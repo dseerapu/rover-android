@@ -15,7 +15,7 @@ import java.io.IOException
 import java.net.URL
 
 class NetworkService(
-    private val accountToken: String,
+    private val authenticationContext: AuthenticationContext,
     private val endpoint: URL,
     private val client: NetworkClient,
     private val deviceIdentification: DeviceIdentificationInterface,
@@ -27,7 +27,13 @@ class NetworkService(
 
     private fun authHeaders(profileIdentifier: String?): HashMap<String, String> {
         val authHeaders = hashMapOf<String, String>()
-        authHeaders["x-rover-account-token"] = accountToken
+        if(authenticationContext.sdkToken != null) {
+            authHeaders["x-rover-account-token"] = authenticationContext.sdkToken!!
+        } else if(authenticationContext.bearerToken != null) {
+            authHeaders["authorization"] = "Bearer: ${authenticationContext.bearerToken}"
+        } else {
+            throw RuntimeException("Attempt to use NetworkService when authentication is not available.")
+        }
 
         authHeaders["x-rover-device-identifier"] = deviceIdentification.installationIdentifier
 
