@@ -29,14 +29,26 @@ class AndroidAssetService(
         url: URL,
         completionHandler: ((NetworkResult<Bitmap>) -> Unit)
     ): NetworkTask {
+
         return SynchronousOperationNetworkTask(
             ioExecutor,
             { synchronousImagePipeline.request(url) },
-            { bitmap ->
-                mainThreadHandler.post {
-                    completionHandler(
-                        NetworkResult.Success(bitmap)
-                    )
+            { pipelineResult ->
+                when(pipelineResult) {
+                    is PipelineStageResult.Successful -> {
+                        mainThreadHandler.post {
+                            completionHandler(
+                                NetworkResult.Success(pipelineResult.output)
+                            )
+                        }
+                    }
+                    is PipelineStageResult.Failed -> {
+                        mainThreadHandler.post {
+                            completionHandler(
+                                NetworkResult.Error(pipelineResult.reason, false)
+                            )
+                        }
+                    }
                 }
             },
             { error ->

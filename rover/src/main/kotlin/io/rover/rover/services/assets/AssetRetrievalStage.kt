@@ -17,7 +17,7 @@ import java.util.concurrent.CountDownLatch
 class AssetRetrievalStage(
     private val networkClient: NetworkClient
 ) : SynchronousPipelineStage<URL, BufferedInputStream> {
-    override fun request(input: URL): BufferedInputStream {
+    override fun request(input: URL): PipelineStageResult<BufferedInputStream> {
         // so now I am going to just *block* while waiting for the callback.
         return blockWaitForNetworkTask { completionHandler ->
             networkClient.networkTask(
@@ -29,22 +29,25 @@ class AssetRetrievalStage(
     }
 }
 
-internal fun blockWaitForNetworkTask(invocation: (completionHandler: (HttpClientResponse) -> Unit) -> NetworkTask): BufferedInputStream {
+internal fun blockWaitForNetworkTask(invocation: (completionHandler: (HttpClientResponse) -> Unit) -> NetworkTask): PipelineStageResult<BufferedInputStream> {
     val latch = CountDownLatch(1)
-    var returnStream: BufferedInputStream? = null
-    var throwableToThrow: Throwable? = null
+    var returnStream: PipelineStageResult<BufferedInputStream>? = null
     invocation { clientResponse ->
         returnStream = when (clientResponse) {
             is HttpClientResponse.ConnectionFailure -> {
-                throwableToThrow = RuntimeException("Network or HTTP error downloading asset", clientResponse.reason)
-                null
+                PipelineStageResult.Failed(
+                    RuntimeException("Network or HTTP error downloading asset", clientResponse.reason)
+                )
             }
             is HttpClientResponse.ApplicationError -> {
-                throwableToThrow = RuntimeException("Remote HTTP API error downloading asset (code ${clientResponse.responseCode}): ${clientResponse.reportedReason}")
-                null
+                PipelineStageResult.Failed(
+                    RuntimeException("Remote HTTP API error downloading asset (code ${clientResponse.responseCode}): ${clientResponse.reportedReason}")
+                )
             }
             is HttpClientResponse.Success -> {
+                PipelineStageResult.Successful(
                 clientResponse.bufferedInputStream
+                )
             }
         }
         latch.countDown()
@@ -52,10 +55,6 @@ internal fun blockWaitForNetworkTask(invocation: (completionHandler: (HttpClient
     // we rely on the network task to handle network timeout for us, so we'll just wait
     // patiently indefinitely here.
     latch.await()
-
-    if(throwableToThrow != null) {
-        throw RuntimeException("Block wait for network task failed", throwableToThrow!!)
-    }
 
     return returnStream!!
 }

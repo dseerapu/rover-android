@@ -14,7 +14,7 @@ import java.net.URL
 class DecodeToBitmapStage(
     private val priorStage: SynchronousPipelineStage<URL, BufferedInputStream>
 ) : SynchronousPipelineStage<URL, Bitmap> {
-    override fun request(input: URL): Bitmap {
+    override fun request(input: URL): PipelineStageResult<Bitmap> {
         val stream = priorStage.request(input)
 
         log.v("Decoding bitmap.")
@@ -22,6 +22,9 @@ class DecodeToBitmapStage(
         // an Executor tuned for multiplexing I/O and not for CPU work); see
         // SynchronousPipelineStage's documentation. If it proves problematic we can offload it to
         // another worker.
-        return BitmapFactory.decodeStream(stream)
+        return when(stream) {
+            is PipelineStageResult.Successful -> PipelineStageResult.Successful(BitmapFactory.decodeStream(stream.output))
+            is PipelineStageResult.Failed -> PipelineStageResult.Failed(stream.reason)
+        }
     }
 }
