@@ -32,10 +32,17 @@ class AndroidAssetService(
         return SynchronousOperationNetworkTask(
             ioExecutor,
             { synchronousImagePipeline.request(url) },
-            {
+            { bitmap ->
                 mainThreadHandler.post {
                     completionHandler(
-                        NetworkResult.Success(it)
+                        NetworkResult.Success(bitmap)
+                    )
+                }
+            },
+            { error ->
+                mainThreadHandler.post {
+                    completionHandler(
+                        NetworkResult.Error(error, false)
                     )
                 }
             }
@@ -49,7 +56,8 @@ class AndroidAssetService(
     class SynchronousOperationNetworkTask<T>(
         private val executor: Executor,
         private val doSynchronousWorkload: () -> T,
-        private val emitResult: (T) -> Unit
+        private val emitResult: (T) -> Unit,
+        private val emitError: (Throwable) -> Unit
     ) : NetworkTask {
         private var cancelled = false
 
@@ -57,13 +65,22 @@ class AndroidAssetService(
             cancelled = true
         }
 
+        private fun execute() {
+            val result = try {
+                doSynchronousWorkload()
+            } catch (e: Throwable) {
+                emitError(e)
+                return
+            }
+
+            if (!cancelled) {
+                emitResult(result)
+            }
+        }
+
         override fun resume() {
             executor.execute {
-                val result = doSynchronousWorkload()
-
-                if (!cancelled) {
-                    emitResult(result)
-                }
+                execute()
             }
         }
     }

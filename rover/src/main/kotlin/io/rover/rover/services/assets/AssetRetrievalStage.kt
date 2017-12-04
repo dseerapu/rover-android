@@ -32,13 +32,16 @@ class AssetRetrievalStage(
 internal fun blockWaitForNetworkTask(invocation: (completionHandler: (HttpClientResponse) -> Unit) -> NetworkTask): BufferedInputStream {
     val latch = CountDownLatch(1)
     var returnStream: BufferedInputStream? = null
+    var throwableToThrow: Throwable? = null
     invocation { clientResponse ->
         returnStream = when (clientResponse) {
             is HttpClientResponse.ConnectionFailure -> {
-                throw RuntimeException("Network or HTTP error downloading asset", clientResponse.reason)
+                throwableToThrow = RuntimeException("Network or HTTP error downloading asset", clientResponse.reason)
+                null
             }
             is HttpClientResponse.ApplicationError -> {
-                throw RuntimeException("Remote HTTP API error downloading asset (code ${clientResponse.responseCode}): ${clientResponse.reportedReason}")
+                throwableToThrow = RuntimeException("Remote HTTP API error downloading asset (code ${clientResponse.responseCode}): ${clientResponse.reportedReason}")
+                null
             }
             is HttpClientResponse.Success -> {
                 clientResponse.bufferedInputStream
@@ -49,6 +52,10 @@ internal fun blockWaitForNetworkTask(invocation: (completionHandler: (HttpClient
     // we rely on the network task to handle network timeout for us, so we'll just wait
     // patiently indefinitely here.
     latch.await()
+
+    if(throwableToThrow != null) {
+        throw RuntimeException("Block wait for network task failed", throwableToThrow!!)
+    }
 
     return returnStream!!
 }
