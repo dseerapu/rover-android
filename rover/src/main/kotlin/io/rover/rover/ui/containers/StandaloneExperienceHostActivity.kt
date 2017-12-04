@@ -46,7 +46,7 @@ class StandaloneExperienceHostActivity: AppCompatActivity() {
     // probably offer the dynamically set method as an activity argument or something.
 
     private val authToken
-        get() = this.intent.getStringExtra("AUTH_BEARER_TOKEN") ?: throw RuntimeException("General SDK configuration not yet available; please pass AUTH_BEARER_TOKEN intent argument.")
+        get() = this.intent.getStringExtra("SDK_TOKEN") ?: throw RuntimeException("General SDK configuration not yet available; please pass SDK_TOKEN intent argument.")
 
     private val experienceId
         get() = this.intent.getStringExtra("EXPERIENCE_ID") ?: throw RuntimeException("Please pass EXPERIENCE_ID.")
@@ -60,10 +60,10 @@ class StandaloneExperienceHostActivity: AppCompatActivity() {
             // "6c546189dc45df1293bddc18c0b54786"
             object : AuthenticationContext {
                 override val bearerToken: String?
-                    get() = this@StandaloneExperienceHostActivity.authToken
+                    get() = null
 
                 override val sdkToken: String?
-                    get() = null
+                    get() = this@StandaloneExperienceHostActivity.authToken
             },
             URL("https://api.rover.io/graphql"),
             networkClient,
@@ -107,13 +107,8 @@ class StandaloneExperienceHostActivity: AppCompatActivity() {
         )
     }
 
-    init {
-        log.v("am I instantiated at least?!")
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        log.v("OY VEY")
 
         setContentView(
             experiencesView
@@ -157,7 +152,7 @@ class StandaloneExperienceHostActivity: AppCompatActivity() {
     companion object {
         fun makeIntent(packageContext: Context, authToken: String, experienceId: String): Intent {
             return Intent(packageContext, StandaloneExperienceHostActivity::class.java).apply {
-                putExtra("AUTH_BEARER_TOKEN", authToken)
+                putExtra("SDK_TOKEN", authToken)
                 putExtra("EXPERIENCE_ID", experienceId)
             }
         }

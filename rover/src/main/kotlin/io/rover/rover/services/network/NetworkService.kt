@@ -30,7 +30,7 @@ class NetworkService(
         if(authenticationContext.sdkToken != null) {
             authHeaders["x-rover-account-token"] = authenticationContext.sdkToken!!
         } else if(authenticationContext.bearerToken != null) {
-            authHeaders["authorization"] = "Bearer: ${authenticationContext.bearerToken}"
+            authHeaders["authorization"] = "Bearer ${authenticationContext.bearerToken}"
         } else {
             throw RuntimeException("Attempt to use NetworkService when authentication is not available.")
         }
