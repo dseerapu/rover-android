@@ -220,7 +220,7 @@ interface ScreenViewModelInterface {
      */
     fun gather(): List<LayoutableViewModel>
 
-    fun rowViewModels(): List<RowViewModelInterface>
+    val rowViewModels: List<RowViewModelInterface>
 }
 
 /**

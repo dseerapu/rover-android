@@ -1,6 +1,9 @@
 package io.rover.rover.ui.viewmodels
 
+import io.rover.rover.core.domain.BarcodeBlock
+import io.rover.rover.core.domain.ButtonBlock
 import io.rover.rover.core.domain.Screen
+import io.rover.rover.core.domain.WebViewBlock
 import io.rover.rover.ui.ViewModelFactoryInterface
 import io.rover.rover.ui.types.DisplayItem
 import io.rover.rover.ui.types.Layout
@@ -11,14 +14,24 @@ class ScreenViewModel(
     private val viewModelFactory: ViewModelFactoryInterface
 ) : ScreenViewModelInterface {
 
-    override fun rowViewModels(): List<RowViewModelInterface> {
-        return screen.rows.map {
-            viewModelFactory.viewModelForRow(it)
+    override val rowViewModels by lazy {
+        screen.rows.map { row ->
+            // temporarily filter out unsupported blocks
+            val filteredBlocks = row.blocks.filter {
+                when (it) {
+                    is ButtonBlock, is WebViewBlock, is BarcodeBlock -> false
+                    else -> true
+                }
+            }
+
+            viewModelFactory.viewModelForRow(
+                row.copy(blocks = filteredBlocks)
+            )
         }
     }
 
     override fun gather(): List<LayoutableViewModel> {
-        return rowViewModels().flatMap {
+        return rowViewModels.flatMap {
             listOf(
                 it
             ) + it.blockViewModels.asReversed()
@@ -28,7 +41,7 @@ class ScreenViewModel(
     override fun render(
         widthDp: Float
     ): Layout =
-        mapRowsToRectDisplayList(rowViewModels(), widthDp)
+        mapRowsToRectDisplayList(rowViewModels, widthDp)
 
     private tailrec fun mapRowsToRectDisplayList(
         remainingRowViewModels: List<RowViewModelInterface>,
@@ -62,4 +75,6 @@ class ScreenViewModel(
 
         return mapRowsToRectDisplayList(tail, width, Layout(results.coordinatesAndViewModels + rowHead + blocks, results.height + row.frame(rowBounds).height(), results.width))
     }
+
+
 }
