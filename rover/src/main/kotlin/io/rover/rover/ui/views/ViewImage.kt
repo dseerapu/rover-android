@@ -74,7 +74,7 @@ class ViewImage(
                 whenDimensionsReady { width, height ->
                     runningTask = viewModel.requestImage(
                         PixelSize(width, height),
-                        imageView.resources.displayMetrics
+                        imageView.resources.displayMetrics.density
                     ) { bitmap ->
                         imageView.setImageBitmap(bitmap)
                     }.apply { this.whenNotNull { it.resume() } }

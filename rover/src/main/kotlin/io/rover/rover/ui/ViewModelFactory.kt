@@ -6,7 +6,6 @@ import io.rover.rover.core.domain.RectangleBlock
 import io.rover.rover.core.domain.Row
 import io.rover.rover.core.domain.TextBlock
 import io.rover.rover.services.assets.AssetService
-import io.rover.rover.services.assets.ImageOptimizationServiceInterface
 import io.rover.rover.ui.viewmodels.BackgroundViewModel
 import io.rover.rover.ui.viewmodels.BlockViewModel
 import io.rover.rover.ui.viewmodels.BlockViewModelInterface
@@ -27,14 +26,13 @@ interface ViewModelFactoryInterface {
 
 class ViewModelFactory(
     private val measurementService: MeasurementService,
-    private val assetService: AssetService,
-    private val imageOptimizationService: ImageOptimizationServiceInterface
+    private val assetService: AssetService
 ) : ViewModelFactoryInterface {
     override fun viewModelForBlock(block: Block): BlockViewModelInterface {
         return when (block) {
             is RectangleBlock -> {
                 val borderViewModel = BorderViewModel(block)
-                val backgroundViewModel = BackgroundViewModel(block, assetService, imageOptimizationService)
+                val backgroundViewModel = BackgroundViewModel(block, assetService)
                 RectangleBlockViewModel(BlockViewModel(block), backgroundViewModel, borderViewModel)
             }
             is TextBlock -> {
@@ -43,7 +41,7 @@ class ViewModelFactory(
                 TextBlockViewModel(
                     BlockViewModel(block, setOf(borderViewModel), textViewModel),
                     textViewModel,
-                    BackgroundViewModel(block, assetService, imageOptimizationService),
+                    BackgroundViewModel(block, assetService),
                     borderViewModel
                     // TODO: I would need to pass in some sort of measure-ator to blockviewmodel...
                     // actually, I could take the Text Concerns themselves out and put them into their own headless viewmodel, and have that implement
@@ -51,11 +49,11 @@ class ViewModelFactory(
                 )
             }
             is ImageBlock -> {
-                val imageViewModel = ImageViewModel(block, assetService, imageOptimizationService)
+                val imageViewModel = ImageViewModel(block, assetService)
                 val borderViewModel = BorderViewModel(block)
                 ImageBlockViewModel(
                     BlockViewModel(block, setOf(borderViewModel), imageViewModel),
-                    BackgroundViewModel(block, assetService, imageOptimizationService),
+                    BackgroundViewModel(block, assetService),
                     imageViewModel,
                     borderViewModel
                 )
@@ -72,8 +70,7 @@ class ViewModelFactory(
             this,
             BackgroundViewModel(
                 row,
-                assetService,
-                imageOptimizationService
+                assetService
             )
         )
     }
