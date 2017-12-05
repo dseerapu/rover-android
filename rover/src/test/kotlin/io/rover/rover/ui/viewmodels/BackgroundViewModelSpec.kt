@@ -54,7 +54,8 @@ class BackgroundViewModelSpec: Spek({
 
         val backgroundViewModel = BackgroundViewModel(
             background,
-            assetService
+            assetService,
+            null
         )
 
         on("optimized to display in exactly the same size block on same density display") {

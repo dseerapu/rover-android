@@ -19,7 +19,8 @@ import java.net.URI
 
 class BackgroundViewModel(
     private val background: Background,
-    private val assetService: AssetService
+    private val assetService: AssetService,
+    private val borderViewModel: BorderViewModelInterface? = null
 ) : BackgroundViewModelInterface {
     override val backgroundColor: Int
         get() = background.backgroundColor.asAndroidColor()
@@ -77,6 +78,9 @@ class BackgroundViewModel(
         }
     }
 
+    private val borderWidth: Int
+        get() = borderViewModel?.borderWidth ?: 0
+
     /**
      * Map the 1X, 2X, and 3X background scale values (which are an iOS convention) to DPI values.
      */
@@ -93,6 +97,8 @@ class BackgroundViewModel(
         targetViewPixelSize: PixelSize,
         displayMetrics: DisplayMetrics
     ): Triple<URI, BackgroundImageConfiguration, Int> {
+        val borderWidthPx = borderWidth.dpAsPx(displayMetrics)
+
         val appleScalingFactor = displayMetrics.densityDpi.toFloat() / imageDensity.toFloat()
         val imageWidthPx = (appleScalingFactor * backgroundImage.width).toInt()
         val imageHeightPx = (appleScalingFactor * backgroundImage.height).toInt()
@@ -111,26 +117,26 @@ class BackgroundViewModel(
                     heightInset
                 )
             }
-            BackgroundContentMode.Tile, BackgroundContentMode.Stretch -> Rect(0, 0, 0, 0)
+            BackgroundContentMode.Tile, BackgroundContentMode.Stretch -> Rect(borderWidthPx, borderWidthPx, borderWidthPx, borderWidthPx)
             BackgroundContentMode.Fit -> {
                 val fitScaleFactor = minOf(
-                    (targetViewPixelSize.width) / imageWidthPx.toFloat(),
-                    (targetViewPixelSize.height) / imageHeightPx.toFloat()
+                    targetViewPixelSize.width / imageWidthPx.toFloat(),
+                    targetViewPixelSize.height / imageHeightPx.toFloat()
                 )
 
                 val fitScaledImageWidthPx = imageWidthPx * fitScaleFactor
                 val fitScaledImageHeightPx = imageHeightPx * fitScaleFactor
 
-                val widthInset = ((targetViewPixelSize.width / 2) - (fitScaledImageWidthPx / 2)).toInt()
                 val heightInset = ((targetViewPixelSize.height / 2) - (fitScaledImageHeightPx / 2)).toInt()
+                val widthInset = ((targetViewPixelSize.width / 2) - (fitScaledImageWidthPx / 2)).toInt()
 
                 log.v("fitScaleFactor: $fitScaleFactor fitScaledImageWidthPx: $fitScaledImageHeightPx fitScaledImageHeightPx: $fitScaledImageHeightPx")
 
                 Rect(
-                    widthInset,
-                    heightInset,
-                    widthInset,
-                    heightInset
+                    widthInset + borderWidthPx,
+                    heightInset + borderWidthPx,
+                    widthInset + borderWidthPx,
+                    heightInset + borderWidthPx
                 )
             }
             BackgroundContentMode.Fill -> {
@@ -142,17 +148,16 @@ class BackgroundViewModel(
                 val fitScaledImageWidthPx = imageWidthPx * fitScaleFactor
                 val fitScaledImageHeightPx = imageHeightPx * fitScaleFactor
 
-                val widthInset = ((targetViewPixelSize.width / 2) - (fitScaledImageWidthPx / 2)).toInt()
                 val heightInset = ((targetViewPixelSize.height / 2) - (fitScaledImageHeightPx / 2)).toInt()
-
+                val widthInset = ((targetViewPixelSize.width / 2) - (fitScaledImageWidthPx / 2)).toInt()
 
                 log.v("fitScaleFactor: $fitScaleFactor fitScaledImageWidthPx: $fitScaledImageHeightPx fitScaledImageHeightPx: $fitScaledImageHeightPx")
 
                 Rect(
-                    widthInset,
-                    heightInset,
-                    widthInset,
-                    heightInset
+                    widthInset + borderWidthPx,
+                    heightInset + borderWidthPx,
+                    widthInset + borderWidthPx,
+                    heightInset + borderWidthPx
                 )
             }
         }
@@ -177,6 +182,7 @@ class BackgroundViewModel(
         targetViewPixelSize: PixelSize,
         displayMetrics: DisplayMetrics
     ): Triple<URI, BackgroundImageConfiguration, Int> {
+        val borderWidthPx = borderWidth.dpAsPx(displayMetrics)
 
         val imageDensityScalingFactor = displayMetrics.densityDpi.toFloat() / imageDensity.toFloat()
 
@@ -241,16 +247,16 @@ class BackgroundViewModel(
             BackgroundContentMode.Fill -> {
                 Triple(
                     hashMapOf(
-                        Pair("w", (targetViewPixelSize.width).toString()),
-                        Pair("h", (targetViewPixelSize.height).toString()),
+                        Pair("w", (targetViewPixelSize.width - borderWidthPx * 2).toString()),
+                        Pair("h", (targetViewPixelSize.height - borderWidthPx * 2).toString()),
                         Pair("fit", "min")
                     ),
                     BackgroundImageConfiguration(
                         Rect(
-                            0,
-                            0,
-                            0,
-                            0
+                            borderWidthPx,
+                            borderWidthPx,
+                            borderWidthPx,
+                            borderWidthPx
                         ),
                         null
                     ),
@@ -261,22 +267,16 @@ class BackgroundViewModel(
                 )
             }
             BackgroundContentMode.Fit -> {
-                val targetViewPixelSizeAccountingForBorder = PixelSize(
-                    targetViewPixelSize.width,
-                    targetViewPixelSize.height
-                )
-
-
                 val fitScaleFactor = minOf(
-                    targetViewPixelSizeAccountingForBorder.width  / imageWidthPx.toFloat(),
-                    targetViewPixelSizeAccountingForBorder.height / imageHeightPx.toFloat()
+                    targetViewPixelSize.width / imageWidthPx.toFloat(),
+                    targetViewPixelSize.height / imageHeightPx.toFloat()
                 )
 
                 val fitScaledImageWidthPx = imageWidthPx * fitScaleFactor
                 val fitScaledImageHeightPx = imageHeightPx * fitScaleFactor
 
-                val heightInset = ((targetViewPixelSizeAccountingForBorder.height / 2) - (fitScaledImageHeightPx / 2)).toInt()
-                val widthInset = ((targetViewPixelSizeAccountingForBorder.width / 2) - (fitScaledImageWidthPx / 2)).toInt()
+                val heightInset = ((targetViewPixelSize.height / 2) - (fitScaledImageHeightPx / 2)).toInt()
+                val widthInset = ((targetViewPixelSize.width / 2) - (fitScaledImageWidthPx / 2)).toInt()
 
                // log.v("fitScaleFactor: $fitScaleFactor fitScaledImageWidthPx: $fitScaledImageHeightPx fitScaledImageHeightPx: $fitScaledImageHeightPx")
 
@@ -287,16 +287,16 @@ class BackgroundViewModel(
                         // since Imgix will appropriately not return whitespace and instead just
                         // return a scaled down if necessary aspect correct version of the original
                         // image.
-                        Pair("w", (targetViewPixelSizeAccountingForBorder.width).toString()),
-                        Pair("h", (targetViewPixelSizeAccountingForBorder.height).toString()),
+                        Pair("w", (targetViewPixelSize.width - borderWidthPx * 2).toString()),
+                        Pair("h", (targetViewPixelSize.height - borderWidthPx * 2).toString()),
                         Pair("fit", "max")
                     ),
                     BackgroundImageConfiguration(
                         Rect(
-                            widthInset,
-                            heightInset,
-                            widthInset,
-                            heightInset
+                            widthInset + borderWidthPx,
+                            heightInset + borderWidthPx,
+                            widthInset + borderWidthPx,
+                            heightInset + borderWidthPx
                         ),
                         null
                     ),
@@ -314,7 +314,7 @@ class BackgroundViewModel(
                 val scaleDownTo = minOf(
                     PixelSize(backgroundImage.width, backgroundImage.height),
                     PixelSize(
-                        targetViewPixelSize.width, targetViewPixelSize.height
+                        targetViewPixelSize.width - borderWidthPx * 2, targetViewPixelSize.height - borderWidthPx * 2
                     )
                 )
 
@@ -326,10 +326,10 @@ class BackgroundViewModel(
                     ),
                     BackgroundImageConfiguration(
                         Rect(
-                            0,
-                            0,
-                            0,
-                            0
+                            borderWidthPx,
+                            borderWidthPx,
+                            borderWidthPx,
+                            borderWidthPx
                         ),
                         null
                     ),
@@ -362,10 +362,10 @@ class BackgroundViewModel(
                     },
                     BackgroundImageConfiguration(
                         Rect(
-                            0,
-                            0,
-                            0,
-                            0
+                            borderWidthPx,
+                            borderWidthPx,
+                            borderWidthPx,
+                            borderWidthPx
                         ),
                         Shader.TileMode.REPEAT
                     ),
