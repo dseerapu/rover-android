@@ -1,13 +1,16 @@
 package io.rover.rover.ui.viewmodels
 
+import android.graphics.Point
 import android.graphics.RectF
 import io.rover.rover.ModelFactories
 import io.rover.rover.core.domain.HorizontalAlignment
 import io.rover.rover.core.domain.Length
+import io.rover.rover.core.domain.Offsets
 import io.rover.rover.core.domain.Position
 import io.rover.rover.core.domain.UnitOfMeasure
 import io.rover.rover.core.domain.VerticalAlignment
-import io.rover.rover.ui.ViewModelFactory
+import io.rover.rover.ui.BlockViewModelFactory
+import io.rover.rover.ui.MeasurementService
 import org.amshove.kluent.mock
 import org.amshove.kluent.shouldEqual
 import org.jetbrains.spek.api.Spek
@@ -36,7 +39,7 @@ class RowViewModelSpec: Spek({
                         )
                     )
                 ),
-            ViewModelFactory(mock(), mock())
+            BlockViewModelFactory(mock(), mock())
         )
 
         on("frame()") {
@@ -89,7 +92,7 @@ class RowViewModelSpec: Spek({
                         )
                     )
                 ),
-            ViewModelFactory(mock(), mock())
+            BlockViewModelFactory(mock(), mock())
         )
 
         on("frame()") {
@@ -135,7 +138,7 @@ class RowViewModelSpec: Spek({
                         )
                     )
                 ),
-            ViewModelFactory(mock(), mock())
+            BlockViewModelFactory(mock(), mock())
         )
 
         on("frame()") {
@@ -188,7 +191,7 @@ class RowViewModelSpec: Spek({
                             )
                         )
                     ),
-                ViewModelFactory(mock(), mock())
+                BlockViewModelFactory(mock(), mock())
             )
         }
 

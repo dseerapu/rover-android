@@ -2,18 +2,21 @@ package io.rover.rover.ui.viewmodels
 
 import android.graphics.RectF
 import io.rover.rover.core.domain.Screen
-import io.rover.rover.ui.ViewModelFactoryInterface
+import io.rover.rover.ui.BlockViewModelFactoryInterface
 import io.rover.rover.ui.types.DisplayItem
 import io.rover.rover.ui.types.Layout
 
 class ScreenViewModel(
     private val screen: Screen,
-    private val viewModelFactory: ViewModelFactoryInterface
+    private val blockViewModelFactory: BlockViewModelFactoryInterface
 ) : ScreenViewModelInterface {
 
     override fun rowViewModels(): List<RowViewModelInterface> {
         return screen.rows.map {
-            viewModelFactory.viewModelForRow(it)
+            RowViewModel(
+                it,
+                blockViewModelFactory
+            )
         }
     }
 

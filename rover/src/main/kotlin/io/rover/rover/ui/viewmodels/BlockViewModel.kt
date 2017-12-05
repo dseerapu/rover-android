@@ -14,13 +14,13 @@ import io.rover.rover.ui.types.ViewType
 /**
  * A base class used by all blocks that contains the block layout and positioning concerns.
  *
- * - LayoutableViewModel probably needs to split, because we want to be able to delegate the frame()
+ * - TODO: LayoutableViewModel probably needs to split, because we want to be able to delegate the frame()
  *   method to the new mixin version of BlockViewModel but obviously it should not specify view type
  */
 class BlockViewModel(
     private val block: Block,
     private val paddingDeflections: Set<LayoutPaddingDeflection> = emptySet(),
-    private val measurable: Measurable? = null
+    private val measureable: Measureable? = null
 ) : BlockViewModelInterface {
 
     override val viewType: ViewType
@@ -90,11 +90,11 @@ class BlockViewModel(
                     bounds.bottom
                 )
 
-                if (measurable == null) {
-                    log.w("Block is set to auto-height but no measurable is given.")
+                if (measureable == null) {
+                    log.e("Block is set to auto-height but no measurable is given.")
                     0f
                 } else {
-                    measurable.intrinsicHeight(boundsConsideringInsets) +
+                    measureable.intrinsicHeight(boundsConsideringInsets) +
                         insets.bottom +
                         insets.top +
                         paddingDeflections.map {
