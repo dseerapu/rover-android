@@ -33,7 +33,7 @@ class ScreenViewModel(
     private tailrec fun mapRowsToRectDisplayList(
         remainingRowViewModels: List<RowViewModelInterface>,
         width: Float,
-        results: Layout = Layout(listOf(), 0f, width)
+        results: Layout = Layout(listOf(), 0f)
     ): Layout {
         if (remainingRowViewModels.isEmpty()) {
             return results
@@ -60,6 +60,6 @@ class ScreenViewModel(
         // in the list must occlude prior ones.
         val blocks = row.mapBlocksToRectDisplayList(rowFrame).asReversed()
 
-        return mapRowsToRectDisplayList(tail, width, Layout(results.coordinatesAndViewModels + rowHead + blocks, results.height + row.frame(rowBounds).height(), results.width))
+        return mapRowsToRectDisplayList(tail, width, Layout(results.coordinatesAndViewModels + rowHead + blocks, results.height + row.frame(rowBounds).height()))
     }
 }

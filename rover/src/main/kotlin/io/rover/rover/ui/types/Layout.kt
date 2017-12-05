@@ -14,13 +14,7 @@ data class Layout(
     val coordinatesAndViewModels: List<DisplayItem>,
 
     /**
-     * The total height (in dp) of the entire layout from start to finish, computed as a result
-     * of the layout pass.
+     * The total height (in dp) of the entire layout from start to finish.
      */
-    val height: Float,
-
-    /**
-     * The requested width for the layout pass.
-     */
-    val width: Float
+    val height: Float
 )

@@ -3,8 +3,7 @@ package io.rover.rover.ui.viewmodels
 import android.graphics.Bitmap
 import android.graphics.Rect
 import android.graphics.RectF
-import android.graphics.Shader
-import android.util.DisplayMetrics
+import android.graphics.drawable.Drawable
 import io.rover.rover.core.domain.Background
 import io.rover.rover.core.domain.Border
 import io.rover.rover.core.domain.Experience
@@ -17,7 +16,6 @@ import io.rover.rover.ui.types.Font
 import io.rover.rover.ui.types.FontAppearance
 import io.rover.rover.ui.types.Insets
 import io.rover.rover.ui.types.Layout
-import io.rover.rover.ui.types.PixelSize
 
 /**
  * Exposed by a view model that may need to contribute to the padding around the content.
@@ -27,44 +25,22 @@ interface LayoutPaddingDeflection {
 }
 
 /**
- * Specifies how the view should properly display the given background image.
- *
- * The method these are specified is a bit idiosyncratic on account of Android implementation
- * details and the combination of Drawables the view uses to achieve the effect.
+ * Specifies what version of [Drawable] should be be used, and with what configuration.
  */
-class BackgroundImageConfiguration(
-    /**
-     * Bounds in pixels, in *relative insets from their respective edges*.
-     *
-     * TODO: consider changing to not use Rect to better indicate that it is not a rectangle but an inset for each edge
-     *
-     * Our drawable is always set to FILL_XY, which means by specifying these insets you get
-     * complete control over the aspect ratio, sizing, and positioning.  Note that this parameter
-     * cannot be used to specify any sort of scaling for tiling, since the bottom/right bounds are
-     * effectively undefined as the pattern repeats forever.  In that case, consider using using
-     * [Bitmap.setDensity] to achieve a scale effect (although note that it is in terms of the
-     * display DPI).
-     *
-     * (Note: we use this approach rather than just having a configurable gravity on the drawable
-     * because that would not allow for aspect correct fit scaling.)
-     */
-    val insets: Rect,
+sealed class BackgroundImageConfiguration {
 
-//    /**
-//     * An optional pixel density the background should be rendered at.  Must be supplied in terms of the
-//     * display density of the screen (ie., multiply in [DisplayMetrics.densityDpi] value).  In many
-//     * cases, if the consumer wishes to  it is more appropriate to achieve a scale effect with the [insets parameter, ]
-//     *
-//     * Hint: this may be used to provide scale factor for tile modes, but it must be done in terms of the device's
-//     * current [DisplayMetrics.densityDpi].
-//     */
-//    val targetDensity: Int,
+    // this class will capture the different modalities of drawable.
 
-    /**
-     * An Android tiling mode.  For no tiling, set as null.
-     */
-    val tileMode: Shader.TileMode?
-)
+    class Fit
+
+    class Original
+
+    class Stretch
+
+    class Fill
+
+    class Tile
+}
 
 /**
  * This interface is exposed by View Models that have support for a background.  Equivalent to
@@ -73,24 +49,9 @@ class BackgroundImageConfiguration(
 interface BackgroundViewModelInterface {
     val backgroundColor: Int
 
-    fun requestBackgroundImage(
-        targetViewPixelSize: PixelSize,
-        displayMetrics: DisplayMetrics,
-        callback: (
-            /**
-             * The bitmap to be drawn.  It is recommended that the consumer arrange to have it
-             * scaled to a roughly appropriate amount (need not be exact; that is the purpose of the
-             * view size and the [insets] given above) and also to be uploaded to GPU texture memory
-             * off thread ([Bitmap.prepareToDraw]) before setting it.
-             *
-             * Note: one can set the source density of the bitmap to control its scaling (which is
-             * particularly relevant for tile modes where
-             */
-            Bitmap,
+    // val backgroundImageConfiguration: BackgroundImageConfiguration
 
-            BackgroundImageConfiguration
-        ) -> Unit
-    ): NetworkTask?
+    fun requestBackgroundImage(callback: (Bitmap) -> Unit): NetworkTask?
 }
 
 /**
@@ -100,10 +61,8 @@ interface BackgroundViewModelInterface {
 interface BorderViewModelInterface : LayoutPaddingDeflection {
     val borderColor: Int
 
-    // TODO: this should start returning Px instead of Dp
     val borderRadius: Int
 
-    // TODO: this should start returning Px instead of Dp
     val borderWidth: Int
 
     companion object
@@ -127,17 +86,11 @@ interface ImageViewModelInterface : Measurable {
 
     /**
      * Get the needed image for display, hitting caches if possible and the network if necessary.
-     * You'll need to give a [PixelSize] of the target view the image will be landing in.  This will
-     * allow for optimizations to select, download, and cache the appropriate size of content.
      *
      * Remember to call [NetworkTask.resume] to start the retrieval, or your callback will never
      * be hit.
      */
-    fun requestImage(
-        targetViewPixelSize: PixelSize,
-        displayDensity: Float,
-        callback: (Bitmap) -> Unit
-    ): NetworkTask?
+    fun requestImage(callback: (Bitmap) -> Unit): NetworkTask?
 }
 
 /**
