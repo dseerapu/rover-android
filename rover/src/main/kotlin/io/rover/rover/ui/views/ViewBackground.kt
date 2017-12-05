@@ -1,6 +1,5 @@
 package io.rover.rover.ui.views
 
-import android.animation.ObjectAnimator
 import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
@@ -17,10 +16,6 @@ import io.rover.rover.ui.viewmodels.BackgroundViewModelInterface
 class ViewBackground(
     private val view: View
 ) : ViewBackgroundInterface {
-    private val shortAnimationDuration = view.resources.getInteger(
-        android.R.integer.config_shortAnimTime
-    )
-
     // State:
     var runningTask: NetworkTask? = null
 
@@ -94,26 +89,17 @@ class ViewBackground(
                                 }
                             }
 
-                        val backgroundDrawable = BackgroundColorDrawableWrapper(
-                            viewModel.backgroundColor,
-                            InsetDrawable(
-                                bitmapDrawable,
-                                backgroundImageConfiguration.insets.left,
-                                backgroundImageConfiguration.insets.top,
-                                backgroundImageConfiguration.insets.right,
-                                backgroundImageConfiguration.insets.bottom
+                        view.background =
+                            BackgroundColorDrawableWrapper(
+                                viewModel.backgroundColor,
+                                InsetDrawable(
+                                    bitmapDrawable,
+                                    backgroundImageConfiguration.insets.left,
+                                    backgroundImageConfiguration.insets.top,
+                                    backgroundImageConfiguration.insets.right,
+                                    backgroundImageConfiguration.insets.bottom
+                                )
                             )
-                        )
-
-                        ObjectAnimator.ofInt(
-                            backgroundDrawable, "alpha", 0, 255
-                        ).apply {
-                            duration = shortAnimationDuration.toLong()
-                            start()
-                        }
-                        
-                        view.background = backgroundDrawable
-
                     }.apply { this.whenNotNull { it.resume() } }
                 }
             }
