@@ -1,19 +1,18 @@
 package io.rover.rover.ui.views
 
 import android.view.View
-import io.rover.rover.ui.viewmodels.LayoutableViewModel
+import io.rover.rover.ui.viewmodels.BindableViewModel
 
 /**
- * Wraps a Rover Android [View] that can be laid out along with a possible view model that is bound
- * to it.
+ * Wraps a Rover Android [View] that can be bound to a [BindableViewModel].
  *
  * This is usually implemented by the views themselves, and [view] just returns `this`.  This is an
  * interface rather than an abstract [View] subclass in order to allow implementers to inherit from
  * various different [View] subclasses.
  */
-interface LayoutableView<VM : LayoutableViewModel>: BindableView<VM> {
-    override var viewModel: VM?
+interface BindableView<VM : BindableViewModel> {
+    var viewModel: VM?
 
-    override val view: View
+    val view: View
         get() = this as View
 }

@@ -26,15 +26,14 @@ import io.rover.rover.ui.BlockAndRowLayoutManager
 import io.rover.rover.ui.BlockAndRowRecyclerAdapter
 import io.rover.rover.ui.ViewModelFactory
 import io.rover.rover.ui.viewmodels.ScreenViewModel
+import io.rover.rover.ui.views.ScreenView
 import java.net.URL
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 
 /**
- * This can display a Rover experience, self-contained.
- *
- * It is suitable for launching a
+ * This can display a Rover experience in an Activity, self-contained.
  */
 class StandaloneExperienceHostActivity: AppCompatActivity() {
     // so, a few constraints:
@@ -51,7 +50,8 @@ class StandaloneExperienceHostActivity: AppCompatActivity() {
     private val experienceId
         get() = this.intent.getStringExtra("EXPERIENCE_ID") ?: throw RuntimeException("Please pass EXPERIENCE_ID.")
 
-    private val experiencesView by lazy { RecyclerView(this) }
+    // We're actually just showing a single screen for now
+    private val experiencesView by lazy { ScreenView(this) }
 
 
     // TODO: somehow share this properly
@@ -124,19 +124,7 @@ class StandaloneExperienceHostActivity: AppCompatActivity() {
 
                         val screenViewModel = ScreenViewModel(result.response.screens.first(), blockViewModelFactory)
 
-                        // so, we need the layout in two contexts.
-                        // we need it laid out (with rects) on demand by the layout manager.
-                        // and we need it, without those rects, ahead of time for the adapter.
-                        experiencesView.layoutManager = BlockAndRowLayoutManager(
-                            screenViewModel,
-                            resources.displayMetrics
-                        )
-
-                        // so, while we have to pass in a width
-                        experiencesView.adapter = BlockAndRowRecyclerAdapter(
-                            // TODO: Rather than using render(), we should instead use "gather()" or something.
-                            screenViewModel.gather()
-                        )
+                        experiencesView.viewModel = screenViewModel
                     }
                     is NetworkResult.Error -> {
                         // Snackbar.make(this.main_content, "Opening ${selectedExperience.name}", Snackbar.LENGTH_SHORT).show()

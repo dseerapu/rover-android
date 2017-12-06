@@ -40,9 +40,7 @@ class InMemoryBitmapCacheStage(
      * to the GC to free the bitmap and therefore recycle it.
      */
     private val lruCache = object : LruCache<URL, Bitmap>(maxMemory / 8) {
-        override fun sizeOf(key: URL, value: Bitmap): Int {
-            return value.byteCount / 1024
-        }
+        override fun sizeOf(key: URL, value: Bitmap): Int = value.byteCount / 1024
 
         override fun create(key: URL): Bitmap {
             this@InMemoryBitmapCacheStage.log.v("Image not available in cache, faulting to next layer.")
