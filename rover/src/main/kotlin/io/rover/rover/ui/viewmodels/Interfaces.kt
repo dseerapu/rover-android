@@ -106,7 +106,7 @@ interface BorderViewModelInterface : LayoutPaddingDeflection {
 }
 
 /**
- * View Model for a block that contains rich text content (decorated with strong, italic, and
+ * View Model for block content that contains rich text content (decorated with strong, italic, and
  * underline HTML tags).
  */
 interface TextViewModelInterface : Measurable {
@@ -115,6 +115,13 @@ interface TextViewModelInterface : Measurable {
     val fontAppearance: FontAppearance
 
     fun boldRelativeToBlockWeight(): Font
+}
+
+/**
+ * View Model for block content that contains a clickable button.
+ */
+interface ButtonViewModelInterface {
+    val text: String
 }
 
 interface ImageViewModelInterface : Measurable {
@@ -236,3 +243,5 @@ interface RectangleBlockViewModelInterface : LayoutableViewModel, BlockViewModel
 interface TextBlockViewModelInterface : LayoutableViewModel, BlockViewModelInterface, BackgroundViewModelInterface, BorderViewModelInterface, TextViewModelInterface
 
 interface ImageBlockViewModelInterface : LayoutableViewModel, BlockViewModelInterface, BackgroundViewModelInterface, BorderViewModelInterface, ImageViewModelInterface
+
+interface ButtonBlockViewModelInterface: LayoutableViewModel, BlockViewModelInterface, ButtonViewModelInterface

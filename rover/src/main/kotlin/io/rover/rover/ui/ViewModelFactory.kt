@@ -1,6 +1,7 @@
 package io.rover.rover.ui
 
 import io.rover.rover.core.domain.Block
+import io.rover.rover.core.domain.ButtonBlock
 import io.rover.rover.core.domain.ImageBlock
 import io.rover.rover.core.domain.RectangleBlock
 import io.rover.rover.core.domain.Row
@@ -11,6 +12,8 @@ import io.rover.rover.ui.viewmodels.BackgroundViewModel
 import io.rover.rover.ui.viewmodels.BlockViewModel
 import io.rover.rover.ui.viewmodels.BlockViewModelInterface
 import io.rover.rover.ui.viewmodels.BorderViewModel
+import io.rover.rover.ui.viewmodels.ButtonBlockViewModel
+import io.rover.rover.ui.viewmodels.ButtonViewModel
 import io.rover.rover.ui.viewmodels.ImageBlockViewModel
 import io.rover.rover.ui.viewmodels.ImageViewModel
 import io.rover.rover.ui.viewmodels.RectangleBlockViewModel
@@ -59,6 +62,9 @@ class ViewModelFactory(
                     imageViewModel,
                     borderViewModel
                 )
+            }
+            is ButtonBlock -> {
+                ButtonBlockViewModel(BlockViewModel(block), ButtonViewModel(block))
             }
             else -> throw Exception(
                 "This Rover UI block type is not yet supported by the 2.0 SDK: ${block.javaClass.simpleName}."

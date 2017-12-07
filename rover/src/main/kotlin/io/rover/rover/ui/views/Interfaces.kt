@@ -4,6 +4,8 @@ import android.graphics.Rect
 import io.rover.rover.ui.viewmodels.BackgroundViewModelInterface
 import io.rover.rover.ui.viewmodels.BlockViewModelInterface
 import io.rover.rover.ui.viewmodels.BorderViewModelInterface
+import io.rover.rover.ui.viewmodels.ButtonBlockViewModelInterface
+import io.rover.rover.ui.viewmodels.ButtonViewModelInterface
 import io.rover.rover.ui.viewmodels.ImageBlockViewModelInterface
 import io.rover.rover.ui.viewmodels.TextBlockViewModelInterface
 
@@ -44,4 +46,8 @@ interface ViewTextInterface {
 
 interface ViewImageInterface {
     var imageBlockViewModel: ImageBlockViewModelInterface?
+}
+
+interface ViewButtonInterface {
+    var buttonViewModel: ButtonViewModelInterface?
 }

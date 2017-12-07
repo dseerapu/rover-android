@@ -26,6 +26,7 @@ import io.rover.rover.ui.BlockAndRowLayoutManager
 import io.rover.rover.ui.BlockAndRowRecyclerAdapter
 import io.rover.rover.ui.ViewModelFactory
 import io.rover.rover.ui.viewmodels.ScreenViewModel
+import io.rover.rover.ui.views.ExperienceView
 import io.rover.rover.ui.views.ScreenView
 import java.net.URL
 import java.util.concurrent.LinkedBlockingQueue
@@ -52,7 +53,7 @@ class StandaloneExperienceHostActivity: AppCompatActivity() {
 
     // We're actually just showing a single screen for now
     private val experiencesView by lazy { ScreenView(this) }
-
+    // private val experiencesView by lazy { ExperienceView(this) }
 
     // TODO: somehow share this properly
     private val roverSdkNetworkService by lazy {
