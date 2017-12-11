@@ -25,6 +25,7 @@ import io.rover.rover.ui.AndroidRichTextToSpannedTransformer
 import io.rover.rover.ui.BlockAndRowLayoutManager
 import io.rover.rover.ui.BlockAndRowRecyclerAdapter
 import io.rover.rover.ui.ViewModelFactory
+import io.rover.rover.ui.viewmodels.ExperienceViewModel
 import io.rover.rover.ui.viewmodels.ScreenViewModel
 import io.rover.rover.ui.views.ExperienceView
 import io.rover.rover.ui.views.ScreenView
@@ -52,8 +53,8 @@ class StandaloneExperienceHostActivity: AppCompatActivity() {
         get() = this.intent.getStringExtra("EXPERIENCE_ID") ?: throw RuntimeException("Please pass EXPERIENCE_ID.")
 
     // We're actually just showing a single screen for now
-    private val experiencesView by lazy { ScreenView(this) }
-    // private val experiencesView by lazy { ExperienceView(this) }
+    // private val experiencesView by lazy { ScreenView(this) }
+    private val experiencesView by lazy { ExperienceView(this) }
 
     // TODO: somehow share this properly
     private val roverSdkNetworkService by lazy {
@@ -115,17 +116,18 @@ class StandaloneExperienceHostActivity: AppCompatActivity() {
             experiencesView
         )
 
-        // TODO: this will probably move once we implement the experiences screen-to-screen flow
-        // concept.
+        // TODO: move into a ExperienceFetchViewModel or something
         roverSdkNetworkService.fetchExperienceTask(ID(experienceId)) { result ->
             if(lifecycle.currentState != Lifecycle.State.DESTROYED) {
                 when (result) {
                     is NetworkResult.Success -> {
                         log.v("Experience fetched successfully! living on thread ${Thread.currentThread().id}")
 
-                        val screenViewModel = ScreenViewModel(result.response.screens.first(), blockViewModelFactory)
 
-                        experiencesView.viewModel = screenViewModel
+
+                        // val screenViewModel = ScreenViewModel(result.response.screens.first(), blockViewModelFactory)
+
+                        experiencesView.viewModel = ExperienceViewModel(result.response, blockViewModelFactory)
                     }
                     is NetworkResult.Error -> {
                         // Snackbar.make(this.main_content, "Opening ${selectedExperience.name}", Snackbar.LENGTH_SHORT).show()

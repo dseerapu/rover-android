@@ -9,7 +9,9 @@ class ViewButton(
     private val buttonView: AppCompatButton
 ) : ViewButtonInterface {
     override var buttonViewModel: ButtonViewModelInterface? = null
-        set(value) {
-            buttonView.text = value?.text ?: ""
+        set(viewModel) {
+            buttonView.text = viewModel?.text ?: ""
+
+            buttonView.setOnClickListener { viewModel?.click() }
         }
 }

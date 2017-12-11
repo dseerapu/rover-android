@@ -4,10 +4,12 @@ import android.graphics.Bitmap
 import android.graphics.Shader
 import android.util.DisplayMetrics
 import io.rover.rover.core.domain.Background
+import io.rover.rover.core.domain.BlockAction
 import io.rover.rover.core.domain.Border
 import io.rover.rover.core.domain.Experience
 import io.rover.rover.core.domain.Screen
 import io.rover.rover.services.network.NetworkTask
+import io.rover.rover.streams.Observable
 import io.rover.rover.ui.BlockAndRowLayoutManager
 import io.rover.rover.ui.types.Alignment
 import io.rover.rover.ui.types.DisplayItem
@@ -15,9 +17,12 @@ import io.rover.rover.ui.types.Font
 import io.rover.rover.ui.types.FontAppearance
 import io.rover.rover.ui.types.Insets
 import io.rover.rover.ui.types.Layout
+import io.rover.rover.ui.types.NavigateTo
 import io.rover.rover.ui.types.PixelSize
 import io.rover.rover.ui.types.Rect
 import io.rover.rover.ui.types.RectF
+import java.net.URI
+import java.net.URL
 
 /**
  * Exposed by a view model that may need to contribute to the padding around the content.
@@ -122,6 +127,19 @@ interface TextViewModelInterface : Measurable {
  */
 interface ButtonViewModelInterface {
     val text: String
+
+    /**
+     * User has clicked the view.
+     */
+    fun click()
+
+    sealed class Event {
+        class Clicked(
+            val navigateTo: NavigateTo
+        ): Event()
+    }
+
+    val events: Observable<Event>
 }
 
 interface ImageViewModelInterface : Measurable {
@@ -197,6 +215,11 @@ interface RowViewModelInterface : LayoutableViewModel, BackgroundViewModelInterf
     fun mapBlocksToRectDisplayList(
         rowFrame: RectF
     ): List<DisplayItem>
+
+    /**
+     * Rows may emit navigation events.
+     */
+    val eventSource : Observable<NavigateTo>
 }
 
 /**
@@ -228,6 +251,41 @@ interface ScreenViewModelInterface: BindableViewModel {
     fun gather(): List<LayoutableViewModel>
 
     val rowViewModels: List<RowViewModelInterface>
+
+    /**
+     * Screens may emit navigation events.
+     */
+    // TODO: rename to events
+    val eventSource : Observable<NavigateTo>
+}
+
+interface ExperienceViewModelInterface: BindableViewModel {
+    val events : Observable<Event>
+
+    fun pressBack()
+
+    fun canGoBack(): Boolean
+
+    sealed class Event {
+        class GoForwardToScreen(val screenViewModel: ScreenViewModelInterface): Event()
+
+        class GoBackwardToScreen(val screenViewModel: ScreenViewModelInterface): Event()
+
+        /**
+         * This event signifies that the view should immediately display the given view model.
+         */
+        class WarpToScreen(val screenViewModel: ScreenViewModelInterface): Event()
+
+        // TODO: we may want to do an (optional) internal web browser like iOS, but there is less call for it
+        // because Android has its back button.  Will discuss.
+
+        class OpenExternalWebBrowser(val uri: URI): Event()
+
+        /**
+         * Containing view should pop itself.
+         */
+        class Exit(): Event()
+    }
 }
 
 /**

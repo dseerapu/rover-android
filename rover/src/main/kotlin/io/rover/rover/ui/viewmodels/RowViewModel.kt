@@ -1,13 +1,19 @@
 package io.rover.rover.ui.viewmodels
 
 import io.rover.rover.core.domain.Row
+import io.rover.rover.core.logging.log
 import io.rover.rover.services.assets.AssetService
+import io.rover.rover.streams.Observable
+import io.rover.rover.streams.asPublisher
+import io.rover.rover.streams.flatMap
+import io.rover.rover.streams.map
+import io.rover.rover.streams.share
 import io.rover.rover.ui.ViewModelFactoryInterface
 import io.rover.rover.ui.measuredAgainst
 import io.rover.rover.ui.types.DisplayItem
+import io.rover.rover.ui.types.NavigateTo
 import io.rover.rover.ui.types.RectF
 import io.rover.rover.ui.types.ViewType
-
 
 class RowViewModel(
     private val row: Row,
@@ -18,6 +24,19 @@ class RowViewModel(
 
     override val blockViewModels: List<BlockViewModelInterface> by lazy {
         row.blocks.map { viewModelFactory.viewModelForBlock(it) }
+    }
+
+    override val eventSource : Observable<NavigateTo> = blockViewModels.filter {
+        it is ButtonViewModelInterface
+    }.map {
+        (it as ButtonViewModelInterface).events.map {
+            when(it) {
+                is ButtonViewModelInterface.Event.Clicked -> it.navigateTo
+            }
+        }
+    }.asPublisher().flatMap { it }.share().map {
+        log.v("Row event: $it")
+        it
     }
 
     /**
@@ -52,8 +71,8 @@ class RowViewModel(
     }
 
     override fun mapBlocksToRectDisplayList(rowFrame: RectF): List<DisplayItem> {
-        // kick off the iteration to statefully map (for stacking, as needed) the blocks into
-        // a flat layout of coordinates.
+        // kick off the iteration to map (for stacking, as needed) the blocks into
+        // a flat layout of coordinates while accumulating the stack height.
         return mapBlocksToRectDisplayList(
             this.blockViewModels,
             rowFrame,
@@ -61,6 +80,8 @@ class RowViewModel(
             listOf()
         )
     }
+
+
 
     private tailrec fun mapBlocksToRectDisplayList(
         remainingBlockViewModels: List<BlockViewModelInterface>,

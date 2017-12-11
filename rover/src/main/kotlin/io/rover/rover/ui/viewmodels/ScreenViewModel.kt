@@ -4,9 +4,15 @@ import io.rover.rover.core.domain.BarcodeBlock
 import io.rover.rover.core.domain.ButtonBlock
 import io.rover.rover.core.domain.Screen
 import io.rover.rover.core.domain.WebViewBlock
+import io.rover.rover.core.logging.log
+import io.rover.rover.streams.Observable
+import io.rover.rover.streams.asPublisher
+import io.rover.rover.streams.flatMap
+import io.rover.rover.streams.map
 import io.rover.rover.ui.ViewModelFactoryInterface
 import io.rover.rover.ui.types.DisplayItem
 import io.rover.rover.ui.types.Layout
+import io.rover.rover.ui.types.NavigateTo
 import io.rover.rover.ui.types.RectF
 
 class ScreenViewModel(
@@ -38,6 +44,11 @@ class ScreenViewModel(
                 it
             ) + it.blockViewModels.asReversed()
         }
+    }
+
+    override val eventSource: Observable<NavigateTo> = rowViewModels.asPublisher().flatMap { it.eventSource }.map {
+        log.v("Screen event: $it")
+        it
     }
 
     override fun render(
@@ -77,6 +88,4 @@ class ScreenViewModel(
 
         return mapRowsToRectDisplayList(tail, width, Layout(results.coordinatesAndViewModels + rowHead + blocks, results.height + row.frame(rowBounds).height(), results.width))
     }
-
-
 }
