@@ -10,8 +10,7 @@ class ViewButton(
 ) : ViewButtonInterface {
     override var buttonViewModel: ButtonViewModelInterface? = null
         set(viewModel) {
+            field = viewModel
             buttonView.text = viewModel?.text ?: ""
-
-            buttonView.setOnClickListener { viewModel?.click() }
         }
 }

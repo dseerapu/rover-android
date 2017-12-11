@@ -1,5 +1,6 @@
 package io.rover.rover.ui.viewmodels
 
+import android.app.Activity
 import android.graphics.Bitmap
 import android.graphics.Shader
 import android.util.DisplayMetrics
@@ -127,19 +128,6 @@ interface TextViewModelInterface : Measurable {
  */
 interface ButtonViewModelInterface {
     val text: String
-
-    /**
-     * User has clicked the view.
-     */
-    fun click()
-
-    sealed class Event {
-        class Clicked(
-            val navigateTo: NavigateTo
-        ): Event()
-    }
-
-    val events: Observable<Event>
 }
 
 interface ImageViewModelInterface : Measurable {
@@ -200,6 +188,27 @@ interface BlockViewModelInterface : LayoutableViewModel {
     val verticalAlignment: Alignment
 
     fun width(bounds: RectF): Float
+
+    // TODO: the following may be moved into a mixin view model, even though our domain model atm
+    // has block actions being included for all blocks.
+
+    /**
+     * The view is clickable.
+     */
+    val isClickable: Boolean
+
+    /**
+     * User has clicked the view.
+     */
+    fun click()
+
+    sealed class Event {
+        class Clicked(
+            val navigateTo: NavigateTo
+        ): Event()
+    }
+
+    val events: Observable<Event>
 }
 
 /**
@@ -255,8 +264,7 @@ interface ScreenViewModelInterface: BindableViewModel {
     /**
      * Screens may emit navigation events.
      */
-    // TODO: rename to events
-    val eventSource : Observable<NavigateTo>
+    val events: Observable<NavigateTo>
 }
 
 interface ExperienceViewModelInterface: BindableViewModel {
@@ -264,6 +272,13 @@ interface ExperienceViewModelInterface: BindableViewModel {
 
     fun pressBack()
 
+    /**
+     * Ask the view model if there are any entries on its internal back stack to revert to.
+     *
+     * Check this before calling [pressBack].  However, it is optional: if you call pressBack()
+     * without checking [canGoBack], and there are no remaining back stack entries remaining, you'll
+     * receive an [ExperienceViewModelInterface.Event.Exit] event.
+     */
     fun canGoBack(): Boolean
 
     sealed class Event {
@@ -282,7 +297,8 @@ interface ExperienceViewModelInterface: BindableViewModel {
         class OpenExternalWebBrowser(val uri: URI): Event()
 
         /**
-         * Containing view should pop itself.
+         * Containing view should pop itself ([Activity.finish], etc.) in the surrounding navigation
+         * flow, whatever it happens to be.
          */
         class Exit(): Event()
     }

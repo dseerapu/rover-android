@@ -26,12 +26,10 @@ class RowViewModel(
         row.blocks.map { viewModelFactory.viewModelForBlock(it) }
     }
 
-    override val eventSource : Observable<NavigateTo> = blockViewModels.filter {
-        it is ButtonViewModelInterface
-    }.map {
-        (it as ButtonViewModelInterface).events.map {
+    override val eventSource : Observable<NavigateTo> = blockViewModels.map { blockViewModel ->
+        blockViewModel.events.map {
             when(it) {
-                is ButtonViewModelInterface.Event.Clicked -> it.navigateTo
+                is BlockViewModelInterface.Event.Clicked -> it.navigateTo
             }
         }
     }.asPublisher().flatMap { it }.share().map {

@@ -13,6 +13,9 @@ class ViewBlock(
         set(viewModel) {
             field = viewModel
             val displayMetrics = view.resources.displayMetrics
+
+            view.setOnClickListener { viewModel?.click() }
+
             if (viewModel != null) {
                 val contributedPaddings = paddingContributors.map { it.contributedPadding }
                 view.setPaddingRelative(
@@ -22,6 +25,11 @@ class ViewBlock(
                     (viewModel.insets.bottom + contributedPaddings.map { it.bottom }.sum()).dpAsPx(displayMetrics)
                 )
                 view.alpha = viewModel.opacity
+
+                view.isClickable = viewModel.isClickable
+
+                // TODO: figure out how to set a ripple drawable for clickable blocks in a way that
+                // works across different view types?
             } else {
                 view.setPaddingRelative(0, 0, 0, 0)
             }

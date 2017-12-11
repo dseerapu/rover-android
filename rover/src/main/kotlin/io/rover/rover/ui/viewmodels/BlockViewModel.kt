@@ -1,13 +1,18 @@
 package io.rover.rover.ui.viewmodels
 
 import io.rover.rover.core.domain.Block
+import io.rover.rover.core.domain.BlockAction
 import io.rover.rover.core.domain.HorizontalAlignment
 import io.rover.rover.core.domain.Position
 import io.rover.rover.core.domain.VerticalAlignment
 import io.rover.rover.core.logging.log
+import io.rover.rover.platform.whenNotNull
+import io.rover.rover.streams.PublishSubject
+import io.rover.rover.streams.share
 import io.rover.rover.ui.measuredAgainst
 import io.rover.rover.ui.types.Alignment
 import io.rover.rover.ui.types.Insets
+import io.rover.rover.ui.types.NavigateTo
 import io.rover.rover.ui.types.RectF
 import io.rover.rover.ui.types.ViewType
 
@@ -122,6 +127,31 @@ class BlockViewModel(
         }
 
         return listOf(width, 0.0f).max()!!
+    }
+
+
+    private val eventSource = PublishSubject<BlockViewModelInterface.Event>()
+    override val events = eventSource.share()
+
+    override val isClickable: Boolean
+        get() = block.action != null
+
+    override fun click() {
+        // I don't have an epic here, just a single event emitter, so I'll just publish an event
+        // immediately.
+        val action = block.action
+
+        val navigateTo = when(action) {
+            null -> null
+            is BlockAction.GoToScreenAction -> { NavigateTo.GoToScreenAction(action.screenId.rawValue) }
+            is BlockAction.OpenUrlAction -> { NavigateTo.OpenUrlAction(action.url)}
+        }
+
+        navigateTo.whenNotNull {
+            eventSource.onNext(
+                BlockViewModelInterface.Event.Clicked(it)
+            )
+        }
     }
 
     /**

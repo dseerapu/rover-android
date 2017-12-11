@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.PersistableBundle
+import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.RecyclerView
 import io.rover.rover.core.domain.ID
@@ -12,6 +13,7 @@ import io.rover.rover.core.logging.log
 import io.rover.rover.platform.DateFormatting
 import io.rover.rover.platform.DeviceIdentification
 import io.rover.rover.platform.SharedPreferencesLocalStorage
+import io.rover.rover.platform.asAndroidUri
 import io.rover.rover.services.assets.AndroidAssetService
 import io.rover.rover.services.assets.ImageOptimizationService
 import io.rover.rover.services.network.AsyncTaskAndHttpUrlConnectionNetworkClient
@@ -20,12 +22,14 @@ import io.rover.rover.services.network.NetworkResult
 import io.rover.rover.services.network.NetworkService
 import io.rover.rover.services.network.NetworkServiceInterface
 import io.rover.rover.services.network.WireEncoder
+import io.rover.rover.streams.subscribe
 import io.rover.rover.ui.AndroidMeasurementService
 import io.rover.rover.ui.AndroidRichTextToSpannedTransformer
 import io.rover.rover.ui.BlockAndRowLayoutManager
 import io.rover.rover.ui.BlockAndRowRecyclerAdapter
 import io.rover.rover.ui.ViewModelFactory
 import io.rover.rover.ui.viewmodels.ExperienceViewModel
+import io.rover.rover.ui.viewmodels.ExperienceViewModelInterface
 import io.rover.rover.ui.viewmodels.ScreenViewModel
 import io.rover.rover.ui.views.ExperienceView
 import io.rover.rover.ui.views.ScreenView
@@ -109,6 +113,45 @@ class StandaloneExperienceHostActivity: AppCompatActivity() {
         )
     }
 
+    // TODO: there should be a standalone-experience-host-activity view model.
+    private var experienceViewModel: ExperienceViewModelInterface? = null
+        set(viewModel) {
+            field = viewModel
+
+            experiencesView.viewModel = viewModel
+
+            // TODO: this subscription must be lifecycle-managed
+            viewModel?.events?.subscribe(
+                { event ->
+                    when(event) {
+                        is ExperienceViewModelInterface.Event.Exit -> {
+                            finish()
+                        }
+                        is ExperienceViewModelInterface.Event.OpenExternalWebBrowser -> {
+                            ContextCompat.startActivity(
+                                this,
+                                Intent(
+                                    Intent.ACTION_VIEW,
+                                    event.uri.asAndroidUri()
+                                ),
+                                null
+                            )
+                        }
+                    }
+                }, { error ->
+                    throw(error)
+                }
+            )
+        }
+
+    override fun onBackPressed() {
+        if(experienceViewModel?.canGoBack() == true) {
+            experienceViewModel!!.pressBack()
+        } else {
+            super.onBackPressed()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -122,12 +165,7 @@ class StandaloneExperienceHostActivity: AppCompatActivity() {
                 when (result) {
                     is NetworkResult.Success -> {
                         log.v("Experience fetched successfully! living on thread ${Thread.currentThread().id}")
-
-
-
-                        // val screenViewModel = ScreenViewModel(result.response.screens.first(), blockViewModelFactory)
-
-                        experiencesView.viewModel = ExperienceViewModel(result.response, blockViewModelFactory)
+                        experienceViewModel = ExperienceViewModel(result.response, blockViewModelFactory)
                     }
                     is NetworkResult.Error -> {
                         // Snackbar.make(this.main_content, "Opening ${selectedExperience.name}", Snackbar.LENGTH_SHORT).show()

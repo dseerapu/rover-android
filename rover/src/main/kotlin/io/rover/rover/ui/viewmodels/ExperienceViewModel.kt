@@ -38,7 +38,7 @@ class ExperienceViewModel(
     // be gloriously ignorant of the actual stack? that's the ideal
 
 
-    // in this case, we'll injections actions by subscribing to events coming from the viewmodels
+    // in this case, we'll inject actions by subscribing to events coming from the viewmodels
     override fun pressBack() {
         actions.onNext(Action.PressedBack())
     }
@@ -71,7 +71,7 @@ class ExperienceViewModel(
     private val screenEventSubscription = screenViewModelsById
         .values
         .asPublisher()
-        .flatMap { it.eventSource }
+        .flatMap { it.events }
         // TODO: do the initial home screen warp in this chain somehow
         .subscribe( { item -> actions.onNext(Action.Navigate(item)) }, { error -> actions.onError(error) } )
 

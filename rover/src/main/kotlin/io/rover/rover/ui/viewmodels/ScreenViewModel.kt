@@ -46,7 +46,7 @@ class ScreenViewModel(
         }
     }
 
-    override val eventSource: Observable<NavigateTo> = rowViewModels.asPublisher().flatMap { it.eventSource }.map {
+    override val events: Observable<NavigateTo> = rowViewModels.asPublisher().flatMap { it.eventSource }.map {
         log.v("Screen event: $it")
         it
     }

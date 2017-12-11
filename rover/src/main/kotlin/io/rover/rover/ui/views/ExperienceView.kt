@@ -46,7 +46,7 @@ class ExperienceView: FrameLayout, BindableView<ExperienceViewModelInterface> {
             field = experienceViewModel
 
             field?.events?.subscribe( { event ->
-                val wat = when(event) {
+                when(event) {
                     is ExperienceViewModelInterface.Event.WarpToScreen -> {
                         // find view for the given viewmodel
                         val newView = getViewForScreenViewModel(event.screenViewModel)
@@ -55,41 +55,31 @@ class ExperienceView: FrameLayout, BindableView<ExperienceViewModelInterface> {
 
                         addView(newView)
                         newView.visibility = View.VISIBLE
+                        activeView = newView
                     }
                     is ExperienceViewModelInterface.Event.GoForwardToScreen -> {
                         val newView = getViewForScreenViewModel(event.screenViewModel)
 
                         TransitionManager.beginDelayedTransition(this)
                         activeView.whenNotNull {
-                            it.visibility = View.GONE
                             removeView(it)
                         }
 
                         addView(newView)
                         newView.visibility = View.VISIBLE
+                        activeView = newView
                     }
                     is ExperienceViewModelInterface.Event.GoBackwardToScreen -> {
                         val newView = getViewForScreenViewModel(event.screenViewModel)
 
                         TransitionManager.beginDelayedTransition(this)
                         activeView.whenNotNull {
-                            it.visibility = View.GONE
                             removeView(it)
                         }
 
                         addView(newView)
                         newView.visibility = View.VISIBLE
-                    }
-                    is ExperienceViewModelInterface.Event.OpenExternalWebBrowser -> {
-                        // TODO: this is possibly the wrong place to listen for this.
-                        startActivity(
-                            context,
-                            Intent(
-                                Intent.ACTION_VIEW,
-                                event.uri.asAndroidUri()
-                            ),
-                            null
-                        )
+                        activeView = newView
                     }
                     is ExperienceViewModelInterface.Event.Exit -> {
                         // TODO: this is definitely the wrong place to listen for this!
