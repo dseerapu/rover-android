@@ -1,6 +1,7 @@
 package io.rover.rover.ui.containers
 
 import android.arch.lifecycle.Lifecycle
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -128,14 +129,18 @@ class StandaloneExperienceHostActivity: AppCompatActivity() {
                             finish()
                         }
                         is ExperienceViewModelInterface.Event.OpenExternalWebBrowser -> {
-                            ContextCompat.startActivity(
-                                this,
-                                Intent(
-                                    Intent.ACTION_VIEW,
-                                    event.uri.asAndroidUri()
-                                ),
-                                null
-                            )
+                            try {
+                                ContextCompat.startActivity(
+                                    this,
+                                    Intent(
+                                        Intent.ACTION_VIEW,
+                                        event.uri.asAndroidUri()
+                                    ),
+                                    null
+                                )
+                            } catch (e: ActivityNotFoundException) {
+                                log.w("No way to handle URI ${event.uri}.  Perhaps app is missing an intent filter for a deep link?")
+                            }
                         }
                     }
                 }, { error ->

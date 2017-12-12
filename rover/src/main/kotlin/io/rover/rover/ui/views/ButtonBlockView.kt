@@ -14,8 +14,11 @@ class ButtonBlockView : AppCompatButton, LayoutableView<ButtonBlockViewModelInte
 
     private val viewButton = ViewButton(this)
 
+    private val viewBlock = ViewBlock(this, setOf())
+
     override var viewModel: ButtonBlockViewModelInterface? = null
         set(value) {
             viewButton.buttonViewModel = value
+            viewBlock.blockViewModel = value
         }
 }

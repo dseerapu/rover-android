@@ -71,9 +71,15 @@ class ExperienceViewModel(
     private val screenEventSubscription = screenViewModelsById
         .values
         .asPublisher()
-        .flatMap { it.events }
-        // TODO: do the initial home screen warp in this chain somehow
-        .subscribe( { item -> actions.onNext(Action.Navigate(item)) }, { error -> actions.onError(error) } )
+        .flatMap { screen ->
+            screen.events.map { Pair(screen, it)}
+        }
+        .subscribe({ (screen, navigateTo) ->
+            // filter out the the events that are not meant for the currently active screen:
+            if(activeScreen() == screen) {
+                actions.onNext(Action.Navigate(navigateTo))
+            }
+        }, { error -> actions.onError(error) })
 
     private sealed class Action {
         class PressedBack: Action()

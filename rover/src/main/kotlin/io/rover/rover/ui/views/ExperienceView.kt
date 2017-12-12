@@ -48,20 +48,17 @@ class ExperienceView: FrameLayout, BindableView<ExperienceViewModelInterface> {
 
             field?.events?.subscribe( { event ->
                 when(event) {
+
                     is ExperienceViewModelInterface.Event.WarpToScreen -> {
                         val newView = getViewForScreenViewModel(event.screenViewModel)
-
-                        activeView.whenNotNull { removeView(it) }
-
+                        activeView?.visibility = View.GONE
                         newView.visibility = View.VISIBLE
                         activeView = newView
                     }
                     is ExperienceViewModelInterface.Event.GoForwardToScreen -> {
                         val newView = getViewForScreenViewModel(event.screenViewModel)
-
                         newView.bringToFront()
-
-                        newView.visibility = View.INVISIBLE
+                        newView.visibility = View.GONE
 
                         val set = TransitionSet().apply {
                             activeView.whenNotNull { activeView ->
@@ -80,13 +77,14 @@ class ExperienceView: FrameLayout, BindableView<ExperienceViewModelInterface> {
 
                         TransitionManager.beginDelayedTransition(this, set)
                         newView.visibility = View.VISIBLE
-                        activeView.whenNotNull { it.visibility = View.INVISIBLE }
+                        activeView.whenNotNull { it.visibility = View.GONE }
 
                         activeView = newView
                     }
                     is ExperienceViewModelInterface.Event.GoBackwardToScreen -> {
                         val newView = getViewForScreenViewModel(event.screenViewModel)
                         newView.bringToFront()
+                        newView.visibility = View.GONE
 
                         val set = TransitionSet().apply {
                             addTransition(
@@ -107,8 +105,8 @@ class ExperienceView: FrameLayout, BindableView<ExperienceViewModelInterface> {
                         activeView.whenNotNull {
                             it.visibility = View.GONE
                         }
-
                         newView.visibility = View.VISIBLE
+
                         activeView = newView
                     }
                 }
