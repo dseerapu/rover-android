@@ -17,8 +17,10 @@ import io.rover.rover.ui.types.RectF
 
 class ScreenViewModel(
     private val screen: Screen,
+    private val backgroundViewModel: BackgroundViewModelInterface,
     private val viewModelFactory: ViewModelFactoryInterface
-) : ScreenViewModelInterface {
+) : ScreenViewModelInterface,
+    BackgroundViewModelInterface by backgroundViewModel {
 
     // TODO: remember (State) scroll position
 

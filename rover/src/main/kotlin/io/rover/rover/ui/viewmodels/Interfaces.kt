@@ -247,7 +247,7 @@ interface RowViewModelInterface : LayoutableViewModel, BackgroundViewModelInterf
  *
  * Primarily used by [BlockAndRowLayoutManager].
  */
-interface ScreenViewModelInterface: BindableViewModel {
+interface ScreenViewModelInterface: BindableViewModel, BackgroundViewModelInterface {
     /**
      * Do the computationally expensive operation of laying out the entire graph of UI view models.
      */

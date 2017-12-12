@@ -13,9 +13,13 @@ class ScreenView : RecyclerView, BindableView<ScreenViewModelInterface> {
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
     constructor(context: Context?, attrs: AttributeSet?, defStyle: Int) : super(context, attrs, defStyle)
 
+    private val viewBackground = ViewBackground(this)
+
     override var viewModel: ScreenViewModelInterface? = null
         set(viewModel) {
             field = viewModel
+
+            viewBackground.backgroundViewModel = viewModel
 
             if(viewModel != null) {
                 // set up the Experience layout manager for the RecyclerView.  Unlike a typical

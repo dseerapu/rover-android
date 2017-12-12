@@ -5,6 +5,7 @@ import io.rover.rover.core.domain.ButtonBlock
 import io.rover.rover.core.domain.ImageBlock
 import io.rover.rover.core.domain.RectangleBlock
 import io.rover.rover.core.domain.Row
+import io.rover.rover.core.domain.Screen
 import io.rover.rover.core.domain.TextBlock
 import io.rover.rover.services.assets.AssetService
 import io.rover.rover.services.assets.ImageOptimizationServiceInterface
@@ -19,6 +20,8 @@ import io.rover.rover.ui.viewmodels.ImageViewModel
 import io.rover.rover.ui.viewmodels.RectangleBlockViewModel
 import io.rover.rover.ui.viewmodels.RowViewModel
 import io.rover.rover.ui.viewmodels.RowViewModelInterface
+import io.rover.rover.ui.viewmodels.ScreenViewModel
+import io.rover.rover.ui.viewmodels.ScreenViewModelInterface
 import io.rover.rover.ui.viewmodels.TextBlockViewModel
 import io.rover.rover.ui.viewmodels.TextViewModel
 
@@ -26,6 +29,8 @@ interface ViewModelFactoryInterface {
     fun viewModelForBlock(block: Block): BlockViewModelInterface
 
     fun viewModelForRow(row: Row): RowViewModelInterface
+
+    fun viewModelForScreen(screen: Screen): ScreenViewModelInterface
 }
 
 class ViewModelFactory(
@@ -48,9 +53,6 @@ class ViewModelFactory(
                     textViewModel,
                     BackgroundViewModel(block, assetService, imageOptimizationService),
                     borderViewModel
-                    // TODO: I would need to pass in some sort of measure-ator to blockviewmodel...
-                    // actually, I could take the Text Concerns themselves out and put them into their own headless viewmodel, and have that implement
-                    // the measure-ator interface :)
                 )
             }
             is ImageBlock -> {
@@ -82,5 +84,15 @@ class ViewModelFactory(
                 imageOptimizationService
             )
         )
+    }
+
+    override fun viewModelForScreen(screen: Screen): ScreenViewModelInterface {
+        return ScreenViewModel(screen,
+            BackgroundViewModel(
+                screen,
+                assetService,
+                imageOptimizationService
+            ),
+            this)
     }
 }

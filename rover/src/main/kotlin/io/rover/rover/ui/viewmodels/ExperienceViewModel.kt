@@ -58,7 +58,7 @@ class ExperienceViewModel(
 
     private val screenViewModelsById: Map<String, ScreenViewModelInterface> = screensById.mapValues {
         // TODO: use DI to inject the screen view models
-        ScreenViewModel(it.value, viewModelFactory)
+        viewModelFactory.viewModelForScreen(it.value)
 
         // TODO: I need to subscribe to all of these, and then when done, I need to emit a
         // single WarpTo event for the home Screen. Even

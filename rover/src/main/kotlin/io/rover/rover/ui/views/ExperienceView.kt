@@ -1,17 +1,14 @@
 package io.rover.rover.ui.views
 
 import android.content.Context
-import android.content.Intent
-import android.support.v4.content.ContextCompat.startActivity
-import android.transition.Transition
-import android.transition.TransitionManager
+import android.support.transition.Slide
+import android.support.transition.TransitionManager
+import android.support.transition.TransitionSet
 import android.util.AttributeSet
+import android.util.LruCache
+import android.view.Gravity
 import android.view.View
-import android.view.ViewGroup
 import android.widget.FrameLayout
-import android.widget.TextView
-import io.rover.rover.core.logging.log
-import io.rover.rover.platform.asAndroidUri
 import io.rover.rover.platform.whenNotNull
 import io.rover.rover.streams.subscribe
 import io.rover.rover.ui.viewmodels.ExperienceViewModelInterface
@@ -28,15 +25,19 @@ class ExperienceView: FrameLayout, BindableView<ExperienceViewModelInterface> {
 
     private var activeView: ScreenView? = null
 
-    private val viewCache: HashMap<ScreenViewModelInterface, ScreenView> = hashMapOf()
+    private val viewCache: LruCache<ScreenViewModelInterface, ScreenView> = object : LruCache<ScreenViewModelInterface, ScreenView>(3) {
+        override fun entryRemoved(evicted: Boolean, key: ScreenViewModelInterface?, oldValue: ScreenView?, newValue: ScreenView?) {
+            removeView(oldValue)
+        }
+    }
 
-    fun getViewForScreenViewModel(screenViewModel: ScreenViewModelInterface): ScreenView {
-        // TODO: manage the size of the cache.  we do not want too many active views (like, at most
-        // two), since they are full Experience screens
+    private fun getViewForScreenViewModel(screenViewModel: ScreenViewModelInterface): ScreenView {
         return viewCache[screenViewModel] ?: ScreenView(
             context
         ).apply {
-            viewCache[screenViewModel] = this
+            this@ExperienceView.addView(this)
+            this.visibility = View.GONE
+            viewCache.put(screenViewModel, this)
             this.viewModel = screenViewModel
         }
     }
@@ -48,42 +49,67 @@ class ExperienceView: FrameLayout, BindableView<ExperienceViewModelInterface> {
             field?.events?.subscribe( { event ->
                 when(event) {
                     is ExperienceViewModelInterface.Event.WarpToScreen -> {
-                        // find view for the given viewmodel
                         val newView = getViewForScreenViewModel(event.screenViewModel)
 
                         activeView.whenNotNull { removeView(it) }
 
-                        addView(newView)
                         newView.visibility = View.VISIBLE
                         activeView = newView
                     }
                     is ExperienceViewModelInterface.Event.GoForwardToScreen -> {
                         val newView = getViewForScreenViewModel(event.screenViewModel)
 
-                        TransitionManager.beginDelayedTransition(this)
-                        activeView.whenNotNull {
-                            removeView(it)
+                        newView.bringToFront()
+
+                        newView.visibility = View.INVISIBLE
+
+                        val set = TransitionSet().apply {
+                            activeView.whenNotNull { activeView ->
+                                addTransition(
+                                    Slide(
+                                        Gravity.START
+                                    ).addTarget(activeView)
+                                )
+                            }
+                            addTransition(
+                                Slide(
+                                    Gravity.END
+                                ).addTarget(newView)
+                            )
                         }
 
-                        addView(newView)
+                        TransitionManager.beginDelayedTransition(this, set)
                         newView.visibility = View.VISIBLE
+                        activeView.whenNotNull { it.visibility = View.INVISIBLE }
+
                         activeView = newView
                     }
                     is ExperienceViewModelInterface.Event.GoBackwardToScreen -> {
                         val newView = getViewForScreenViewModel(event.screenViewModel)
+                        newView.bringToFront()
 
-                        TransitionManager.beginDelayedTransition(this)
-                        activeView.whenNotNull {
-                            removeView(it)
+                        val set = TransitionSet().apply {
+                            addTransition(
+                                Slide(
+                                    Gravity.START
+                                ).addTarget(newView)
+                            )
+                            activeView.whenNotNull { activeView ->
+                                addTransition(
+                                    Slide(
+                                        Gravity.END
+                                    ).addTarget(activeView)
+                                )
+                            }
                         }
 
-                        addView(newView)
+                        TransitionManager.beginDelayedTransition(this, set)
+                        activeView.whenNotNull {
+                            it.visibility = View.GONE
+                        }
+
                         newView.visibility = View.VISIBLE
                         activeView = newView
-                    }
-                    is ExperienceViewModelInterface.Event.Exit -> {
-                        // TODO: this is definitely the wrong place to listen for this!
-                        log.v("Gotta go back out, but can't lol")
                     }
                 }
             }, { error -> throw error })
@@ -91,13 +117,5 @@ class ExperienceView: FrameLayout, BindableView<ExperienceViewModelInterface> {
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
-
-        // kick off a test transition
-//        postDelayed({
-//            TransitionManager.beginDelayedTransition(this)
-//
-//            viewOne.visibility = View.GONE
-//            viewTwo.visibility = View.VISIBLE
-//        }, 2000)
     }
 }
