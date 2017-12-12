@@ -22,7 +22,8 @@ import kotlinx.android.parcel.Parcelize
  */
 class ExperienceViewModel(
     val experience: Experience,
-    val viewModelFactory: ViewModelFactoryInterface
+    val viewModelFactory: ViewModelFactoryInterface,
+    val icicle: Parcelable? = null
 ): ExperienceViewModelInterface {
     // concerns:
     // start at home Screen.
@@ -86,9 +87,14 @@ class ExperienceViewModel(
         class Navigate(val navigateTo: NavigateTo): Action()
     }
 
-    private var state = State(
-        listOf(BackStackFrame(experience.homeScreenId.rawValue))
-    )
+    override var state = if(icicle != null) {
+        icicle as State
+    } else {
+        State(
+            listOf(BackStackFrame(experience.homeScreenId.rawValue))
+        )
+    }
+        private set
 
     private fun activeScreen(): ScreenViewModelInterface? {
         val currentScreenId = state.backStack.lastOrNull()?.screenId

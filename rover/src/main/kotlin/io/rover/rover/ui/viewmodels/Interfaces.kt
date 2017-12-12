@@ -3,6 +3,7 @@ package io.rover.rover.ui.viewmodels
 import android.app.Activity
 import android.graphics.Bitmap
 import android.graphics.Shader
+import android.os.Parcelable
 import android.util.DisplayMetrics
 import io.rover.rover.core.domain.Background
 import io.rover.rover.core.domain.BlockAction
@@ -280,6 +281,14 @@ interface ExperienceViewModelInterface: BindableViewModel {
      * receive an [ExperienceViewModelInterface.Event.Exit] event.
      */
     fun canGoBack(): Boolean
+
+    /**
+     * Obtain a state object for this Experience View Model.
+     *
+     * TODO: determine what the chain of responsibility is for nested view models' state.  Don't
+     * have any yet, though.
+     */
+    val state: Parcelable
 
     sealed class Event {
         class GoForwardToScreen(val screenViewModel: ScreenViewModelInterface): Event()

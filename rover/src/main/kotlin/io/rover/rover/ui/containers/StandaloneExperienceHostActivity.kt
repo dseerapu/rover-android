@@ -164,13 +164,13 @@ class StandaloneExperienceHostActivity: AppCompatActivity() {
             experiencesView
         )
 
-        // TODO: move into a ExperienceFetchViewModel or something
+        // TODO: move into a ExperienceFetchViewModel or something coupled with an ExperienceFetchView (or perhaps StandaloneExperienceView)
         roverSdkNetworkService.fetchExperienceTask(ID(experienceId)) { result ->
             if(lifecycle.currentState != Lifecycle.State.DESTROYED) {
                 when (result) {
                     is NetworkResult.Success -> {
                         log.v("Experience fetched successfully! living on thread ${Thread.currentThread().id}")
-                        experienceViewModel = ExperienceViewModel(result.response, blockViewModelFactory)
+                        experienceViewModel = ExperienceViewModel(result.response, blockViewModelFactory, savedInstanceState?.getParcelable("experienceState"))
                     }
                     is NetworkResult.Error -> {
                         // Snackbar.make(this.main_content, "Opening ${selectedExperience.name}", Snackbar.LENGTH_SHORT).show()
@@ -181,6 +181,12 @@ class StandaloneExperienceHostActivity: AppCompatActivity() {
                 }
             }
         }.resume()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        // TODO: this will be migrated into a surrounding StandaloneExperienceView.
+        outState.putParcelable("experienceState", experienceViewModel?.state)
     }
 
     companion object {
