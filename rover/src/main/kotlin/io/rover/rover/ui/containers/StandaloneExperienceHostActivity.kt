@@ -9,6 +9,7 @@ import android.os.PersistableBundle
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.RecyclerView
+import io.rover.rover.core.domain.Experience
 import io.rover.rover.core.domain.ID
 import io.rover.rover.core.logging.log
 import io.rover.rover.platform.DateFormatting
@@ -23,6 +24,9 @@ import io.rover.rover.services.network.NetworkResult
 import io.rover.rover.services.network.NetworkService
 import io.rover.rover.services.network.NetworkServiceInterface
 import io.rover.rover.services.network.WireEncoder
+import io.rover.rover.streams.CallbackReceiver
+import io.rover.rover.streams.androidLifecycleDispose
+import io.rover.rover.streams.asPublisher
 import io.rover.rover.streams.subscribe
 import io.rover.rover.ui.AndroidMeasurementService
 import io.rover.rover.ui.AndroidRichTextToSpannedTransformer
@@ -165,8 +169,12 @@ class StandaloneExperienceHostActivity: AppCompatActivity() {
         )
 
         // TODO: move into a ExperienceFetchViewModel or something coupled with an ExperienceFetchView (or perhaps StandaloneExperienceView)
-        roverSdkNetworkService.fetchExperienceTask(ID(experienceId)) { result ->
-            if(lifecycle.currentState != Lifecycle.State.DESTROYED) {
+
+        val fetchExperiencePublisher = { callback: CallbackReceiver<NetworkResult<Experience>> -> roverSdkNetworkService.fetchExperienceTask(ID(experienceId), callback) }.asPublisher()
+
+        fetchExperiencePublisher
+            .androidLifecycleDispose(this)
+            .subscribe({ result ->
                 when (result) {
                     is NetworkResult.Success -> {
                         log.v("Experience fetched successfully! living on thread ${Thread.currentThread().id}")
@@ -179,8 +187,10 @@ class StandaloneExperienceHostActivity: AppCompatActivity() {
                         // TODO not using snackbar for now because we need to decide if including design support lib is sane. also would need to wrap in coordinatorview
                     }
                 }
-            }
-        }.resume()
+            }, { error ->
+                // there are no soft errors here.
+                throw RuntimeException("Unexpected error fetching experience.", error)
+            })
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

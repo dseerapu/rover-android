@@ -10,6 +10,7 @@ import android.view.Gravity
 import android.view.View
 import android.widget.FrameLayout
 import io.rover.rover.platform.whenNotNull
+import io.rover.rover.streams.androidLifecycleDispose
 import io.rover.rover.streams.subscribe
 import io.rover.rover.ui.viewmodels.ExperienceViewModelInterface
 import io.rover.rover.ui.viewmodels.ScreenViewModelInterface
@@ -46,7 +47,7 @@ class ExperienceView: FrameLayout, BindableView<ExperienceViewModelInterface> {
         set(experienceViewModel) {
             field = experienceViewModel
 
-            field?.events?.subscribe( { event ->
+            field?.events?.androidLifecycleDispose(this)?.subscribe( { event ->
                 when(event) {
 
                     is ExperienceViewModelInterface.Event.WarpToScreen -> {

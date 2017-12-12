@@ -1,5 +1,11 @@
 package io.rover.rover.streams
 
+import android.arch.lifecycle.GenericLifecycleObserver
+import android.arch.lifecycle.Lifecycle
+import android.arch.lifecycle.LifecycleObserver
+import android.arch.lifecycle.LifecycleOwner
+import android.view.View
+import io.rover.rover.services.network.NetworkTask
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentSkipListSet
 
@@ -46,8 +52,19 @@ interface Publisher<out T> {
         fun <T> concat(vararg sources: Publisher<T>): Publisher<T> {
             return object : Publisher<T> {
                 override fun subscribe(subscriber: Subscriber<T>) {
+                    var cancelled = false
+
+                    val subscription = object : Subscription {
+                        override fun cancel() {
+                            cancelled = true
+                        }
+                    }
+
+                    subscriber.onSubscribe(subscription)
+
                     // subscribe to first thing, wait for it to complete, then subscribe to second thing, wait for it to complete, etc.
                     fun recursiveSubscribe(remainingSources: List<Publisher<T>>) {
+
                         if(remainingSources.isEmpty()) {
                             subscriber.onComplete()
                         } else {
@@ -57,20 +74,20 @@ interface Publisher<out T> {
                                     // While there is potentially a risk of a stack overflow here,
                                     // but in practical terms, there will not be that many sources
                                     // given to concat().
-                                    recursiveSubscribe(
+                                    if(!cancelled) recursiveSubscribe(
                                         remainingSources.subList(1, remainingSources.size)
                                     )
                                 }
 
                                 override fun onError(error: Throwable) {
-                                    subscriber.onError(error)
+                                    if(!cancelled) subscriber.onError(error)
                                 }
 
                                 override fun onNext(item: T) {
-                                    subscriber.onNext(item)
+                                    if(!cancelled) subscriber.onNext(item)
                                 }
 
-                                override fun onSubscribe(subscription: Subscription) { }
+                                override fun onSubscribe(subscription: Subscription) { /* no-op: we don't tell our subscribers about each source subscribing */ }
                             })
                         }
                     }
@@ -135,6 +152,30 @@ fun <T, R> Publisher<T>.map(transform: (T) -> R): Publisher<R> {
                     }
                 }
             )
+        }
+    }
+}
+
+fun <T> Publisher<T>.filter(predicate: (T) -> Boolean): Publisher<T> {
+    return object : Publisher<T> {
+        override fun subscribe(subscriber: Subscriber<T>) {
+            this@filter.subscribe(object : Subscriber<T> {
+                override fun onComplete() {
+                    subscriber.onComplete()
+                }
+
+                override fun onError(error: Throwable) {
+                    subscriber.onError(error)
+                }
+
+                override fun onNext(item: T) {
+                    if (predicate(item)) subscriber.onNext(item)
+                }
+
+                override fun onSubscribe(subscription: Subscription) {
+                    subscriber.onSubscribe(subscription)
+                }
+            })
         }
     }
 }
@@ -262,6 +303,9 @@ fun <T> Publisher<T>.share(): Publisher<T> {
 
 interface Subject<T>: Processor<T, T>
 
+/**
+ *
+ */
 class PublishSubject<T> : Subject<T> {
     var subscriber : Subscriber<T>? = null
 
@@ -284,7 +328,7 @@ class PublishSubject<T> : Subject<T> {
         subscriber?.onError(error)
     }
 
-    override fun onSubscribe(subscription: Subscription) { /* no-op */ }
+    override fun onSubscribe(subscription: Subscription) { /* no-op: any subscribers to the PublishSubject are subscribed immediately */ }
 
     override fun onNext(item: T) {
         subscriber?.onNext(item)
@@ -303,5 +347,165 @@ fun <T> Collection<T>.asPublisher(): Publisher<T> {
         }
     }
 }
+
+/**
+ * Republish emissions from the Publisher until such time as the provider [Publisher] [stopper]
+ * emits completion, error, or an emission.
+ */
+fun <T, S> Publisher<T>.takeUntil(stopper: Publisher<S>): Publisher<T> {
+    return object : Publisher<T> {
+        override fun subscribe(subscriber: Subscriber<T>) {
+            this@takeUntil.subscribe(object : Subscriber<T> {
+                override fun onComplete() {
+                    subscriber.onComplete()
+                }
+
+                override fun onError(error: Throwable) {
+                    subscriber.onError(error)
+                }
+
+                override fun onNext(item: T) {
+                    subscriber.onNext(item)
+                }
+
+                override fun onSubscribe(subscription: Subscription) {
+                    // subscribe to the stopper and cancel the subscription whenever it emits
+                    // anything.
+                    stopper.subscribe(object : Subscriber<S> {
+                        override fun onComplete() {
+                            subscriber.onComplete()
+                            subscription.cancel()
+                        }
+
+                        override fun onError(error: Throwable) {
+                            subscriber.onError(error)
+                            subscription.cancel()
+                        }
+
+                        override fun onNext(item: S) {
+                            subscription.cancel()
+                        }
+
+                        override fun onSubscribe(subscription: Subscription) {
+                            subscriber.onSubscribe(subscription)
+                        }
+                    })
+                }
+            })
+        }
+
+    }
+}
+
+sealed class ViewEvent {
+    class Attach: ViewEvent()
+    class Detach: ViewEvent()
+}
+
+/**
+ * Observe attach and detach events from the given Android [View].
+ */
+fun View.attachEvents(): Publisher<ViewEvent> {
+    return object : Publisher<ViewEvent> {
+        override fun subscribe(subscriber: Subscriber<ViewEvent>) {
+            val listener = object :  View.OnAttachStateChangeListener {
+                override fun onViewDetachedFromWindow(v: View) {
+                    subscriber.onNext(ViewEvent.Detach())
+                }
+
+                override fun onViewAttachedToWindow(v: View) {
+                    subscriber.onNext(ViewEvent.Attach())
+                }
+            }
+            addOnAttachStateChangeListener(listener)
+
+            subscriber.onSubscribe(object : Subscription {
+                override fun cancel() {
+                    removeOnAttachStateChangeListener(listener)
+                }
+            })
+        }
+    }
+}
+
+fun LifecycleOwner.asPublisher(): Publisher<Lifecycle.Event> {
+    return object: Publisher<Lifecycle.Event> {
+        override fun subscribe(subscriber: Subscriber<Lifecycle.Event>) {
+            val observer = object : GenericLifecycleObserver {
+                override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
+                    subscriber.onNext(event)
+                }
+            }
+            this@asPublisher.lifecycle.addObserver(observer)
+            subscriber.onSubscribe(object : Subscription {
+                override fun cancel() {
+                    this@asPublisher.lifecycle.removeObserver(observer)
+                }
+            })
+        }
+    }
+}
+
+/**
+ * Returns a [Publisher] that is unsubscribed from [this] when the given [View] is detached.
+ */
+fun <T> Publisher<T>.androidLifecycleDispose(view: View): Publisher<T> {
+    return this.takeUntil(
+        view.attachEvents().filter { it is ViewEvent.Detach }
+    )
+}
+
+/**
+ * Returns a [Publisher] that is unsubscribed from [this] when the given [LifecycleOwner] (Fragment
+ * or Activity) goes out-of-lifecycle.
+ */
+fun <T> Publisher<T>.androidLifecycleDispose(lifecycleOwner: LifecycleOwner): Publisher<T> {
+    return this.takeUntil(
+        lifecycleOwner.asPublisher().filter { it == Lifecycle.Event.ON_STOP || it == Lifecycle.Event.ON_DESTROY }
+    )
+}
+
+/**
+ * When using [asPublisher], you'll find that you will have difficulty specifying a needed type
+ * specification for a closure, for that you may use this.  See the [asPublisher] documentation for
+ * details.
+ */
+typealias  CallbackReceiver<T> = (T) -> Unit
+
+
+/**
+ * This allows you to map a method call that returns a NetworkTask, a convention in the Rover SDK
+ * for async methods, to a [Publisher].
+ *
+ * Unfortunately, because said convention involves passing in a callback and receiving a
+ * [NetworkTask] return value, our adapter here is somewhat convoluted, implemented as an extension
+ * method on a closure type.
+ *
+ * Note that you do need to use [CallbackReceiver]: Kotlin type inference will lack sufficient
+ * information to know what your callback type is, and worse, the Kotlin parser does not seem
+ * to like nesting closure definitions a closure literal, so the [CallbackReceiver] typelias
+ * becomes necessary.
+ *
+ * Example usage:
+ *
+ * `{ callback: CallbackReceiver<MY_RESULT_TYPE> -> roverNetworkService.someMethodThatReturnsANetworkTask(callback) }.asPublisher()`
+ */
+fun <T> (((r: T) -> Unit) -> NetworkTask).asPublisher(): Publisher<T> {
+    return object : Publisher<T> {
+        override fun subscribe(subscriber: Subscriber<T>) {
+            val networkTask = this@asPublisher.invoke { result ->
+                subscriber.onNext(result)
+                subscriber.onComplete()
+            }
+            val subscription = object : Subscription {
+                override fun cancel() {
+                    networkTask.cancel()
+                }
+            }
+            networkTask.resume()
+        }
+    }
+}
+
 
 // TODO fun <T> Publisher<T>.observeOn() { }
