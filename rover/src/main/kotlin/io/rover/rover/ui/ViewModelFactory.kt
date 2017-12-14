@@ -108,7 +108,7 @@ class ViewModelFactory(
             buttonState,
             borderViewModel,
             BackgroundViewModel(buttonState, assetService, imageOptimizationService),
-            TextViewModel(buttonState, measurementService)
+            TextViewModel(buttonState, measurementService, true, true)
         )
     }
 }

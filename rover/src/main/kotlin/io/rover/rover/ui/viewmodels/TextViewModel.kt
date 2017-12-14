@@ -16,7 +16,9 @@ import io.rover.rover.ui.views.asAndroidColor
  */
 class TextViewModel(
     private val styledText: Text,
-    private val measurementService: MeasurementService
+    private val measurementService: MeasurementService,
+    override val singleLine: Boolean = false,
+    override val centerVertically: Boolean = false
 ) : TextViewModelInterface {
     override val text: String
         get() = styledText.text
@@ -95,7 +97,14 @@ class TextViewModel(
 
     override fun intrinsicHeight(bounds: RectF): Float {
         return measurementService.measureHeightNeededForRichText(
-            styledText.text,
+            if(singleLine) {
+                // only measure a single line as configured.
+                // However, as things stand, no single-line TextViewModels are actually measured, so
+                // this case for intrinsicHeight() is only here for completeness.
+                "1"
+            } else {
+                styledText.text
+            },
             fontAppearance,
             boldRelativeToBlockWeight(),
             bounds.width()

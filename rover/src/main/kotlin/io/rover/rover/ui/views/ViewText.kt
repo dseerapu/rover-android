@@ -2,6 +2,8 @@ package io.rover.rover.ui.views
 
 import android.graphics.Paint
 import android.graphics.Typeface
+import android.os.Build
+import android.text.Layout
 import android.view.Gravity
 import android.widget.TextView
 import io.rover.rover.ui.RichTextToSpannedTransformer
@@ -22,6 +24,13 @@ class ViewText(
         // left at the top of the text and ironically push the descenders off the bottom (don't
         // worry, the ascenders do not appear to be clipped either).
         textView.includeFontPadding = false
+
+        // Experiences app does not wrap text on text blocks.  This seems particularly
+        // important for short, tight blocks.
+        // Unfortunately, we cannot disable it on Android older than 23.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            textView.hyphenationFrequency = Layout.HYPHENATION_FREQUENCY_NONE
+        }
     }
 
     override var textViewModelInterface: TextViewModelInterface? = null
@@ -42,7 +51,7 @@ class ViewText(
                     Paint.Align.RIGHT -> Gravity.END
                     Paint.Align.LEFT -> Gravity.START
                     Paint.Align.CENTER -> Gravity.CENTER_HORIZONTAL
-                }
+                } or if (viewModel.centerVertically) Gravity.CENTER_VERTICAL else 0
 
                 textView.textSize = viewModel.fontAppearance.fontSize.toFloat()
 
@@ -51,9 +60,9 @@ class ViewText(
                 textView.typeface = Typeface.create(
                     viewModel.fontAppearance.font.fontFamily, viewModel.fontAppearance.font.fontStyle
                 )
+
+                textView.setSingleLine(viewModel.singleLine)
             }
         }
-
-
 }
 

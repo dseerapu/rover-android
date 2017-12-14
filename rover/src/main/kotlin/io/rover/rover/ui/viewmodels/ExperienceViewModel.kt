@@ -128,7 +128,7 @@ class ExperienceViewModel(
                     )
                     is NavigateTo.GoToScreenAction -> StateChange(
                         ExperienceViewModelInterface.Event.GoForwardToScreen(
-                            screenViewModelsById[action.navigateTo.screenId]!!
+                            screenViewModelsById[action.navigateTo.screenId] ?: throw RuntimeException("Screen by id ${action.navigateTo.screenId} missing from Experience with id ${experience.id.rawValue}.")
                         ),
                         state.backStack + listOf(BackStackFrame(action.navigateTo.screenId))
                     )

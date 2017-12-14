@@ -120,6 +120,13 @@ interface BorderViewModelInterface : LayoutPaddingDeflection {
 interface TextViewModelInterface : Measurable {
     val text: String
 
+    val singleLine: Boolean
+
+    /**
+     * Should the view configure the Android text view with a vertically centering gravity?
+     */
+    val centerVertically: Boolean
+
     val fontAppearance: FontAppearance
 
     fun boldRelativeToBlockWeight(): Font

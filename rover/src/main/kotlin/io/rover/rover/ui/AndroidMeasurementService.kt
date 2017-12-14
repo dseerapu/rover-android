@@ -1,10 +1,13 @@
 package io.rover.rover.ui
 
+import android.annotation.SuppressLint
 import android.graphics.Paint
 import android.graphics.Typeface
+import android.os.Build
 import android.text.Layout
 import android.text.StaticLayout
 import android.text.TextPaint
+import android.text.TextUtils
 import android.util.DisplayMetrics
 import io.rover.rover.ui.types.Font
 import io.rover.rover.ui.types.FontAppearance
@@ -15,6 +18,7 @@ class AndroidMeasurementService(
     private val displayMetrics: DisplayMetrics,
     private val richTextToSpannedTransformer: RichTextToSpannedTransformer
 ) : MeasurementService {
+    @SuppressLint("NewApi")
     override fun measureHeightNeededForRichText(
         richText: String,
         fontAppearance: FontAppearance,
@@ -39,23 +43,38 @@ class AndroidMeasurementService(
 
         // now ask Android's StaticLayout to measure the needed height of the text soft-wrapped to
         // the width.
-        val layout = StaticLayout(
-            spanned,
-            paint,
-            width.dpAsPx(displayMetrics),
-            textLayoutAlign,
-            1.0f,
-            0f,
+        val layout = if((Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)) {
+            StaticLayout
+                .Builder.obtain(spanned, 0, spanned.length, paint, width.dpAsPx(displayMetrics))
+                .setAlignment(textLayoutAlign)
+                .setLineSpacing(0f, 1.0f)
 
-            // includePad ensures we don't clip off any of the ligatures that extend down past
-            // the rule line.
-            true
-        )
+                // includePad ensures we don't clip off any of the ligatures that extend down past
+                // the rule line.
+                .setIncludePad(true)
 
+                // Experiences app does not appear to wrap text on text blocks.  This seems particularly
+                // important for short, tight blocks.
+                .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NONE)
+                .build()
+        } else {
+            // On Android before 23 have to use the older interface for setting up a StaticLayout,
+            // with which we sadly cannot configure it without hyphenation turned on, but this
+            // only really effects edge cases anyway.
+            StaticLayout(
+                spanned,
+                paint,
+                width.dpAsPx(displayMetrics),
+                textLayoutAlign,
+                1.0f,
+                0f,
+
+                // includePad ensures we don't clip off any of the ligatures that extend down past
+                // the rule line.
+                true
+            )
+        }
         // log.v("Measured ${richText.lines().size} lines of text as needing ${layout.height} px")
-
         return (layout.height + layout.topPadding + layout.bottomPadding).pxAsDp(displayMetrics)
     }
-
-
 }
