@@ -6,6 +6,7 @@ import android.view.Gravity
 import android.widget.TextView
 import io.rover.rover.ui.RichTextToSpannedTransformer
 import io.rover.rover.ui.viewmodels.TextBlockViewModelInterface
+import io.rover.rover.ui.viewmodels.TextViewModelInterface
 
 /**
  * Mixin that binds a text block view model to the relevant parts of a [TextView].
@@ -23,7 +24,7 @@ class ViewText(
         textView.includeFontPadding = false
     }
 
-    override var textBlockViewModel: TextBlockViewModelInterface? = null
+    override var textViewModelInterface: TextViewModelInterface? = null
         set(viewModel) {
             if (viewModel != null) {
                 // TODO: this may be a fair bit of compute at bind-time.  But not sure where to put

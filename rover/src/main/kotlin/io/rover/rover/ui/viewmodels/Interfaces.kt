@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.Shader
 import android.os.Parcelable
 import android.util.DisplayMetrics
+import android.view.MotionEvent
 import io.rover.rover.core.domain.Background
 import io.rover.rover.core.domain.BlockAction
 import io.rover.rover.core.domain.Border
@@ -36,7 +37,7 @@ interface LayoutPaddingDeflection {
 /**
  * Specifies how the view should properly display the given background image.
  *
- * The method these are specified is a bit idiosyncratic on account of Android implementation
+ * The method these are specified with is a bit idiosyncratic on account of Android implementation
  * details and the combination of Drawables the view uses to achieve the effect.
  */
 class BackgroundImageConfiguration(
@@ -125,10 +126,39 @@ interface TextViewModelInterface : Measurable {
 }
 
 /**
- * View Model for block content that contains a clickable button.
+ * View Model for block content that contains a clickable button with several different
+ * states.
  */
 interface ButtonViewModelInterface {
-    val text: String
+//    val text: String
+
+    val buttonEvents: Observable<Event>
+
+    sealed class Event {
+        /**
+         * Reveal the text for the given.
+         */
+        class DisplayState(
+            val viewModel: ButtonStateViewModelInterface,
+            val animate: Boolean,
+
+            /**
+             * The owning view will maintain a set of background views itself for allowing for
+             * partially occlusive transitions between button states.  This means it has need to
+             * know which of the backgrounds it should display on a given [Event.DisplayState]
+             * event.
+             */
+            val stateOfButton: StateOfButton
+        ): Event()
+    }
+
+
+    /**
+     * The owning view will maintain a set of background views itself for allowing for partially
+     * occlusive transitions between button states.  This means it has need to interrogate to
+     * bind all of the needed view models to each of the background layers.
+     */
+    fun viewModelForState(state: StateOfButton): ButtonStateViewModelInterface
 }
 
 interface ImageViewModelInterface : Measurable {
@@ -203,10 +233,35 @@ interface BlockViewModelInterface : LayoutableViewModel {
      */
     fun click()
 
+    /**
+     * User has touched the view, but not necessarily clicked it.
+     */
+    fun touched()
+
+    /**
+     * User has released the view, but not necessarily clicked it.
+     */
+    fun released()
+
     sealed class Event {
+        /**
+         * Block has been clicked, requesting that we [navigateTo] something.
+         */
         class Clicked(
             val navigateTo: NavigateTo
         ): Event()
+
+        /**
+         * Block has been touched, but not clicked.
+         *
+         * TODO: may not be appropriate to use MotionEvent.
+         */
+        class Touched(): Event()
+
+        /**
+         * Block has been released, but not necessarily clicked.
+         */
+        class Released(): Event()
     }
 
     val events: Observable<Event>
@@ -328,3 +383,12 @@ interface TextBlockViewModelInterface : LayoutableViewModel, BlockViewModelInter
 interface ImageBlockViewModelInterface : LayoutableViewModel, BlockViewModelInterface, BackgroundViewModelInterface, BorderViewModelInterface, ImageViewModelInterface
 
 interface ButtonBlockViewModelInterface: LayoutableViewModel, BlockViewModelInterface, ButtonViewModelInterface
+
+interface ButtonStateViewModelInterface: BindableViewModel, TextViewModelInterface, BackgroundViewModelInterface, BorderViewModelInterface
+
+enum class StateOfButton {
+    Normal,
+    Disabled,
+    Highlighted,
+    Selected
+}

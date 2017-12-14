@@ -28,7 +28,7 @@ class TextBlockView : TextView, LayoutableView<TextBlockViewModelInterface> {
             viewBorder.borderViewModel = viewModel
             viewBlock.blockViewModel = viewModel
             viewBackground.backgroundViewModel = viewModel
-            viewText.textBlockViewModel = viewModel
+            viewText.textViewModelInterface = viewModel
         }
 
     override fun onDraw(canvas: Canvas) {

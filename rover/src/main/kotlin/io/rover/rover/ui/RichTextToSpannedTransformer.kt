@@ -22,32 +22,37 @@ class AndroidRichTextToSpannedTransformer : RichTextToSpannedTransformer {
     override fun transform(string: String, boldRelativeToBlockWeight: Font): Spanned {
         val spanned = string.roverTextHtmlAsSpanned()
 
-        // spans always arrive with a trailing newline; clip it off.
-        spanned.delete(spanned.lastIndex, spanned.length)
+        return if(spanned.isEmpty()) {
+            spanned
+        } else {
 
-        // TextUtils.dumpSpans(spanned, lp, "  ")
+            // spans always arrive with a trailing newline; clip it off.
+            spanned.delete(spanned.lastIndex, spanned.length)
 
-        // we want the spanned bolds within the text to be relative to the base typeface'
-        // for the entire text block.
-        val styleSpans = spanned.getSpans(0, spanned.length, StyleSpan::class.java)
-        val boldSpans = styleSpans.filter { it.style == Typeface.BOLD }
-        // log.v("There are ${boldSpans.size} bolds for '${string}'")
-        boldSpans.forEach {
-            // replace the bold span with our own explicit typeface+style span.
-            val start = spanned.getSpanStart(it)
-            val end = spanned.getSpanEnd(it)
+            // TextUtils.dumpSpans(spanned, lp, "  ")
 
-            // log.v("... bold span from $start to $end ('${spanned.substring(start, end)}')")
+            // we want the spanned bolds within the text to be relative to the base typeface'
+            // for the entire text block.
+            val styleSpans = spanned.getSpans(0, spanned.length, StyleSpan::class.java)
+            val boldSpans = styleSpans.filter { it.style == Typeface.BOLD }
+            // log.v("There are ${boldSpans.size} bolds for '${string}'")
+            boldSpans.forEach {
+                // replace the bold span with our own explicit typeface+style span.
+                val start = spanned.getSpanStart(it)
+                val end = spanned.getSpanEnd(it)
 
-            // spanned.removeSpan(it)
-            spanned.setSpan(
-                TypefaceAndExplicitBoldSpan(boldRelativeToBlockWeight.fontFamily, boldRelativeToBlockWeight.fontStyle),
-                start,
-                end,
-                0
-            )
+                // log.v("... bold span from $start to $end ('${spanned.substring(start, end)}')")
+
+                // spanned.removeSpan(it)
+                spanned.setSpan(
+                    TypefaceAndExplicitBoldSpan(boldRelativeToBlockWeight.fontFamily, boldRelativeToBlockWeight.fontStyle),
+                    start,
+                    end,
+                    0
+                )
+            }
+
+            spanned
         }
-
-        return spanned
     }
 }

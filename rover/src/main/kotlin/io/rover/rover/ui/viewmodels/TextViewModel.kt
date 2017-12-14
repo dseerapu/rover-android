@@ -3,8 +3,8 @@ package io.rover.rover.ui.viewmodels
 import android.graphics.Paint
 import android.graphics.Typeface
 import io.rover.rover.core.domain.FontWeight
+import io.rover.rover.core.domain.Text
 import io.rover.rover.core.domain.TextAlignment
-import io.rover.rover.core.domain.TextBlock
 import io.rover.rover.ui.MeasurementService
 import io.rover.rover.ui.types.Font
 import io.rover.rover.ui.types.FontAppearance
@@ -15,24 +15,24 @@ import io.rover.rover.ui.views.asAndroidColor
  * Text styling and size concerns.
  */
 class TextViewModel(
-    private val block: TextBlock,
+    private val styledText: Text,
     private val measurementService: MeasurementService
 ) : TextViewModelInterface {
     override val text: String
-        get() = block.text
+        get() = styledText.text
 
     override val fontAppearance: FontAppearance
         // this maps from the Rover font weight to a named font-family and typeface style,
         // which is what Android will ultimately expect since it doesn't explicitly support
         // a font weight.
         get() {
-            val font = mapFontWeightToFont(block.textFont.weight)
+            val font = mapFontWeightToFont(styledText.textFont.weight)
 
             return FontAppearance(
-                block.textFont.size,
+                styledText.textFont.size,
                 font,
-                block.textColor.asAndroidColor(),
-                when (block.textAlignment) {
+                styledText.textColor.asAndroidColor(),
+                when (styledText.textAlignment) {
                     TextAlignment.Center -> Paint.Align.CENTER
                     TextAlignment.Left -> Paint.Align.LEFT
                     TextAlignment.Right -> Paint.Align.RIGHT
@@ -43,7 +43,7 @@ class TextViewModel(
     override fun boldRelativeToBlockWeight(): Font {
         FontWeight.values().lastIndex
 
-        val addedOrdinal = block.textFont.weight.ordinal + 3
+        val addedOrdinal = styledText.textFont.weight.ordinal + 3
         val addedWeight = if (addedOrdinal <= FontWeight.values().lastIndex) {
             FontWeight.values()[addedOrdinal]
         } else {
@@ -95,7 +95,7 @@ class TextViewModel(
 
     override fun intrinsicHeight(bounds: RectF): Float {
         return measurementService.measureHeightNeededForRichText(
-            block.text,
+            styledText.text,
             fontAppearance,
             boldRelativeToBlockWeight(),
             bounds.width()

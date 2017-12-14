@@ -154,6 +154,18 @@ class BlockViewModel(
         }
     }
 
+    override fun touched() {
+        eventSource.onNext(
+            BlockViewModelInterface.Event.Touched()
+        )
+    }
+
+    override fun released() {
+        eventSource.onNext(
+            BlockViewModelInterface.Event.Released()
+        )
+    }
+
     /**
      * Computes the Block's absolute horizontal coordinate in the [ScreenViewModel]'s coordinate
      * space.

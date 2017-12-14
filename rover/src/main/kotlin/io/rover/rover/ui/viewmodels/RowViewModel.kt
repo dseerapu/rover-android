@@ -5,6 +5,8 @@ import io.rover.rover.core.logging.log
 import io.rover.rover.services.assets.AssetService
 import io.rover.rover.streams.Observable
 import io.rover.rover.streams.asPublisher
+import io.rover.rover.streams.filter
+import io.rover.rover.streams.filterNulls
 import io.rover.rover.streams.flatMap
 import io.rover.rover.streams.map
 import io.rover.rover.streams.share
@@ -30,8 +32,9 @@ class RowViewModel(
         blockViewModel.events.map {
             when(it) {
                 is BlockViewModelInterface.Event.Clicked -> it.navigateTo
+                is BlockViewModelInterface.Event.Touched, is BlockViewModelInterface.Event.Released -> null
             }
-        }
+        }.filterNulls()
     }.asPublisher().flatMap { it }.share().map {
         log.v("Row event: $it")
         it

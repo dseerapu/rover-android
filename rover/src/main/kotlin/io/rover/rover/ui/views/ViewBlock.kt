@@ -1,6 +1,8 @@
 package io.rover.rover.ui.views
 
+import android.view.MotionEvent
 import android.view.View
+import io.rover.rover.core.logging.log
 import io.rover.rover.ui.types.dpAsPx
 import io.rover.rover.ui.viewmodels.BlockViewModelInterface
 
@@ -15,6 +17,15 @@ class ViewBlock(
             val displayMetrics = view.resources.displayMetrics
 
             view.setOnClickListener { viewModel?.click() }
+
+            view.setOnTouchListener { _, event ->
+                when(event.action) {
+                    MotionEvent.ACTION_DOWN -> viewModel?.touched()
+                    MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> viewModel?.released()
+                }
+
+                false
+            }
 
             if (viewModel != null) {
                 val contributedPaddings = paddingContributors.map { it.contributedPadding }

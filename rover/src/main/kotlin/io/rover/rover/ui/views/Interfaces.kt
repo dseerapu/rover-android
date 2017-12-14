@@ -8,6 +8,7 @@ import io.rover.rover.ui.viewmodels.ButtonBlockViewModelInterface
 import io.rover.rover.ui.viewmodels.ButtonViewModelInterface
 import io.rover.rover.ui.viewmodels.ImageBlockViewModelInterface
 import io.rover.rover.ui.viewmodels.TextBlockViewModelInterface
+import io.rover.rover.ui.viewmodels.TextViewModelInterface
 
 interface PaddingContributor {
     val contributedPadding: Rect
@@ -41,7 +42,7 @@ interface ViewBorderInterface {
 }
 
 interface ViewTextInterface {
-    var textBlockViewModel: TextBlockViewModelInterface?
+    var textViewModelInterface: TextViewModelInterface?
 }
 
 interface ViewImageInterface {

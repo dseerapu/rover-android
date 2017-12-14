@@ -348,6 +348,9 @@ fun <T> Collection<T>.asPublisher(): Publisher<T> {
     }
 }
 
+@Deprecated("When Android Min SDK is set to at least 24, use Optional here instead (Reactive Streams spec does not actually allow for nulls)")
+fun <T> Publisher<T?>.filterNulls(): Publisher<T> = filter { it != null }.map { it!! }
+
 /**
  * Republish emissions from the Publisher until such time as the provider [Publisher] [stopper]
  * emits completion, error, or an emission.
