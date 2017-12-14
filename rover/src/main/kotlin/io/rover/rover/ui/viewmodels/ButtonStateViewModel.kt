@@ -11,6 +11,3 @@ class ButtonStateViewModel(
     BorderViewModelInterface by borderViewModel,
     BackgroundViewModelInterface by backgroundViewModel,
     TextViewModelInterface by textViewModel
-{
-
-}
