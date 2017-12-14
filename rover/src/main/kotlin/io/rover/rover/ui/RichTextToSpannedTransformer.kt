@@ -26,8 +26,10 @@ class AndroidRichTextToSpannedTransformer : RichTextToSpannedTransformer {
             spanned
         } else {
 
-            // spans always arrive with a trailing newline; clip it off.
-            spanned.delete(spanned.lastIndex, spanned.length)
+            // spans can arrive with a trailing newline; clip it off if present.
+            if(spanned[spanned.lastIndex] == '\n') {
+                spanned.delete(spanned.lastIndex, spanned.length)
+            }
 
             // TextUtils.dumpSpans(spanned, lp, "  ")
 
