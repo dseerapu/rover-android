@@ -155,7 +155,12 @@ interface ButtonViewModelInterface {
              * know which of the backgrounds it should display on a given [Event.DisplayState]
              * event.
              */
-            val stateOfButton: StateOfButton
+            val stateOfButton: StateOfButton,
+
+            /**
+             * The given animation should undo itself afterwards.
+             */
+            val selfRevert: Boolean
         ): Event()
     }
 

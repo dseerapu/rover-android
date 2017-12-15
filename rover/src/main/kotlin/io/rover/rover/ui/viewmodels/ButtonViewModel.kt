@@ -21,13 +21,13 @@ class ButtonViewModel(
         .map { event ->
             when(event) {
                 is BlockViewModelInterface.Event.Touched -> ButtonViewModelInterface.Event.DisplayState(
-                    highlightedStateViewModel, true, StateOfButton.Highlighted
+                    highlightedStateViewModel, true, StateOfButton.Highlighted, false
                 )
                 is BlockViewModelInterface.Event.Released -> ButtonViewModelInterface.Event.DisplayState(
-                    normalStateViewModel, true, StateOfButton.Normal
+                    normalStateViewModel, true, StateOfButton.Normal, false
                 )
                 is BlockViewModelInterface.Event.Clicked -> ButtonViewModelInterface.Event.DisplayState(
-                    selectedStateViewModel, true, StateOfButton.Selected
+                    selectedStateViewModel, true, StateOfButton.Selected, true
                 )
             }
         }
@@ -37,7 +37,7 @@ class ButtonViewModel(
         // start by setting any newly subscribed view to the Normal state!
         Observable.just(
             ButtonViewModelInterface.Event.DisplayState(
-                normalStateViewModel, false, StateOfButton.Normal
+                normalStateViewModel, false, StateOfButton.Normal, false
             )
         ),
         // and then subscribe to the event stream as normal

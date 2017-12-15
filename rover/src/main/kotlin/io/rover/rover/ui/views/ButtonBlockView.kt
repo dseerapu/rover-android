@@ -2,6 +2,7 @@ package io.rover.rover.ui.views
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
+import android.animation.AnimatorSet
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
@@ -35,8 +36,7 @@ class ButtonBlockView : FrameLayout, LayoutableView<ButtonBlockViewModelInterfac
 
     private val viewBlock = ViewBlock(this, setOf())
 
-    // private val fauxRippleEffect = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
-    private val fauxRippleEffect = false
+    private val fauxRippleEffect = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
 
     init {
         addView(disabledView)
@@ -87,7 +87,7 @@ class ButtonBlockView : FrameLayout, LayoutableView<ButtonBlockViewModelInterfac
 
                         log.v("Moving to state $viewStateBeingTransitionedTo")
 
-                        val sourceView = currentlyActiveView()
+                        val sourceView = currentlyActiveView
 
                         val viewToTransitionTo = when(viewStateBeingTransitionedTo) {
                             StateOfButton.Disabled -> disabledView
@@ -99,57 +99,71 @@ class ButtonBlockView : FrameLayout, LayoutableView<ButtonBlockViewModelInterfac
                         if(sourceView == null) {
                             // no prior state to transition from, no animation is appropriate.
                             viewToTransitionTo.visibility = View.VISIBLE
+                            currentlyActiveView = viewToTransitionTo
                         } else {
-                            if(fauxRippleEffect) {
+                            if(fauxRippleEffect && event.animate) {
                                 activeAnimator?.end()
 
-                                // ensure the one to transition to is on top because we will reveal it with a clip animation.
+                                // ensure the one to transition to is on top because we will reveal
+                                // it with a clip animation.
 
                                 // Using negative elevations because that inhibits the shadows.
                                 sourceView.elevation = -2f
                                 viewToTransitionTo.elevation = -1f
 
+                                // all the other views that are not either of the current views in
+                                // operation should be invisible.
+                                allStateLayerViews.filter { it != viewToTransitionTo && it != sourceView}.forEach { it.visibility = View.INVISIBLE }
+
                                 // make both visible
                                 sourceView.visibility = View.VISIBLE
                                 viewToTransitionTo.visibility = View.VISIBLE
-
-                                // So, this is very racy.  Example: if the Normal event arrives
-                                // while the Highlight animation is still running, it means that the
-                                // Normal button is actually still visible because it hasn't been
-                                // called on Animation end.  Probably best to cancel the animation,
-                                // ensure that we're at end-stage, and then continue.  We don't need
-                                // multiple propagating ripples at once.
-
-                                // Only one problem with that: we're snapping to the end state,
-                                // which causes a nasty flicker.  maybe we should queue the
-                                // animations? yeah, let's queue.
 
                                 // this isn't quite equivalent to a proper Material Design Ripple
                                 // effect because there is no slight fade animation at the same time.
                                 // I expect that two animators for the circle reveal and fade in
                                 // would conflict.  A solution is surely possible but that would
                                 // require more engineering investment.
-                                val animation = ViewAnimationUtils.createCircularReveal(
+                                val revealOutwards = ViewAnimationUtils.createCircularReveal(
                                     viewToTransitionTo,
                                     width / 2, height / 2,
                                     0f,
                                     Math.hypot(width / 2.0, height / 2.0).toFloat()
                                 )
-                                animation.addListener(object : AnimatorListenerAdapter() {
-                                    // TODO: this must be unsubscribed when view is out-of-lifecycle and when we want to fire a new animation
 
-                                    override fun onAnimationEnd(animation: Animator?, isReverse: Boolean) {
-                                        log.v("onAnimationEnd")
-                                        // TODO: bug: this isn't getting called, so the oldview is
-                                        // being left visible.
-                                        sourceView.visibility = View.INVISIBLE
+                                val animator = if(event.selfRevert) {
+                                    AnimatorSet().apply {
+                                        play(revealOutwards).before(
+                                            ViewAnimationUtils.createCircularReveal(
+                                                viewToTransitionTo,
+                                                width / 2, height / 2,
+                                                Math.hypot(width / 2.0, height / 2.0).toFloat(),
+                                                0f
+                                            )
+                                        )
                                     }
-                                })
-                                animation.duration = 2000
+                                } else revealOutwards
+
+                                // workaround for Animator listeners not working reliably. For the
+                                // non reversion case it's just a performance enhancement to ovoid
+                                // overdraw by setting the view invisible, and for the reversion
+                                // case it's important to hide the target view once the animation
+                                // completes or it will simply pop back into view.  Works by
+                                // dead-reckoning the animation time. :(
+                                postDelayed({
+                                    if(activeAnimator == animator) {
+                                        if (event.selfRevert) {
+                                            viewToTransitionTo.visibility = View.INVISIBLE
+                                        } else {
+                                            sourceView.visibility = View.INVISIBLE
+                                        }
+                                    }
+                                }, animator.totalDuration)
+
                                 // TODO: ADDRESS POTENTIAL LEAK ISSUES
-                                // TODO: the Selected event isn't coming through
-                                animation.start()
-                                activeAnimator = animation
+                                animator.start()
+                                if(!event.selfRevert) currentlyActiveView = viewToTransitionTo
+                                activeAnimator = animator
                             } else {
                                 // On older Android versions just snap.
                                 sourceView.visibility = View.INVISIBLE
@@ -172,13 +186,7 @@ class ButtonBlockView : FrameLayout, LayoutableView<ButtonBlockViewModelInterfac
         log.v("Tried to forcefully invalidate layout.  Inhibited.")
     }
 
-    private fun currentlyActiveView(): ButtonStateView? {
-        val views = listOf(
-            disabledView, normalView, highlightedView, selectedView
-        )
+    private var currentlyActiveView: ButtonStateView? = null
 
-        return views.firstOrNull() { it.visibility == View.VISIBLE }
-    }
+    private val allStateLayerViews = setOf(disabledView, normalView, highlightedView, selectedView)
 }
-
-typealias ButtonTransitionAnimation = () -> Animator
