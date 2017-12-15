@@ -1,21 +1,10 @@
 package io.rover.rover.ui.viewmodels
 
-import android.annotation.SuppressLint
-import android.os.Parcelable
-import io.rover.rover.core.domain.Block
-import io.rover.rover.core.domain.BlockAction
 import io.rover.rover.core.domain.ButtonBlock
-import io.rover.rover.core.logging.log
-import io.rover.rover.platform.whenNotNull
 import io.rover.rover.streams.Observable
-import io.rover.rover.streams.PublishSubject
-import io.rover.rover.streams.filter
 import io.rover.rover.streams.map
 import io.rover.rover.streams.share
 import io.rover.rover.ui.ViewModelFactoryInterface
-import io.rover.rover.ui.types.NavigateTo
-import io.rover.rover.ui.types.RectF
-import kotlinx.android.parcel.Parcelize
 
 class ButtonViewModel(
     private val block: ButtonBlock,
@@ -29,9 +18,8 @@ class ButtonViewModel(
 
     private val epic = blockViewModel
         .events
-        .filter { it is BlockViewModelInterface.Event.Touched || it is BlockViewModelInterface.Event.Released }
-        .map { releasedOrTouched ->
-            when(releasedOrTouched) {
+        .map { event ->
+            when(event) {
                 is BlockViewModelInterface.Event.Touched -> ButtonViewModelInterface.Event.DisplayState(
                     highlightedStateViewModel, true, StateOfButton.Highlighted
                 )

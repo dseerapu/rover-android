@@ -35,7 +35,8 @@ class ButtonBlockView : FrameLayout, LayoutableView<ButtonBlockViewModelInterfac
 
     private val viewBlock = ViewBlock(this, setOf())
 
-    private val fauxRippleEffect = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+    // private val fauxRippleEffect = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+    private val fauxRippleEffect = false
 
     init {
         addView(disabledView)
@@ -64,56 +65,6 @@ class ButtonBlockView : FrameLayout, LayoutableView<ButtonBlockViewModelInterfac
     }
 
     private var activeAnimator: Animator? = null
-    private var queuedAnimationTasks: Queue<ButtonTransitionAnimation> = LinkedList()
-
-    private fun executeAnimationOperation(operation: ButtonTransitionAnimation) {
-        operation().apply {
-            activeAnimator = this
-            log.v("Adding listener")
-            addListener(object : AnimatorListenerAdapter() {
-                override fun onAnimationStart(animation: Animator?) {
-                    log.v("2 at least started")
-                }
-
-                override fun onAnimationEnd(animation: Animator?, isReverse: Boolean) {
-                    log.v("2")
-
-//                    // remove myself:
-//                    if(queuedAnimationTasks.poll() != operation) {
-//                        throw RuntimeException("Animation operation list got out of alignment with itself. Race?")
-//                    }
-
-                    activeAnimator = null
-
-                    // chain to next animation task if there is one.
-                    val op = queuedAnimationTasks.poll()
-                    if (op != null) {
-                        executeAnimationOperation(operation)
-                    }
-                }
-            })
-            start()
-        }
-    }
-
-    private fun queueAnimatorOperation(operation: ButtonTransitionAnimation) {
-        log.v("Current queue depth is ${queuedAnimationTasks.size}")
-
-        // TODO: because the Animator uses a background thread, could this be an issue? I don't
-        // think so, because the animation end callback should arrive on the main thread.  although
-        // maybe there's still a race because perhaps the poll() might happen before the insertion,
-        // meaning that the animation will just sit in the queue.
-
-        if(activeAnimator != null && activeAnimator?.isRunning == true) {
-            queuedAnimationTasks.add(operation)
-        } else {
-            executeAnimationOperation(operation)
-        }
-    }
-
-    override fun onAnimationEnd() {
-        super.onAnimationEnd()
-    }
 
     override var viewModel: ButtonBlockViewModelInterface? = null
         @SuppressLint("NewApi")
@@ -150,65 +101,55 @@ class ButtonBlockView : FrameLayout, LayoutableView<ButtonBlockViewModelInterfac
                             viewToTransitionTo.visibility = View.VISIBLE
                         } else {
                             if(fauxRippleEffect) {
+                                activeAnimator?.end()
 
-                                queueAnimatorOperation {
+                                // ensure the one to transition to is on top because we will reveal it with a clip animation.
 
-                                    // ensure the one to transition to is on top because we will reveal it with a clip animation.
+                                // Using negative elevations because that inhibits the shadows.
+                                sourceView.elevation = -2f
+                                viewToTransitionTo.elevation = -1f
 
-                                    // Using negative elevations because that inhibits the shadows.
-                                    sourceView.elevation = -2f
-                                    viewToTransitionTo.elevation = -1f
+                                // make both visible
+                                sourceView.visibility = View.VISIBLE
+                                viewToTransitionTo.visibility = View.VISIBLE
 
-                                    // make both visible
-                                    sourceView.visibility = View.VISIBLE
-                                    viewToTransitionTo.visibility = View.VISIBLE
+                                // So, this is very racy.  Example: if the Normal event arrives
+                                // while the Highlight animation is still running, it means that the
+                                // Normal button is actually still visible because it hasn't been
+                                // called on Animation end.  Probably best to cancel the animation,
+                                // ensure that we're at end-stage, and then continue.  We don't need
+                                // multiple propagating ripples at once.
 
-                                    // So, this is very racy.  Example: if the Normal event arrives
-                                    // while the Highlight animation is still running, it means that the
-                                    // Normal button is actually still visible because it hasn't been
-                                    // called on Animation end.  Probably best to cancel the animation,
-                                    // ensure that we're at end-stage, and then continue.  We don't need
-                                    // multiple propagating ripples at once.
+                                // Only one problem with that: we're snapping to the end state,
+                                // which causes a nasty flicker.  maybe we should queue the
+                                // animations? yeah, let's queue.
 
-                                    // Only one problem with that: we're snapping to the end state,
-                                    // which causes a nasty flicker.  maybe we should queue the
-                                    // animations? yeah, let's queue.
+                                // this isn't quite equivalent to a proper Material Design Ripple
+                                // effect because there is no slight fade animation at the same time.
+                                // I expect that two animators for the circle reveal and fade in
+                                // would conflict.  A solution is surely possible but that would
+                                // require more engineering investment.
+                                val animation = ViewAnimationUtils.createCircularReveal(
+                                    viewToTransitionTo,
+                                    width / 2, height / 2,
+                                    0f,
+                                    Math.hypot(width / 2.0, height / 2.0).toFloat()
+                                )
+                                animation.addListener(object : AnimatorListenerAdapter() {
+                                    // TODO: this must be unsubscribed when view is out-of-lifecycle and when we want to fire a new animation
 
-                                    // this isn't quite equivalent to a proper Material Design Ripple
-                                    // effect because there is no slight fade animation at the same time.
-                                    // I expect that two animators for the circle reveal and fade in
-                                    // would conflict.  A solution is surely possible but that would
-                                    // require more engineering investment.
-                                    val animation = ViewAnimationUtils.createCircularReveal(
-                                        viewToTransitionTo,
-                                        width / 2, height / 2,
-                                        0f,
-                                        Math.hypot(width / 2.0, height / 2.0).toFloat()
-                                    )
-                                    animation.addListener(object : AnimatorListenerAdapter() {
-                                        // TODO: this must be unsubscribed when view is out-of-lifecycle and when we want to fire a new animation
-
-                                        override fun onAnimationStart(animation: Animator?) {
-                                            log.v("1 at least started")
-                                        }
-
-                                        override fun onAnimationCancel(animation: Animator?) {
-                                            log.v("1 cancelled?")
-                                        }
-
-
-
-                                        override fun onAnimationEnd(animation: Animator?, isReverse: Boolean) {
-                                            log.v("1")
-                                            sourceView.visibility = View.INVISIBLE
-                                        }
-                                    })
-                                    // TODO: ADDRESS POTENTIAL LEAK ISSUES
-                                    // TODO: the Selected event isn't coming through
-                                    // TODO:
-                                    animation
-                                }
-
+                                    override fun onAnimationEnd(animation: Animator?, isReverse: Boolean) {
+                                        log.v("onAnimationEnd")
+                                        // TODO: bug: this isn't getting called, so the oldview is
+                                        // being left visible.
+                                        sourceView.visibility = View.INVISIBLE
+                                    }
+                                })
+                                animation.duration = 2000
+                                // TODO: ADDRESS POTENTIAL LEAK ISSUES
+                                // TODO: the Selected event isn't coming through
+                                animation.start()
+                                activeAnimator = animation
                             } else {
                                 // On older Android versions just snap.
                                 sourceView.visibility = View.INVISIBLE
