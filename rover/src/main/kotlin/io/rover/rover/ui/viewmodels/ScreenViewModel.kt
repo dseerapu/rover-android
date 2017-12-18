@@ -29,7 +29,7 @@ class ScreenViewModel(
             // temporarily filter out unsupported blocks
             val filteredBlocks = row.blocks.filter {
                 when (it) {
-                    is WebViewBlock, is BarcodeBlock -> false
+                    is BarcodeBlock -> false
                     else -> true
                 }
             }

@@ -29,7 +29,8 @@ class BlockViewModel(
 ) : BlockViewModelInterface {
 
     override val viewType: ViewType
-        get() = TODO("This will be removed when LayoutableViewModel is split")
+        // TODO: remove this entirely
+        get() = TODO("You must implement this in your block ViewModel type.")
 
     override fun stackedHeight(bounds: RectF): Float = when (block.position) {
         Position.Floating -> 0.0f

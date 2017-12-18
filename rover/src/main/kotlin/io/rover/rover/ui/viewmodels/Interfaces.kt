@@ -11,6 +11,7 @@ import io.rover.rover.core.domain.BlockAction
 import io.rover.rover.core.domain.Border
 import io.rover.rover.core.domain.Experience
 import io.rover.rover.core.domain.Screen
+import io.rover.rover.core.domain.WebViewBlock
 import io.rover.rover.services.network.NetworkTask
 import io.rover.rover.streams.Observable
 import io.rover.rover.ui.BlockAndRowLayoutManager
@@ -190,6 +191,11 @@ interface ImageViewModelInterface : Measurable {
         displayMetrics: DisplayMetrics,
         callback: (Bitmap) -> Unit
     ): NetworkTask?
+}
+
+interface WebViewModelInterface {
+    val url: URL
+    val scrollingEnabled: Boolean
 }
 
 /**
@@ -393,6 +399,8 @@ interface RectangleBlockViewModelInterface : LayoutableViewModel, BlockViewModel
 interface TextBlockViewModelInterface : LayoutableViewModel, BlockViewModelInterface, BackgroundViewModelInterface, BorderViewModelInterface, TextViewModelInterface
 
 interface ImageBlockViewModelInterface : LayoutableViewModel, BlockViewModelInterface, BackgroundViewModelInterface, BorderViewModelInterface, ImageViewModelInterface
+
+interface WebViewBlockViewModelInterface : LayoutableViewModel, BlockViewModelInterface, BackgroundViewModelInterface, BorderViewModelInterface, WebViewModelInterface
 
 interface ButtonBlockViewModelInterface: LayoutableViewModel, BlockViewModelInterface, ButtonViewModelInterface
 

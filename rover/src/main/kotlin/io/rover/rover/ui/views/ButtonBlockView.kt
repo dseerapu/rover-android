@@ -1,7 +1,6 @@
 package io.rover.rover.ui.views
 
 import android.animation.Animator
-import android.animation.AnimatorListenerAdapter
 import android.animation.AnimatorSet
 import android.annotation.SuppressLint
 import android.content.Context
@@ -12,13 +11,11 @@ import android.view.ViewAnimationUtils
 import android.widget.FrameLayout
 import android.widget.TextView
 import io.rover.rover.core.logging.log
-import io.rover.rover.streams.Observable
 import io.rover.rover.streams.subscribe
 import io.rover.rover.ui.AndroidRichTextToSpannedTransformer
 import io.rover.rover.ui.viewmodels.ButtonBlockViewModelInterface
 import io.rover.rover.ui.viewmodels.ButtonViewModelInterface
 import io.rover.rover.ui.viewmodels.StateOfButton
-import java.util.*
 
 class ButtonBlockView : FrameLayout, LayoutableView<ButtonBlockViewModelInterface> {
     constructor(context: Context?) : super(context)
@@ -81,7 +78,7 @@ class ButtonBlockView : FrameLayout, LayoutableView<ButtonBlockViewModelInterfac
             buttonBlockViewModel?.buttonEvents?.subscribe({ event ->
                 when(event) {
                     is ButtonViewModelInterface.Event.DisplayState -> {
-                        viewText.textViewModelInterface = event.viewModel
+                        viewText.textViewModel = event.viewModel
 
                         val viewStateBeingTransitionedTo = event.stateOfButton
 

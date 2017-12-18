@@ -35,7 +35,7 @@ class AsyncTaskAndHttpUrlConnectionNetworkClient : NetworkClient {
             override fun doInBackground(vararg params: Void?) {
                 this@AsyncTaskAndHttpUrlConnectionNetworkClient.log.d("Starting request: $request")
                 val connection = request.url
-                    .openConnection() as HttpsURLConnection
+                    .openConnection() as HttpURLConnection
 
                 if (!connection.useCaches || HttpResponseCache.getInstalled() == null) {
                     // We expect the user to agree to and implement setting up a global

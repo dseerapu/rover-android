@@ -8,6 +8,7 @@ import io.rover.rover.core.domain.RectangleBlock
 import io.rover.rover.core.domain.Row
 import io.rover.rover.core.domain.Screen
 import io.rover.rover.core.domain.TextBlock
+import io.rover.rover.core.domain.WebViewBlock
 import io.rover.rover.services.assets.AssetService
 import io.rover.rover.services.assets.ImageOptimizationServiceInterface
 import io.rover.rover.ui.viewmodels.BackgroundViewModel
@@ -27,6 +28,8 @@ import io.rover.rover.ui.viewmodels.ScreenViewModel
 import io.rover.rover.ui.viewmodels.ScreenViewModelInterface
 import io.rover.rover.ui.viewmodels.TextBlockViewModel
 import io.rover.rover.ui.viewmodels.TextViewModel
+import io.rover.rover.ui.viewmodels.WebViewBlockViewModel
+import io.rover.rover.ui.viewmodels.WebViewModel
 
 interface ViewModelFactoryInterface {
     fun viewModelForBlock(block: Block): BlockViewModelInterface
@@ -74,6 +77,14 @@ class ViewModelFactory(
                 val blockViewModel = BlockViewModel(block)
                 ButtonBlockViewModel(blockViewModel, ButtonViewModel(block, blockViewModel, this))
             }
+            is WebViewBlock -> {
+                val blockViewModel = BlockViewModel(block)
+                WebViewBlockViewModel(block,
+                    blockViewModel,
+                    BackgroundViewModel(block, assetService, imageOptimizationService),
+                    BorderViewModel(block), WebViewModel(block)
+                )
+            }
             else -> throw Exception(
                 "This Rover UI block type is not yet supported by the 2.0 SDK: ${block.javaClass.simpleName}."
             )
@@ -104,6 +115,7 @@ class ViewModelFactory(
 
     override fun viewModelForButtonState(buttonState: ButtonState): ButtonStateViewModelInterface {
         val borderViewModel = BorderViewModel(buttonState)
+
         return ButtonStateViewModel(
             buttonState,
             borderViewModel,

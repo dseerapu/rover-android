@@ -33,7 +33,7 @@ class ViewText(
         }
     }
 
-    override var textViewModelInterface: TextViewModelInterface? = null
+    override var textViewModel: TextViewModelInterface? = null
         set(viewModel) {
             if (viewModel != null) {
                 // TODO: this may be a fair bit of compute at bind-time.  But not sure where to put

@@ -11,7 +11,7 @@ enum class ViewType {
     Rectangle,
     Text,
     Image,
-//    WebView,
+    WebView,
 //    Barcode,
     Button
 }

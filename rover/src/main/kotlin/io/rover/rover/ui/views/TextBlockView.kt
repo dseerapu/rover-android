@@ -28,7 +28,7 @@ class TextBlockView : TextView, LayoutableView<TextBlockViewModelInterface> {
             viewBorder.borderViewModel = viewModel
             viewBlock.blockViewModel = viewModel
             viewBackground.backgroundViewModel = viewModel
-            viewText.textViewModelInterface = viewModel
+            viewText.textViewModel = viewModel
         }
 
     override fun onDraw(canvas: Canvas) {
@@ -38,6 +38,7 @@ class TextBlockView : TextView, LayoutableView<TextBlockViewModelInterface> {
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
         viewComposition.onSizeChanged(w, h, oldw, oldh)
     }
 

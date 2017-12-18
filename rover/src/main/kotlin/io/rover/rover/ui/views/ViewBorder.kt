@@ -3,6 +3,7 @@ package io.rover.rover.ui.views
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.Matrix
 import android.graphics.Paint
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffXfermode
@@ -33,6 +34,11 @@ class ViewBorder(
         viewComposition.registerAfterDraw { canvas ->
             val viewModel = borderViewModel
             val configuration = this.configuration
+
+            // canvas is potentially deflected because of a content scroll, particularly with web
+            // views.  I don't want the border to scroll (or otherwise be transformed) with the
+            // content, so I'll just reset the canvas matrix to an identity (no-op) matrix.
+            canvas.matrix = Matrix()
 
             // have we discovered the view size and also been bound to a viewmodel?
             if (viewModel != null && configuration != null) {

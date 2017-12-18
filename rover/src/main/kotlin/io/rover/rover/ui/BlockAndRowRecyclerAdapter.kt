@@ -10,6 +10,7 @@ import io.rover.rover.ui.views.LayoutableView
 import io.rover.rover.ui.views.RectangleBlockView
 import io.rover.rover.ui.views.RowView
 import io.rover.rover.ui.views.TextBlockView
+import io.rover.rover.ui.views.WebBlockView
 
 /**
  * This [RecyclerView.ViewHolder] wraps a [LayoutableViewModel].
@@ -61,6 +62,7 @@ class BlockAndRowRecyclerAdapter(
             ViewType.Text -> TextBlockView(parent.context)
             ViewType.Image -> ImageBlockView(parent.context)
             ViewType.Button -> ButtonBlockView(parent.context)
-        } as LayoutableView<LayoutableViewModel> // TODO: this cast is terrible
+            ViewType.WebView -> WebBlockView(parent.context)
+        } as LayoutableView<LayoutableViewModel>
     }
 }
