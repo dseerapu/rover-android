@@ -4,6 +4,7 @@ import android.support.v7.widget.RecyclerView
 import android.view.ViewGroup
 import io.rover.rover.ui.types.ViewType
 import io.rover.rover.ui.viewmodels.LayoutableViewModel
+import io.rover.rover.ui.views.BarcodeBlockView
 import io.rover.rover.ui.views.ButtonBlockView
 import io.rover.rover.ui.views.ImageBlockView
 import io.rover.rover.ui.views.LayoutableView
@@ -63,6 +64,7 @@ class BlockAndRowRecyclerAdapter(
             ViewType.Image -> ImageBlockView(parent.context)
             ViewType.Button -> ButtonBlockView(parent.context)
             ViewType.WebView -> WebBlockView(parent.context)
+            ViewType.Barcode -> BarcodeBlockView(parent.context)
         } as LayoutableView<LayoutableViewModel>
     }
 }

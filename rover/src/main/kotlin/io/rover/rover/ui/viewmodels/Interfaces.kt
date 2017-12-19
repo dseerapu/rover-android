@@ -198,6 +198,16 @@ interface WebViewModelInterface {
     val scrollingEnabled: Boolean
 }
 
+interface BarcodeViewModelInterface: Measurable {
+    val barcodeType: BarcodeType
+
+    val barcodeValue: String
+
+    enum class BarcodeType {
+        PDF417, Code128, Aztec, QrCode
+    }
+}
+
 /**
  * Can vertically measure its content for stacked/autoheight purposes.
  */
@@ -401,6 +411,8 @@ interface TextBlockViewModelInterface : LayoutableViewModel, BlockViewModelInter
 interface ImageBlockViewModelInterface : LayoutableViewModel, BlockViewModelInterface, BackgroundViewModelInterface, BorderViewModelInterface, ImageViewModelInterface
 
 interface WebViewBlockViewModelInterface : LayoutableViewModel, BlockViewModelInterface, BackgroundViewModelInterface, BorderViewModelInterface, WebViewModelInterface
+
+interface BarcodeBlockViewModelInterface : LayoutableViewModel, BlockViewModelInterface, BarcodeViewModelInterface
 
 interface ButtonBlockViewModelInterface: LayoutableViewModel, BlockViewModelInterface, ButtonViewModelInterface
 

@@ -1,5 +1,6 @@
 package io.rover.rover.ui
 
+import io.rover.rover.core.domain.BarcodeBlock
 import io.rover.rover.core.domain.Block
 import io.rover.rover.core.domain.ButtonBlock
 import io.rover.rover.core.domain.ButtonState
@@ -12,6 +13,8 @@ import io.rover.rover.core.domain.WebViewBlock
 import io.rover.rover.services.assets.AssetService
 import io.rover.rover.services.assets.ImageOptimizationServiceInterface
 import io.rover.rover.ui.viewmodels.BackgroundViewModel
+import io.rover.rover.ui.viewmodels.BarcodeBlockViewModel
+import io.rover.rover.ui.viewmodels.BarcodeViewModel
 import io.rover.rover.ui.viewmodels.BlockViewModel
 import io.rover.rover.ui.viewmodels.BlockViewModelInterface
 import io.rover.rover.ui.viewmodels.BorderViewModel
@@ -83,6 +86,15 @@ class ViewModelFactory(
                     blockViewModel,
                     BackgroundViewModel(block, assetService, imageOptimizationService),
                     BorderViewModel(block), WebViewModel(block)
+                )
+            }
+            is BarcodeBlock -> {
+                val barcodeViewModel = BarcodeViewModel(
+                    block
+                )
+                val blockViewModel = BlockViewModel(block, emptySet(), barcodeViewModel)
+                BarcodeBlockViewModel(
+                    blockViewModel, barcodeViewModel
                 )
             }
             else -> throw Exception(

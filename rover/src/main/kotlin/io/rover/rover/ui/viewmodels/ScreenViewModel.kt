@@ -26,16 +26,8 @@ class ScreenViewModel(
 
     override val rowViewModels by lazy {
         screen.rows.map { row ->
-            // temporarily filter out unsupported blocks
-            val filteredBlocks = row.blocks.filter {
-                when (it) {
-                    is BarcodeBlock -> false
-                    else -> true
-                }
-            }
-
             viewModelFactory.viewModelForRow(
-                row.copy(blocks = filteredBlocks)
+                row.copy(blocks = row.blocks)
             )
         }
     }

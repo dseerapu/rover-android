@@ -2,6 +2,7 @@ package io.rover.rover.ui.views
 
 import android.graphics.Rect
 import io.rover.rover.ui.viewmodels.BackgroundViewModelInterface
+import io.rover.rover.ui.viewmodels.BarcodeViewModelInterface
 import io.rover.rover.ui.viewmodels.BlockViewModelInterface
 import io.rover.rover.ui.viewmodels.BorderViewModelInterface
 import io.rover.rover.ui.viewmodels.ButtonBlockViewModelInterface
@@ -44,6 +45,10 @@ interface ViewBorderInterface {
 
 interface ViewTextInterface {
     var textViewModel: TextViewModelInterface?
+}
+
+interface ViewBarcodeInterface {
+    var barcodeViewModel: BarcodeViewModelInterface?
 }
 
 interface ViewWebInterface {
