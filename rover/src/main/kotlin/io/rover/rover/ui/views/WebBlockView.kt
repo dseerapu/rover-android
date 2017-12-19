@@ -8,7 +8,7 @@ import android.webkit.WebView
 import io.rover.rover.core.logging.log
 import io.rover.rover.ui.viewmodels.WebViewBlockViewModelInterface
 import android.view.MotionEvent
-
+import android.widget.FrameLayout
 
 
 class WebBlockView : WebView, LayoutableView<WebViewBlockViewModelInterface> {

@@ -29,7 +29,7 @@ class InMemoryBitmapCacheStage(
     private val maxMemory = (Runtime.getRuntime().maxMemory() / 1024).toInt()
 
     init {
-        log.v("There are $maxMemory KiB available to the in memory bitmap cache.")
+        log.v("There are $maxMemory KiB available to the memory bitmap cache.")
     }
 
     /**

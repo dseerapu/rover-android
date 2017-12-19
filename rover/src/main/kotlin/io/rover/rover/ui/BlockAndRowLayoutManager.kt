@@ -226,6 +226,13 @@ class BlockAndRowLayoutManager(
                 // be able to check at draw-time to allow us to control the view *draw* order
                 // independently of view add order.
 
+                // In the event that any of the views are composite views (such as WebViews)
+                // that need to know their size outside of the otherwise entirely decoupled-from-
+                // Android Rover layout system, we set their Android layout parameters such that
+                // they know what their dimensions are.
+                view.layoutParams.width = displayPosition.width()
+                view.layoutParams.height = displayPosition.height()
+
                 addView(view)
 
                 view.measure(
