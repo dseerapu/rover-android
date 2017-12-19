@@ -7,3 +7,5 @@
 local.properties
 gradle.xml
 gradle.properties
+rover/src/main/java/io/rover/shaded
+shade
