@@ -5,6 +5,7 @@ import android.view.View
 import io.rover.rover.core.logging.log
 import io.rover.rover.ui.types.dpAsPx
 import io.rover.rover.ui.viewmodels.BlockViewModelInterface
+import io.rover.rover.ui.viewmodels.LayoutPaddingDeflection
 
 class ViewBlock(
     private val view: View,
@@ -28,6 +29,9 @@ class ViewBlock(
             }
 
             if (viewModel != null) {
+                // TODO if I elect to implement `viewModel as LayoutPaddingDeflection` then I could
+                // perhaps remove PaddingContributor (if there isn't something I'm forgetting).
+                // Investigate this.
                 val contributedPaddings = paddingContributors.map { it.contributedPadding }
                 view.setPaddingRelative(
                     (viewModel.insets.left + contributedPaddings.map { it.left }.sum()).dpAsPx(displayMetrics),
@@ -35,6 +39,7 @@ class ViewBlock(
                     (viewModel.insets.right + contributedPaddings.map { it.right }.sum()).dpAsPx(displayMetrics),
                     (viewModel.insets.bottom + contributedPaddings.map { it.bottom }.sum()).dpAsPx(displayMetrics)
                 )
+
                 view.alpha = viewModel.opacity
 
                 view.isClickable = viewModel.isClickable

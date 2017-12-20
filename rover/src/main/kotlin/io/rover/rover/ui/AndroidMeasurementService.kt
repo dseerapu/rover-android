@@ -9,10 +9,15 @@ import android.text.StaticLayout
 import android.text.TextPaint
 import android.text.TextUtils
 import android.util.DisplayMetrics
+import io.rover.rover.core.logging.log
 import io.rover.rover.ui.types.Font
 import io.rover.rover.ui.types.FontAppearance
 import io.rover.rover.ui.types.dpAsPx
 import io.rover.rover.ui.types.pxAsDp
+import io.rover.rover.ui.viewmodels.BarcodeViewModelInterface
+import io.rover.shaded.zxing.com.google.zxing.BarcodeFormat
+import io.rover.shaded.zxing.com.google.zxing.MultiFormatWriter
+import io.rover.shaded.zxing.com.google.zxing.pdf417.PDF417Writer
 
 class AndroidMeasurementService(
     private val displayMetrics: DisplayMetrics,
@@ -76,5 +81,41 @@ class AndroidMeasurementService(
         }
         // log.v("Measured ${richText.lines().size} lines of text as needing ${layout.height} px")
         return (layout.height + layout.topPadding + layout.bottomPadding).pxAsDp(displayMetrics)
+    }
+
+    override fun measureHeightNeededForBarcode(
+        text: String,
+        type: BarcodeViewModelInterface.BarcodeType,
+        width: Float
+    ): Float {
+        // sadly I think I just have to compute the entire barcode and measure the resulting bitmap.
+
+        val renderedBitmap = MultiFormatWriter().encode(
+            text,
+            when(type) {
+                BarcodeViewModelInterface.BarcodeType.PDF417 -> BarcodeFormat.PDF_417
+                // this one will happily collapse to a minimum height of 1.  That ain't going to do
+                BarcodeViewModelInterface.BarcodeType.Code128 -> BarcodeFormat.CODE_128
+                BarcodeViewModelInterface.BarcodeType.Aztec -> BarcodeFormat.AZTEC
+                BarcodeViewModelInterface.BarcodeType.QrCode -> BarcodeFormat.QR_CODE
+            },
+            // we want the minimum size.
+            0,
+            0
+        )
+
+        log.v("Minimum barcode size is ${renderedBitmap.width} x ${renderedBitmap.height}")
+
+        val aspectRatio = if(type == BarcodeViewModelInterface.BarcodeType.Code128) {
+            2.26086956521739f
+        } else renderedBitmap.width / renderedBitmap.height.toFloat()
+
+        log.v("Barcode aspect ratio is $aspectRatio")
+
+        val neededHeight = width / aspectRatio
+
+        log.v("Needed height for barcode: $neededHeight")
+
+        return neededHeight
     }
 }

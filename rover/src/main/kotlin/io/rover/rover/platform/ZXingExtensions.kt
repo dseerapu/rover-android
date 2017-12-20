@@ -35,6 +35,8 @@ fun BitMatrix.toAndroidBitmap(): Bitmap {
         }
     }
 
+    // TODO: do I really need a friggen 32-bit ARGB bitmap for this?  surely a 1-bit bitmap would be
+    // better and smaller (and I already use them for masks elsewhere in the app)
     val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
     bitmap.setPixels(pixels, 0, width, 0, 0, width, height)
     return bitmap

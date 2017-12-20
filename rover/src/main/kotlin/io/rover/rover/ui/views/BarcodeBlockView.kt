@@ -10,14 +10,19 @@ class BarcodeBlockView : AppCompatImageView, LayoutableView<BarcodeBlockViewMode
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
-    private val viewBlock = ViewBlock(this)
+    private val viewComposition = ViewComposition()
+    private val viewBackground = ViewBackground(this)
+    private val viewBorder = ViewBorder(this, viewComposition)
     private val viewBarcode = ViewBarcode(this)
+    private val viewBlock = ViewBlock(this, setOf(viewBorder, viewBarcode))
 
     override var viewModel: BarcodeBlockViewModelInterface? = null
         set(barcodeBlockViewModel) {
             field = barcodeBlockViewModel
 
-            viewBlock.blockViewModel = barcodeBlockViewModel
+            viewBorder.borderViewModel = barcodeBlockViewModel
             viewBarcode.barcodeViewModel = barcodeBlockViewModel
+            viewBlock.blockViewModel = barcodeBlockViewModel
+            viewBackground.backgroundViewModel = barcodeBlockViewModel
         }
 }

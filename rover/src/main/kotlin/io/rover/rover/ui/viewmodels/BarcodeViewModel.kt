@@ -2,14 +2,16 @@ package io.rover.rover.ui.viewmodels
 
 import io.rover.rover.core.domain.BarcodeBlock
 import io.rover.rover.core.domain.BarcodeFormat
+import io.rover.rover.ui.MeasurementService
+import io.rover.rover.ui.types.Rect
 import io.rover.rover.ui.types.RectF
 
 /**
  * Barcode display view model.
  */
 class BarcodeViewModel(
-    private val barcode: BarcodeBlock
-    // TODO: may need MeasurementService (and to teach it to talk to ZXing)
+    private val barcode: BarcodeBlock,
+    private val measurementService: MeasurementService
 ): BarcodeViewModelInterface {
     override val barcodeType: BarcodeViewModelInterface.BarcodeType
         get() = when(barcode.barcodeFormat) {
@@ -23,7 +25,16 @@ class BarcodeViewModel(
         get() = barcode.barcodeText
 
     override fun intrinsicHeight(bounds: RectF): Float {
-        // TODO: figure out measurement rules for the various types of barcode
-        return 40f
+        return measurementService.measureHeightNeededForBarcode(
+            barcode.barcodeText,
+            barcodeType,
+            bounds.width()
+        )
     }
+
+    override val paddingDeflection: Rect
+        get() = when(barcode.barcodeFormat) {
+            BarcodeFormat.Code128 -> Rect(10, 20, 10, 20)
+            else -> Rect(0,0, 0, 0)
+        }
 }

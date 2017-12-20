@@ -90,11 +90,18 @@ class ViewModelFactory(
             }
             is BarcodeBlock -> {
                 val barcodeViewModel = BarcodeViewModel(
+                    block,
+                    measurementService
+                )
+                val borderViewModel = BorderViewModel(
                     block
                 )
-                val blockViewModel = BlockViewModel(block, emptySet(), barcodeViewModel)
+                val blockViewModel = BlockViewModel(block, setOf(borderViewModel, borderViewModel), barcodeViewModel)
                 BarcodeBlockViewModel(
-                    blockViewModel, barcodeViewModel
+                    blockViewModel,
+                    barcodeViewModel,
+                    BackgroundViewModel(block, assetService, imageOptimizationService),
+                    borderViewModel
                 )
             }
             else -> throw Exception(

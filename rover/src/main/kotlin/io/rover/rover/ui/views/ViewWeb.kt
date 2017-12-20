@@ -14,6 +14,9 @@ class ViewWeb(
         webView.webViewClient = WebViewClient()
         webView.settings.domStorageEnabled = true
         webView.settings.javaScriptEnabled = true
+
+        // TODO disable the scroll bars if scrolling is disabled, because otherwise they'll appear
+        // when you scroll by
     }
 
     override var webViewModel: WebViewModelInterface? = null

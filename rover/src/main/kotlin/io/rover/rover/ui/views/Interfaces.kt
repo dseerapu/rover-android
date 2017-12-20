@@ -8,11 +8,20 @@ import io.rover.rover.ui.viewmodels.BorderViewModelInterface
 import io.rover.rover.ui.viewmodels.ButtonBlockViewModelInterface
 import io.rover.rover.ui.viewmodels.ButtonViewModelInterface
 import io.rover.rover.ui.viewmodels.ImageBlockViewModelInterface
+import io.rover.rover.ui.viewmodels.LayoutPaddingDeflection
 import io.rover.rover.ui.viewmodels.TextBlockViewModelInterface
 import io.rover.rover.ui.viewmodels.TextViewModelInterface
 import io.rover.rover.ui.viewmodels.WebViewModelInterface
 
+/**
+ * The View-side equivalent to [LayoutPaddingDeflection].  This View-side parallel structure needs
+ * to exist because the View mixins must not set the padding directly on the Android view (lest
+ * they clobber one another), and moreover , so they must delegate that responsibility to [ViewBlock] which will
+ * gather up all contributed padding and ultimately apply it to the view.
+ */
 interface PaddingContributor {
+    // TODO: consider changing to not use Rect to better indicate that it is not a rectangle but an
+    // inset for each edge
     val contributedPadding: Rect
 }
 

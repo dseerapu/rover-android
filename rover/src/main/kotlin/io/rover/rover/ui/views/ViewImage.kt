@@ -37,9 +37,11 @@ class ViewImage(
         imageView.scaleType = ImageView.ScaleType.FIT_XY
 
         // in order to know our realized width and height we need to listen for layout events.
+
+        // TODO: setting these initial values here might be the cause of the issues with images
+        // getting the wrong density loaded when you fling.
         width = imageView.width
         height = imageView.height
-
         imageView.addOnLayoutChangeListener { view, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
             width = right - left
             height = bottom - top
@@ -81,7 +83,7 @@ class ViewImage(
                     ) { bitmap ->
                         imageView.setImageBitmap(bitmap)
                         imageView.animate()
-                            .alpha(1f)
+                            .alpha(viewModel.opacity)
                             .setDuration(shortAnimationDuration.toLong())
                             .start()
                     }.apply { this.whenNotNull { it.resume() } }

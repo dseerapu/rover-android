@@ -25,13 +25,23 @@ import io.rover.rover.ui.types.NavigateTo
 import io.rover.rover.ui.types.PixelSize
 import io.rover.rover.ui.types.Rect
 import io.rover.rover.ui.types.RectF
+import io.rover.rover.ui.views.PaddingContributor
+import io.rover.rover.ui.views.ViewBlock
 import java.net.URI
 import java.net.URL
 
 /**
- * Exposed by a view model that may need to contribute to the padding around the content.
+ * Exposed by a view model that may need to contribute to the padding around the content.  For
+ * instance, the [BorderViewModel] exposes this so that content-bearing view models can ensure their
+ * content is not occluded by the border.
+ *
+ * Note that the View mixins will likely need to implement the [PaddingContributor] interface and
+ * ensure that they are passed to the [ViewBlock].  Please see the documentation there for more
+ * details and the rationale.
  */
 interface LayoutPaddingDeflection {
+    // TODO: consider changing to not use Rect to better indicate that it is not a rectangle but an
+    // inset for each edge
     val paddingDeflection: Rect
 }
 
@@ -198,7 +208,7 @@ interface WebViewModelInterface {
     val scrollingEnabled: Boolean
 }
 
-interface BarcodeViewModelInterface: Measurable {
+interface BarcodeViewModelInterface: Measurable, LayoutPaddingDeflection {
     val barcodeType: BarcodeType
 
     val barcodeValue: String
@@ -412,7 +422,7 @@ interface ImageBlockViewModelInterface : LayoutableViewModel, BlockViewModelInte
 
 interface WebViewBlockViewModelInterface : LayoutableViewModel, BlockViewModelInterface, BackgroundViewModelInterface, BorderViewModelInterface, WebViewModelInterface
 
-interface BarcodeBlockViewModelInterface : LayoutableViewModel, BlockViewModelInterface, BarcodeViewModelInterface
+interface BarcodeBlockViewModelInterface : LayoutableViewModel, BlockViewModelInterface, BackgroundViewModelInterface, BarcodeViewModelInterface, BorderViewModelInterface
 
 interface ButtonBlockViewModelInterface: LayoutableViewModel, BlockViewModelInterface, ButtonViewModelInterface
 
