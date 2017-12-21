@@ -111,17 +111,13 @@ class AndroidMeasurementService(
             )
         )
 
-        log.v("Minimum barcode size is ${renderedBitmap.width} x ${renderedBitmap.height}")
-
         val aspectRatio = if(type == BarcodeViewModelInterface.BarcodeType.Code128) {
+            // Code 128 is our only 1 dimensional barcode type, but naturally it ultimately renders
+            // into 2D space, so we want to define an appropriate hard-coded aspect ratio for it.
             2.26086956521739f
         } else renderedBitmap.width / renderedBitmap.height.toFloat()
 
-        log.v("Barcode aspect ratio is $aspectRatio")
-
         val neededHeight = width / aspectRatio
-
-        log.v("Needed height for barcode: $neededHeight")
 
         return neededHeight
     }
