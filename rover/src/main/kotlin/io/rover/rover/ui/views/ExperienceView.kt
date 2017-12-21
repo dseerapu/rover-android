@@ -8,7 +8,10 @@ import android.util.AttributeSet
 import android.util.LruCache
 import android.view.Gravity
 import android.view.View
+import android.view.Window
+import android.view.WindowManager
 import android.widget.FrameLayout
+import io.rover.rover.core.logging.log
 import io.rover.rover.platform.whenNotNull
 import io.rover.rover.streams.androidLifecycleDispose
 import io.rover.rover.streams.subscribe
@@ -25,6 +28,12 @@ class ExperienceView: FrameLayout, BindableView<ExperienceViewModelInterface> {
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes)
 
     private var activeView: ScreenView? = null
+
+    /**
+     * You must set [attachedWindow] on the Experience view before binding the view model.
+     * This is needed for backlight control.
+     */
+    var attachedWindow: Window? = null
 
     private val viewCache: LruCache<ScreenViewModelInterface, ScreenView> = object : LruCache<ScreenViewModelInterface, ScreenView>(3) {
         override fun entryRemoved(evicted: Boolean, key: ScreenViewModelInterface?, oldValue: ScreenView?, newValue: ScreenView?) {
@@ -45,6 +54,9 @@ class ExperienceView: FrameLayout, BindableView<ExperienceViewModelInterface> {
 
     override var viewModel: ExperienceViewModelInterface? = null
         set(experienceViewModel) {
+            if(attachedWindow == null) {
+                throw RuntimeException("You must set the attached window on ExperienceView before binding it to a view model.")
+            }
             field = experienceViewModel
 
             field?.events?.androidLifecycleDispose(this)?.subscribe( { event ->
@@ -110,11 +122,24 @@ class ExperienceView: FrameLayout, BindableView<ExperienceViewModelInterface> {
 
                         activeView = newView
                     }
+                    is ExperienceViewModelInterface.Event.SetBacklightBoost -> {
+                        attachedWindow?.attributes = (attachedWindow?.attributes ?: WindowManager.LayoutParams()).apply {
+                            screenBrightness = when(event.extraBright) {
+                                true -> WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_FULL
+                                false -> WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
+                            }
+                        }
+                    }
                 }
             }, { error -> throw error })
         }
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
+    }
+
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        attachedWindow = null
     }
 }

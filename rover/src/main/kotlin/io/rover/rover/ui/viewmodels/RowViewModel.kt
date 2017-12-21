@@ -82,7 +82,9 @@ class RowViewModel(
         )
     }
 
-
+    override val needsBrightBacklight: Boolean by lazy {
+        blockViewModels.any { blockViewModel -> blockViewModel is BarcodeBlockViewModel }
+    }
 
     private tailrec fun mapBlocksToRectDisplayList(
         remainingBlockViewModels: List<BlockViewModelInterface>,

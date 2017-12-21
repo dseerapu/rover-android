@@ -9,6 +9,7 @@ import io.rover.rover.streams.Observable
 import io.rover.rover.streams.PublishSubject
 import io.rover.rover.streams.Publisher
 import io.rover.rover.streams.asPublisher
+import io.rover.rover.streams.filterNulls
 import io.rover.rover.streams.flatMap
 import io.rover.rover.streams.map
 import io.rover.rover.streams.share
@@ -84,7 +85,9 @@ class ExperienceViewModel(
 
     private sealed class Action {
         class PressedBack: Action()
-        class Navigate(val navigateTo: NavigateTo): Action()
+        class Navigate(
+            val navigateTo: NavigateTo
+        ): Action()
     }
 
     override var state = if(icicle != null) {
@@ -147,17 +150,30 @@ class ExperienceViewModel(
         .map { stateChange ->
             // abuse .map() for doOnNext() side-effects for now to update our state! TODO add doOnNext()
             state = State(stateChange.newBackStack)
-
             log.v("State change: $stateChange")
             stateChange
         }.map { stateChange -> stateChange.event }
+
 
     // TODO: onSubscribe we want to emit the WarpTo event.  I need a concat transform to do that tho
     override val events: Observable<ExperienceViewModelInterface.Event> = Publisher.concat(
         // emit a warp-to for all new subscribers so they are guaranteed to see their state.
         Publisher.just(ExperienceViewModelInterface.Event.WarpToScreen(activeScreen() ?: throw RuntimeException("Backstack unexpectedly empty"))),
         epic.share()
-    )
+    ).flatMap { event ->
+        // emit an additional BacklightBoost event into the stream for screen changes.
+        val backlightEvent = when(event) {
+            is ExperienceViewModelInterface.Event.GoBackwardToScreen -> event.screenViewModel.needsBrightBacklight
+            is ExperienceViewModelInterface.Event.GoForwardToScreen -> event.screenViewModel.needsBrightBacklight
+            is ExperienceViewModelInterface.Event.WarpToScreen -> event.screenViewModel.needsBrightBacklight
+            else -> null
+        }.whenNotNull { ExperienceViewModelInterface.Event.SetBacklightBoost(it) }
+
+        Observable.concat(
+            Observable.just(event),
+            Observable.just(backlightEvent)
+        ).filterNulls()
+    }
 
     // @Parcelize Kotlin synthetics are generating the CREATOR method for us.
     @SuppressLint("ParcelCreator")

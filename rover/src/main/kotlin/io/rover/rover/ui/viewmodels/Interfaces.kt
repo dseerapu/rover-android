@@ -6,6 +6,7 @@ import android.graphics.Shader
 import android.os.Parcelable
 import android.util.DisplayMetrics
 import android.view.MotionEvent
+import android.view.WindowManager
 import io.rover.rover.core.domain.Background
 import io.rover.rover.core.domain.BlockAction
 import io.rover.rover.core.domain.Border
@@ -323,6 +324,12 @@ interface RowViewModelInterface : LayoutableViewModel, BackgroundViewModelInterf
      * Rows may emit navigation events.
      */
     val eventSource : Observable<NavigateTo>
+
+    /**
+     * Does this row contain anything that calls for the backlight to be set temporarily extra
+     * bright?
+     */
+    val needsBrightBacklight: Boolean
 }
 
 /**
@@ -359,6 +366,8 @@ interface ScreenViewModelInterface: BindableViewModel, BackgroundViewModelInterf
      * Screens may emit navigation events.
      */
     val events: Observable<NavigateTo>
+
+    val needsBrightBacklight: Boolean
 }
 
 interface ExperienceViewModelInterface: BindableViewModel {
@@ -392,6 +401,12 @@ interface ExperienceViewModelInterface: BindableViewModel {
          * This event signifies that the view should immediately display the given view model.
          */
         class WarpToScreen(val screenViewModel: ScreenViewModelInterface): Event()
+
+        /**
+         * This event signifies that the LayoutParams of the containing window should either be set
+         * to either 1 or [WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE].
+         */
+        class SetBacklightBoost(val extraBright: Boolean): Event()
 
         // TODO: we may want to do an (optional) internal web browser like iOS, but there is less call for it
         // because Android has its back button.  Will discuss.

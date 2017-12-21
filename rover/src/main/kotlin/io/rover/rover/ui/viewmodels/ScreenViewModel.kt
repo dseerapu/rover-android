@@ -45,6 +45,11 @@ class ScreenViewModel(
         it
     }
 
+    override val needsBrightBacklight: Boolean by lazy {
+        rowViewModels.any { it.needsBrightBacklight }
+    }
+
+
     override fun render(
         widthDp: Float
     ): Layout =

@@ -163,10 +163,12 @@ class StandaloneExperienceHostActivity: AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         setContentView(
             experiencesView
         )
+        // The View needs to know about the Activity-level window in order to temporarily change the
+        // backlight.
+        experiencesView.attachedWindow = this.window
 
         // TODO: move into a ExperienceFetchViewModel or something coupled with an ExperienceFetchView (or perhaps StandaloneExperienceView)
 
