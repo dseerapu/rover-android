@@ -21,11 +21,11 @@ import kotlinx.android.parcel.Parcelize
 /**
  * Behaviour for navigating through an experience.
  */
-class ExperienceViewModel(
+class ExperienceNavigationViewModel(
     val experience: Experience,
     val viewModelFactory: ViewModelFactoryInterface,
     val icicle: Parcelable? = null
-): ExperienceViewModelInterface {
+): ExperienceNavigationViewModelInterface {
     // concerns:
     // start at home Screen.
     // maintain a backstack of ScreenView/ScreenViewModels.
@@ -112,25 +112,25 @@ class ExperienceViewModel(
             is Action.PressedBack -> {
                 possiblePreviousScreenId.whenNotNull { previousScreenId ->
                     StateChange(
-                        ExperienceViewModelInterface.Event.GoBackwardToScreen(
+                        ExperienceNavigationViewModelInterface.Event.GoBackwardToScreen(
                             screenViewModelsById[previousScreenId]!!
                         ),
                         // pop backstack:
                         state.backStack.subList(0, state.backStack.lastIndex)
                     )
                 } ?: StateChange(
-                    ExperienceViewModelInterface.Event.Exit(),
+                    ExperienceNavigationViewModelInterface.Event.Exit(),
                     state.backStack // no change to backstack: the view is just getting entirely popped
                 )
             }
             is Action.Navigate -> {
                 when(action.navigateTo) {
                     is NavigateTo.OpenUrlAction -> StateChange(
-                        ExperienceViewModelInterface.Event.OpenExternalWebBrowser(action.navigateTo.uri),
+                        ExperienceNavigationViewModelInterface.Event.OpenExternalWebBrowser(action.navigateTo.uri),
                         state.backStack // no change to backstack: the view is just getting entirely popped
                     )
                     is NavigateTo.GoToScreenAction -> StateChange(
-                        ExperienceViewModelInterface.Event.GoForwardToScreen(
+                        ExperienceNavigationViewModelInterface.Event.GoForwardToScreen(
                             screenViewModelsById[action.navigateTo.screenId] ?: throw RuntimeException("Screen by id ${action.navigateTo.screenId} missing from Experience with id ${experience.id.rawValue}.")
                         ),
                         state.backStack + listOf(BackStackFrame(action.navigateTo.screenId))
@@ -141,7 +141,7 @@ class ExperienceViewModel(
     }
 
     data class StateChange(
-        val event: ExperienceViewModelInterface.Event,
+        val event: ExperienceNavigationViewModelInterface.Event,
         val newBackStack: List<BackStackFrame>
     )
 
@@ -156,18 +156,18 @@ class ExperienceViewModel(
 
 
     // TODO: onSubscribe we want to emit the WarpTo event.  I need a concat transform to do that tho
-    override val events: Observable<ExperienceViewModelInterface.Event> = Publisher.concat(
+    override val events: Observable<ExperienceNavigationViewModelInterface.Event> = Publisher.concat(
         // emit a warp-to for all new subscribers so they are guaranteed to see their state.
-        Publisher.just(ExperienceViewModelInterface.Event.WarpToScreen(activeScreen() ?: throw RuntimeException("Backstack unexpectedly empty"))),
+        Publisher.just(ExperienceNavigationViewModelInterface.Event.WarpToScreen(activeScreen() ?: throw RuntimeException("Backstack unexpectedly empty"))),
         epic.share()
     ).flatMap { event ->
         // emit an additional BacklightBoost event into the stream for screen changes.
         val backlightEvent = when(event) {
-            is ExperienceViewModelInterface.Event.GoBackwardToScreen -> event.screenViewModel.needsBrightBacklight
-            is ExperienceViewModelInterface.Event.GoForwardToScreen -> event.screenViewModel.needsBrightBacklight
-            is ExperienceViewModelInterface.Event.WarpToScreen -> event.screenViewModel.needsBrightBacklight
+            is ExperienceNavigationViewModelInterface.Event.GoBackwardToScreen -> event.screenViewModel.needsBrightBacklight
+            is ExperienceNavigationViewModelInterface.Event.GoForwardToScreen -> event.screenViewModel.needsBrightBacklight
+            is ExperienceNavigationViewModelInterface.Event.WarpToScreen -> event.screenViewModel.needsBrightBacklight
             else -> null
-        }.whenNotNull { ExperienceViewModelInterface.Event.SetBacklightBoost(it) }
+        }.whenNotNull { ExperienceNavigationViewModelInterface.Event.SetBacklightBoost(it) }
 
         Observable.concat(
             Observable.just(event),

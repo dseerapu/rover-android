@@ -5,7 +5,7 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.os.PersistableBundle
+import android.support.design.widget.Snackbar
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.RecyclerView
@@ -33,11 +33,9 @@ import io.rover.rover.ui.AndroidRichTextToSpannedTransformer
 import io.rover.rover.ui.BlockAndRowLayoutManager
 import io.rover.rover.ui.BlockAndRowRecyclerAdapter
 import io.rover.rover.ui.ViewModelFactory
-import io.rover.rover.ui.viewmodels.ExperienceViewModel
-import io.rover.rover.ui.viewmodels.ExperienceViewModelInterface
-import io.rover.rover.ui.viewmodels.ScreenViewModel
-import io.rover.rover.ui.views.ExperienceView
-import io.rover.rover.ui.views.ScreenView
+import io.rover.rover.ui.viewmodels.ExperienceNavigationViewModel
+import io.rover.rover.ui.viewmodels.ExperienceNavigationViewModelInterface
+import io.rover.rover.ui.views.ExperienceNavigationView
 import java.net.URL
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.ThreadPoolExecutor
@@ -63,7 +61,7 @@ class StandaloneExperienceHostActivity: AppCompatActivity() {
 
     // We're actually just showing a single screen for now
     // private val experiencesView by lazy { ScreenView(this) }
-    private val experiencesView by lazy { ExperienceView(this) }
+    private val experiencesView by lazy { ExperienceNavigationView(this) }
 
     // TODO: somehow share this properly
     private val roverSdkNetworkService by lazy {
@@ -119,7 +117,7 @@ class StandaloneExperienceHostActivity: AppCompatActivity() {
     }
 
     // TODO: there should be a standalone-experience-host-activity view model.
-    private var experienceViewModel: ExperienceViewModelInterface? = null
+    private var experienceNavigationViewModel: ExperienceNavigationViewModelInterface? = null
         set(viewModel) {
             field = viewModel
 
@@ -129,10 +127,10 @@ class StandaloneExperienceHostActivity: AppCompatActivity() {
             viewModel?.events?.subscribe(
                 { event ->
                     when(event) {
-                        is ExperienceViewModelInterface.Event.Exit -> {
+                        is ExperienceNavigationViewModelInterface.Event.Exit -> {
                             finish()
                         }
-                        is ExperienceViewModelInterface.Event.OpenExternalWebBrowser -> {
+                        is ExperienceNavigationViewModelInterface.Event.OpenExternalWebBrowser -> {
                             try {
                                 ContextCompat.startActivity(
                                     this,
@@ -154,8 +152,8 @@ class StandaloneExperienceHostActivity: AppCompatActivity() {
         }
 
     override fun onBackPressed() {
-        if(experienceViewModel?.canGoBack() == true) {
-            experienceViewModel!!.pressBack()
+        if(experienceNavigationViewModel?.canGoBack() == true) {
+            experienceNavigationViewModel!!.pressBack()
         } else {
             super.onBackPressed()
         }
@@ -170,8 +168,7 @@ class StandaloneExperienceHostActivity: AppCompatActivity() {
         // backlight.
         experiencesView.attachedWindow = this.window
 
-        // TODO: move into a ExperienceFetchViewModel or something coupled with an ExperienceFetchView (or perhaps StandaloneExperienceView)
-
+        // TODO: move into a ExperienceFetchViewModel or something coupled with an ExperienceFetchView (or perhaps StandaloneExperienceView).
         val fetchExperiencePublisher = { callback: CallbackReceiver<NetworkResult<Experience>> -> roverSdkNetworkService.fetchExperienceTask(ID(experienceId), callback) }.asPublisher()
 
         fetchExperiencePublisher
@@ -180,13 +177,11 @@ class StandaloneExperienceHostActivity: AppCompatActivity() {
                 when (result) {
                     is NetworkResult.Success -> {
                         log.v("Experience fetched successfully! living on thread ${Thread.currentThread().id}")
-                        experienceViewModel = ExperienceViewModel(result.response, blockViewModelFactory, savedInstanceState?.getParcelable("experienceState"))
+                        experienceNavigationViewModel = ExperienceNavigationViewModel(result.response, blockViewModelFactory, savedInstanceState?.getParcelable("experienceState"))
                     }
                     is NetworkResult.Error -> {
-                        // Snackbar.make(this.main_content, "Opening ${selectedExperience.name}", Snackbar.LENGTH_SHORT).show()
+                        Snackbar.make(this.experiencesView, "Problem: ${result.throwable.message}", Snackbar.LENGTH_SHORT).show()
                         log.w("Unable to retrieve experience: ${result.throwable.message}")
-
-                        // TODO not using snackbar for now because we need to decide if including design support lib is sane. also would need to wrap in coordinatorview
                     }
                 }
             }, { error ->
@@ -198,7 +193,7 @@ class StandaloneExperienceHostActivity: AppCompatActivity() {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         // TODO: this will be migrated into a surrounding StandaloneExperienceView.
-        outState.putParcelable("experienceState", experienceViewModel?.state)
+        outState.putParcelable("experienceState", experienceNavigationViewModel?.state)
     }
 
     companion object {

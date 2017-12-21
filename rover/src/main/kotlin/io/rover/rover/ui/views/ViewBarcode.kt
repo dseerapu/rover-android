@@ -3,6 +3,8 @@ package io.rover.rover.ui.views
 import android.graphics.Rect
 import android.graphics.drawable.BitmapDrawable
 import android.support.v7.widget.AppCompatImageView
+import android.view.View
+import android.view.WindowManager
 import android.widget.ImageView
 import io.rover.rover.platform.toAndroidBitmap
 import io.rover.rover.ui.types.asAndroidRect
@@ -19,19 +21,11 @@ class ViewBarcode(
     private val barcodeView: AppCompatImageView
 ): ViewBarcodeInterface, PaddingContributor {
     init {
-
         // Using stretch fit because (at least for auto-height) we've ensured that the image will
         // scale aspect-correct, and we also are using integer scaling to ensure a sharp scale of
         // the pixels.  Instead of FIT_CENTER, in the case of Code 128 (the only supported 1D
         // barcode) this allows us to use the GPU to scale the height of the 1px high barcode to fit
         // the view, saving a little bit of memory.
-
-        // However, if it turns out that in the event of non-autoheight blocks we want to ensure
-        // aspect correct display of the 2D barcodes (right now the web Experiences App stretches
-        // them, and it's not super easy to check to see what iOS SDk 2.0 is currently doing), I
-        // will instead need to switch to FIT_CENTER and instead pass in the the dimensions of the
-        // view to ZXing below (rather than 0s) to have it do the scaling appropriate to the
-        // specific barcode.
         barcodeView.scaleType = ImageView.ScaleType.FIT_XY
     }
 
@@ -41,7 +35,6 @@ class ViewBarcode(
             // TODO: render off-thread (although generation seems fast so it may not matter too
             // much).
             if(viewModel != null) {
-
                 // TODO: factor this out into a "BarcodeService"
                 val bitmap = MultiFormatWriter().encode(
                     viewModel.barcodeValue,

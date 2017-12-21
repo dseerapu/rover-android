@@ -44,8 +44,9 @@ dependencies {
     compile 'com.android.support:appcompat-v7:26.1.0'
     compile 'com.android.support:transition:26.1.0'
 
-    // used only by the UI module
+    // used only by the UI concerns
     compile 'com.android.support:recyclerview-v7:26.1.0'
+    compile 'com.android.support:design:26.1.0'
 
     testCompile 'junit:junit:4.12'
     testCompile 'org.jetbrains.spek:spek-api:1.1.5'

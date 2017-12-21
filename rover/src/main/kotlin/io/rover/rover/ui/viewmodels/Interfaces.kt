@@ -5,14 +5,11 @@ import android.graphics.Bitmap
 import android.graphics.Shader
 import android.os.Parcelable
 import android.util.DisplayMetrics
-import android.view.MotionEvent
 import android.view.WindowManager
 import io.rover.rover.core.domain.Background
-import io.rover.rover.core.domain.BlockAction
 import io.rover.rover.core.domain.Border
 import io.rover.rover.core.domain.Experience
 import io.rover.rover.core.domain.Screen
-import io.rover.rover.core.domain.WebViewBlock
 import io.rover.rover.services.network.NetworkTask
 import io.rover.rover.streams.Observable
 import io.rover.rover.ui.BlockAndRowLayoutManager
@@ -370,7 +367,7 @@ interface ScreenViewModelInterface: BindableViewModel, BackgroundViewModelInterf
     val needsBrightBacklight: Boolean
 }
 
-interface ExperienceViewModelInterface: BindableViewModel {
+interface ExperienceNavigationViewModelInterface : BindableViewModel {
     val events : Observable<Event>
 
     fun pressBack()
@@ -380,7 +377,7 @@ interface ExperienceViewModelInterface: BindableViewModel {
      *
      * Check this before calling [pressBack].  However, it is optional: if you call pressBack()
      * without checking [canGoBack], and there are no remaining back stack entries remaining, you'll
-     * receive an [ExperienceViewModelInterface.Event.Exit] event.
+     * receive an [ExperienceNavigationViewModelInterface.Event.Exit] event.
      */
     fun canGoBack(): Boolean
 

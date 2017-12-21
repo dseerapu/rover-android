@@ -11,21 +11,22 @@ import android.view.View
 import android.view.Window
 import android.view.WindowManager
 import android.widget.FrameLayout
-import io.rover.rover.core.logging.log
 import io.rover.rover.platform.whenNotNull
 import io.rover.rover.streams.androidLifecycleDispose
 import io.rover.rover.streams.subscribe
-import io.rover.rover.ui.viewmodels.ExperienceViewModelInterface
+import io.rover.rover.ui.viewmodels.ExperienceNavigationViewModelInterface
 import io.rover.rover.ui.viewmodels.ScreenViewModelInterface
 
 /**
  * Navigation behaviour between screens of an Experience.
  */
-class ExperienceView: FrameLayout, BindableView<ExperienceViewModelInterface> {
+class ExperienceNavigationView : FrameLayout, BindableView<ExperienceNavigationViewModelInterface> {
     constructor(context: Context?) : super(context)
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes)
+
+    // TODO: implement an onCreate and if inEditMode() display a "Rover Experience" text view.
 
     private var activeView: ScreenView? = null
 
@@ -45,30 +46,30 @@ class ExperienceView: FrameLayout, BindableView<ExperienceViewModelInterface> {
         return viewCache[screenViewModel] ?: ScreenView(
             context
         ).apply {
-            this@ExperienceView.addView(this)
+            this@ExperienceNavigationView.addView(this)
             this.visibility = View.GONE
             viewCache.put(screenViewModel, this)
             this.viewModel = screenViewModel
         }
     }
 
-    override var viewModel: ExperienceViewModelInterface? = null
+    override var viewModel: ExperienceNavigationViewModelInterface? = null
         set(experienceViewModel) {
             if(attachedWindow == null) {
-                throw RuntimeException("You must set the attached window on ExperienceView before binding it to a view model.")
+                throw RuntimeException("You must set the attached window on ExperienceNavigationView before binding it to a view model.")
             }
             field = experienceViewModel
 
             field?.events?.androidLifecycleDispose(this)?.subscribe( { event ->
                 when(event) {
 
-                    is ExperienceViewModelInterface.Event.WarpToScreen -> {
+                    is ExperienceNavigationViewModelInterface.Event.WarpToScreen -> {
                         val newView = getViewForScreenViewModel(event.screenViewModel)
                         activeView?.visibility = View.GONE
                         newView.visibility = View.VISIBLE
                         activeView = newView
                     }
-                    is ExperienceViewModelInterface.Event.GoForwardToScreen -> {
+                    is ExperienceNavigationViewModelInterface.Event.GoForwardToScreen -> {
                         val newView = getViewForScreenViewModel(event.screenViewModel)
                         newView.bringToFront()
                         newView.visibility = View.GONE
@@ -94,7 +95,7 @@ class ExperienceView: FrameLayout, BindableView<ExperienceViewModelInterface> {
 
                         activeView = newView
                     }
-                    is ExperienceViewModelInterface.Event.GoBackwardToScreen -> {
+                    is ExperienceNavigationViewModelInterface.Event.GoBackwardToScreen -> {
                         val newView = getViewForScreenViewModel(event.screenViewModel)
                         newView.bringToFront()
                         newView.visibility = View.GONE
@@ -122,7 +123,7 @@ class ExperienceView: FrameLayout, BindableView<ExperienceViewModelInterface> {
 
                         activeView = newView
                     }
-                    is ExperienceViewModelInterface.Event.SetBacklightBoost -> {
+                    is ExperienceNavigationViewModelInterface.Event.SetBacklightBoost -> {
                         attachedWindow?.attributes = (attachedWindow?.attributes ?: WindowManager.LayoutParams()).apply {
                             screenBrightness = when(event.extraBright) {
                                 true -> WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_FULL
