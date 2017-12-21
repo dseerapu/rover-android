@@ -189,7 +189,7 @@ class ViewBorder(
                     it.borderWidth,
                     it.borderWidth
                 )
-            } ?: throw RuntimeException("ViewBorder must be bound to the view model before ViewBlock.") // not a good way to enforce this invariant, alas.
+            } ?: throw RuntimeException("ViewBorder must be bound to the view model before ViewBlock.") // not a great way to enforce this invariant, alas.
         }
 
     data class MaskConfiguration(

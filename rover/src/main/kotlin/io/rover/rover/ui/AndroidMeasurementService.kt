@@ -16,6 +16,7 @@ import io.rover.rover.ui.types.dpAsPx
 import io.rover.rover.ui.types.pxAsDp
 import io.rover.rover.ui.viewmodels.BarcodeViewModelInterface
 import io.rover.shaded.zxing.com.google.zxing.BarcodeFormat
+import io.rover.shaded.zxing.com.google.zxing.EncodeHintType
 import io.rover.shaded.zxing.com.google.zxing.MultiFormatWriter
 import io.rover.shaded.zxing.com.google.zxing.pdf417.PDF417Writer
 
@@ -101,7 +102,13 @@ class AndroidMeasurementService(
             },
             // we want the minimum size.
             0,
-            0
+            0,
+            hashMapOf(
+                // I furnish my own margin (see contributedPadding).  Some -- but not all --
+                // of the barcode types look for this margin parameter and if they don't
+                // find it include their own (pretty massive) margin.
+                Pair(EncodeHintType.MARGIN, 0)
+            )
         )
 
         log.v("Minimum barcode size is ${renderedBitmap.width} x ${renderedBitmap.height}")

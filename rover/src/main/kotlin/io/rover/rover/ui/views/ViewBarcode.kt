@@ -1,17 +1,14 @@
 package io.rover.rover.ui.views
 
-import android.graphics.Bitmap
-import android.graphics.Canvas
 import android.graphics.Rect
 import android.graphics.drawable.BitmapDrawable
-import android.graphics.drawable.DrawableWrapper
 import android.support.v7.widget.AppCompatImageView
 import android.widget.ImageView
 import io.rover.rover.platform.toAndroidBitmap
 import io.rover.rover.ui.types.asAndroidRect
-import io.rover.rover.ui.types.dpAsPx
 import io.rover.rover.ui.viewmodels.BarcodeViewModelInterface
 import io.rover.shaded.zxing.com.google.zxing.BarcodeFormat
+import io.rover.shaded.zxing.com.google.zxing.EncodeHintType
 import io.rover.shaded.zxing.com.google.zxing.MultiFormatWriter
 
 /**
@@ -44,20 +41,30 @@ class ViewBarcode(
             // TODO: render off-thread (although generation seems fast so it may not matter too
             // much).
             if(viewModel != null) {
-                val drawable = BitmapDrawable(
+
+                // TODO: factor this out into a "BarcodeService"
+                val bitmap = MultiFormatWriter().encode(
+                    viewModel.barcodeValue,
+                    when(viewModel.barcodeType) {
+                        BarcodeViewModelInterface.BarcodeType.PDF417 -> BarcodeFormat.PDF_417
+                        BarcodeViewModelInterface.BarcodeType.Code128 -> BarcodeFormat.CODE_128
+                        BarcodeViewModelInterface.BarcodeType.Aztec -> BarcodeFormat.AZTEC
+                        BarcodeViewModelInterface.BarcodeType.QrCode -> BarcodeFormat.QR_CODE
+                    },
+                    // we want the minimum size, pixel exact.  we'll scale it later.
+                    0,
+                    0,
+                    hashMapOf(
+                        // I furnish my own margin (see contributedPadding).  Some -- but not all --
+                        // of the barcode types look for this margin parameter and if they don't
+                        // find it include their own (pretty massive) margin.
+                        Pair(EncodeHintType.MARGIN, 0)
+                    )
+                ).toAndroidBitmap()
+
+                val nearestScaleDrawable = BitmapDrawable(
                     barcodeView.resources,
-                    MultiFormatWriter().encode(
-                        viewModel.barcodeValue,
-                        when(viewModel.barcodeType) {
-                            BarcodeViewModelInterface.BarcodeType.PDF417 -> BarcodeFormat.PDF_417
-                            BarcodeViewModelInterface.BarcodeType.Code128 -> BarcodeFormat.CODE_128
-                            BarcodeViewModelInterface.BarcodeType.Aztec -> BarcodeFormat.AZTEC
-                            BarcodeViewModelInterface.BarcodeType.QrCode -> BarcodeFormat.QR_CODE
-                        },
-                        // we want the minimum size, pixel exact.  we'll scale it later.
-                        0,
-                        0
-                    ).toAndroidBitmap()
+                    bitmap
                 ).apply {
                     // The ZXing library appropriately renders the barcodes at their smallest
                     // pixel-exact size.  Thus, we want non-anti-aliased (ie., simple integer
@@ -67,7 +74,7 @@ class ViewBarcode(
                 }
 
                 barcodeView.setImageDrawable(
-                    drawable
+                    nearestScaleDrawable
                 )
             } else {
                 barcodeView.setImageResource(android.R.color.transparent)

@@ -34,7 +34,7 @@ class BarcodeViewModel(
 
     override val paddingDeflection: Rect
         get() = when(barcode.barcodeFormat) {
-            BarcodeFormat.Code128 -> Rect(10, 20, 10, 20)
-            else -> Rect(0,0, 0, 0)
+            BarcodeFormat.Pdf417 -> Rect(5, 5, 5, 5)
+            else -> Rect(20, 20, 20, 20)
         }
 }
