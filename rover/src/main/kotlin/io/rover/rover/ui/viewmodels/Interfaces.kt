@@ -367,6 +367,36 @@ interface ScreenViewModelInterface: BindableViewModel, BackgroundViewModelInterf
     val needsBrightBacklight: Boolean
 }
 
+/**
+ * Responsible for fetching and displaying an Experience, with the appropriate AppBar along the top.
+ *
+ * Emits an event with a new ExperienceNavigationViewModel (and
+ *
+ * TODO: consider renaming to experiencefetchviewmodel
+ */
+interface ExperienceViewModelInterface: BindableViewModel {
+    val events: Observable<Event>
+
+    fun pressBack()
+
+    sealed class Event {
+        class ExperienceReady(
+            val experienceNavigationViewModel: ExperienceNavigationViewModelInterface
+        ): Event()
+        class DisplayError(
+            val message: String
+        ): Event()
+
+        // TODO: rename to navigationEvent
+        class ViewEvent(
+            val event: ExperienceViewEvent
+        ): Event()
+
+
+        // TODO: activity indication event
+    }
+}
+
 interface ExperienceNavigationViewModelInterface : BindableViewModel {
     val events : Observable<Event>
 
@@ -390,32 +420,59 @@ interface ExperienceNavigationViewModelInterface : BindableViewModel {
     val state: Parcelable
 
     sealed class Event {
-        class GoForwardToScreen(val screenViewModel: ScreenViewModelInterface): Event()
+        class GoForwardToScreen(
+            val screenViewModel: ScreenViewModelInterface,
+            val appBarState: AppBarState
+        ): Event()
 
-        class GoBackwardToScreen(val screenViewModel: ScreenViewModelInterface): Event()
+        class GoBackwardToScreen(
+            val screenViewModel: ScreenViewModelInterface,
+            val appBarState: AppBarState
+        ): Event()
 
         /**
          * This event signifies that the view should immediately display the given view model.
          */
-        class WarpToScreen(val screenViewModel: ScreenViewModelInterface): Event()
+        class WarpToScreen(
+            val screenViewModel: ScreenViewModelInterface,
+            val appBarState: AppBarState
+        ): Event()
 
-        /**
-         * This event signifies that the LayoutParams of the containing window should either be set
-         * to either 1 or [WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE].
-         */
-        class SetBacklightBoost(val extraBright: Boolean): Event()
-
-        // TODO: we may want to do an (optional) internal web browser like iOS, but there is less call for it
-        // because Android has its back button.  Will discuss.
-
-        class OpenExternalWebBrowser(val uri: URI): Event()
-
-        /**
-         * Containing view should pop itself ([Activity.finish], etc.) in the surrounding navigation
-         * flow, whatever it happens to be.
-         */
-        class Exit(): Event()
+        class ViewEvent(
+            val event: ExperienceViewEvent
+        ): Event()
     }
+
+    data class AppBarState(
+        val color: Int
+    )
+}
+
+/**
+ * These are events that are emitted by the experience navigation view model but must be passed up
+ * by the containing ExperienceViewModel.
+ *
+ * TODO: I split this out so ExperienceViewModel could pass these events along.  However, it seems
+ * to align very closely to my future intention to split all the Event concerns between
+ */
+// TODO: rename to navigationevent
+sealed class ExperienceViewEvent {
+    /**
+     * This event signifies that the LayoutParams of the containing window should either be set
+     * to either 1 or [WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE].
+     */
+    class SetBacklightBoost(val extraBright: Boolean): ExperienceViewEvent()
+
+    // TODO: we may want to do an (optional) internal web browser like iOS, but there is less call for it
+    // because Android has its back button.  Will discuss.
+
+    class OpenExternalWebBrowser(val uri: URI): ExperienceViewEvent()
+
+    /**
+     * Containing view should pop itself ([Activity.finish], etc.) in the surrounding navigation
+     * flow, whatever it happens to be.
+     */
+    class Exit(): ExperienceViewEvent()
 }
 
 /**

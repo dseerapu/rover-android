@@ -4,6 +4,9 @@ import android.content.Context
 import android.graphics.Canvas
 import android.util.AttributeSet
 import android.view.View
+import io.rover.rover.streams.Observable
+import io.rover.rover.streams.PublishSubject
+import io.rover.rover.streams.share
 import io.rover.rover.ui.viewmodels.ButtonStateViewModelInterface
 
 class ButtonStateView: View, BindableView<ButtonStateViewModelInterface> {
@@ -34,4 +37,14 @@ class ButtonStateView: View, BindableView<ButtonStateViewModelInterface> {
         super.onSizeChanged(w, h, oldw, oldh)
         viewComposition.onSizeChanged(w, h, oldw, oldh)
     }
+//
+//    override fun onAnimationEnd() {
+//        super.onAnimationEnd()
+//        // workaround for a bug with Android Animator listeners.
+//        animationEndSubject.onNext(Unit)
+//    }
+//
+//    private val animationEndSubject = PublishSubject<Unit>()
+//
+//    val animationEnds: Observable<Unit> = animationEndSubject.share()
 }

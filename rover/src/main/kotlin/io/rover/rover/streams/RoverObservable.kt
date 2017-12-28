@@ -115,6 +115,20 @@ fun <T> Publisher<T>.subscribe(onNext: (item: T) -> Unit, onError: (throwable: T
     })
 }
 
+fun <T> Publisher<T>.subscribe(onNext: (item: T) -> Unit) {
+    this.subscribe(object: Subscriber<T> {
+        override fun onComplete() { }
+
+        override fun onError(error: Throwable) {
+            throw RuntimeException("Undeliverable (unhandled) exception", error)
+        }
+
+        override fun onNext(item: T) { onNext(item) }
+
+        override fun onSubscribe(subscription: Subscription) { }
+    })
+}
+
 fun <T, R> Publisher<T>.map(transform: (T) -> R): Publisher<R> {
     val prior = this
     return object : Publisher<R> {
@@ -348,7 +362,7 @@ fun <T> Collection<T>.asPublisher(): Publisher<T> {
     }
 }
 
-@Deprecated("When Android Min SDK is set to at least 24, use Optional here instead (Reactive Streams spec does not actually allow for nulls)")
+@Deprecated("Whenever we set Android Min SDK is set to at least 24, use Optional here instead (Reactive Streams spec does not actually allow for nulls)")
 fun <T> Publisher<T?>.filterNulls(): Publisher<T> = filter { it != null }.map { it!! }
 
 /**

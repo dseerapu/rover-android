@@ -1,6 +1,5 @@
 package io.rover.rover.ui.containers
 
-import android.arch.lifecycle.Lifecycle
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
@@ -8,7 +7,8 @@ import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.RecyclerView
+import com.facebook.stetho.urlconnection.ByteArrayRequestEntity
+import com.facebook.stetho.urlconnection.StethoURLConnectionManager
 import io.rover.rover.core.domain.Experience
 import io.rover.rover.core.domain.ID
 import io.rover.rover.core.logging.log
@@ -18,6 +18,8 @@ import io.rover.rover.platform.SharedPreferencesLocalStorage
 import io.rover.rover.platform.asAndroidUri
 import io.rover.rover.services.assets.AndroidAssetService
 import io.rover.rover.services.assets.ImageOptimizationService
+import io.rover.rover.services.network.AsyncTaskAndHttpUrlConnectionInterception
+import io.rover.rover.services.network.AsyncTaskAndHttpUrlConnectionInterceptor
 import io.rover.rover.services.network.AsyncTaskAndHttpUrlConnectionNetworkClient
 import io.rover.rover.services.network.AuthenticationContext
 import io.rover.rover.services.network.NetworkResult
@@ -30,12 +32,15 @@ import io.rover.rover.streams.asPublisher
 import io.rover.rover.streams.subscribe
 import io.rover.rover.ui.AndroidMeasurementService
 import io.rover.rover.ui.AndroidRichTextToSpannedTransformer
-import io.rover.rover.ui.BlockAndRowLayoutManager
-import io.rover.rover.ui.BlockAndRowRecyclerAdapter
 import io.rover.rover.ui.ViewModelFactory
 import io.rover.rover.ui.viewmodels.ExperienceNavigationViewModel
 import io.rover.rover.ui.viewmodels.ExperienceNavigationViewModelInterface
+import io.rover.rover.ui.viewmodels.ExperienceViewModelInterface
 import io.rover.rover.ui.views.ExperienceNavigationView
+import io.rover.rover.ui.views.ExperienceView
+import java.io.IOException
+import java.io.InputStream
+import java.net.HttpURLConnection
 import java.net.URL
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.ThreadPoolExecutor
@@ -61,7 +66,7 @@ class StandaloneExperienceHostActivity: AppCompatActivity() {
 
     // We're actually just showing a single screen for now
     // private val experiencesView by lazy { ScreenView(this) }
-    private val experiencesView by lazy { ExperienceNavigationView(this) }
+    private val experiencesView by lazy { ExperienceView(this) }
 
     // TODO: somehow share this properly
     private val roverSdkNetworkService by lazy {
@@ -89,10 +94,11 @@ class StandaloneExperienceHostActivity: AppCompatActivity() {
         // consuming apps.
         AsyncTaskAndHttpUrlConnectionNetworkClient.installSaneGlobalHttpCacheCache(this)
 
-        AsyncTaskAndHttpUrlConnectionNetworkClient()
-//        networkClient.registerInterceptor(
-//            StethoRoverInterceptor()
-//        )
+        AsyncTaskAndHttpUrlConnectionNetworkClient().apply {
+            registerInterceptor(
+                StethoRoverInterceptor()
+            )
+        }
     }
 
     private val ioExecutor by lazy {
@@ -117,7 +123,7 @@ class StandaloneExperienceHostActivity: AppCompatActivity() {
     }
 
     // TODO: there should be a standalone-experience-host-activity view model.
-    private var experienceNavigationViewModel: ExperienceNavigationViewModelInterface? = null
+    private var experienceViewModel: ExperienceViewModelInterface? = null
         set(viewModel) {
             field = viewModel
 
@@ -127,6 +133,7 @@ class StandaloneExperienceHostActivity: AppCompatActivity() {
             viewModel?.events?.subscribe(
                 { event ->
                     when(event) {
+                        // ANDREW START HERE
                         is ExperienceNavigationViewModelInterface.Event.Exit -> {
                             finish()
                         }
@@ -201,6 +208,33 @@ class StandaloneExperienceHostActivity: AppCompatActivity() {
             return Intent(packageContext, StandaloneExperienceHostActivity::class.java).apply {
                 putExtra("SDK_TOKEN", authToken)
                 putExtra("EXPERIENCE_ID", experienceId)
+            }
+        }
+    }
+
+    /**
+     * If you want to be able to see the requests made by the Rover SDK to our API in
+     * [Stetho's](http://facebook.github.io/stetho/) network inspector, copy this class into your
+     * application and set an instance of it on the [AsyncTaskAndHttpUrlConnectionNetworkClient] with
+     * [AsyncTaskAndHttpUrlConnectionNetworkClient.registerInterceptor] (DI instructions for
+     * users to follow).
+     */
+    class StethoRoverInterceptor : AsyncTaskAndHttpUrlConnectionInterceptor {
+        override fun onOpened(httpUrlConnection: HttpURLConnection, requestPath: String, body: ByteArray): AsyncTaskAndHttpUrlConnectionInterception {
+            val connManager = StethoURLConnectionManager(requestPath)
+            connManager.preConnect(httpUrlConnection, ByteArrayRequestEntity(body))
+
+            return object : AsyncTaskAndHttpUrlConnectionInterception {
+                override fun onConnected() {
+                    connManager.postConnect()
+                }
+
+                override fun onError(exception: IOException) {
+                    connManager.httpExchangeFailed(exception)
+                }
+
+                override fun sniffStream(source: InputStream): InputStream =
+                    connManager.interpretResponseStream(source)
             }
         }
     }

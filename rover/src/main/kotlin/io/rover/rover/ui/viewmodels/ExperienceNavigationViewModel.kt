@@ -1,6 +1,7 @@
 package io.rover.rover.ui.viewmodels
 
 import android.annotation.SuppressLint
+import android.graphics.Color
 import android.os.Parcelable
 import io.rover.rover.core.domain.Experience
 import io.rover.rover.core.logging.log
@@ -20,27 +21,18 @@ import kotlinx.android.parcel.Parcelize
 
 /**
  * Behaviour for navigating through an experience.
+ *
+ * Responsible for the following concerns: starting at the home screen, maintaining a backstack,
+ * state persistence, WebView-like canGoBack/goBack methods, and exposing an API for customizing
+ * flow behaviour.
+ *
+ * TODO: customization exposure.
  */
 class ExperienceNavigationViewModel(
     val experience: Experience,
     val viewModelFactory: ViewModelFactoryInterface,
     val icicle: Parcelable? = null
 ): ExperienceNavigationViewModelInterface {
-    // concerns:
-    // start at home Screen.
-    // maintain a backstack of ScreenView/ScreenViewModels.
-    // persist state of which screen it's on.
-    // have a canGoBack query method and a goBack() action creator, akin to WebView.
-
-    // be aware that user extensions must be possible, but achieve it by writing a concise,
-    // non-tightly coupled implementation and then think about extension points afterwards.
-
-    // coming up with Events is a bit tricky: the View itself is going to want some degree
-    // of state so it can do caching of views.  or maybe it can just cache by screen id, and
-    // be gloriously ignorant of the actual stack? that's the ideal
-
-
-    // in this case, we'll inject actions by subscribing to events coming from the viewmodels
     override fun pressBack() {
         actions.onNext(Action.PressedBack())
     }
@@ -113,25 +105,29 @@ class ExperienceNavigationViewModel(
                 possiblePreviousScreenId.whenNotNull { previousScreenId ->
                     StateChange(
                         ExperienceNavigationViewModelInterface.Event.GoBackwardToScreen(
-                            screenViewModelsById[previousScreenId]!!
+                            screenViewModelsById[previousScreenId]!!,
+                            ExperienceNavigationViewModelInterface.AppBarState(Color.RED)
                         ),
                         // pop backstack:
                         state.backStack.subList(0, state.backStack.lastIndex)
                     )
                 } ?: StateChange(
-                    ExperienceNavigationViewModelInterface.Event.Exit(),
+                    ExperienceNavigationViewModelInterface.Event.ViewEvent(ExperienceViewEvent.Exit()),
                     state.backStack // no change to backstack: the view is just getting entirely popped
                 )
             }
             is Action.Navigate -> {
                 when(action.navigateTo) {
                     is NavigateTo.OpenUrlAction -> StateChange(
-                        ExperienceNavigationViewModelInterface.Event.OpenExternalWebBrowser(action.navigateTo.uri),
+                        ExperienceNavigationViewModelInterface.Event.ViewEvent(
+                            ExperienceViewEvent.OpenExternalWebBrowser(action.navigateTo.uri)
+                        ),
                         state.backStack // no change to backstack: the view is just getting entirely popped
                     )
                     is NavigateTo.GoToScreenAction -> StateChange(
                         ExperienceNavigationViewModelInterface.Event.GoForwardToScreen(
-                            screenViewModelsById[action.navigateTo.screenId] ?: throw RuntimeException("Screen by id ${action.navigateTo.screenId} missing from Experience with id ${experience.id.rawValue}.")
+                            screenViewModelsById[action.navigateTo.screenId] ?: throw RuntimeException("Screen by id ${action.navigateTo.screenId} missing from Experience with id ${experience.id.rawValue}."),
+                            ExperienceNavigationViewModelInterface.AppBarState(Color.RED)
                         ),
                         state.backStack + listOf(BackStackFrame(action.navigateTo.screenId))
                     )
@@ -158,7 +154,12 @@ class ExperienceNavigationViewModel(
     // TODO: onSubscribe we want to emit the WarpTo event.  I need a concat transform to do that tho
     override val events: Observable<ExperienceNavigationViewModelInterface.Event> = Publisher.concat(
         // emit a warp-to for all new subscribers so they are guaranteed to see their state.
-        Publisher.just(ExperienceNavigationViewModelInterface.Event.WarpToScreen(activeScreen() ?: throw RuntimeException("Backstack unexpectedly empty"))),
+        Publisher.just(
+            ExperienceNavigationViewModelInterface.Event.WarpToScreen(
+                activeScreen() ?: throw RuntimeException("Backstack unexpectedly empty"),
+                ExperienceNavigationViewModelInterface.AppBarState(Color.RED)
+            )
+        ),
         epic.share()
     ).flatMap { event ->
         // emit an additional BacklightBoost event into the stream for screen changes.
@@ -167,7 +168,7 @@ class ExperienceNavigationViewModel(
             is ExperienceNavigationViewModelInterface.Event.GoForwardToScreen -> event.screenViewModel.needsBrightBacklight
             is ExperienceNavigationViewModelInterface.Event.WarpToScreen -> event.screenViewModel.needsBrightBacklight
             else -> null
-        }.whenNotNull { ExperienceNavigationViewModelInterface.Event.SetBacklightBoost(it) }
+        }.whenNotNull { ExperienceNavigationViewModelInterface.Event.ViewEvent(ExperienceViewEvent.SetBacklightBoost(it)) }
 
         Observable.concat(
             Observable.just(event),

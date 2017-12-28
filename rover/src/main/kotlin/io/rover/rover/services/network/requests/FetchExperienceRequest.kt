@@ -2,6 +2,7 @@ package io.rover.rover.services.network.requests
 
 import io.rover.rover.core.domain.Experience
 import io.rover.rover.core.domain.ID
+import io.rover.rover.core.logging.log
 import io.rover.rover.services.network.NetworkRequest
 import io.rover.rover.services.network.WireEncoderInterface
 import org.json.JSONObject
