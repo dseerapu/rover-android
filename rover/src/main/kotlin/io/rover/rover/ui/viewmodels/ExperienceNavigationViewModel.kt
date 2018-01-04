@@ -29,9 +29,9 @@ import kotlinx.android.parcel.Parcelize
  * TODO: customization exposure.
  */
 class ExperienceNavigationViewModel(
-    val experience: Experience,
-    val viewModelFactory: ViewModelFactoryInterface,
-    val icicle: Parcelable? = null
+    private val experience: Experience,
+    private val viewModelFactory: ViewModelFactoryInterface,
+    icicle: Parcelable? = null
 ): ExperienceNavigationViewModelInterface {
     override fun pressBack() {
         actions.onNext(Action.PressedBack())
@@ -85,6 +85,8 @@ class ExperienceNavigationViewModel(
     override var state = if(icicle != null) {
         icicle as State
     } else {
+        // the default starting state.  One stack frame, pointing to the experience screen set as
+        // the "home" screen.
         State(
             listOf(BackStackFrame(experience.homeScreenId.rawValue))
         )

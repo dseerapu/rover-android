@@ -37,7 +37,7 @@ class RowViewModelSpec: Spek({
                         )
                     )
                 ),
-            ViewModelFactory(mock(), mock(), mock()),
+            ViewModelFactory(mock(), mock(), mock(), mock()),
             mock()
         )
 
@@ -45,6 +45,14 @@ class RowViewModelSpec: Spek({
             // row bounds' bottom is given as 0, because rows are always responsible
             // for either setting their own height or measuring their stacked auto-height.
             val frame = rowViewModel.frame(RectF(0f, 0f, 60f, 0f))
+
+            it("expands its height to contain the blocks") {
+                frame.bottom.shouldEqual(90f)
+            }
+        }
+
+        on("frame() when erroneously given 0 width") {
+            val frame = rowViewModel.frame(RectF(0f, 0f, 0f, 0f))
 
             it("expands its height to contain the blocks") {
                 frame.bottom.shouldEqual(90f)
@@ -71,6 +79,27 @@ class RowViewModelSpec: Spek({
                 )
             }
         }
+
+        on("render() when erroneously given 0 width") {
+            val layout = rowViewModel.mapBlocksToRectDisplayList(
+                // bottom is given here as 90f because mapBlocksToRectDisplayList must be called
+                // with the fully measured dimensions as returned by frame().
+                RectF(0f, 0f, 0f, 90f)
+            )
+
+            it("lays out the blocks in vertical order with a complete clip") {
+                layout.first().shouldMatch(
+                    RectF(0f, 0f, 0f, 20f),
+                    RectangleBlockViewModelInterface::class.java,
+                    RectF(0f, 0f, 0f, 0f)
+                )
+                layout[1].shouldMatch(
+                    RectF(0f, 20f, 0f, 90f),
+                    RectangleBlockViewModelInterface::class.java,
+                    RectF(0f, 20f, 0f, 20f)
+                )
+            }
+        }
     }
 
     given("a non-autoheight row with a floating block that extends outside the top of the row") {
@@ -91,7 +120,7 @@ class RowViewModelSpec: Spek({
                         )
                     )
                 ),
-            ViewModelFactory(mock(), mock(), mock()),
+            ViewModelFactory(mock(), mock(), mock(), mock()),
             mock()
         )
 
@@ -138,7 +167,7 @@ class RowViewModelSpec: Spek({
                         )
                     )
                 ),
-            ViewModelFactory(mock(), mock(), mock()),
+            ViewModelFactory(mock(), mock(), mock(), mock()),
             mock()
         )
 
@@ -192,7 +221,7 @@ class RowViewModelSpec: Spek({
                             )
                         )
                     ),
-                ViewModelFactory(mock(), mock(), mock()),
+                ViewModelFactory(mock(), mock(), mock(), mock()),
                 mock()
             )
         }

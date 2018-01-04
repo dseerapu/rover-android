@@ -362,7 +362,7 @@ fun <T> Collection<T>.asPublisher(): Publisher<T> {
     }
 }
 
-@Deprecated("Whenever we set Android Min SDK is set to at least 24, use Optional here instead (Reactive Streams spec does not actually allow for nulls)")
+@Deprecated("Whenever we set Android Min SDK to at least 24, change to use Optional here instead (on account of Reactive Streams spec not actually allowing for nulls)")
 fun <T> Publisher<T?>.filterNulls(): Publisher<T> = filter { it != null }.map { it!! }
 
 /**
@@ -510,7 +510,7 @@ typealias  CallbackReceiver<T> = (T) -> Unit
 fun <T> (((r: T) -> Unit) -> NetworkTask).asPublisher(): Publisher<T> {
     return object : Publisher<T> {
         override fun subscribe(subscriber: Subscriber<T>) {
-            val networkTask = this@asPublisher.invoke { result ->
+            val networkTask = this@asPublisher.invoke { result: T ->
                 subscriber.onNext(result)
                 subscriber.onComplete()
             }

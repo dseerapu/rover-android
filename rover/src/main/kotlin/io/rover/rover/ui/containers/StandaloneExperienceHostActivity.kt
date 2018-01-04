@@ -4,13 +4,10 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.support.design.widget.Snackbar
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import com.facebook.stetho.urlconnection.ByteArrayRequestEntity
 import com.facebook.stetho.urlconnection.StethoURLConnectionManager
-import io.rover.rover.core.domain.Experience
-import io.rover.rover.core.domain.ID
 import io.rover.rover.core.logging.log
 import io.rover.rover.platform.DateFormatting
 import io.rover.rover.platform.DeviceIdentification
@@ -22,21 +19,15 @@ import io.rover.rover.services.network.AsyncTaskAndHttpUrlConnectionInterception
 import io.rover.rover.services.network.AsyncTaskAndHttpUrlConnectionInterceptor
 import io.rover.rover.services.network.AsyncTaskAndHttpUrlConnectionNetworkClient
 import io.rover.rover.services.network.AuthenticationContext
-import io.rover.rover.services.network.NetworkResult
 import io.rover.rover.services.network.NetworkService
 import io.rover.rover.services.network.NetworkServiceInterface
 import io.rover.rover.services.network.WireEncoder
-import io.rover.rover.streams.CallbackReceiver
-import io.rover.rover.streams.androidLifecycleDispose
-import io.rover.rover.streams.asPublisher
 import io.rover.rover.streams.subscribe
 import io.rover.rover.ui.AndroidMeasurementService
 import io.rover.rover.ui.AndroidRichTextToSpannedTransformer
 import io.rover.rover.ui.ViewModelFactory
-import io.rover.rover.ui.viewmodels.ExperienceNavigationViewModel
-import io.rover.rover.ui.viewmodels.ExperienceNavigationViewModelInterface
+import io.rover.rover.ui.viewmodels.ExperienceViewEvent
 import io.rover.rover.ui.viewmodels.ExperienceViewModelInterface
-import io.rover.rover.ui.views.ExperienceNavigationView
 import io.rover.rover.ui.views.ExperienceView
 import java.io.IOException
 import java.io.InputStream
@@ -59,7 +50,7 @@ class StandaloneExperienceHostActivity: AppCompatActivity() {
     // probably offer the dynamically set method as an activity argument or something.
 
     private val authToken
-        get() = this.intent.getStringExtra("SDK_TOKEN") ?: throw RuntimeException("General SDK configuration not yet available; please pass SDK_TOKEN intent argument.")
+        get() = this.intent.getStringExtra("SDK_TOKEN") ?: throw RuntimeException("General Rover SDK configuration not yet available; please pass SDK_TOKEN intent argument.")
 
     private val experienceId
         get() = this.intent.getStringExtra("EXPERIENCE_ID") ?: throw RuntimeException("Please pass EXPERIENCE_ID.")
@@ -118,7 +109,8 @@ class StandaloneExperienceHostActivity: AppCompatActivity() {
                 networkClient,
                 ioExecutor
             ),
-            ImageOptimizationService()
+            ImageOptimizationService(),
+            roverSdkNetworkService
         )
     }
 
@@ -133,22 +125,25 @@ class StandaloneExperienceHostActivity: AppCompatActivity() {
             viewModel?.events?.subscribe(
                 { event ->
                     when(event) {
-                        // ANDREW START HERE
-                        is ExperienceNavigationViewModelInterface.Event.Exit -> {
-                            finish()
-                        }
-                        is ExperienceNavigationViewModelInterface.Event.OpenExternalWebBrowser -> {
-                            try {
-                                ContextCompat.startActivity(
-                                    this,
-                                    Intent(
-                                        Intent.ACTION_VIEW,
-                                        event.uri.asAndroidUri()
-                                    ),
-                                    null
-                                )
-                            } catch (e: ActivityNotFoundException) {
-                                log.w("No way to handle URI ${event.uri}.  Perhaps app is missing an intent filter for a deep link?")
+                        is ExperienceViewModelInterface.Event.ViewEvent -> {
+                            when(event.event) {
+                                is ExperienceViewEvent.Exit -> {
+                                    finish()
+                                }
+                                is ExperienceViewEvent.OpenExternalWebBrowser -> {
+                                    try {
+                                        ContextCompat.startActivity(
+                                            this,
+                                            Intent(
+                                                Intent.ACTION_VIEW,
+                                                event.event.uri.asAndroidUri()
+                                            ),
+                                            null
+                                        )
+                                    } catch (e: ActivityNotFoundException) {
+                                        log.w("No way to handle URI ${event.event.uri}.  Perhaps app is missing an intent filter for a deep link?")
+                                    }
+                                }
                             }
                         }
                     }
@@ -159,9 +154,11 @@ class StandaloneExperienceHostActivity: AppCompatActivity() {
         }
 
     override fun onBackPressed() {
-        if(experienceNavigationViewModel?.canGoBack() == true) {
-            experienceNavigationViewModel!!.pressBack()
+        if(experienceViewModel != null) {
+            experienceViewModel?.pressBack()
         } else {
+            // default to standard Android back-button behaviour (ie., pop the activity) if our view
+            // model isn't yet available.
             super.onBackPressed()
         }
     }
@@ -175,32 +172,14 @@ class StandaloneExperienceHostActivity: AppCompatActivity() {
         // backlight.
         experiencesView.attachedWindow = this.window
 
-        // TODO: move into a ExperienceFetchViewModel or something coupled with an ExperienceFetchView (or perhaps StandaloneExperienceView).
-        val fetchExperiencePublisher = { callback: CallbackReceiver<NetworkResult<Experience>> -> roverSdkNetworkService.fetchExperienceTask(ID(experienceId), callback) }.asPublisher()
-
-        fetchExperiencePublisher
-            .androidLifecycleDispose(this)
-            .subscribe({ result ->
-                when (result) {
-                    is NetworkResult.Success -> {
-                        log.v("Experience fetched successfully! living on thread ${Thread.currentThread().id}")
-                        experienceNavigationViewModel = ExperienceNavigationViewModel(result.response, blockViewModelFactory, savedInstanceState?.getParcelable("experienceState"))
-                    }
-                    is NetworkResult.Error -> {
-                        Snackbar.make(this.experiencesView, "Problem: ${result.throwable.message}", Snackbar.LENGTH_SHORT).show()
-                        log.w("Unable to retrieve experience: ${result.throwable.message}")
-                    }
-                }
-            }, { error ->
-                // there are no soft errors here.
-                throw RuntimeException("Unexpected error fetching experience.", error)
-            })
+        experienceViewModel = blockViewModelFactory.viewModelForExperience(
+            experienceId, savedInstanceState?.getParcelable("experienceState")
+        )
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        // TODO: this will be migrated into a surrounding StandaloneExperienceView.
-        outState.putParcelable("experienceState", experienceNavigationViewModel?.state)
+        outState.putParcelable("experienceState", experienceViewModel?.state)
     }
 
     companion object {

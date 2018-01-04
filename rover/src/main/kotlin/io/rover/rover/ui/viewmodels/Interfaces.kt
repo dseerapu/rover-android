@@ -395,6 +395,13 @@ interface ExperienceViewModelInterface: BindableViewModel {
 
         // TODO: activity indication event
     }
+
+    /**
+     * Obtain a state object for this Experience View Model.
+     *
+     * This view model is the start of the chain of responsibility for any nested view models.
+     */
+    val state: Parcelable
 }
 
 interface ExperienceNavigationViewModelInterface : BindableViewModel {
@@ -412,10 +419,11 @@ interface ExperienceNavigationViewModelInterface : BindableViewModel {
     fun canGoBack(): Boolean
 
     /**
-     * Obtain a state object for this Experience View Model.
+     * Obtain a state object for this Experience Navigation View Model.
      *
-     * TODO: determine what the chain of responsibility is for nested view models' state.  Don't
-     * have any yet, though.
+     * TODO: determine if in fact it is worth exposing my own State interface type here (but not the
+     * full type to avoid exposing internals).  A bit more boilerplate but it allows consuming view
+     * models (that contain this one) to have stronger type guarantees in their own state bundles.
      */
     val state: Parcelable
 

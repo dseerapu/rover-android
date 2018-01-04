@@ -15,6 +15,7 @@ import io.rover.rover.platform.whenNotNull
 import io.rover.rover.streams.androidLifecycleDispose
 import io.rover.rover.streams.subscribe
 import io.rover.rover.ui.viewmodels.ExperienceNavigationViewModelInterface
+import io.rover.rover.ui.viewmodels.ExperienceViewEvent
 import io.rover.rover.ui.viewmodels.ScreenViewModelInterface
 
 /**
@@ -29,12 +30,6 @@ class ExperienceNavigationView : FrameLayout, BindableView<ExperienceNavigationV
     // TODO: implement an onCreate and if inEditMode() display a "Rover Experience" text view.
 
     private var activeView: ScreenView? = null
-
-    /**
-     * You must set [attachedWindow] on the Experience view before binding the view model.
-     * This is needed for backlight control.
-     */
-    var attachedWindow: Window? = null
 
     private val viewCache: LruCache<ScreenViewModelInterface, ScreenView> = object : LruCache<ScreenViewModelInterface, ScreenView>(3) {
         override fun entryRemoved(evicted: Boolean, key: ScreenViewModelInterface?, oldValue: ScreenView?, newValue: ScreenView?) {
@@ -55,9 +50,7 @@ class ExperienceNavigationView : FrameLayout, BindableView<ExperienceNavigationV
 
     override var viewModel: ExperienceNavigationViewModelInterface? = null
         set(experienceViewModel) {
-            if(attachedWindow == null) {
-                throw RuntimeException("You must set the attached window on ExperienceNavigationView before binding it to a view model.")
-            }
+
             field = experienceViewModel
 
             field?.events?.androidLifecycleDispose(this)?.subscribe( { event ->
@@ -123,24 +116,8 @@ class ExperienceNavigationView : FrameLayout, BindableView<ExperienceNavigationV
 
                         activeView = newView
                     }
-                    is ExperienceNavigationViewModelInterface.Event.SetBacklightBoost -> {
-                        attachedWindow?.attributes = (attachedWindow?.attributes ?: WindowManager.LayoutParams()).apply {
-                            screenBrightness = when(event.extraBright) {
-                                true -> WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_FULL
-                                false -> WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
-                            }
-                        }
-                    }
+
                 }
             }, { error -> throw error })
         }
-
-    override fun onAttachedToWindow() {
-        super.onAttachedToWindow()
-    }
-
-    override fun onDetachedFromWindow() {
-        super.onDetachedFromWindow()
-        attachedWindow = null
-    }
 }

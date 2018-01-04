@@ -14,6 +14,7 @@ import io.rover.rover.core.domain.TextBlock
 import io.rover.rover.core.domain.WebViewBlock
 import io.rover.rover.services.assets.AssetService
 import io.rover.rover.services.assets.ImageOptimizationServiceInterface
+import io.rover.rover.services.network.NetworkServiceInterface
 import io.rover.rover.ui.viewmodels.BackgroundViewModel
 import io.rover.rover.ui.viewmodels.BarcodeBlockViewModel
 import io.rover.rover.ui.viewmodels.BarcodeViewModel
@@ -26,6 +27,8 @@ import io.rover.rover.ui.viewmodels.ButtonStateViewModelInterface
 import io.rover.rover.ui.viewmodels.ButtonViewModel
 import io.rover.rover.ui.viewmodels.ExperienceNavigationViewModel
 import io.rover.rover.ui.viewmodels.ExperienceNavigationViewModelInterface
+import io.rover.rover.ui.viewmodels.ExperienceViewModel
+import io.rover.rover.ui.viewmodels.ExperienceViewModelInterface
 import io.rover.rover.ui.viewmodels.ImageBlockViewModel
 import io.rover.rover.ui.viewmodels.ImageViewModel
 import io.rover.rover.ui.viewmodels.RectangleBlockViewModel
@@ -39,7 +42,9 @@ import io.rover.rover.ui.viewmodels.WebViewBlockViewModel
 import io.rover.rover.ui.viewmodels.WebViewModel
 
 interface ViewModelFactoryInterface {
-    fun viewModelForExperience(experience: Experience, icicle: Parcelable?): ExperienceNavigationViewModelInterface
+    fun viewModelForExperienceNavigation(experience: Experience, icicle: Parcelable?): ExperienceNavigationViewModelInterface
+
+    fun viewModelForExperience(experienceId: String, icicle: Parcelable?): ExperienceViewModelInterface
 
     fun viewModelForBlock(block: Block): BlockViewModelInterface
 
@@ -53,29 +58,9 @@ interface ViewModelFactoryInterface {
 class ViewModelFactory(
     private val measurementService: MeasurementService,
     private val assetService: AssetService,
-    private val imageOptimizationService: ImageOptimizationServiceInterface
+    private val imageOptimizationService: ImageOptimizationServiceInterface,
+    private val networkService: NetworkServiceInterface
 ) : ViewModelFactoryInterface {
-
-    // I need to decide how to handle icicles.  Maybe I could key the icicles off of the arguments'
-    // hash codes or something?  could be a risk of collision from doing that though.  I wonder if I
-    // could do a stronger hash off of a params data class.  Perhaps dataClass.toString().sha256?
-    //
-    //
-    // Regardless of hash issues, it comes down to a larger philosophical problem: should I allow
-    // ViewModels, even with the help of ViewModelFactory, to construct other view models?  Anything
-    // driven by data suggests that they should: like our whole layout.  So that means that:
-
-    // 1) in the subsequent implementation of some sort of DI system, a layered-context is necessary
-    // - lifecycle context separate from everything else, so that an instance state parcelable is
-    // available.
-
-    // 2) in the interim, ViewModelFactory needs to you to provide it the parcelable state object
-    // and then it would return some sort of context object from which you could use the viewModel
-    // construction objects.
-
-
-
-
 
     override fun viewModelForBlock(block: Block): BlockViewModelInterface {
         return when (block) {
@@ -132,6 +117,7 @@ class ViewModelFactory(
                     borderViewModel
                 )
             }
+
             else -> throw Exception(
                 "This Rover UI block type is not yet supported by the 2.0 SDK: ${block.javaClass.simpleName}."
             )
@@ -171,9 +157,18 @@ class ViewModelFactory(
         )
     }
 
-    override fun viewModelForExperience(experience: Experience, icicle: Parcelable?): ExperienceNavigationViewModelInterface {
+    override fun viewModelForExperienceNavigation(experience: Experience, icicle: Parcelable?): ExperienceNavigationViewModelInterface {
         return ExperienceNavigationViewModel(
             experience,
+            this,
+            icicle
+        )
+    }
+
+    override fun viewModelForExperience(experienceId: String, icicle: Parcelable?): ExperienceViewModelInterface {
+        return ExperienceViewModel(
+            experienceId,
+            networkService,
             this,
             icicle
         )

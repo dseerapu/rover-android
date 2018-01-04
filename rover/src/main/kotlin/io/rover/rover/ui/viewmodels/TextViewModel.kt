@@ -96,6 +96,9 @@ class TextViewModel(
     }
 
     override fun intrinsicHeight(bounds: RectF): Float {
+        if(bounds.width() < 0) {
+            throw RuntimeException("Bounds width somehow less than zero? ${bounds.width()} -- $bounds")
+        }
         return measurementService.measureHeightNeededForRichText(
             if(singleLine) {
                 // only measure a single line as configured.

@@ -96,6 +96,9 @@ class BlockViewModel(
                     bounds.bottom
                 )
 
+                // TODO: boundsConsideringInsets could go negative if the insets are bigger than the
+                // bounds, causing illegal/undefined behaviour further down the chain.
+
                 if (measurable == null) {
                     log.w("Block is set to auto-height but no measurable is given.")
                     0f
