@@ -548,7 +548,6 @@ fun Row.encodeJson(experienceId: String, screenId: String): JSONObject {
 
 fun Screen.Companion.decodeJson(json: JSONObject): Screen {
     return Screen(
-        autoColorStatusBar = json.getBoolean("autoColorStatusBar"),
         backgroundColor = Color.decodeJson(json.getJSONObject("backgroundColor")),
         backgroundContentMode = BackgroundContentMode.decodeJson(json.getString("backgroundContentMode")),
         backgroundImage = Image.optDecodeJSON(json.optJSONObject("backgroundImage")),
@@ -572,7 +571,6 @@ fun Screen.Companion.decodeJson(json: JSONObject): Screen {
 fun Screen.encodeJson(experienceId: String): JSONObject {
     return JSONObject().apply {
         val primitiveProps = listOf(
-            Screen::autoColorStatusBar,
             Screen::isStretchyHeaderEnabled,
             Screen::titleBarText,
             Screen::useDefaultTitleBarStyle

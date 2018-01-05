@@ -3,6 +3,7 @@ package io.rover.rover.ui.viewmodels
 import io.rover.rover.core.domain.BarcodeBlock
 import io.rover.rover.core.domain.ButtonBlock
 import io.rover.rover.core.domain.Screen
+import io.rover.rover.core.domain.TitleBarButtons
 import io.rover.rover.core.domain.WebViewBlock
 import io.rover.rover.core.logging.log
 import io.rover.rover.streams.Observable
@@ -10,10 +11,12 @@ import io.rover.rover.streams.asPublisher
 import io.rover.rover.streams.flatMap
 import io.rover.rover.streams.map
 import io.rover.rover.ui.ViewModelFactoryInterface
+import io.rover.rover.ui.types.AppBarConfiguration
 import io.rover.rover.ui.types.DisplayItem
 import io.rover.rover.ui.types.Layout
 import io.rover.rover.ui.types.NavigateTo
 import io.rover.rover.ui.types.RectF
+import io.rover.rover.ui.views.asAndroidColor
 
 class ScreenViewModel(
     private val screen: Screen,
@@ -45,6 +48,17 @@ class ScreenViewModel(
     override val needsBrightBacklight: Boolean by lazy {
         rowViewModels.any { it.needsBrightBacklight }
     }
+
+    override val appBarConfiguration: AppBarConfiguration
+        get() = AppBarConfiguration(
+            screen.useDefaultTitleBarStyle,
+            screen.titleBarText,
+            screen.titleBarBackgroundColor.asAndroidColor(),
+            screen.titleBarTextColor.asAndroidColor(),
+            screen.titleBarButtons == TitleBarButtons.Both || screen.titleBarButtons == TitleBarButtons.Back,
+            screen.titleBarButtons == TitleBarButtons.Both || screen.titleBarButtons == TitleBarButtons.Close,
+            screen.statusBarColor.asAndroidColor()
+        )
 
     override fun render(
         widthDp: Float

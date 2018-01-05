@@ -26,7 +26,6 @@ class ModelFactories {
          */
         fun emptyScreen(): Screen {
             return Screen(
-                autoColorStatusBar = false,
                 backgroundColor = Black,
                 backgroundContentMode = BackgroundContentMode.Original,
                 backgroundImage = null,

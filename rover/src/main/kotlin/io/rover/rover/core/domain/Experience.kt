@@ -455,7 +455,6 @@ data class Row(
 }
 
 data class Screen(
-    val autoColorStatusBar: Boolean,
     override val backgroundColor: Color,
     override val backgroundContentMode: BackgroundContentMode,
     override val backgroundImage: Image?,

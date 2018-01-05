@@ -26,9 +26,13 @@ import io.rover.rover.streams.subscribe
 import io.rover.rover.ui.AndroidMeasurementService
 import io.rover.rover.ui.AndroidRichTextToSpannedTransformer
 import io.rover.rover.ui.ViewModelFactory
+import io.rover.rover.ui.viewmodels.ExperienceAppBarViewModel
+import io.rover.rover.ui.viewmodels.ExperienceAppBarViewModelInterface
 import io.rover.rover.ui.viewmodels.ExperienceViewEvent
 import io.rover.rover.ui.viewmodels.ExperienceViewModelInterface
 import io.rover.rover.ui.views.ExperienceView
+import io.rover.rover.ui.views.ViewExperienceAppBar
+import io.rover.rover.ui.views.ViewExperienceAppBarInterface
 import java.io.IOException
 import java.io.InputStream
 import java.net.HttpURLConnection
@@ -114,12 +118,19 @@ class StandaloneExperienceHostActivity: AppCompatActivity() {
         )
     }
 
+    private var viewExperienceAppBar : ViewExperienceAppBarInterface? = null
+
     // TODO: there should be a standalone-experience-host-activity view model.
     private var experienceViewModel: ExperienceViewModelInterface? = null
         set(viewModel) {
             field = viewModel
 
             experiencesView.viewModel = viewModel
+
+            if(viewModel != null) {
+                // TODO: ExperienceAppBarViewModel() should come from the Factory
+                viewExperienceAppBar?.experienceAppBarViewModel = ExperienceAppBarViewModel(viewModel)
+            }
 
             // TODO: this subscription must be lifecycle-managed
             viewModel?.events?.subscribe(
@@ -171,6 +182,12 @@ class StandaloneExperienceHostActivity: AppCompatActivity() {
         // The View needs to know about the Activity-level window in order to temporarily change the
         // backlight.
         experiencesView.attachedWindow = this.window
+
+        val actionBar = this.supportActionBar
+
+        viewExperienceAppBar = if(actionBar != null) {
+            ViewExperienceAppBar(experiencesView, actionBar, window)
+        } else null
 
         experienceViewModel = blockViewModelFactory.viewModelForExperience(
             experienceId, savedInstanceState?.getParcelable("experienceState")

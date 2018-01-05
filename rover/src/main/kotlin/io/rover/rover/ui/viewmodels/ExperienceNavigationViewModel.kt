@@ -16,6 +16,7 @@ import io.rover.rover.streams.map
 import io.rover.rover.streams.share
 import io.rover.rover.streams.subscribe
 import io.rover.rover.ui.ViewModelFactoryInterface
+import io.rover.rover.ui.types.AppBarConfiguration
 import io.rover.rover.ui.types.NavigateTo
 import kotlinx.android.parcel.Parcelize
 
@@ -107,8 +108,7 @@ class ExperienceNavigationViewModel(
                 possiblePreviousScreenId.whenNotNull { previousScreenId ->
                     StateChange(
                         ExperienceNavigationViewModelInterface.Event.GoBackwardToScreen(
-                            screenViewModelsById[previousScreenId]!!,
-                            ExperienceNavigationViewModelInterface.AppBarState(Color.RED)
+                            screenViewModelsById[previousScreenId]!!
                         ),
                         // pop backstack:
                         state.backStack.subList(0, state.backStack.lastIndex)
@@ -126,13 +126,15 @@ class ExperienceNavigationViewModel(
                         ),
                         state.backStack // no change to backstack: the view is just getting entirely popped
                     )
-                    is NavigateTo.GoToScreenAction -> StateChange(
-                        ExperienceNavigationViewModelInterface.Event.GoForwardToScreen(
-                            screenViewModelsById[action.navigateTo.screenId] ?: throw RuntimeException("Screen by id ${action.navigateTo.screenId} missing from Experience with id ${experience.id.rawValue}."),
-                            ExperienceNavigationViewModelInterface.AppBarState(Color.RED)
-                        ),
-                        state.backStack + listOf(BackStackFrame(action.navigateTo.screenId))
-                    )
+                    is NavigateTo.GoToScreenAction -> {
+                        val viewModel = screenViewModelsById[action.navigateTo.screenId] ?: throw RuntimeException("Screen by id ${action.navigateTo.screenId} missing from Experience with id ${experience.id.rawValue}.")
+                        StateChange(
+                            ExperienceNavigationViewModelInterface.Event.GoForwardToScreen(
+                                viewModel
+                            ),
+                            state.backStack + listOf(BackStackFrame(action.navigateTo.screenId))
+                        )
+                    }
                 }
             }
         }
@@ -158,13 +160,12 @@ class ExperienceNavigationViewModel(
         // emit a warp-to for all new subscribers so they are guaranteed to see their state.
         Publisher.just(
             ExperienceNavigationViewModelInterface.Event.WarpToScreen(
-                activeScreen() ?: throw RuntimeException("Backstack unexpectedly empty"),
-                ExperienceNavigationViewModelInterface.AppBarState(Color.RED)
+                activeScreen() ?: throw RuntimeException("Backstack unexpectedly empty")
             )
         ),
         epic.share()
     ).flatMap { event ->
-        // emit an additional BacklightBoost event into the stream for screen changes.
+        // emit app bar update and BacklightBoost events (as needed) and into the stream for screen changes.
         val backlightEvent = when(event) {
             is ExperienceNavigationViewModelInterface.Event.GoBackwardToScreen -> event.screenViewModel.needsBrightBacklight
             is ExperienceNavigationViewModelInterface.Event.GoForwardToScreen -> event.screenViewModel.needsBrightBacklight
@@ -172,9 +173,17 @@ class ExperienceNavigationViewModel(
             else -> null
         }.whenNotNull { ExperienceNavigationViewModelInterface.Event.ViewEvent(ExperienceViewEvent.SetBacklightBoost(it)) }
 
+        val appBarEvent = when(event) {
+            is ExperienceNavigationViewModelInterface.Event.GoBackwardToScreen -> event.screenViewModel.appBarConfiguration
+            is ExperienceNavigationViewModelInterface.Event.GoForwardToScreen -> event.screenViewModel.appBarConfiguration
+            is ExperienceNavigationViewModelInterface.Event.WarpToScreen -> event.screenViewModel.appBarConfiguration
+            else -> null
+        }.whenNotNull { ExperienceNavigationViewModelInterface.Event.ViewEvent(ExperienceViewEvent.SetActionBar(it)) }
+
         Observable.concat(
             Observable.just(event),
-            Observable.just(backlightEvent)
+            Observable.just(backlightEvent),
+            Observable.just(appBarEvent)
         ).filterNulls()
     }
 

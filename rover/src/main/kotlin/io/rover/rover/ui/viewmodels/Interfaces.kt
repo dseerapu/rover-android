@@ -14,6 +14,7 @@ import io.rover.rover.services.network.NetworkTask
 import io.rover.rover.streams.Observable
 import io.rover.rover.ui.BlockAndRowLayoutManager
 import io.rover.rover.ui.types.Alignment
+import io.rover.rover.ui.types.AppBarConfiguration
 import io.rover.rover.ui.types.DisplayItem
 import io.rover.rover.ui.types.Font
 import io.rover.rover.ui.types.FontAppearance
@@ -365,6 +366,8 @@ interface ScreenViewModelInterface: BindableViewModel, BackgroundViewModelInterf
     val events: Observable<NavigateTo>
 
     val needsBrightBacklight: Boolean
+
+    val appBarConfiguration: AppBarConfiguration
 }
 
 /**
@@ -391,7 +394,6 @@ interface ExperienceViewModelInterface: BindableViewModel {
         class ViewEvent(
             val event: ExperienceViewEvent
         ): Event()
-
 
         // TODO: activity indication event
     }
@@ -429,31 +431,24 @@ interface ExperienceNavigationViewModelInterface : BindableViewModel {
 
     sealed class Event {
         class GoForwardToScreen(
-            val screenViewModel: ScreenViewModelInterface,
-            val appBarState: AppBarState
+            val screenViewModel: ScreenViewModelInterface
         ): Event()
 
         class GoBackwardToScreen(
-            val screenViewModel: ScreenViewModelInterface,
-            val appBarState: AppBarState
+            val screenViewModel: ScreenViewModelInterface
         ): Event()
 
         /**
          * This event signifies that the view should immediately display the given view model.
          */
         class WarpToScreen(
-            val screenViewModel: ScreenViewModelInterface,
-            val appBarState: AppBarState
+            val screenViewModel: ScreenViewModelInterface
         ): Event()
 
         class ViewEvent(
             val event: ExperienceViewEvent
         ): Event()
     }
-
-    data class AppBarState(
-        val color: Int
-    )
 }
 
 /**
@@ -481,6 +476,18 @@ sealed class ExperienceViewEvent {
      * flow, whatever it happens to be.
      */
     class Exit(): ExperienceViewEvent()
+
+    class SetActionBar(
+        val appBarConfiguration: AppBarConfiguration
+    ): ExperienceViewEvent()
+}
+
+interface ExperienceAppBarViewModelInterface {
+    val events: Observable<Event>
+
+    class Event(
+        val appBarConfiguration: AppBarConfiguration
+    )
 }
 
 /**

@@ -71,7 +71,6 @@ class ExperienceViewModel(
                                     // What will unsubscribe this when a new ExperienceNavigationViewModel
                                     // comes through?  For now not likely to happen because this view model is not re-bound.
                                     viewModel.events.map { navigationEvent ->
-
                                         when(navigationEvent) {
                                             is ExperienceNavigationViewModelInterface.Event.ViewEvent -> ExperienceViewModelInterface.Event.ViewEvent(navigationEvent.event)
                                             else -> null

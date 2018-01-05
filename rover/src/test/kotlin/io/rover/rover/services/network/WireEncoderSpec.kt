@@ -101,7 +101,6 @@ class WireEncoderSpec: Spek({
                     // order is important!
                     decoded.screens.first().apply {
                         id shouldEqual ID("BkKeyw-Ux")
-                        autoColorStatusBar shouldEqual true
                         backgroundColor shouldEqual Color(211, 238, 247, 1.0)
                         backgroundContentMode shouldEqual BackgroundContentMode.Original
                         backgroundImage shouldEqual null

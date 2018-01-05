@@ -5,7 +5,6 @@
             "id": "5873dee6d5bf3e002de4d70e",
             "screens": [
                 {
-                    "autoColorStatusBar": true,
                     "backgroundColor": {
                         "alpha": 1,
                         "blue": 247,
@@ -702,7 +701,6 @@
                     "useDefaultTitleBarStyle": false
                 },
                 {
-                    "autoColorStatusBar": true,
                     "backgroundColor": {
                         "alpha": 1,
                         "blue": 255,
@@ -1154,7 +1152,6 @@
                     "useDefaultTitleBarStyle": false
                 },
                 {
-                    "autoColorStatusBar": true,
                     "backgroundColor": {
                         "alpha": 1,
                         "blue": 255,
@@ -2020,7 +2017,6 @@
                     "useDefaultTitleBarStyle": false
                 },
                 {
-                    "autoColorStatusBar": true,
                     "backgroundColor": {
                         "alpha": 1,
                         "blue": 255,

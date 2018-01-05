@@ -1,9 +1,12 @@
 package io.rover.rover.ui.views
 
+import android.app.Activity
 import android.content.Context
 import android.os.Parcelable
+import android.support.design.widget.AppBarLayout
 import android.support.design.widget.CoordinatorLayout
 import android.support.design.widget.Snackbar
+import android.support.v7.widget.Toolbar
 import android.util.AttributeSet
 import android.view.Window
 import android.view.WindowManager
@@ -23,9 +26,37 @@ class ExperienceView: FrameLayout, BindableView<ExperienceViewModelInterface> {
     private val experienceNavigationView: ExperienceNavigationView = ExperienceNavigationView(context)
 
     init {
+
+//        addView(
+//           toolbar
+//        )
+//        toolbar.title = "WAT"
+//        (toolbar.layoutParams as CoordinatorLayout.LayoutParams).apply {
+//            width = LayoutParams.MATCH_PARENT
+//            height = LayoutParams.WRAP_CONTENT
+//        }
+
+
         addView(
             experienceNavigationView
         )
+
+//        (experienceNavigationView.layoutParams as CoordinatorLayout.LayoutParams).apply {
+//            behavior = AppBarLayout.ScrollingViewBehavior()
+//            width = LayoutParams.MATCH_PARENT
+//            height = LayoutParams.MATCH_PARENT
+//        }
+//
+//        val appBarLayout = AppBarLayout(context)
+//        addView(appBarLayout)
+//        (appBarLayout.layoutParams as CoordinatorLayout.LayoutParams).apply {
+//            width = LayoutParams.MATCH_PARENT
+//            height = LayoutParams.WRAP_CONTENT
+//        }
+//        appBarLayout.addView(toolbar)
+//        (toolbar.layoutParams as AppBarLayout.LayoutParams).apply {
+//            scrollFlags = AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS
+//        }
     }
 
     /**
