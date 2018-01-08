@@ -5,6 +5,7 @@ import android.os.Build
 import android.support.v7.app.ActionBar
 import android.support.v7.appcompat.R.attr.colorPrimary
 import android.support.v7.appcompat.R.attr.colorPrimaryDark
+import android.support.v7.widget.Toolbar
 import android.text.SpannableStringBuilder
 import android.text.style.ForegroundColorSpan
 import android.util.TypedValue
@@ -15,30 +16,23 @@ import io.rover.rover.streams.subscribe
 import io.rover.rover.ui.viewmodels.ExperienceAppBarViewModelInterface
 
 /**
+ * This view concern wraps an [ActionBar] (that is, the specialized [Toolbar] that is provided as
+ * part of Android appcompat activities and fragments as the so-called "system action bar").
  *
+ * This view concern is used when the host activity/fragment of an [ExperienceView] is using
+ * said stock system action bar.  If the host activity is using a custom toolbar in lieu of
+ * the Android action bar, then see [?????] instead.
  */
 class ViewExperienceAppBar(
     val hostView: View,
     val supportActionBar: ActionBar,
     val hostWindowForStatusBar: Window
 ): ViewExperienceAppBarInterface {
-
-    // we need to determine what the default background color is so we can restore it when we
-    // receive an action bar configuration with [ActionBarConfiguration.useGlobalTheme] turned off.
-//    private val actionBarId = hostView.resources.getIdentifier("action_bar", "id", "android");
-//    private val actionBarView: View = hostView.findViewById(actionBarId)
-//    private val defaultBackground = actionBarView.background
-
-//    private val canary = View(hostView.context)
-//    init {
-//        supportActionBar.customView = canary
-//    }
-//    private val actionBarView = canary.parent.parent
-//    init {
-//        supportActionBar.customView = null
-//    }
-//    private val defaultBackground = actionBarView.background
-
+    // This is a bit of a bug because the action bar style (by default) indirects to colorPrimary
+    // from the theme.  However, if the developer has directly replaced or changed the action bar
+    // style to do something different than the primary colour, than our attempt to use
+    // themeColorPrimary below to "restore" the original state will in fact just clobber their
+    // theme.  Retrieve `actionBarStyle` from user's theme, which is the customization point?
     private val themeColorPrimary = TypedValue().apply {
         supportActionBar.themedContext.theme.resolveAttribute(colorPrimary, this, true)
     }.data

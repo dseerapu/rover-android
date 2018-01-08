@@ -2,12 +2,10 @@ package io.rover.rover.streams
 
 import android.arch.lifecycle.GenericLifecycleObserver
 import android.arch.lifecycle.Lifecycle
-import android.arch.lifecycle.LifecycleObserver
 import android.arch.lifecycle.LifecycleOwner
 import android.view.View
 import io.rover.rover.services.network.NetworkTask
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.ConcurrentSkipListSet
 
 interface Subscription {
     fun cancel()
@@ -94,6 +92,12 @@ interface Publisher<out T> {
 
                     recursiveSubscribe(sources.asList())
                 }
+            }
+        }
+
+        fun <T> defer(builder: () -> Observable<T>): Observable<T> {
+            return object : Observable<T> {
+                override fun subscribe(subscriber: Subscriber<T>) = builder().subscribe(subscriber)
             }
         }
     }
