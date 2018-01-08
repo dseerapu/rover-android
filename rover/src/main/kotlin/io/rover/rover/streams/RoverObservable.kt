@@ -4,7 +4,9 @@ import android.arch.lifecycle.GenericLifecycleObserver
 import android.arch.lifecycle.Lifecycle
 import android.arch.lifecycle.LifecycleOwner
 import android.view.View
+import io.rover.rover.core.logging.log
 import io.rover.rover.services.network.NetworkTask
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 interface Subscription {
@@ -276,36 +278,98 @@ fun <T, R> Publisher<T>.flatMap(transform: (T) -> Publisher<R>): Publisher<R> {
 /**
  * Subscribe to the [Publisher] once, and multicast yielded signals to multiple subscribers.
  *
- * Note that [share] will immediately subscribe (unlike the implementation in RxJava), so if you use
- * it on a cold [Publisher] (one that yields items on subscribe right away), you will almost
- * certainly miss those items.
- *
+ * Note that [share] will subscribe to the source once the first consumer subscribes to it.
  */
 fun <T> Publisher<T>.share(): Publisher<T> {
     val multicastTo: MutableSet<Subscriber<T>> = mutableSetOf()
 
-    this.subscribe(
-        object : Subscriber<T> {
-            override fun onComplete() {
-                multicastTo.forEach { it.onComplete() }
-                multicastTo.clear()
-            }
+    var subscribed = false
 
-            override fun onError(error: Throwable) {
-                multicastTo.forEach { it.onError(error) }
-            }
-
-            override fun onNext(item: T) {
-                multicastTo.forEach { it.onNext(item) }
-            }
-
-            override fun onSubscribe(subscription: Subscription) { /* no-op */ }
-        }
-    )
-
-    // subscribe right away and multicast to any listeners
     return object : Publisher<T> {
         override fun subscribe(subscriber: Subscriber<T>) {
+            // subscribe on initial.
+            if(!subscribed) {
+                subscribed = true
+                this@share.subscribe(
+                    object : Subscriber<T> {
+                        override fun onComplete() {
+                            multicastTo.forEach { it.onComplete() }
+                            multicastTo.clear()
+                        }
+
+                        override fun onError(error: Throwable) {
+                            multicastTo.forEach { it.onError(error) }
+                        }
+
+                        override fun onNext(item: T) {
+                            multicastTo.forEach { it.onNext(item) }
+                        }
+
+                        override fun onSubscribe(subscription: Subscription) { /* no-op */ }
+                    }
+                )
+            }
+
+            multicastTo.add(subscriber)
+
+            val subscription = object : Subscription {
+                override fun cancel() {
+                    // he wants out
+                    multicastTo.remove(subscriber)
+                }
+            }
+            subscriber.onSubscribe(subscription)
+        }
+    }
+}
+
+/**
+ * Similar to [share], but will buffer and re-emit the [count] most recent events to any new
+ * subscriber.  Similarly to [share], it will not subscribe to the source until it is first
+ * subscribed to itself.
+ */
+fun <T> Publisher<T>.shareAndReplay(count: Int): Publisher<T> {
+    val buffer = ArrayDeque<T>(count)
+
+    val multicastTo: MutableSet<Subscriber<T>> = mutableSetOf()
+
+    var subscribed = false
+
+    return object : Publisher<T> {
+        override fun subscribe(subscriber: Subscriber<T>) {
+            // subscribe to source on initial subscribe.
+            if(!subscribed) {
+                subscribed = true
+                this@shareAndReplay.subscribe(
+                    object : Subscriber<T> {
+                        override fun onComplete() {
+                            multicastTo.forEach { it.onComplete() }
+                            multicastTo.clear()
+                        }
+
+                        override fun onError(error: Throwable) {
+                            multicastTo.forEach { it.onError(error) }
+                        }
+
+                        override fun onNext(item: T) {
+                            multicastTo.forEach { it.onNext(item) }
+                            buffer.addLast(item)
+                            // emulate a ring buffer by removing any older entries than `count`
+                            for(i in 1..buffer.size - count) {
+                                buffer.removeFirst()
+                            }
+                        }
+
+                        override fun onSubscribe(subscription: Subscription) {
+                            // catch up the new subscriber on the `count` number of last events.
+                            multicastTo.forEach { subscriber ->
+                                buffer.forEach { event -> subscriber.onNext(event) }
+                            }
+                        }
+                    }
+                )
+            }
+
             multicastTo.add(subscriber)
 
             val subscription = object : Subscription {
