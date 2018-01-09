@@ -16,7 +16,7 @@ class RectangleBlockView : View, LayoutableView<RectangleBlockViewModelInterface
 
     // mixins
     private val viewComposition = ViewComposition()
-    private val viewBackground = ViewBackground(this)
+    private val viewBackground = ViewBackground(this, viewComposition)
     private val viewBorder = ViewBorder(this, viewComposition)
 
     override var viewModel: RectangleBlockViewModelInterface? = null

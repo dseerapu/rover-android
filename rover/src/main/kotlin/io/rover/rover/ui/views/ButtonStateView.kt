@@ -24,7 +24,7 @@ class ButtonStateView: View, BindableView<ButtonStateViewModelInterface> {
         }
 
     private val viewComposition = ViewComposition()
-    private val viewBackground = ViewBackground(this)
+    private val viewBackground = ViewBackground(this, viewComposition)
     private val viewBorder = ViewBorder(this, viewComposition)
 
     override fun onDraw(canvas: Canvas) {

@@ -1,6 +1,7 @@
 package io.rover.rover.ui.views
 
 import android.content.Context
+import android.graphics.Canvas
 import android.support.v7.widget.RecyclerView
 import android.util.AttributeSet
 import android.view.View
@@ -13,7 +14,8 @@ class ScreenView : RecyclerView, BindableView<ScreenViewModelInterface> {
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
     constructor(context: Context?, attrs: AttributeSet?, defStyle: Int) : super(context, attrs, defStyle)
 
-    private val viewBackground = ViewBackground(this)
+    private val viewComposition = ViewComposition()
+    private val viewBackground = ViewBackground(this, viewComposition)
 
     override var viewModel: ScreenViewModelInterface? = null
         set(viewModel) {
@@ -36,4 +38,15 @@ class ScreenView : RecyclerView, BindableView<ScreenViewModelInterface> {
                 )
             }
         }
+
+    override fun onDraw(canvas: Canvas) {
+        viewComposition.beforeOnDraw(canvas)
+        super.onDraw(canvas)
+        viewComposition.afterOnDraw(canvas)
+    }
+
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        viewComposition.onSizeChanged(w, h, oldw, oldh)
+    }
 }

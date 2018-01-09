@@ -1,6 +1,7 @@
 package io.rover.rover.ui.views
 
 import android.content.Context
+import android.graphics.Canvas
 import android.support.v7.widget.AppCompatImageView
 import android.util.AttributeSet
 import io.rover.rover.ui.viewmodels.BarcodeBlockViewModelInterface
@@ -11,7 +12,7 @@ class BarcodeBlockView : AppCompatImageView, LayoutableView<BarcodeBlockViewMode
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
     private val viewComposition = ViewComposition()
-    private val viewBackground = ViewBackground(this)
+    private val viewBackground = ViewBackground(this, viewComposition)
     private val viewBorder = ViewBorder(this, viewComposition)
     private val viewBarcode = ViewBarcode(this)
     private val viewBlock = ViewBlock(this, setOf(viewBorder, viewBarcode))
@@ -25,4 +26,15 @@ class BarcodeBlockView : AppCompatImageView, LayoutableView<BarcodeBlockViewMode
             viewBlock.blockViewModel = barcodeBlockViewModel
             viewBackground.backgroundViewModel = barcodeBlockViewModel
         }
+
+    override fun onDraw(canvas: Canvas) {
+        viewComposition.beforeOnDraw(canvas)
+        super.onDraw(canvas)
+        viewComposition.afterOnDraw(canvas)
+    }
+
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        viewComposition.onSizeChanged(w, h, oldw, oldh)
+    }
 }

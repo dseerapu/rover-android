@@ -13,7 +13,7 @@ class RowView : View, LayoutableView<RowViewModelInterface> {
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes)
 
     private val viewComposition = ViewComposition()
-    private val viewBackground = ViewBackground(this)
+    private val viewBackground = ViewBackground(this, viewComposition)
 
     override var viewModel: RowViewModelInterface? = null
         set(viewModel) {

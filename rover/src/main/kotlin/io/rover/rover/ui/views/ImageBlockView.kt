@@ -16,7 +16,7 @@ class ImageBlockView : AppCompatImageView, LayoutableView<ImageBlockViewModelInt
     // mixins (TODO: injections)
     private val viewComposition = ViewComposition()
 
-    private val viewBackground = ViewBackground(this)
+    private val viewBackground = ViewBackground(this, viewComposition)
     private val viewBorder = ViewBorder(this, viewComposition)
     private val viewBlock = ViewBlock(this, setOf(viewBorder))
     private val viewImage = ViewImage(this)

@@ -18,7 +18,7 @@ class TextBlockView : TextView, LayoutableView<TextBlockViewModelInterface> {
     // mixins (TODO: injections)
     private val viewComposition = ViewComposition()
 
-    private val viewBackground = ViewBackground(this)
+    private val viewBackground = ViewBackground(this, viewComposition)
     private val viewBorder = ViewBorder(this, viewComposition)
     private val viewBlock = ViewBlock(this, setOf(viewBorder))
     private val viewText = ViewText(this, AndroidRichTextToSpannedTransformer())

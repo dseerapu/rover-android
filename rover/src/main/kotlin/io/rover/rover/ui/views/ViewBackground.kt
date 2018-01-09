@@ -15,7 +15,8 @@ import io.rover.rover.ui.types.PixelSize
 import io.rover.rover.ui.viewmodels.BackgroundViewModelInterface
 
 class ViewBackground(
-    private val view: View
+    private val view: View,
+    private val viewComposition: ViewCompositionInterface
 ) : ViewBackgroundInterface {
     private val shortAnimationDuration = view.resources.getInteger(
         android.R.integer.config_shortAnimTime
@@ -38,12 +39,7 @@ class ViewBackground(
         })
 
         // in order to know our realized width and height we need to listen for layout events.
-        width = view.width
-        height = view.height
-
-        view.addOnLayoutChangeListener { view, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
-            width = right - left
-            height = bottom - top
+        viewComposition.registerOnSizeChangedCallback { width, height, oldWidth, oldHeight ->
             dimensionCallbacks.forEach { it.invoke(width, height) }
             dimensionCallbacks.clear()
         }
@@ -54,7 +50,6 @@ class ViewBackground(
      */
     private fun whenDimensionsReady(callback: DimensionCallback) {
         if(width == 0 && height == 0) {
-            // dimensions aren't ready. wait.
             log.v("Dimensions aren't ready.  Waiting.")
             dimensionCallbacks.add(callback)
         } else {
