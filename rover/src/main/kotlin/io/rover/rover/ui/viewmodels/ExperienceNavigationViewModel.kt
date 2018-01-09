@@ -100,7 +100,7 @@ class ExperienceNavigationViewModel(
     }
 
     // TODO: this is definitely going to be the custom behaviour injection opportunity
-    private fun actionBehaviour(action: Action): StateChange {
+    private fun actionBehaviour(action: Action): StateChange? {
         val activeScreen = activeScreen()
         val possiblePreviousScreenId = state.backStack.getOrNull(state.backStack.lastIndex - 1)?.screenId
         return when(action) {
@@ -127,13 +127,18 @@ class ExperienceNavigationViewModel(
                         state.backStack // no change to backstack: the view is just getting entirely popped
                     )
                     is NavigateTo.GoToScreenAction -> {
-                        val viewModel = screenViewModelsById[action.navigateTo.screenId] ?: throw RuntimeException("Screen by id ${action.navigateTo.screenId} missing from Experience with id ${experience.id.rawValue}.")
-                        StateChange(
-                            ExperienceNavigationViewModelInterface.Event.GoForwardToScreen(
-                                viewModel
-                            ),
-                            state.backStack + listOf(BackStackFrame(action.navigateTo.screenId))
-                        )
+                        val viewModel = screenViewModelsById[action.navigateTo.screenId]
+                            if(viewModel == null) {
+                                log.w("Screen by id ${action.navigateTo.screenId} missing from Experience with id ${experience.id.rawValue}.")
+                                null
+                            } else {
+                                StateChange(
+                                    ExperienceNavigationViewModelInterface.Event.GoForwardToScreen(
+                                        viewModel
+                                    ),
+                                    state.backStack + listOf(BackStackFrame(action.navigateTo.screenId))
+                                )
+                            }
                     }
                 }
             }
@@ -147,6 +152,7 @@ class ExperienceNavigationViewModel(
 
     private val epic = actions
         .map { action -> actionBehaviour(action) }
+        .filterNulls()
         .map { stateChange ->
             // abuse .map() for doOnNext() side-effects for now to update our state! TODO add doOnNext()
             state = State(stateChange.newBackStack)
