@@ -1,22 +1,20 @@
 package io.rover.rover.ui.viewmodels
 
 import android.annotation.SuppressLint
-import android.graphics.Color
 import android.os.Parcelable
 import io.rover.rover.core.domain.Experience
 import io.rover.rover.core.logging.log
 import io.rover.rover.platform.whenNotNull
 import io.rover.rover.streams.Observable
 import io.rover.rover.streams.PublishSubject
-import io.rover.rover.streams.Publisher
 import io.rover.rover.streams.asPublisher
 import io.rover.rover.streams.filterNulls
 import io.rover.rover.streams.flatMap
 import io.rover.rover.streams.map
+import io.rover.rover.streams.replayTypesOnResubscribe
 import io.rover.rover.streams.share
 import io.rover.rover.streams.subscribe
 import io.rover.rover.ui.ViewModelFactoryInterface
-import io.rover.rover.ui.types.AppBarConfiguration
 import io.rover.rover.ui.types.NavigateTo
 import kotlinx.android.parcel.Parcelize
 
@@ -109,8 +107,10 @@ class ExperienceNavigationViewModel(
             is Action.PressedBack -> {
                 possiblePreviousScreenId.whenNotNull { previousScreenId ->
                     StateChange(
-                        ExperienceNavigationViewModelInterface.Event.GoBackwardToScreen(
-                            screenViewModelsById[previousScreenId]!!
+                        ExperienceNavigationViewModelInterface.Event.GoToScreen(
+                            screenViewModelsById[previousScreenId]!!,
+                            true,
+                            true
                         ),
                         // pop backstack:
                         state.backStack.subList(0, state.backStack.lastIndex)
@@ -135,8 +135,8 @@ class ExperienceNavigationViewModel(
                                 null
                             } else {
                                 StateChange(
-                                    ExperienceNavigationViewModelInterface.Event.GoForwardToScreen(
-                                        viewModel
+                                    ExperienceNavigationViewModelInterface.Event.GoToScreen(
+                                        viewModel, false, true
                                     ),
                                     state.backStack + listOf(BackStackFrame(action.navigateTo.screenId))
                                 )
@@ -159,16 +159,12 @@ class ExperienceNavigationViewModel(
         // into the stream as needed (backlight and toolbar behaviours).
         // emit app bar update and BacklightBoost events (as needed) and into the stream for screen changes.
         val backlightEvent = when(event) {
-            is ExperienceNavigationViewModelInterface.Event.GoBackwardToScreen -> event.screenViewModel.needsBrightBacklight
-            is ExperienceNavigationViewModelInterface.Event.GoForwardToScreen -> event.screenViewModel.needsBrightBacklight
-            is ExperienceNavigationViewModelInterface.Event.WarpToScreen -> event.screenViewModel.needsBrightBacklight
+            is ExperienceNavigationViewModelInterface.Event.GoToScreen -> event.screenViewModel.needsBrightBacklight
             else -> null
         }.whenNotNull { ExperienceNavigationViewModelInterface.Event.ViewEvent(ExperienceViewEvent.SetBacklightBoost(it)) }
 
         val appBarEvent = when(event) {
-            is ExperienceNavigationViewModelInterface.Event.GoBackwardToScreen -> event.screenViewModel.appBarConfiguration
-            is ExperienceNavigationViewModelInterface.Event.GoForwardToScreen -> event.screenViewModel.appBarConfiguration
-            is ExperienceNavigationViewModelInterface.Event.WarpToScreen -> event.screenViewModel.appBarConfiguration
+            is ExperienceNavigationViewModelInterface.Event.GoToScreen -> event.screenViewModel.appBarConfiguration
             else -> null
         }.whenNotNull { ExperienceNavigationViewModelInterface.Event.SetActionBar(it) }
 
@@ -179,37 +175,41 @@ class ExperienceNavigationViewModel(
         ).filterNulls()
     }
 
-    private val epic = actions
-        .map { action -> actionBehaviour(action) }
-        .filterNulls()
-        .map { stateChange ->
-            // abuse .map() for doOnNext() side-effects for now to update our state! TODO add doOnNext()
-            state = State(stateChange.newBackStack)
-            log.v("State change: $stateChange")
-
-            stateChange
-        }.flatMap { stateChange -> injectBehaviouralTransientEvents(stateChange.event)}
-        .map { event ->
-            // and to dispatch the change to the toolbar view model (TODO doOnNext)
-            if (event is ExperienceNavigationViewModelInterface.Event.SetActionBar) {
-                toolbarViewModel.setConfiguration(event.appBarConfiguration)
-            }
-
-            event
-        }.share()
-
-    override val events: Observable<ExperienceNavigationViewModelInterface.Event> = Publisher.concat(
-        // emit a warp-to for all new subscribers so they are guaranteed to see their state.
-        Publisher.just(
-            ExperienceNavigationViewModelInterface.Event.WarpToScreen(
-                activeScreen()
+    private val epic = Observable.concat(
+        Observable.just(
+            // just warp right to the current screen in the state (or the home screen in the
+            // experience).
+            StateChange(
+                ExperienceNavigationViewModelInterface.Event.GoToScreen(
+                    activeScreen(), false, false
+                ),
+                state.backStack
             )
-        ).flatMap { event -> injectBehaviouralTransientEvents(event) },
-        epic
-    ).map { event ->
-        log.v("Navigation view model event: $event")
+        ),
+        actions
+            .map { action -> actionBehaviour(action) }
+            .filterNulls()
+    ).map { stateChange ->
+        // abuse .map() for doOnNext() side-effects for now to update our state! TODO add doOnNext()
+        state = State(stateChange.newBackStack)
+        stateChange
+    }.flatMap { stateChange -> injectBehaviouralTransientEvents(stateChange.event) }
+    .map { event ->
+        // and to dispatch the change to the toolbar view model (TODO doOnNext)
+        if (event is ExperienceNavigationViewModelInterface.Event.SetActionBar) {
+            toolbarViewModel.setConfiguration(event.appBarConfiguration)
+        }
+
         event
+    }.share().map {
+        it
     }
+
+    override val events: Observable<ExperienceNavigationViewModelInterface.Event> = epic.replayTypesOnResubscribe(
+        // TODO oh shit.  GoToScreen would retain its animation values.  it needs to be transformed.
+        ExperienceNavigationViewModelInterface.Event.GoToScreen::class.java,
+        ExperienceNavigationViewModelInterface.Event.SetActionBar::class.java
+    )
 
     // @Parcelize Kotlin synthetics are generating the CREATOR method for us.
     @SuppressLint("ParcelCreator")

@@ -141,8 +141,8 @@ class BlockViewModel(
         get() = block.action != null
 
     override fun click() {
-        // I don't have an epic here, just a single event emitter, so I'll just publish an event
-        // immediately.
+        // I don't have an epic (any other asynchronous behaviour to compose) here, just a single
+        // event emitter, so I'll just publish an event directly.
         val action = block.action
 
         val navigateTo = when(action) {

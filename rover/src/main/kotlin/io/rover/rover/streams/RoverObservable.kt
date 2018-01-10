@@ -65,7 +65,6 @@ interface Publisher<out T> {
 
                     // subscribe to first thing, wait for it to complete, then subscribe to second thing, wait for it to complete, etc.
                     fun recursiveSubscribe(remainingSources: List<Publisher<T>>) {
-
                         if(remainingSources.isEmpty()) {
                             subscriber.onComplete()
                         } else {
@@ -98,6 +97,67 @@ interface Publisher<out T> {
             }
         }
 
+        /**
+         * Emit the signals from two or more [Publisher]s while interleaving them.  It will
+         * subscribe to all of the [sources] when subscribed to.
+         *
+         * [merge()](http://reactivex.io/documentation/operators/merge.html).
+         */
+        fun <T> merge(vararg sources: Publisher<T>): Publisher<T> {
+            return object : Publisher<T> {
+                override fun subscribe(subscriber: Subscriber<T>) {
+                    var cancelled = false
+
+                    val subscriptions : MutableSet<Subscription> = mutableSetOf()
+
+                    val subscription = object : Subscription {
+                        override fun cancel() {
+                            cancelled = true
+                            // cancel our subscriptions to all the sources
+                            subscriptions.forEach { it.cancel() }
+                        }
+                    }
+
+                    val remainingSources = sources.toMutableSet()
+
+                    subscriber.onSubscribe(subscription)
+
+                    sources.forEach { source ->
+                        source.subscribe(object : Subscriber<T> {
+                            override fun onComplete() {
+                                remainingSources.remove(source)
+                                if(remainingSources.isEmpty() && !cancelled) {
+                                    subscriber.onComplete()
+                                }
+                            }
+
+                            override fun onError(error: Throwable) {
+                                if (!cancelled) subscriber.onError(error)
+                            }
+
+                            override fun onNext(item: T) {
+                                if (!cancelled) subscriber.onNext(item)
+                            }
+
+                            override fun onSubscribe(subscription: Subscription) {
+                                if (!cancelled) {
+                                    subscriptions.add(subscription)
+                                } else {
+                                    // just in case a subscription comes up after we are cancelled
+                                    // ourselves, cancel.
+                                    subscription.cancel()
+                                }
+                            }
+                        })
+                    }
+                }
+            }
+        }
+
+        /**
+         * When subscribed to, evaluate the given [builder] block that will yield an Observable
+         * that is then subscribed to.
+         */
         fun <T> defer(builder: () -> Observable<T>): Observable<T> {
             return object : Observable<T> {
                 override fun subscribe(subscriber: Subscriber<T>) = builder().subscribe(subscriber)
@@ -295,7 +355,16 @@ fun <T> Publisher<T>.share(): Publisher<T> {
 
     return object : Publisher<T> {
         override fun subscribe(subscriber: Subscriber<T>) {
-            log.v("SUBSCRIBED FROM THREAD ${Thread.currentThread()}")
+            multicastTo.add(subscriber)
+
+            val subscription = object : Subscription {
+                override fun cancel() {
+                    // he wants out
+                    multicastTo.remove(subscriber)
+                }
+            }
+            subscriber.onSubscribe(subscription)
+
             // subscribe on initial.
             if(!subscribed) {
                 subscribed = true
@@ -318,16 +387,6 @@ fun <T> Publisher<T>.share(): Publisher<T> {
                     }
                 )
             }
-
-            multicastTo.add(subscriber)
-
-            val subscription = object : Subscription {
-                override fun cancel() {
-                    // he wants out
-                    multicastTo.remove(subscriber)
-                }
-            }
-            subscriber.onSubscribe(subscription)
         }
     }
 }
@@ -336,9 +395,6 @@ fun <T> Publisher<T>.share(): Publisher<T> {
  * Similar to [shareAndReplay], but in addition buffering and re-emitting the [count] most recent
  * events to any new subscriber, it will also immediately subscribe to the source and begin
  * buffering.  This is suitable for use with hot observables.
- *
- * This appears somewhat equivalent to Jake Wharton's
- * [RxReplayingShare](https://github.com/JakeWharton/RxReplayingShare).
  */
 fun <T> Publisher<T>.shareHotAndReplay(count: Int): Publisher<T> {
     val buffer = ArrayDeque<T>(count)
@@ -365,12 +421,7 @@ fun <T> Publisher<T>.shareHotAndReplay(count: Int): Publisher<T> {
                 }
             }
 
-            override fun onSubscribe(subscription: Subscription) {
-                // catch up the new subscriber on the `count` number of last events.
-                multicastTo.forEach { subscriber ->
-                    buffer.forEach { event -> subscriber.onNext(event) }
-                }
-            }
+            override fun onSubscribe(subscription: Subscription) { /* no-op */}
         }
     )
 
@@ -385,6 +436,9 @@ fun <T> Publisher<T>.shareHotAndReplay(count: Int): Publisher<T> {
                 }
             }
             subscriber.onSubscribe(subscription)
+
+            // catch up the new subscriber on the `count` number of last events.
+            buffer.forEach { event -> subscriber.onNext(event) }
         }
     }
 }
@@ -393,6 +447,11 @@ fun <T> Publisher<T>.shareHotAndReplay(count: Int): Publisher<T> {
  * Similar to [share], but will buffer and re-emit the [count] most recent events to any new
  * subscriber.  Similarly to [share], it will not subscribe to the source until it is first
  * subscribed to itself.
+ *
+ * This appears somewhat equivalent to Jake Wharton's
+ * [RxReplayingShare](https://github.com/JakeWharton/RxReplayingShare).
+ *
+ * Not thread safe.
  */
 fun <T> Publisher<T>.shareAndReplay(count: Int): Publisher<T> {
     val buffer = ArrayDeque<T>(count)
@@ -405,6 +464,7 @@ fun <T> Publisher<T>.shareAndReplay(count: Int): Publisher<T> {
         override fun subscribe(subscriber: Subscriber<T>) {
             // subscribe to source on initial subscribe.
             if(!subscribed) {
+                // note that this is not re-entrant without a race condition.
                 subscribed = true
                 this@shareAndReplay.subscribe(
                     object : Subscriber<T> {
@@ -445,6 +505,51 @@ fun <T> Publisher<T>.shareAndReplay(count: Int): Publisher<T> {
                 }
             }
             subscriber.onSubscribe(subscription)
+        }
+    }
+}
+
+/**
+ * Subscribes to the source, stores and re-emit the latest item seen of each of the types to any
+ * new subscriber.  Note that this is vulnerable to the typical Java/Android platform issue of
+ * type erasure.
+ *
+ * Note that any re-emitted items are emitted in the order of the [types] given.
+ *
+ * Not thread safe.
+ */
+fun <T: Any> Publisher<T>.replayTypesOnResubscribe(vararg types: Class<out T>): Publisher<T> {
+    val lastSeen : MutableMap<Class<out T>, T?> = types.associate { Pair(it, null) }.toMutableMap()
+
+    return object : Publisher<T> {
+        override fun subscribe(subscriber: Subscriber<T>) {
+            this@replayTypesOnResubscribe.subscribe(
+                object : Subscriber<T> {
+                    override fun onComplete() {
+                        subscriber.onComplete()
+                    }
+
+                    override fun onError(error: Throwable) {
+                        subscriber.onError(error)
+                    }
+
+                    override fun onNext(item: T) {
+                        subscriber.onNext(item)
+                        // TODO this has a problem: it does not check for descendant classes, it
+                        // must be an exact match.
+                        if(lastSeen.keys.contains(item.javaClass)) {
+                            lastSeen[item.javaClass] = item
+                        }
+                    }
+
+                    override fun onSubscribe(subscription: Subscription) {
+                        subscriber.onSubscribe(subscription)
+                        lastSeen.values.filterNotNull().forEach {
+                            subscriber.onNext(it)
+                        }
+                    }
+                }
+            )
         }
     }
 }
@@ -496,7 +601,7 @@ fun <T> Collection<T>.asPublisher(): Publisher<T> {
     }
 }
 
-@Deprecated("Whenever we set Android Min SDK to at least 24, change to use Optional here instead (on account of Reactive Streams spec not actually allowing for nulls)")
+@Deprecated("Whenever we set Android Min SDK to at least 24, change to use Optional here instead (on account of the Reactive Streams spec not actually allowing for nulls)")
 fun <T> Publisher<T?>.filterNulls(): Publisher<T> = filter { it != null }.map { it!! }
 
 /**
@@ -623,7 +728,6 @@ fun <T> Publisher<T>.androidLifecycleDispose(lifecycleOwner: LifecycleOwner): Pu
  */
 typealias  CallbackReceiver<T> = (T) -> Unit
 
-
 /**
  * This allows you to map a method call that returns a NetworkTask, a convention in the Rover SDK
  * for async methods, to a [Publisher].
@@ -664,6 +768,5 @@ fun <T> (((r: T) -> Unit) -> NetworkTask).asPublisher(): Publisher<T> {
         }
     }
 }
-
 
 // TODO fun <T> Publisher<T>.observeOn() { }

@@ -155,7 +155,7 @@ interface ButtonViewModelInterface {
         /**
          * Reveal the text for the given.
          */
-        class DisplayState(
+        data class DisplayState(
             val viewModel: ButtonStateViewModelInterface,
             val animate: Boolean,
 
@@ -284,7 +284,7 @@ interface BlockViewModelInterface : LayoutableViewModel {
         /**
          * Block has been clicked, requesting that we [navigateTo] something.
          */
-        class Clicked(
+        data class Clicked(
             val navigateTo: NavigateTo
         ): Event()
 
@@ -362,6 +362,8 @@ interface ScreenViewModelInterface: BindableViewModel, BackgroundViewModelInterf
 
     /**
      * Screens may emit navigation events.
+     *
+     * In particular it aggregates all the navigation events from the contained rows.
      */
     val events: Observable<NavigateTo>
 
@@ -380,15 +382,15 @@ interface ExperienceViewModelInterface: BindableViewModel {
     fun pressBack()
 
     sealed class Event {
-        class ExperienceReady(
+        data class ExperienceReady(
             val experienceNavigationViewModel: ExperienceNavigationViewModelInterface
         ): Event()
-        class DisplayError(
+        data class DisplayError(
             val message: String
         ): Event()
 
         // TODO: rename to navigationEvent
-        class ViewEvent(
+        data class ViewEvent(
             val event: ExperienceViewEvent
         ): Event()
 
@@ -427,26 +429,32 @@ interface ExperienceNavigationViewModelInterface : BindableViewModel, Experience
     val state: Parcelable
 
     sealed class Event {
-        class GoForwardToScreen(
-            val screenViewModel: ScreenViewModelInterface
+        data class GoToScreen(
+            val screenViewModel: ScreenViewModelInterface,
+            val backwards: Boolean,
+            val animate: Boolean
         ): Event()
 
-        class GoBackwardToScreen(
-            val screenViewModel: ScreenViewModelInterface
-        ): Event()
+//        data class GoForwardToScreen(
+//            val screenViewModel: ScreenViewModelInterface
+//        ): Event()
+//
+//        data class GoBackwardToScreen(
+//            val screenViewModel: ScreenViewModelInterface
+//        ): Event()
+//
+//        /**
+//         * This event signifies that the view should immediately display the given view model.
+//         */
+//        data class WarpToScreen(
+//            val screenViewModel: ScreenViewModelInterface
+//        ): Event()
 
-        /**
-         * This event signifies that the view should immediately display the given view model.
-         */
-        class WarpToScreen(
-            val screenViewModel: ScreenViewModelInterface
-        ): Event()
-
-        class ViewEvent(
+        data class ViewEvent(
             val event: ExperienceViewEvent
         ): Event()
 
-        class SetActionBar(
+        data class SetActionBar(
             val appBarConfiguration: AppBarConfiguration
         ): Event()
     }
@@ -465,12 +473,12 @@ sealed class ExperienceViewEvent {
      * This event signifies that the LayoutParams of the containing window should either be set
      * to either 1 or [WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE].
      */
-    class SetBacklightBoost(val extraBright: Boolean): ExperienceViewEvent()
+    data class SetBacklightBoost(val extraBright: Boolean): ExperienceViewEvent()
 
     // TODO: we may want to do an (optional) internal web browser like iOS, but there is less call for it
     // because Android has its back button.  Will discuss.
 
-    class OpenExternalWebBrowser(val uri: URI): ExperienceViewEvent()
+    data class OpenExternalWebBrowser(val uri: URI): ExperienceViewEvent()
 
     /**
      * Containing view should pop itself ([Activity.finish], etc.) in the surrounding navigation
@@ -492,7 +500,7 @@ interface ExperienceToolbarViewModelInterface {
 
     fun setConfiguration(toolbarConfiguration: AppBarConfiguration)
 
-    class Event(
+    data class Event(
         val toolbarConfiguration: AppBarConfiguration
     )
 }

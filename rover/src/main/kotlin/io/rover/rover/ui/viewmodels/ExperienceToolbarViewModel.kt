@@ -15,5 +15,5 @@ class ExperienceToolbarViewModel(): ExperienceToolbarViewModelInterface {
 
     override val toolbarEvents: Observable<ExperienceToolbarViewModelInterface.Event> = actions.map {
         ExperienceToolbarViewModelInterface.Event(it)
-    }.shareHotAndReplay(1)
+    }.shareHotAndReplay(1) // we want to share hot and replay in order to capture any events that occur before any subscribers arrive
 }

@@ -23,11 +23,6 @@ class ViewExperienceToolbar(
         hostWindowForStatusBar.statusBarColor
     } else 0
 
-    init {
-//        toolbar.setBackgroundColor(Color.RED)
-//        toolbar.title = "OI"
-    }
-
     override var experienceToolbarViewModel: ExperienceToolbarViewModelInterface? = null
         set(viewModel) {
             field = viewModel
@@ -37,7 +32,6 @@ class ViewExperienceToolbar(
             viewModel?.toolbarEvents
                 ?.androidLifecycleDispose(toolbar)
                 ?.subscribe { event ->
-                    log.v("GOT TOOLBAR CALLBACK")
                     //toolbar.visibility = View.VISIBLE
 
                     val configuration = event.toolbarConfiguration
