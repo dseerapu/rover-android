@@ -371,11 +371,8 @@ interface ScreenViewModelInterface: BindableViewModel, BackgroundViewModelInterf
 }
 
 /**
- * Responsible for fetching and displaying an Experience, with the appropriate AppBar along the top.
- *
- * Emits an event with a new ExperienceNavigationViewModel (and
- *
- * TODO: consider renaming to experiencefetchviewmodel
+ * Responsible for fetching and displaying an Experience, with the appropriate Android toolbar along
+ * the top.
  */
 interface ExperienceViewModelInterface: BindableViewModel {
     val events: Observable<Event>
@@ -406,7 +403,7 @@ interface ExperienceViewModelInterface: BindableViewModel {
     val state: Parcelable
 }
 
-interface ExperienceNavigationViewModelInterface : BindableViewModel {
+interface ExperienceNavigationViewModelInterface : BindableViewModel, ExperienceToolbarViewModelInterface {
     val events : Observable<Event>
 
     fun pressBack()
@@ -448,6 +445,10 @@ interface ExperienceNavigationViewModelInterface : BindableViewModel {
         class ViewEvent(
             val event: ExperienceViewEvent
         ): Event()
+
+        class SetActionBar(
+            val appBarConfiguration: AppBarConfiguration
+        ): Event()
     }
 }
 
@@ -476,10 +477,6 @@ sealed class ExperienceViewEvent {
      * flow, whatever it happens to be.
      */
     class Exit(): ExperienceViewEvent()
-
-    class SetActionBar(
-        val appBarConfiguration: AppBarConfiguration
-    ): ExperienceViewEvent()
 }
 
 interface ExperienceAppBarViewModelInterface {
@@ -487,6 +484,16 @@ interface ExperienceAppBarViewModelInterface {
 
     class Event(
         val appBarConfiguration: AppBarConfiguration
+    )
+}
+
+interface ExperienceToolbarViewModelInterface {
+    val toolbarEvents: Observable<Event>
+
+    fun setConfiguration(toolbarConfiguration: AppBarConfiguration)
+
+    class Event(
+        val toolbarConfiguration: AppBarConfiguration
     )
 }
 
@@ -500,17 +507,44 @@ interface RectangleBlockViewModelInterface : LayoutableViewModel, BlockViewModel
  * View Model for a block that contains rich text content (decorated with strong, italic, and
  * underline HTML tags).
  */
-interface TextBlockViewModelInterface : LayoutableViewModel, BlockViewModelInterface, BackgroundViewModelInterface, BorderViewModelInterface, TextViewModelInterface
+interface TextBlockViewModelInterface :
+    LayoutableViewModel,
+    BlockViewModelInterface,
+    BackgroundViewModelInterface,
+    BorderViewModelInterface,
+    TextViewModelInterface
 
-interface ImageBlockViewModelInterface : LayoutableViewModel, BlockViewModelInterface, BackgroundViewModelInterface, BorderViewModelInterface, ImageViewModelInterface
+interface ImageBlockViewModelInterface :
+    LayoutableViewModel,
+    BlockViewModelInterface,
+    BackgroundViewModelInterface,
+    BorderViewModelInterface,
+    ImageViewModelInterface
 
-interface WebViewBlockViewModelInterface : LayoutableViewModel, BlockViewModelInterface, BackgroundViewModelInterface, BorderViewModelInterface, WebViewModelInterface
+interface WebViewBlockViewModelInterface :
+    LayoutableViewModel,
+    BlockViewModelInterface,
+    BackgroundViewModelInterface,
+    BorderViewModelInterface,
+    WebViewModelInterface
 
-interface BarcodeBlockViewModelInterface : LayoutableViewModel, BlockViewModelInterface, BackgroundViewModelInterface, BarcodeViewModelInterface, BorderViewModelInterface
+interface BarcodeBlockViewModelInterface :
+    LayoutableViewModel,
+    BlockViewModelInterface,
+    BackgroundViewModelInterface,
+    BarcodeViewModelInterface,
+    BorderViewModelInterface
 
-interface ButtonBlockViewModelInterface: LayoutableViewModel, BlockViewModelInterface, ButtonViewModelInterface
+interface ButtonBlockViewModelInterface :
+    LayoutableViewModel,
+    BlockViewModelInterface,
+    ButtonViewModelInterface
 
-interface ButtonStateViewModelInterface: BindableViewModel, TextViewModelInterface, BackgroundViewModelInterface, BorderViewModelInterface
+interface ButtonStateViewModelInterface:
+    BindableViewModel,
+    TextViewModelInterface,
+    BackgroundViewModelInterface,
+    BorderViewModelInterface
 
 enum class StateOfButton {
     Normal,

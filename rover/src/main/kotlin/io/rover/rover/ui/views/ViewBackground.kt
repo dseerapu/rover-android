@@ -61,11 +61,14 @@ class ViewBackground(
     override var backgroundViewModel: BackgroundViewModelInterface? = null
         set(viewModel) {
             if (viewModel != null) {
+                view.background = null
                 view.setBackgroundColor(viewModel.backgroundColor)
 
                 // if there's already a running image fetch, cancel it before starting another.
                 runningTask?.cancel()
 
+                // TODO: both dimensions coming ready and the background image becoming ready are
+                // async. we want to wait for both, and also *unsubscribe* them when this view is bound to a new view model.
                 whenDimensionsReady { width, height ->
                     runningTask = viewModel.requestBackgroundImage(
                         PixelSize(width, height),

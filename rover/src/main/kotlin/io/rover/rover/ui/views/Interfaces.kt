@@ -8,6 +8,7 @@ import io.rover.rover.ui.viewmodels.BorderViewModelInterface
 import io.rover.rover.ui.viewmodels.ButtonBlockViewModelInterface
 import io.rover.rover.ui.viewmodels.ButtonViewModelInterface
 import io.rover.rover.ui.viewmodels.ExperienceAppBarViewModelInterface
+import io.rover.rover.ui.viewmodels.ExperienceToolbarViewModelInterface
 import io.rover.rover.ui.viewmodels.ImageBlockViewModelInterface
 import io.rover.rover.ui.viewmodels.LayoutPaddingDeflection
 import io.rover.rover.ui.viewmodels.TextBlockViewModelInterface
@@ -75,4 +76,8 @@ interface ViewButtonInterface {
 
 interface ViewExperienceAppBarInterface {
     var experienceAppBarViewModel: ExperienceAppBarViewModelInterface?
+}
+
+interface ViewExperienceToolbarInterface {
+    var experienceToolbarViewModel: ExperienceToolbarViewModelInterface?
 }

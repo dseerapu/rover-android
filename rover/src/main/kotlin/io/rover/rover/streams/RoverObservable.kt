@@ -3,6 +3,7 @@ package io.rover.rover.streams
 import android.arch.lifecycle.GenericLifecycleObserver
 import android.arch.lifecycle.Lifecycle
 import android.arch.lifecycle.LifecycleOwner
+import android.os.Looper
 import android.view.View
 import io.rover.rover.core.logging.log
 import io.rover.rover.services.network.NetworkTask
@@ -142,7 +143,14 @@ fun <T, R> Publisher<T>.map(transform: (T) -> R): Publisher<R> {
             prior.subscribe(
                 object : Subscriber<T> {
                     override fun onComplete() {
-                        subscriber.onComplete()
+                        if(Looper.myLooper() != Looper.getMainLooper()) {
+                            throw RuntimeException("Completion result on bogus thread?!  Running on thread ${Thread.currentThread()}")
+                        }
+                        try {
+                            subscriber.onComplete()
+                        } catch (e: Throwable) {
+                            log.v("STOP HERE")
+                        }
                     }
 
                     override fun onError(error: Throwable) {
@@ -287,6 +295,7 @@ fun <T> Publisher<T>.share(): Publisher<T> {
 
     return object : Publisher<T> {
         override fun subscribe(subscriber: Subscriber<T>) {
+            log.v("SUBSCRIBED FROM THREAD ${Thread.currentThread()}")
             // subscribe on initial.
             if(!subscribed) {
                 subscribed = true
@@ -310,6 +319,63 @@ fun <T> Publisher<T>.share(): Publisher<T> {
                 )
             }
 
+            multicastTo.add(subscriber)
+
+            val subscription = object : Subscription {
+                override fun cancel() {
+                    // he wants out
+                    multicastTo.remove(subscriber)
+                }
+            }
+            subscriber.onSubscribe(subscription)
+        }
+    }
+}
+
+/**
+ * Similar to [shareAndReplay], but in addition buffering and re-emitting the [count] most recent
+ * events to any new subscriber, it will also immediately subscribe to the source and begin
+ * buffering.  This is suitable for use with hot observables.
+ *
+ * This appears somewhat equivalent to Jake Wharton's
+ * [RxReplayingShare](https://github.com/JakeWharton/RxReplayingShare).
+ */
+fun <T> Publisher<T>.shareHotAndReplay(count: Int): Publisher<T> {
+    val buffer = ArrayDeque<T>(count)
+
+    val multicastTo: MutableSet<Subscriber<T>> = mutableSetOf()
+
+    this.subscribe(
+        object : Subscriber<T> {
+            override fun onComplete() {
+                multicastTo.forEach { it.onComplete() }
+                multicastTo.clear()
+            }
+
+            override fun onError(error: Throwable) {
+                multicastTo.forEach { it.onError(error) }
+            }
+
+            override fun onNext(item: T) {
+                multicastTo.forEach { it.onNext(item) }
+                buffer.addLast(item)
+                // emulate a ring buffer by removing any older entries than `count`
+                for(i in 1..buffer.size - count) {
+                    buffer.removeFirst()
+                }
+            }
+
+            override fun onSubscribe(subscription: Subscription) {
+                // catch up the new subscriber on the `count` number of last events.
+                multicastTo.forEach { subscriber ->
+                    buffer.forEach { event -> subscriber.onNext(event) }
+                }
+            }
+        }
+    )
+
+    return object : Publisher<T> {
+        override fun subscribe(subscriber: Subscriber<T>) {
             multicastTo.add(subscriber)
 
             val subscription = object : Subscription {
@@ -579,14 +645,21 @@ fun <T> (((r: T) -> Unit) -> NetworkTask).asPublisher(): Publisher<T> {
     return object : Publisher<T> {
         override fun subscribe(subscriber: Subscriber<T>) {
             val networkTask = this@asPublisher.invoke { result: T ->
+                if(Looper.myLooper() != Looper.getMainLooper()) {
+                    throw RuntimeException("NetworkService did not dispatch result handler to main thread correctly.  Running on thread ${Thread.currentThread()}")
+                }
                 subscriber.onNext(result)
                 subscriber.onComplete()
             }
             val subscription = object : Subscription {
                 override fun cancel() {
+                    if(Looper.myLooper() != Looper.getMainLooper()) {
+                        throw RuntimeException("NetworkService did not dispatch cancel handler to main thread correctly.  Running on thread ${Thread.currentThread()}")
+                    }
                     networkTask.cancel()
                 }
             }
+            subscriber.onSubscribe(subscription)
             networkTask.resume()
         }
     }

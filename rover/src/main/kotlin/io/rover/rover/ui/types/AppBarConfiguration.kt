@@ -4,7 +4,7 @@ package io.rover.rover.ui.types
  * App bar configuration.  Colour overrides, text, text colour, and status bar settings.
  */
 data class AppBarConfiguration(
-    val useGlobalTheme: Boolean,
+    val useExistingStyle: Boolean,
 
     val appBarText: String,
 
@@ -20,8 +20,3 @@ data class AppBarConfiguration(
      */
     val statusBarColor: Int
 )
-
-// ViewAppBar
-// ExperienceAppBarViewModel
-// ExperienceAppBarViewModel will subscribe to ExperienceViewModel?
-// ... ExperienceAppBarViewModel will want to be injected with the same instance of ExperienceViewModel as already exists.

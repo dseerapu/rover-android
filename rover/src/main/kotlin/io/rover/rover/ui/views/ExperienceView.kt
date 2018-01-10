@@ -18,45 +18,40 @@ import io.rover.rover.ui.viewmodels.ExperienceNavigationViewModelInterface
 import io.rover.rover.ui.viewmodels.ExperienceViewEvent
 import io.rover.rover.ui.viewmodels.ExperienceViewModelInterface
 
-class ExperienceView: FrameLayout, BindableView<ExperienceViewModelInterface> {
+class ExperienceView: CoordinatorLayout, BindableView<ExperienceViewModelInterface> {
     constructor(context: Context?) : super(context)
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
+    val toolbar: Toolbar = Toolbar(context)
+
     private val experienceNavigationView: ExperienceNavigationView = ExperienceNavigationView(context)
 
+    private val viewToolbar by lazy {
+        ViewExperienceToolbar(toolbar, attachedWindow!!)
+    }
+
     init {
-
-//        addView(
-//           toolbar
-//        )
-//        toolbar.title = "WAT"
-//        (toolbar.layoutParams as CoordinatorLayout.LayoutParams).apply {
-//            width = LayoutParams.MATCH_PARENT
-//            height = LayoutParams.WRAP_CONTENT
-//        }
-
-
         addView(
             experienceNavigationView
         )
 
-//        (experienceNavigationView.layoutParams as CoordinatorLayout.LayoutParams).apply {
-//            behavior = AppBarLayout.ScrollingViewBehavior()
-//            width = LayoutParams.MATCH_PARENT
-//            height = LayoutParams.MATCH_PARENT
-//        }
-//
-//        val appBarLayout = AppBarLayout(context)
-//        addView(appBarLayout)
-//        (appBarLayout.layoutParams as CoordinatorLayout.LayoutParams).apply {
-//            width = LayoutParams.MATCH_PARENT
-//            height = LayoutParams.WRAP_CONTENT
-//        }
-//        appBarLayout.addView(toolbar)
-//        (toolbar.layoutParams as AppBarLayout.LayoutParams).apply {
-//            scrollFlags = AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS
-//        }
+        (experienceNavigationView.layoutParams as CoordinatorLayout.LayoutParams).apply {
+            behavior = AppBarLayout.ScrollingViewBehavior()
+            width = LayoutParams.MATCH_PARENT
+            height = LayoutParams.MATCH_PARENT
+        }
+
+        val appBarLayout = AppBarLayout(context)
+        addView(appBarLayout)
+        (appBarLayout.layoutParams as CoordinatorLayout.LayoutParams).apply {
+            width = LayoutParams.MATCH_PARENT
+            height = LayoutParams.WRAP_CONTENT
+        }
+        appBarLayout.addView(toolbar)
+        (toolbar.layoutParams as AppBarLayout.LayoutParams).apply {
+            scrollFlags = AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS
+        }
     }
 
     /**
@@ -74,10 +69,13 @@ class ExperienceView: FrameLayout, BindableView<ExperienceViewModelInterface> {
 
             experienceNavigationView.viewModel = null
 
+            viewToolbar.experienceToolbarViewModel = null
+
             experienceViewModel?.events?.androidLifecycleDispose(this)?.subscribe({ event ->
                 when(event) {
                     is ExperienceViewModelInterface.Event.ExperienceReady -> {
                         experienceNavigationView.viewModel = event.experienceNavigationViewModel
+                        viewToolbar.experienceToolbarViewModel = event.experienceNavigationViewModel
                     }
                     is ExperienceViewModelInterface.Event.DisplayError -> {
                         Snackbar.make(this, "Problem: ${event.message}", Snackbar.LENGTH_LONG).show()

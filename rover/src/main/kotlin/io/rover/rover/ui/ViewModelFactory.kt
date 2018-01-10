@@ -27,6 +27,7 @@ import io.rover.rover.ui.viewmodels.ButtonStateViewModelInterface
 import io.rover.rover.ui.viewmodels.ButtonViewModel
 import io.rover.rover.ui.viewmodels.ExperienceNavigationViewModel
 import io.rover.rover.ui.viewmodels.ExperienceNavigationViewModelInterface
+import io.rover.rover.ui.viewmodels.ExperienceToolbarViewModel
 import io.rover.rover.ui.viewmodels.ExperienceViewModel
 import io.rover.rover.ui.viewmodels.ExperienceViewModelInterface
 import io.rover.rover.ui.viewmodels.ImageBlockViewModel
@@ -158,9 +159,11 @@ class ViewModelFactory(
     }
 
     override fun viewModelForExperienceNavigation(experience: Experience, icicle: Parcelable?): ExperienceNavigationViewModelInterface {
+        var toolbarViewModel = ExperienceToolbarViewModel()
         return ExperienceNavigationViewModel(
             experience,
             this,
+            toolbarViewModel,
             icicle
         )
     }

@@ -32,8 +32,10 @@ import kotlinx.android.parcel.Parcelize
 class ExperienceNavigationViewModel(
     private val experience: Experience,
     private val viewModelFactory: ViewModelFactoryInterface,
+    private val toolbarViewModel: ExperienceToolbarViewModelInterface,
     icicle: Parcelable? = null
-): ExperienceNavigationViewModelInterface {
+): ExperienceNavigationViewModelInterface, ExperienceToolbarViewModelInterface by toolbarViewModel {
+
     override fun pressBack() {
         actions.onNext(Action.PressedBack())
     }
@@ -50,13 +52,9 @@ class ExperienceNavigationViewModel(
 
     // TODO: right now we bring up viewmodels for the *entire* experience (ie., all the screens at
     // once).  This is unnecessary.
-
     private val screenViewModelsById: Map<String, ScreenViewModelInterface> = screensById.mapValues {
         // TODO: use DI to inject the screen view models
         viewModelFactory.viewModelForScreen(it.value)
-
-        // TODO: I need to subscribe to all of these, and then when done, I need to emit a
-        // single WarpTo event for the home Screen. Even
     }
 
     /**
@@ -94,9 +92,13 @@ class ExperienceNavigationViewModel(
     }
         private set
 
-    private fun activeScreen(): ScreenViewModelInterface? {
-        val currentScreenId = state.backStack.lastOrNull()?.screenId
-        return currentScreenId.whenNotNull { screenViewModelsById[it] }
+    private fun activeScreen(): ScreenViewModelInterface {
+        val currentScreenId = state.backStack.lastOrNull()?.screenId ?: throw RuntimeException("Backstack unexpectedly empty")
+        return screenViewModelsById[currentScreenId] ?: throw RuntimeException("Unexpectedly found a dangling screen id in the back stack.")
+    }
+
+    init {
+        toolbarViewModel.setConfiguration(activeScreen().appBarConfiguration)
     }
 
     // TODO: this is definitely going to be the custom behaviour injection opportunity
@@ -150,27 +152,11 @@ class ExperienceNavigationViewModel(
         val newBackStack: List<BackStackFrame>
     )
 
-    private val epic = actions
-        .map { action -> actionBehaviour(action) }
-        .filterNulls()
-        .map { stateChange ->
-            // abuse .map() for doOnNext() side-effects for now to update our state! TODO add doOnNext()
-            state = State(stateChange.newBackStack)
-            log.v("State change: $stateChange")
-            stateChange
-        }.map { stateChange -> stateChange.event }
-
-
-    // TODO: onSubscribe we want to emit the WarpTo event.  I need a concat transform to do that tho
-    override val events: Observable<ExperienceNavigationViewModelInterface.Event> = Publisher.concat(
-        // emit a warp-to for all new subscribers so they are guaranteed to see their state.
-        Publisher.just(
-            ExperienceNavigationViewModelInterface.Event.WarpToScreen(
-                activeScreen() ?: throw RuntimeException("Backstack unexpectedly empty")
-            )
-        ),
-        epic.share()
-    ).flatMap { event ->
+    private fun injectBehaviouralTransientEvents(
+        event: ExperienceNavigationViewModelInterface.Event
+    ): Observable<ExperienceNavigationViewModelInterface.Event> {
+        // now take the event from the state change and inject some behavioural transient events
+        // into the stream as needed (backlight and toolbar behaviours).
         // emit app bar update and BacklightBoost events (as needed) and into the stream for screen changes.
         val backlightEvent = when(event) {
             is ExperienceNavigationViewModelInterface.Event.GoBackwardToScreen -> event.screenViewModel.needsBrightBacklight
@@ -184,13 +170,45 @@ class ExperienceNavigationViewModel(
             is ExperienceNavigationViewModelInterface.Event.GoForwardToScreen -> event.screenViewModel.appBarConfiguration
             is ExperienceNavigationViewModelInterface.Event.WarpToScreen -> event.screenViewModel.appBarConfiguration
             else -> null
-        }.whenNotNull { ExperienceNavigationViewModelInterface.Event.ViewEvent(ExperienceViewEvent.SetActionBar(it)) }
+        }.whenNotNull { ExperienceNavigationViewModelInterface.Event.SetActionBar(it) }
 
-        Observable.concat(
+        return Observable.concat(
             Observable.just(event),
             Observable.just(backlightEvent),
             Observable.just(appBarEvent)
         ).filterNulls()
+    }
+
+    private val epic = actions
+        .map { action -> actionBehaviour(action) }
+        .filterNulls()
+        .map { stateChange ->
+            // abuse .map() for doOnNext() side-effects for now to update our state! TODO add doOnNext()
+            state = State(stateChange.newBackStack)
+            log.v("State change: $stateChange")
+
+            stateChange
+        }.flatMap { stateChange -> injectBehaviouralTransientEvents(stateChange.event)}
+        .map { event ->
+            // and to dispatch the change to the toolbar view model (TODO doOnNext)
+            if (event is ExperienceNavigationViewModelInterface.Event.SetActionBar) {
+                toolbarViewModel.setConfiguration(event.appBarConfiguration)
+            }
+
+            event
+        }.share()
+
+    override val events: Observable<ExperienceNavigationViewModelInterface.Event> = Publisher.concat(
+        // emit a warp-to for all new subscribers so they are guaranteed to see their state.
+        Publisher.just(
+            ExperienceNavigationViewModelInterface.Event.WarpToScreen(
+                activeScreen()
+            )
+        ).flatMap { event -> injectBehaviouralTransientEvents(event) },
+        epic
+    ).map { event ->
+        log.v("Navigation view model event: $event")
+        event
     }
 
     // @Parcelize Kotlin synthetics are generating the CREATOR method for us.

@@ -53,7 +53,7 @@ class ViewExperienceAppBar(
                     supportActionBar.show()
                     val configuration = event.appBarConfiguration
 
-                    supportActionBar.title = if(configuration.useGlobalTheme) {
+                    supportActionBar.title = if(configuration.useExistingStyle) {
                         configuration.appBarText
                     } else {
                         SpannableStringBuilder(configuration.appBarText).apply {
@@ -61,7 +61,7 @@ class ViewExperienceAppBar(
                         }
                     }
 
-                    val actionBarBackgroundColor = if(configuration.useGlobalTheme) themeColorPrimary else configuration.color
+                    val actionBarBackgroundColor = if(configuration.useExistingStyle) themeColorPrimary else configuration.color
 
                     supportActionBar.setBackgroundDrawable(
                         ColorDrawable(actionBarBackgroundColor)
@@ -69,7 +69,7 @@ class ViewExperienceAppBar(
 
                     // status bar color only supported on Lollipop and greater.
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        hostWindowForStatusBar.statusBarColor = if(configuration.useGlobalTheme) themeColorPrimaryDark else {
+                        hostWindowForStatusBar.statusBarColor = if(configuration.useExistingStyle) themeColorPrimaryDark else {
                             configuration.statusBarColor
                         }
                     }
