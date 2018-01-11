@@ -14,7 +14,7 @@ import io.rover.rover.services.network.NetworkTask
 import io.rover.rover.streams.Observable
 import io.rover.rover.ui.BlockAndRowLayoutManager
 import io.rover.rover.ui.types.Alignment
-import io.rover.rover.ui.types.AppBarConfiguration
+import io.rover.rover.ui.types.ToolbarConfiguration
 import io.rover.rover.ui.types.DisplayItem
 import io.rover.rover.ui.types.Font
 import io.rover.rover.ui.types.FontAppearance
@@ -369,7 +369,7 @@ interface ScreenViewModelInterface: BindableViewModel, BackgroundViewModelInterf
 
     val needsBrightBacklight: Boolean
 
-    val appBarConfiguration: AppBarConfiguration
+    val appBarConfiguration: ToolbarConfiguration
 }
 
 /**
@@ -389,12 +389,18 @@ interface ExperienceViewModelInterface: BindableViewModel {
             val message: String
         ): Event()
 
-        // TODO: rename to navigationEvent
-        data class ViewEvent(
-            val event: ExperienceViewEvent
-        ): Event()
+        /**
+         * This event signifies that the LayoutParams of the containing window should either be set
+         * to either 1 or [WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE].
+         */
+        data class SetBacklightBoost(val extraBright: Boolean): Event()
 
-        // TODO: activity indication event
+        /**
+         * The user should be navigated somewhere external to
+         */
+        data class ExternalNavigation(
+            val event: ExperienceExternalNavigationEvent
+        ): Event()
     }
 
     /**
@@ -451,58 +457,73 @@ interface ExperienceNavigationViewModelInterface : BindableViewModel, Experience
 //        ): Event()
 
         data class ViewEvent(
-            val event: ExperienceViewEvent
+            val event: ExperienceExternalNavigationEvent
         ): Event()
 
         data class SetActionBar(
-            val appBarConfiguration: AppBarConfiguration
+            val appBarConfiguration: ToolbarConfiguration
         ): Event()
+
+        /**
+         * This event signifies that the LayoutParams of the containing window should either be set
+         * to either 1 or [WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE].
+         */
+        data class SetBacklightBoost(val extraBright: Boolean): Event()
     }
 }
 
 /**
- * These are events that are emitted by the experience navigation view model but must be passed up
- * by the containing ExperienceViewModel.
- *
- * TODO: I split this out so ExperienceViewModel could pass these events along.  However, it seems
- * to align very closely to my future intention to split all the Event concerns between
+ * These are navigation that are emitted by the experience navigation view model but because they
+ * are for destinations external to the experience they must be passed up by the containing
+ * ExperienceViewModel.
  */
-// TODO: rename to navigationevent
-sealed class ExperienceViewEvent {
-    /**
-     * This event signifies that the LayoutParams of the containing window should either be set
-     * to either 1 or [WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE].
-     */
-    data class SetBacklightBoost(val extraBright: Boolean): ExperienceViewEvent()
-
+sealed class ExperienceExternalNavigationEvent {
     // TODO: we may want to do an (optional) internal web browser like iOS, but there is less call for it
     // because Android has its back button.  Will discuss.
 
-    data class OpenExternalWebBrowser(val uri: URI): ExperienceViewEvent()
+    // TODO: add an Event here for customers to insert a custom navigation event that their own code
+    // can handle on the outer side of ExperienceViewModel for navigating to other screens in their
+    // app and such.
 
     /**
-     * Containing view should pop itself ([Activity.finish], etc.) in the surrounding navigation
-     * flow, whatever it happens to be.
+     *  Containing view context should launch a web browser for the given URI in the surrounding
+     *  navigation flow (such as the general Android backstack, Conductor backstack, etc.) external
+     *  to the internal Rover ExperienceNavigationViewModel, whatever it happens to be in the
+     *  surrounding app.
      */
-    class Exit(): ExperienceViewEvent()
+    data class OpenExternalWebBrowser(val uri: URI): ExperienceExternalNavigationEvent()
+
+    /**
+     * Containing view context (hosting the Experience) should pop itself ([Activity.finish], etc.)
+     * in the surrounding navigation flow (such as the general Android backstack, Conductor
+     * backstack, etc.) external to the internal Rover ExperienceNavigationViewModel, whatever it
+     * happens to be in the surrounding app.
+     */
+    class Exit(): ExperienceExternalNavigationEvent()
 }
 
 interface ExperienceAppBarViewModelInterface {
     val events: Observable<Event>
 
     class Event(
-        val appBarConfiguration: AppBarConfiguration
+        val appBarConfiguration: ToolbarConfiguration
     )
 }
 
 interface ExperienceToolbarViewModelInterface {
     val toolbarEvents: Observable<Event>
 
-    fun setConfiguration(toolbarConfiguration: AppBarConfiguration)
+    fun setConfiguration(toolbarConfiguration: ToolbarConfiguration)
 
-    data class Event(
-        val toolbarConfiguration: AppBarConfiguration
-    )
+    fun pressedBack()
+
+    fun pressedClose()
+
+    sealed class Event {
+        data class SetToolbar(val toolbarConfiguration: ToolbarConfiguration): Event()
+        class PressedBack(): Event()
+        class PressedClose(): Event()
+    }
 }
 
 /**

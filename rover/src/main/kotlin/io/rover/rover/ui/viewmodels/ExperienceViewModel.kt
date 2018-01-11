@@ -15,7 +15,7 @@ import io.rover.rover.streams.asPublisher
 import io.rover.rover.streams.filterNulls
 import io.rover.rover.streams.flatMap
 import io.rover.rover.streams.map
-import io.rover.rover.streams.replayTypesOnResubscribe
+import io.rover.rover.streams.shareAndReplayTypesOnResubscribe
 import io.rover.rover.streams.share
 import io.rover.rover.ui.ViewModelFactoryInterface
 import kotlinx.android.parcel.Parcelize
@@ -44,7 +44,9 @@ class ExperienceViewModel(
             }
         }
 
-    private val actions = PublishSubject<Action>()
+    private val actionSource = PublishSubject<Action>()
+
+    private val actions = actionSource.share()
 
     private fun fetchExperience(): Publisher<NetworkResult<Experience>> =
         ({ callback: CallbackReceiver<NetworkResult<Experience>> -> networkService.fetchExperienceTask(ID(experienceId), callback) }).asPublisher()
@@ -56,7 +58,7 @@ class ExperienceViewModel(
                     Action.BackPressedBeforeExperienceReady -> {
                         // when view model isn't available (yet) but the user mashed the back button,
                         // just emit Exit immediately.
-                        ExperienceViewModelInterface.Event.ViewEvent(ExperienceViewEvent.Exit())
+                        ExperienceViewModelInterface.Event.ExternalNavigation(ExperienceExternalNavigationEvent.Exit())
                     }
                 }
             }.filterNulls(),
@@ -69,51 +71,50 @@ class ExperienceViewModel(
                             )
                         )
                         is NetworkResult.Success -> {
-                            val viewModel = viewModelFactory.viewModelForExperienceNavigation(
+                            val navigationViewModel = viewModelFactory.viewModelForExperienceNavigation(
                                 networkResult.response, (state as State).navigationState
                             )
-
-
-                            val experienceReadyEvent = ExperienceViewModelInterface.Event.ExperienceReady(viewModel)
+                            val experienceReadyEvent = ExperienceViewModelInterface.Event.ExperienceReady(navigationViewModel)
 
                             Observable.concat(
                                 Observable.just(experienceReadyEvent),
-                                viewModel.events.map { navigationEvent ->
+                                navigationViewModel.events.map { navigationEvent ->
                                     when (navigationEvent) {
-                                    // pass the ViewEvents further up to the surrounding activity.
-                                    // Any external navigation events (exit, load web URI, change backlight)
-                                    // from the navigation view model need to be passed up.
-                                    // What will unsubscribe this when a new ExperienceNavigationViewModel
-                                    // comes through?  For now not likely to happen because this view model is not re-bound.
-                                        is ExperienceNavigationViewModelInterface.Event.ViewEvent -> ExperienceViewModelInterface.Event.ViewEvent(navigationEvent.event)
+                                        // pass the ViewEvents further up to the surrounding activity.
+                                        // Any external navigation events (exit, load web URI, change backlight)
+                                        // from the navigation view model need to be passed up.
+                                        // What will unsubscribe this when a new ExperienceNavigationViewModel
+                                        // comes through?  For now not likely to happen because this view model is not re-bound.
+                                        is ExperienceNavigationViewModelInterface.Event.ViewEvent -> ExperienceViewModelInterface.Event.ExternalNavigation(navigationEvent.event)
+                                        is ExperienceNavigationViewModelInterface.Event.SetBacklightBoost -> ExperienceViewModelInterface.Event.SetBacklightBoost(navigationEvent.extraBright)
                                         else -> null
                                     }
                                 }.filterNulls()
-                            )
+                            ).map {
+                                this@ExperienceViewModel.log.v("Observed navigation View Event: $it")
+                                it
+                            }
                         }
                     }
                 }.map { event ->
-                // side-effect!  Store newly navigationViewModel as state (TODO should be doOnNext)
-                if (event is ExperienceViewModelInterface.Event.ExperienceReady) {
-                    log.v("Remembering experience view model.")
-                    navigationViewModel = event.experienceNavigationViewModel
+                    // side-effect!  Store newly navigationViewModel as state (TODO should be doOnNext)
+                    if (event is ExperienceViewModelInterface.Event.ExperienceReady) {
+                        log.v("Remembering experience view model.")
+                        navigationViewModel = event.experienceNavigationViewModel
+                    }
+
+                    event
                 }
+            ).share()
 
-                event
-            }
-        ).share().map {
-            log.v("Event: $it")
-            it
-        }
-
-    override val events: Observable<ExperienceViewModelInterface.Event> = epic.replayTypesOnResubscribe(
+    override val events: Observable<ExperienceViewModelInterface.Event> = epic.shareAndReplayTypesOnResubscribe(
         // ExperienceReady should be replayed to any new subscriber to make sure they are brought up to date.
         ExperienceViewModelInterface.Event.ExperienceReady::class.java
     )
 
     override fun pressBack() {
         if(navigationViewModel == null) {
-            actions.onNext(Action.BackPressedBeforeExperienceReady)
+            actionSource.onNext(Action.BackPressedBeforeExperienceReady)
         } else {
             navigationViewModel?.pressBack()
         }

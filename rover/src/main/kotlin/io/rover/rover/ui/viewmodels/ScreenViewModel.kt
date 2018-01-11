@@ -1,17 +1,12 @@
 package io.rover.rover.ui.viewmodels
 
-import io.rover.rover.core.domain.BarcodeBlock
-import io.rover.rover.core.domain.ButtonBlock
 import io.rover.rover.core.domain.Screen
 import io.rover.rover.core.domain.TitleBarButtons
-import io.rover.rover.core.domain.WebViewBlock
-import io.rover.rover.core.logging.log
 import io.rover.rover.streams.Observable
 import io.rover.rover.streams.asPublisher
 import io.rover.rover.streams.flatMap
-import io.rover.rover.streams.map
 import io.rover.rover.ui.ViewModelFactoryInterface
-import io.rover.rover.ui.types.AppBarConfiguration
+import io.rover.rover.ui.types.ToolbarConfiguration
 import io.rover.rover.ui.types.DisplayItem
 import io.rover.rover.ui.types.Layout
 import io.rover.rover.ui.types.NavigateTo
@@ -49,8 +44,8 @@ class ScreenViewModel(
         rowViewModels.any { it.needsBrightBacklight }
     }
 
-    override val appBarConfiguration: AppBarConfiguration
-        get() = AppBarConfiguration(
+    override val appBarConfiguration: ToolbarConfiguration
+        get() = ToolbarConfiguration(
             screen.useDefaultTitleBarStyle,
             screen.titleBarText,
             screen.titleBarBackgroundColor.asAndroidColor(),

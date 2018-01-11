@@ -27,33 +27,33 @@ class ViewExperienceToolbar(
         set(viewModel) {
             field = viewModel
 
-            //toolbar.visibility = View.INVISIBLE
-
             viewModel?.toolbarEvents
                 ?.androidLifecycleDispose(toolbar)
                 ?.subscribe { event ->
-                    //toolbar.visibility = View.VISIBLE
+                    when(event) {
+                        is ExperienceToolbarViewModelInterface.Event.SetToolbar -> {
+                            val configuration = event.toolbarConfiguration
 
-                    val configuration = event.toolbarConfiguration
+                            toolbar.title = if(configuration.useExistingStyle) {
+                                configuration.appBarText
+                            } else {
+                                SpannableStringBuilder(configuration.appBarText).apply {
+                                    setSpan(ForegroundColorSpan(configuration.textColor), 0, configuration.appBarText.length, 0)
+                                }
+                            }
 
-                    toolbar.title = if(configuration.useExistingStyle) {
-                        configuration.appBarText
-                    } else {
-                        SpannableStringBuilder(configuration.appBarText).apply {
-                            setSpan(ForegroundColorSpan(configuration.textColor), 0, configuration.appBarText.length, 0)
-                        }
-                    }
+                            toolbar.background = if(configuration.useExistingStyle) {
+                                defaultStyleBackground
+                            } else {
+                                ColorDrawable(configuration.color)
+                            }
 
-                    toolbar.background = if(configuration.useExistingStyle) {
-                        defaultStyleBackground
-                    } else {
-                        ColorDrawable(configuration.color)
-                    }
-
-                    // status bar color only supported on Lollipop and greater.
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        hostWindowForStatusBar.statusBarColor = if(configuration.useExistingStyle) defaultStatusBarColor else {
-                            configuration.statusBarColor
+                            // status bar color only supported on Lollipop and greater.
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                                hostWindowForStatusBar.statusBarColor = if(configuration.useExistingStyle) defaultStatusBarColor else {
+                                    configuration.statusBarColor
+                                }
+                            }
                         }
                     }
                 }

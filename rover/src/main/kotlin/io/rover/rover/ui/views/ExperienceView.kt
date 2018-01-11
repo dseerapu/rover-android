@@ -1,8 +1,6 @@
 package io.rover.rover.ui.views
 
-import android.app.Activity
 import android.content.Context
-import android.os.Parcelable
 import android.support.design.widget.AppBarLayout
 import android.support.design.widget.CoordinatorLayout
 import android.support.design.widget.Snackbar
@@ -10,12 +8,9 @@ import android.support.v7.widget.Toolbar
 import android.util.AttributeSet
 import android.view.Window
 import android.view.WindowManager
-import android.widget.FrameLayout
 import io.rover.rover.core.logging.log
 import io.rover.rover.streams.androidLifecycleDispose
 import io.rover.rover.streams.subscribe
-import io.rover.rover.ui.viewmodels.ExperienceNavigationViewModelInterface
-import io.rover.rover.ui.viewmodels.ExperienceViewEvent
 import io.rover.rover.ui.viewmodels.ExperienceViewModelInterface
 
 class ExperienceView: CoordinatorLayout, BindableView<ExperienceViewModelInterface> {
@@ -68,7 +63,6 @@ class ExperienceView: CoordinatorLayout, BindableView<ExperienceViewModelInterfa
             }
 
             experienceNavigationView.viewModel = null
-
             viewToolbar.experienceToolbarViewModel = null
 
             experienceViewModel?.events?.androidLifecycleDispose(this)?.subscribe({ event ->
@@ -81,19 +75,14 @@ class ExperienceView: CoordinatorLayout, BindableView<ExperienceViewModelInterfa
                         Snackbar.make(this, "Problem: ${event.message}", Snackbar.LENGTH_LONG).show()
                         log.w("Unable to retrieve experience: ${event.message}")
                     }
-                    is ExperienceViewModelInterface.Event.ViewEvent -> {
-                        when(event.event) {
-                            is ExperienceViewEvent.SetBacklightBoost -> {
-                                attachedWindow?.attributes = (attachedWindow?.attributes ?: WindowManager.LayoutParams()).apply {
-                                    screenBrightness = when (event.event.extraBright) {
-                                        true -> WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_FULL
-                                        false -> WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
-                                    }
-                                }
+                    is ExperienceViewModelInterface.Event.SetBacklightBoost -> {
+                        attachedWindow?.attributes = (attachedWindow?.attributes ?: WindowManager.LayoutParams()).apply {
+                            screenBrightness = when (event.extraBright) {
+                                true -> WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_FULL
+                                false -> WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
                             }
                         }
                     }
-
                 }
             }, { error ->
                 throw error

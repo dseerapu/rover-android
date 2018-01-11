@@ -11,7 +11,7 @@ import io.rover.rover.streams.asPublisher
 import io.rover.rover.streams.filterNulls
 import io.rover.rover.streams.flatMap
 import io.rover.rover.streams.map
-import io.rover.rover.streams.replayTypesOnResubscribe
+import io.rover.rover.streams.shareAndReplayTypesOnResubscribe
 import io.rover.rover.streams.share
 import io.rover.rover.streams.subscribe
 import io.rover.rover.ui.ViewModelFactoryInterface
@@ -74,6 +74,10 @@ class ExperienceNavigationViewModel(
 
     private sealed class Action {
         class PressedBack: Action()
+        /**
+         * Emitted into the actions stream if the close button is pressed on the toolbar.
+         */
+        class PressedClose : Action()
         class Navigate(
             val navigateTo: NavigateTo
         ): Action()
@@ -95,10 +99,6 @@ class ExperienceNavigationViewModel(
         return screenViewModelsById[currentScreenId] ?: throw RuntimeException("Unexpectedly found a dangling screen id in the back stack.")
     }
 
-    init {
-        toolbarViewModel.setConfiguration(activeScreen().appBarConfiguration)
-    }
-
     // TODO: this is definitely going to be the custom behaviour injection opportunity
     private fun actionBehaviour(action: Action): StateChange? {
         val activeScreen = activeScreen()
@@ -116,7 +116,13 @@ class ExperienceNavigationViewModel(
                         state.backStack.subList(0, state.backStack.lastIndex)
                     )
                 } ?: StateChange(
-                    ExperienceNavigationViewModelInterface.Event.ViewEvent(ExperienceViewEvent.Exit()),
+                    ExperienceNavigationViewModelInterface.Event.ViewEvent(ExperienceExternalNavigationEvent.Exit()),
+                    state.backStack // no change to backstack: the view is just getting entirely popped
+                )
+            }
+            is Action.PressedClose -> {
+                StateChange(
+                    ExperienceNavigationViewModelInterface.Event.ViewEvent(ExperienceExternalNavigationEvent.Exit()),
                     state.backStack // no change to backstack: the view is just getting entirely popped
                 )
             }
@@ -124,7 +130,7 @@ class ExperienceNavigationViewModel(
                 when(action.navigateTo) {
                     is NavigateTo.OpenUrlAction -> StateChange(
                         ExperienceNavigationViewModelInterface.Event.ViewEvent(
-                            ExperienceViewEvent.OpenExternalWebBrowser(action.navigateTo.uri)
+                            ExperienceExternalNavigationEvent.OpenExternalWebBrowser(action.navigateTo.uri)
                         ),
                         state.backStack // no change to backstack: the view is just getting entirely popped
                     )
@@ -161,7 +167,7 @@ class ExperienceNavigationViewModel(
         val backlightEvent = when(event) {
             is ExperienceNavigationViewModelInterface.Event.GoToScreen -> event.screenViewModel.needsBrightBacklight
             else -> null
-        }.whenNotNull { ExperienceNavigationViewModelInterface.Event.ViewEvent(ExperienceViewEvent.SetBacklightBoost(it)) }
+        }.whenNotNull { ExperienceNavigationViewModelInterface.Event.SetBacklightBoost(it) }
 
         val appBarEvent = when(event) {
             is ExperienceNavigationViewModelInterface.Event.GoToScreen -> event.screenViewModel.appBarConfiguration
@@ -186,9 +192,20 @@ class ExperienceNavigationViewModel(
                 state.backStack
             )
         ),
-        actions
-            .map { action -> actionBehaviour(action) }
-            .filterNulls()
+
+        Observable.merge(
+            actions,
+            toolbarViewModel.toolbarEvents.map { toolbarEvent ->
+                // the toolbar has buttons that can emit Back or Close events depending on the
+                // button configuration.
+                when(toolbarEvent) {
+                    is ExperienceToolbarViewModelInterface.Event.PressedClose -> Action.PressedClose()
+                    is ExperienceToolbarViewModelInterface.Event.PressedBack -> Action.PressedBack()
+                    is ExperienceToolbarViewModelInterface.Event.SetToolbar -> null
+                }
+            }.filterNulls()
+        ).map { action -> actionBehaviour(action) }
+        .filterNulls()
     ).map { stateChange ->
         // abuse .map() for doOnNext() side-effects for now to update our state! TODO add doOnNext()
         state = State(stateChange.newBackStack)
@@ -197,18 +214,22 @@ class ExperienceNavigationViewModel(
     .map { event ->
         // and to dispatch the change to the toolbar view model (TODO doOnNext)
         if (event is ExperienceNavigationViewModelInterface.Event.SetActionBar) {
+            log.v("Setting action bar: ${event.appBarConfiguration}")
             toolbarViewModel.setConfiguration(event.appBarConfiguration)
         }
 
         event
-    }.share().map {
+    }.map {
+        log.v("Event: $it")
         it
-    }
+    }.share()
 
-    override val events: Observable<ExperienceNavigationViewModelInterface.Event> = epic.replayTypesOnResubscribe(
+
+    override val events: Observable<ExperienceNavigationViewModelInterface.Event> = epic.shareAndReplayTypesOnResubscribe(
         // TODO oh shit.  GoToScreen would retain its animation values.  it needs to be transformed.
         ExperienceNavigationViewModelInterface.Event.GoToScreen::class.java,
-        ExperienceNavigationViewModelInterface.Event.SetActionBar::class.java
+        ExperienceNavigationViewModelInterface.Event.SetActionBar::class.java,
+        ExperienceNavigationViewModelInterface.Event.SetBacklightBoost::class.java
     )
 
     // @Parcelize Kotlin synthetics are generating the CREATOR method for us.

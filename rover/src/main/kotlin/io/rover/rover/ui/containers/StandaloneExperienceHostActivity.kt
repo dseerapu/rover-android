@@ -26,7 +26,7 @@ import io.rover.rover.streams.subscribe
 import io.rover.rover.ui.AndroidMeasurementService
 import io.rover.rover.ui.AndroidRichTextToSpannedTransformer
 import io.rover.rover.ui.ViewModelFactory
-import io.rover.rover.ui.viewmodels.ExperienceViewEvent
+import io.rover.rover.ui.viewmodels.ExperienceExternalNavigationEvent
 import io.rover.rover.ui.viewmodels.ExperienceViewModelInterface
 import io.rover.rover.ui.views.ExperienceView
 import java.io.IOException
@@ -127,13 +127,13 @@ class StandaloneExperienceHostActivity: AppCompatActivity() {
             viewModel?.events?.subscribe(
                 { event ->
                     when(event) {
-                        is ExperienceViewModelInterface.Event.ViewEvent -> {
+                        is ExperienceViewModelInterface.Event.ExternalNavigation -> {
                             log.v("Received a view event: ${event.event}")
                             when(event.event) {
-                                is ExperienceViewEvent.Exit -> {
+                                is ExperienceExternalNavigationEvent.Exit -> {
                                     finish()
                                 }
-                                is ExperienceViewEvent.OpenExternalWebBrowser -> {
+                                is ExperienceExternalNavigationEvent.OpenExternalWebBrowser -> {
                                     try {
                                         ContextCompat.startActivity(
                                             this,

@@ -34,6 +34,11 @@ view).  Class delegation is a good method of achieving this.
 
 ## Observable Chains
 
+We wanted to avoid introducing a dependency on the Android Architecture
+libraries (specifically, the LiveData components), so instead we
+implemented designed our own lightweight reactive MVVM.  The principles,
+however, remain generally the same.
+
 -> UI state is effectively even-sourced.
 
 -> events for both updating the UI and informing client view models of
@@ -43,16 +48,17 @@ actions.
 Rx/Reactive Streams to avoid any external dependencies.
 
 -> any side-effects must occur before a share() or shareAndReplay()
-operator.
+operator (updating state, calling a method on another view model, etc.).
 
 -> new subscribers (particularly views) should immediately receive
-enough events to fully populate them.  This adds some complexity,
-however.  Particularly, the challenge of not duplicating side-effect
-operations such as state updates or, worse, dispatching events (to say
-nothing of duplicated computing). trade-offs with a "dispatch a refresh
-action on subscribe" pattern? well, for starters, while it solves the
-side-effect support issue above it introduces the issue of emitting
-unnecessary updates to subscriber views.
+enough events to fully populate them (this is similar behaviour to
+LiveData).  This adds some complexity, however, because not all of the
+events are appropriate to re-emit (some are idempotent, like updating a
+list, and others are not, like displaying a snackbar).   An important
+constraint is that this re-emission behaviour must not conflict with
+avoiding duplicating side-effect operations.  Our solution to this
+problem is adding a stage to the end of the pipeline that will re-emit
+any previously observed items that match a list of given types.
 
 Perhaps one solution to this problem is to implement the re-emitter as
 the last stage of an observable chain (merge with a flatMap on the
@@ -87,6 +93,10 @@ actions subject discussed above.  That is, the role of the Epic is to
 transform external input (remote service data, user input) into messages
 that describe UI state. However, make sure to break apart the epic into
 methods to avoid having a single massive expression.
+
+-> constrast with LiveData:
+  -> single Observable exit point rather than multiple
+
 
 ## State Persistence
 

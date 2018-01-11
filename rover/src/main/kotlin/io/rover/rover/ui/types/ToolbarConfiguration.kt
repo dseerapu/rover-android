@@ -1,9 +1,9 @@
 package io.rover.rover.ui.types
 
 /**
- * App bar configuration.  Colour overrides, text, text colour, and status bar settings.
+ * Tool bar configuration.  Colour overrides, text, text colour, and status bar settings.
  */
-data class AppBarConfiguration(
+data class ToolbarConfiguration(
     val useExistingStyle: Boolean,
 
     val appBarText: String,

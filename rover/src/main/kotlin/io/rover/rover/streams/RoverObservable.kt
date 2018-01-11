@@ -206,11 +206,8 @@ fun <T, R> Publisher<T>.map(transform: (T) -> R): Publisher<R> {
                         if(Looper.myLooper() != Looper.getMainLooper()) {
                             throw RuntimeException("Completion result on bogus thread?!  Running on thread ${Thread.currentThread()}")
                         }
-                        try {
-                            subscriber.onComplete()
-                        } catch (e: Throwable) {
-                            log.v("STOP HERE")
-                        }
+
+                        subscriber.onComplete()
                     }
 
                     override fun onError(error: Throwable) {
@@ -518,12 +515,14 @@ fun <T> Publisher<T>.shareAndReplay(count: Int): Publisher<T> {
  *
  * Not thread safe.
  */
-fun <T: Any> Publisher<T>.replayTypesOnResubscribe(vararg types: Class<out T>): Publisher<T> {
+fun <T: Any> Publisher<T>.shareAndReplayTypesOnResubscribe(vararg types: Class<out T>): Publisher<T> {
     val lastSeen : MutableMap<Class<out T>, T?> = types.associate { Pair(it, null) }.toMutableMap()
+
+    val shared = this.share()
 
     return object : Publisher<T> {
         override fun subscribe(subscriber: Subscriber<T>) {
-            this@replayTypesOnResubscribe.subscribe(
+            shared.subscribe(
                 object : Subscriber<T> {
                     override fun onComplete() {
                         subscriber.onComplete()
@@ -563,6 +562,9 @@ class PublishSubject<T> : Subject<T> {
     var subscriber : Subscriber<T>? = null
 
     override fun subscribe(subscriber: Subscriber<T>) {
+        if(this.subscriber != null) {
+            throw RuntimeException("PublishSubject() already subscribed.  Consider using .share().")
+        }
         this.subscriber = subscriber
         val subscription = object : Subscription {
             override fun cancel() {
