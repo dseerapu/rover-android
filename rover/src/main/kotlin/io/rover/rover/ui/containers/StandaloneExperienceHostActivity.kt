@@ -6,6 +6,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
+import android.view.Menu
 import com.facebook.stetho.urlconnection.ByteArrayRequestEntity
 import com.facebook.stetho.urlconnection.StethoURLConnectionManager
 import io.rover.rover.core.logging.log
@@ -174,11 +175,20 @@ class StandaloneExperienceHostActivity: AppCompatActivity() {
         // The View needs to know about the Activity-level window in order to temporarily change the
         // backlight.
         experiencesView.attachedWindow = this.window
-        // setSupportActionBar(experiencesView.toolbar)
+
+        setSupportActionBar(experiencesView.toolbar)
+
+        experiencesView.supportActionBarWrapper = supportActionBar
 
         experienceViewModel = blockViewModelFactory.viewModelForExperience(
             experienceId, savedInstanceState?.getParcelable("experienceState")
         )
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        super.onCreateOptionsMenu(menu)
+        experiencesView.attachedMenu = menu
+        return true
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

@@ -4,13 +4,17 @@ import android.content.Context
 import android.support.design.widget.AppBarLayout
 import android.support.design.widget.CoordinatorLayout
 import android.support.design.widget.Snackbar
+import android.support.v7.app.ActionBar
 import android.support.v7.widget.Toolbar
 import android.util.AttributeSet
+import android.view.Menu
 import android.view.Window
 import android.view.WindowManager
 import io.rover.rover.core.logging.log
+import io.rover.rover.platform.whenNotNull
 import io.rover.rover.streams.androidLifecycleDispose
 import io.rover.rover.streams.subscribe
+import io.rover.rover.ui.viewmodels.ExperienceToolbarViewModelInterface
 import io.rover.rover.ui.viewmodels.ExperienceViewModelInterface
 
 class ExperienceView: CoordinatorLayout, BindableView<ExperienceViewModelInterface> {
@@ -18,13 +22,11 @@ class ExperienceView: CoordinatorLayout, BindableView<ExperienceViewModelInterfa
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
-    val toolbar: Toolbar = Toolbar(context)
+    var toolbar: Toolbar = Toolbar(context)
 
     private val experienceNavigationView: ExperienceNavigationView = ExperienceNavigationView(context)
 
-    private val viewToolbar by lazy {
-        ViewExperienceToolbar(toolbar, attachedWindow!!)
-    }
+    private val appBarLayout = AppBarLayout(context)
 
     init {
         addView(
@@ -37,16 +39,18 @@ class ExperienceView: CoordinatorLayout, BindableView<ExperienceViewModelInterfa
             height = LayoutParams.MATCH_PARENT
         }
 
-        val appBarLayout = AppBarLayout(context)
+        val appBarLayout = appBarLayout
         addView(appBarLayout)
         (appBarLayout.layoutParams as CoordinatorLayout.LayoutParams).apply {
             width = LayoutParams.MATCH_PARENT
             height = LayoutParams.WRAP_CONTENT
         }
+
         appBarLayout.addView(toolbar)
         (toolbar.layoutParams as AppBarLayout.LayoutParams).apply {
             scrollFlags = AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS
         }
+
     }
 
     /**
@@ -55,11 +59,28 @@ class ExperienceView: CoordinatorLayout, BindableView<ExperienceViewModelInterfa
      */
     var attachedWindow: Window? = null
 
+    val viewToolbar by lazy { ViewExperienceToolbar(toolbar, attachedWindow!!) }
+
+    var supportActionBarWrapper: ActionBar? = null
+        set(bar) {
+            field = bar
+            viewToolbar.actionBarWrapper = bar
+        }
+
+    var attachedMenu: Menu? = null
+        set(menu) {
+            field = menu
+            viewToolbar.menu = menu
+        }
+
     override var viewModel: ExperienceViewModelInterface? = null
         set(experienceViewModel) {
             field = experienceViewModel
             if(attachedWindow == null) {
                 throw RuntimeException("You must set the attached window on ExperienceView before binding it to a view model.")
+            }
+            if(supportActionBarWrapper == null) {
+                throw RuntimeException("You must set the support action bar wrapper on ExperienceView before binding it to a view model.")
             }
 
             experienceNavigationView.viewModel = null
