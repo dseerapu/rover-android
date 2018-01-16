@@ -14,15 +14,8 @@ import android.view.WindowManager
 import io.rover.rover.core.logging.log
 import io.rover.rover.platform.whenNotNull
 import io.rover.rover.streams.Observable
-import io.rover.rover.streams.PublishSubject
-import io.rover.rover.streams.Publisher
 import io.rover.rover.streams.androidLifecycleDispose
-import io.rover.rover.streams.flatMap
-import io.rover.rover.streams.map
-import io.rover.rover.streams.shareAndReplay
 import io.rover.rover.streams.subscribe
-import io.rover.rover.ui.viewmodels.ExperienceNavigationViewModelInterface
-import io.rover.rover.ui.viewmodels.ExperienceToolbarViewModelInterface
 import io.rover.rover.ui.viewmodels.ExperienceViewModelInterface
 
 class ExperienceView: CoordinatorLayout, BindableView<ExperienceViewModelInterface> {
@@ -82,9 +75,6 @@ class ExperienceView: CoordinatorLayout, BindableView<ExperienceViewModelInterfa
 
     var originalStatusBarColor : Int = 0 // this is set as a side-effect of the attached window
 
-    private val toolbarEmitterSubject = PublishSubject<Toolbar>()
-    val toolbarCreations: Publisher<Toolbar> = toolbarEmitterSubject.shareAndReplay(1)
-
     private fun connectToolbar(newToolbar: Toolbar) {
         toolbar.whenNotNull { appBarLayout.removeView(it) }
 
@@ -94,55 +84,62 @@ class ExperienceView: CoordinatorLayout, BindableView<ExperienceViewModelInterfa
         }
 
         toolbar = newToolbar
+    }
 
-        toolbarEmitterSubject.onNext(newToolbar)
+    private val viewExperienceToolbar by lazy {
+        val toolbarHost = toolbarHost ?: throw RuntimeException("You must set the ToolbarHost up on ExperienceView before binding the view to a view model.")
+        ViewExperienceToolbar(
+            this,
+            toolbarHost.provideWindow(),
+            this.context,
+            toolbarHost
+        )
     }
 
     override var viewModel: ExperienceViewModelInterface? = null
         set(experienceViewModel) {
+            if(viewModel != null) {
+                // sadly have to add this invariant because of complexity dealing with the toolbar.
+                // May fix it later as required.
+                throw RuntimeException("ExperienceView does not support being re-bound to a new ExperienceViewModel.")
+            }
             field = experienceViewModel
             val toolbarHost = toolbarHost ?:
                 throw RuntimeException("You must set the ToolbarHost up on ExperienceView before binding the view to a view model.")
 
             experienceNavigationView.viewModel = null
 
-            experienceViewModel
-                ?.events
-                ?.androidLifecycleDispose(this)?.subscribe({ event ->
-                when(event) {
-                    is ExperienceViewModelInterface.Event.ExperienceReady -> {
-                        experienceNavigationView.viewModel = event.experienceNavigationViewModel
-                    }
-                    is ExperienceViewModelInterface.Event.SetActionBar -> {
-                        // regenerate and replace the toolbar
+            if(experienceViewModel != null) {
+                experienceViewModel.events.androidLifecycleDispose(this).subscribe({ event ->
+                    when (event) {
+                        is ExperienceViewModelInterface.Event.ExperienceReady -> {
+                            experienceNavigationView.viewModel = event.experienceNavigationViewModel
+                        }
+                        is ExperienceViewModelInterface.Event.SetActionBar -> {
+                            // regenerate and replace the toolbar
 
-                        // but the toolbar needs to become ready
-                        val newToolbar = ViewExperienceToolbar.generateToolbar(
-                            this,
-                            event.toolbarViewModel,
-                            context,
-                            toolbarHost,
-                            originalStatusBarColor
-                        )
-
-                        connectToolbar(newToolbar)
-                    }
-                    is ExperienceViewModelInterface.Event.DisplayError -> {
-                        Snackbar.make(this, "Problem: ${event.message}", Snackbar.LENGTH_LONG).show()
-                        log.w("Unable to retrieve experience: ${event.message}")
-                    }
-                    is ExperienceViewModelInterface.Event.SetBacklightBoost -> {
-                        toolbarHost.provideWindow().attributes = (toolbarHost.provideWindow().attributes ?: WindowManager.LayoutParams()).apply {
-                            screenBrightness = when (event.extraBright) {
-                                true -> WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_FULL
-                                false -> WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
+                            val newToolbar = viewExperienceToolbar.setViewModelAndReturnToolbar(
+                                event.toolbarViewModel
+                            )
+                            connectToolbar(newToolbar)
+                        }
+                        is ExperienceViewModelInterface.Event.DisplayError -> {
+                            Snackbar.make(this, "Problem: ${event.message}", Snackbar.LENGTH_LONG).show()
+                            log.w("Unable to retrieve experience: ${event.message}")
+                        }
+                        is ExperienceViewModelInterface.Event.SetBacklightBoost -> {
+                            toolbarHost.provideWindow().attributes = (toolbarHost.provideWindow().attributes ?: WindowManager.LayoutParams()).apply {
+                                screenBrightness = when (event.extraBright) {
+                                    true -> WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_FULL
+                                    false -> WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
+                                }
                             }
                         }
                     }
-                }
-            }, { error ->
-                throw error
-            })
+                }, { error ->
+                    throw error
+                })
+            }
         }
 
     override fun onDetachedFromWindow() {

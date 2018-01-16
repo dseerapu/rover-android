@@ -197,7 +197,7 @@ class StandaloneExperienceHostActivity: AppCompatActivity() {
 
     /**
      * Sadly, menu arrives somewhat asynchronously: specifically, after setSupportActionBar() and
-     * the system interogates the Menu in order to populate things in the toolbar.  In ancient
+     * the system interrogates the Menu in order to populate things in the toolbar.  In ancient
      * versions of Android, this would occur even later because it was only done on first press of
      * the Menu button.
      */

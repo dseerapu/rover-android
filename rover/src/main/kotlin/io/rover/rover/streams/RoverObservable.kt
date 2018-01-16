@@ -170,7 +170,7 @@ interface Processor<T, R>: Subscriber<T>, Publisher<R>
 
 typealias Observable<T> = Publisher<T>
 
-fun <T> Publisher<T>.subscribe(onNext: (item: T) -> Unit, onError: (throwable: Throwable) -> Unit) {
+fun <T> Publisher<T>.subscribe(onNext: (item: T) -> Unit, onError: (throwable: Throwable) -> Unit, subscriptionReceiver: ((Subscription) -> Unit)? = null) {
     this.subscribe(object: Subscriber<T> {
         override fun onComplete() { }
 
@@ -178,7 +178,11 @@ fun <T> Publisher<T>.subscribe(onNext: (item: T) -> Unit, onError: (throwable: T
 
         override fun onNext(item: T) { onNext(item) }
 
-        override fun onSubscribe(subscription: Subscription) { }
+        override fun onSubscribe(subscription: Subscription) {
+            if(subscriptionReceiver != null) {
+                subscriptionReceiver(subscription)
+            }
+        }
     })
 }
 
@@ -550,6 +554,39 @@ fun <T: Any> Publisher<T>.shareAndReplayTypesOnResubscribe(vararg types: Class<o
                 }
             )
         }
+    }
+}
+
+/**
+ * Execute the given block when the Publisher is either cancelled or co
+ */
+fun <T> Publisher<T>.doOnUnsubscribe(behaviour: () -> Unit): Publisher<T> {
+    return object : Publisher<T> {
+        override fun subscribe(subscriber: Subscriber<T>) {
+
+            // I guess do it on complete & cancel?
+
+            val wrappedSubscriber = object : Subscriber<T> by subscriber {
+                override fun onSubscribe(subscription: Subscription) {
+                    val wrappedSubscription = object : Subscription {
+                        override fun cancel() {
+                            behaviour()
+                            subscription.cancel()
+                        }
+
+                    }
+                    subscriber.onSubscribe(wrappedSubscription)
+                }
+
+                override fun onComplete() {
+                    behaviour()
+                    subscriber.onComplete()
+                }
+            }
+
+            this@doOnUnsubscribe.subscribe(wrappedSubscriber)
+        }
+
     }
 }
 
