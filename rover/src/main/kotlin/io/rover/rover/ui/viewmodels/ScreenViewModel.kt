@@ -50,6 +50,7 @@ class ScreenViewModel(
             screen.titleBarText,
             screen.titleBarBackgroundColor.asAndroidColor(),
             screen.titleBarTextColor.asAndroidColor(),
+            screen.titleBarButtonColor.asAndroidColor(),
             screen.titleBarButtons == TitleBarButtons.Both || screen.titleBarButtons == TitleBarButtons.Back,
             screen.titleBarButtons == TitleBarButtons.Both || screen.titleBarButtons == TitleBarButtons.Close,
             screen.statusBarColor.asAndroidColor()

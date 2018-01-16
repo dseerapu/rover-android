@@ -10,10 +10,10 @@ data class ToolbarConfiguration(
 
     val color: Int,
     val textColor: Int,
+    var buttonColor: Int,
 
     val backButton: Boolean,
     val closeButton: Boolean,
-    // TODO: button colour
 
     /**
      * If null, then the default material design behaviour should be used.

@@ -1,22 +1,32 @@
 package io.rover.rover.ui.views
 
+import android.annotation.SuppressLint
 import android.content.Context
+import android.content.res.Resources
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.os.Handler
 import android.support.v4.widget.TextViewCompat
 import android.support.v7.app.ActionBar
+import android.support.v7.appcompat.R.attr.borderlessButtonStyle
+import android.support.v7.appcompat.R.attr.toolbarNavigationButtonStyle
+import android.support.v7.view.ContextThemeWrapper
 import android.support.v7.view.menu.MenuBuilder
+import android.support.v7.widget.AppCompatButton
 import android.support.v7.widget.AppCompatTextView
 import android.support.v7.widget.Toolbar
 import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.style.ForegroundColorSpan
+import android.view.Gravity
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.ViewGroup
 import android.view.Window
+import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.TextView
 import io.rover.rover.core.logging.log
 import io.rover.rover.streams.Publisher
@@ -52,13 +62,29 @@ class ViewExperienceToolbar(
 
     private var retrievedMenu : Menu? = null
 
+    val toolbar = Toolbar(context)
+
+    val closeButton = AppCompatButton(context, null, borderlessButtonStyle)
+
+    init {
+        closeButton.text = "Close"
+        // TODO: default close button style to whatever is set in toolbar style
+        toolbar.addView(closeButton)
+        (closeButton.layoutParams as ActionBar.LayoutParams).gravity = Gravity.END
+    }
+
+    /**
+     * Sadly I have to use the restricted API here.  It used to be available publicly, but has
+     * for some reason made library-group restricted in newer versions of AppCompat.
+     */
+    @SuppressLint("RestrictedApi")
     override fun setViewModelAndReturnToolbar(
         toolbarViewModel: ExperienceToolbarViewModelInterface
     ): Toolbar {
         val configuration = toolbarViewModel.configuration
 
-        // TODO: theme overlay on context
-        val toolbar = Toolbar(context)
+        closeButton.setOnClickListener {  }
+
 
         // I need to keep state for the toolbar subscription so I can unsubscribe it when bind.
         activeMenuSubscription?.cancel()
@@ -73,30 +99,40 @@ class ViewExperienceToolbar(
             .subscribe({ (actionBar, menu) ->
                 actionBar.setDisplayHomeAsUpEnabled(true)
 
+                val textButton = AppCompatButton(
+                    context, null, borderlessButtonStyle
+                )
+
+
+
                 if(retrievedMenu != menu) {
                     // the menu has changed.  We'll recreate our dynamic menu option.
                     retrievedMenu = menu
-                    activeCloseMenuItem = menu.add(Menu.NONE, menuItemId, Menu.NONE, "Close").apply {
-                        isVisible = false
-                        setOnMenuItemClickListener {
-                            toolbarViewModel.pressedClose()
-                            true
-                        }
-                        setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
-
-                        title = "Close"
-                        //                    if(viewModel.configuration.useExistingStyle) {
-                        //                        "Close"
-                        //                    } else {
-                        //                        SpannableStringBuilder("Close").apply {
-                        //                            setSpan(ForegroundColorSpan(Color.RED), 0, "Close".length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-                        //                        }
-                        //                    }
-                    }
+//                    activeCloseMenuItem = menu.add(Menu.NONE, menuItemId, Menu.NONE, "Close").apply {
+//                        isVisible = false
+//                        setOnMenuItemClickListener {
+//                            toolbarViewModel.pressedClose()
+//                            true
+//                        }
+//                        setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
+//
+//                        title = "Close"
+//                        //                    if(viewModel.configuration.useExistingStyle) {
+//                        //                        "Close"
+//                        //                    } else {
+//                        //                        SpannableStringBuilder("Close").apply {
+//                        //                            setSpan(ForegroundColorSpan(Color.RED), 0, "Close".length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+//                        //                        }
+//                        //                    }
+//                    }
                 }
 
                 toolbar.setNavigationOnClickListener {
                     toolbarViewModel.pressedBack()
+                }
+
+                closeButton.setOnClickListener {
+                    toolbarViewModel.pressedClose()
                 }
 
                 // TODO: this one must be changed to style method
@@ -111,6 +147,8 @@ class ViewExperienceToolbar(
                 if (!configuration.useExistingStyle) {
                     // TODO may do with the style above instead
                     toolbar.background = ColorDrawable(configuration.color)
+
+                    closeButton.setTextColor(configuration.textColor)
                 }
 
                 // status bar color only supported on Lollipop and greater.
@@ -120,7 +158,8 @@ class ViewExperienceToolbar(
                     }
                 }
 
-                activeCloseMenuItem!!.isVisible = toolbarViewModel.configuration.closeButton
+                // activeCloseMenuItem!!.isVisible = toolbarViewModel.configuration.closeButton
+                textButton.visibility = if (toolbarViewModel.configuration.closeButton) View.VISIBLE else View.GONE
             }, { error -> throw(error) }, { subscription ->
                 activeMenuSubscription = subscription
             })
