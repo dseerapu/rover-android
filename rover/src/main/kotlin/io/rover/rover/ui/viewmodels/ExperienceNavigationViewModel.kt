@@ -30,9 +30,8 @@ import kotlinx.android.parcel.Parcelize
 class ExperienceNavigationViewModel(
     private val experience: Experience,
     private val viewModelFactory: ViewModelFactoryInterface,
-    private val toolbarViewModel: ExperienceToolbarViewModelInterface,
     icicle: Parcelable? = null
-): ExperienceNavigationViewModelInterface, ExperienceToolbarViewModelInterface by toolbarViewModel {
+): ExperienceNavigationViewModelInterface {
 
     override fun pressBack() {
         actions.onNext(Action.PressedBack())
@@ -172,7 +171,12 @@ class ExperienceNavigationViewModel(
         val appBarEvent = when(event) {
             is ExperienceNavigationViewModelInterface.Event.GoToScreen -> event.screenViewModel.appBarConfiguration
             else -> null
-        }.whenNotNull { ExperienceNavigationViewModelInterface.Event.SetActionBar(it) }
+        }.whenNotNull {
+            val toolbarViewModel = viewModelFactory.viewModelForExperienceToolbar(it)
+            ExperienceNavigationViewModelInterface.Event.SetActionBar(
+                toolbarViewModel
+            )
+        }
 
         return Observable.concat(
             Observable.just(event),
@@ -193,30 +197,30 @@ class ExperienceNavigationViewModel(
             )
         ),
 
-        Observable.merge(
-            actions,
-            toolbarViewModel.toolbarEvents.map { toolbarEvent ->
-                // the toolbar has buttons that can emit Back or Close events depending on the
-                // button configuration.
-                when(toolbarEvent) {
-                    is ExperienceToolbarViewModelInterface.Event.PressedClose -> Action.PressedClose()
-                    is ExperienceToolbarViewModelInterface.Event.PressedBack -> Action.PressedBack()
-                    is ExperienceToolbarViewModelInterface.Event.SetToolbar -> null
-                }
-            }.filterNulls()
-        ).map { action -> actionBehaviour(action) }
-        .filterNulls()
+        actions.map { action -> actionBehaviour(action) }
+            .filterNulls()
     ).map { stateChange ->
         // abuse .map() for doOnNext() side-effects for now to update our state! TODO add doOnNext()
         state = State(stateChange.newBackStack)
         stateChange
     }.flatMap { stateChange -> injectBehaviouralTransientEvents(stateChange.event) }
     .map { event ->
-        // and to dispatch the change to the toolbar view model (TODO doOnNext)
+        // and subscribe to any new toolbars (TODO doOnNext)
         if (event is ExperienceNavigationViewModelInterface.Event.SetActionBar) {
-            log.v("Setting action bar: ${event.appBarConfiguration}")
-            toolbarViewModel.setConfiguration(event.appBarConfiguration)
+            event
+                .experienceToolbarViewModel
+                .toolbarEvents
+                .subscribe { toolbarEvent ->
+                    actions.onNext(
+                        when(toolbarEvent) {
+                            is ExperienceToolbarViewModelInterface.Event.PressedBack -> Action.PressedBack()
+                            is ExperienceToolbarViewModelInterface.Event.PressedClose -> Action.PressedClose()
+                        }
+                    )
+                }
         }
+
+        // and subscribe to the events from the toolbar and dispatch them
 
         event
     }.map {

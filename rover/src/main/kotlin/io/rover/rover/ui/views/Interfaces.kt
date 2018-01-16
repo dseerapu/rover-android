@@ -81,16 +81,4 @@ interface ViewExperienceAppBarInterface {
 }
 
 interface ViewExperienceToolbarInterface {
-    var experienceToolbarViewModel: ExperienceToolbarViewModelInterface?
-
-    /**
-     * The menu becomes available in the containing view after the View mixins are constructed,
-     * so it is passed in after the fact here.
-     */
-    var menu: Menu?
-
-    /**
-     * The ActionBar object should be passed in once the toolbar has been set as
-     */
-    var actionBarWrapper: ActionBar?
 }

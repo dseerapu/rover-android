@@ -87,7 +87,12 @@ class ExperienceViewModel(
                                         // comes through?  For now not likely to happen because this view model is not re-bound.
                                         is ExperienceNavigationViewModelInterface.Event.ViewEvent -> ExperienceViewModelInterface.Event.ExternalNavigation(navigationEvent.event)
                                         is ExperienceNavigationViewModelInterface.Event.SetBacklightBoost -> ExperienceViewModelInterface.Event.SetBacklightBoost(navigationEvent.extraBright)
-                                        else -> null
+                                        is ExperienceNavigationViewModelInterface.Event.SetActionBar -> {
+                                            ExperienceViewModelInterface.Event.SetActionBar(
+                                                navigationEvent.experienceToolbarViewModel
+                                            )
+                                        }
+                                        is ExperienceNavigationViewModelInterface.Event.GoToScreen -> null /* TODO this event is an internal concern of ExperienceNavigation, it should eventually be hid */
                                     }
                                 }.filterNulls()
                             ).map {
@@ -97,11 +102,13 @@ class ExperienceViewModel(
                         }
                     }
                 }.map { event ->
-                    // side-effect!  Store newly navigationViewModel as state (TODO should be doOnNext)
+                    // side-effects!  Store newly navigationViewModel as state (TODO should be doOnNext)
                     if (event is ExperienceViewModelInterface.Event.ExperienceReady) {
                         log.v("Remembering experience view model.")
                         navigationViewModel = event.experienceNavigationViewModel
                     }
+
+
 
                     event
                 }

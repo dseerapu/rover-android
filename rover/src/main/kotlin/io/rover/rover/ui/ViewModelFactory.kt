@@ -15,6 +15,7 @@ import io.rover.rover.core.domain.WebViewBlock
 import io.rover.rover.services.assets.AssetService
 import io.rover.rover.services.assets.ImageOptimizationServiceInterface
 import io.rover.rover.services.network.NetworkServiceInterface
+import io.rover.rover.ui.types.ToolbarConfiguration
 import io.rover.rover.ui.viewmodels.BackgroundViewModel
 import io.rover.rover.ui.viewmodels.BarcodeBlockViewModel
 import io.rover.rover.ui.viewmodels.BarcodeViewModel
@@ -28,6 +29,7 @@ import io.rover.rover.ui.viewmodels.ButtonViewModel
 import io.rover.rover.ui.viewmodels.ExperienceNavigationViewModel
 import io.rover.rover.ui.viewmodels.ExperienceNavigationViewModelInterface
 import io.rover.rover.ui.viewmodels.ExperienceToolbarViewModel
+import io.rover.rover.ui.viewmodels.ExperienceToolbarViewModelInterface
 import io.rover.rover.ui.viewmodels.ExperienceViewModel
 import io.rover.rover.ui.viewmodels.ExperienceViewModelInterface
 import io.rover.rover.ui.viewmodels.ImageBlockViewModel
@@ -46,6 +48,8 @@ interface ViewModelFactoryInterface {
     fun viewModelForExperienceNavigation(experience: Experience, icicle: Parcelable?): ExperienceNavigationViewModelInterface
 
     fun viewModelForExperience(experienceId: String, icicle: Parcelable?): ExperienceViewModelInterface
+
+    fun viewModelForExperienceToolbar(toolbarConfiguration: ToolbarConfiguration): ExperienceToolbarViewModelInterface
 
     fun viewModelForBlock(block: Block): BlockViewModelInterface
 
@@ -159,11 +163,9 @@ class ViewModelFactory(
     }
 
     override fun viewModelForExperienceNavigation(experience: Experience, icicle: Parcelable?): ExperienceNavigationViewModelInterface {
-        var toolbarViewModel = ExperienceToolbarViewModel()
         return ExperienceNavigationViewModel(
             experience,
             this,
-            toolbarViewModel,
             icicle
         )
     }
@@ -174,6 +176,12 @@ class ViewModelFactory(
             networkService,
             this,
             icicle
+        )
+    }
+
+    override fun viewModelForExperienceToolbar(toolbarConfiguration: ToolbarConfiguration): ExperienceToolbarViewModelInterface {
+        return ExperienceToolbarViewModel(
+            toolbarConfiguration
         )
     }
 }

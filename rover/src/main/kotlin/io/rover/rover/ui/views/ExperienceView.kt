@@ -1,6 +1,7 @@
 package io.rover.rover.ui.views
 
 import android.content.Context
+import android.os.Build
 import android.support.design.widget.AppBarLayout
 import android.support.design.widget.CoordinatorLayout
 import android.support.design.widget.Snackbar
@@ -12,8 +13,15 @@ import android.view.Window
 import android.view.WindowManager
 import io.rover.rover.core.logging.log
 import io.rover.rover.platform.whenNotNull
+import io.rover.rover.streams.Observable
+import io.rover.rover.streams.PublishSubject
+import io.rover.rover.streams.Publisher
 import io.rover.rover.streams.androidLifecycleDispose
+import io.rover.rover.streams.flatMap
+import io.rover.rover.streams.map
+import io.rover.rover.streams.shareAndReplay
 import io.rover.rover.streams.subscribe
+import io.rover.rover.ui.viewmodels.ExperienceNavigationViewModelInterface
 import io.rover.rover.ui.viewmodels.ExperienceToolbarViewModelInterface
 import io.rover.rover.ui.viewmodels.ExperienceViewModelInterface
 
@@ -22,7 +30,7 @@ class ExperienceView: CoordinatorLayout, BindableView<ExperienceViewModelInterfa
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
-    var toolbar: Toolbar = Toolbar(context)
+    private var toolbar: Toolbar? = null
 
     private val experienceNavigationView: ExperienceNavigationView = ExperienceNavigationView(context)
 
@@ -45,59 +53,86 @@ class ExperienceView: CoordinatorLayout, BindableView<ExperienceViewModelInterfa
             width = LayoutParams.MATCH_PARENT
             height = LayoutParams.WRAP_CONTENT
         }
+    }
 
-        appBarLayout.addView(toolbar)
-        (toolbar.layoutParams as AppBarLayout.LayoutParams).apply {
+    interface ToolbarHost {
+        /**
+         * The ExperiencesView will generate the toolbar and lay it out within it's own view.
+         *
+         * However, for it to work completely, it needs to be set as the Activity's (Fragment?)
+         * toolbar.
+         *
+         * In response to this, the Activity will provide an ActionBar (and then, after a small
+         * delay, a Menu).
+         */
+        fun setToolbarAsActionBar(toolbar: Toolbar): Observable<Pair<ActionBar, Menu>>
+
+        fun provideWindow(): Window
+    }
+
+    var toolbarHost: ToolbarHost? = null
+        set(host) {
+            field = host
+            // TODO: I need an event for when menu arrives, not just pull it.
+
+            originalStatusBarColor = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                host?.provideWindow()?.statusBarColor ?: 0
+            } else 0
+        }
+
+    var originalStatusBarColor : Int = 0 // this is set as a side-effect of the attached window
+
+    private val toolbarEmitterSubject = PublishSubject<Toolbar>()
+    val toolbarCreations: Publisher<Toolbar> = toolbarEmitterSubject.shareAndReplay(1)
+
+    private fun connectToolbar(newToolbar: Toolbar) {
+        toolbar.whenNotNull { appBarLayout.removeView(it) }
+
+        appBarLayout.addView(newToolbar)
+        (newToolbar.layoutParams as AppBarLayout.LayoutParams).apply {
             scrollFlags = AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS
         }
 
+        toolbar = newToolbar
+
+        toolbarEmitterSubject.onNext(newToolbar)
     }
-
-    /**
-     * You must set [attachedWindow] on the Experience view before binding the view model.
-     * This is needed for backlight control.
-     */
-    var attachedWindow: Window? = null
-
-    val viewToolbar by lazy { ViewExperienceToolbar(toolbar, attachedWindow!!) }
-
-    var supportActionBarWrapper: ActionBar? = null
-        set(bar) {
-            field = bar
-            viewToolbar.actionBarWrapper = bar
-        }
-
-    var attachedMenu: Menu? = null
-        set(menu) {
-            field = menu
-            viewToolbar.menu = menu
-        }
 
     override var viewModel: ExperienceViewModelInterface? = null
         set(experienceViewModel) {
             field = experienceViewModel
-            if(attachedWindow == null) {
-                throw RuntimeException("You must set the attached window on ExperienceView before binding it to a view model.")
-            }
-            if(supportActionBarWrapper == null) {
-                throw RuntimeException("You must set the support action bar wrapper on ExperienceView before binding it to a view model.")
-            }
+            val toolbarHost = toolbarHost ?:
+                throw RuntimeException("You must set the ToolbarHost up on ExperienceView before binding the view to a view model.")
 
             experienceNavigationView.viewModel = null
-            viewToolbar.experienceToolbarViewModel = null
 
-            experienceViewModel?.events?.androidLifecycleDispose(this)?.subscribe({ event ->
+            experienceViewModel
+                ?.events
+                ?.androidLifecycleDispose(this)?.subscribe({ event ->
                 when(event) {
                     is ExperienceViewModelInterface.Event.ExperienceReady -> {
                         experienceNavigationView.viewModel = event.experienceNavigationViewModel
-                        viewToolbar.experienceToolbarViewModel = event.experienceNavigationViewModel
+                    }
+                    is ExperienceViewModelInterface.Event.SetActionBar -> {
+                        // regenerate and replace the toolbar
+
+                        // but the toolbar needs to become ready
+                        val newToolbar = ViewExperienceToolbar.generateToolbar(
+                            this,
+                            event.toolbarViewModel,
+                            context,
+                            toolbarHost,
+                            originalStatusBarColor
+                        )
+
+                        connectToolbar(newToolbar)
                     }
                     is ExperienceViewModelInterface.Event.DisplayError -> {
                         Snackbar.make(this, "Problem: ${event.message}", Snackbar.LENGTH_LONG).show()
                         log.w("Unable to retrieve experience: ${event.message}")
                     }
                     is ExperienceViewModelInterface.Event.SetBacklightBoost -> {
-                        attachedWindow?.attributes = (attachedWindow?.attributes ?: WindowManager.LayoutParams()).apply {
+                        toolbarHost.provideWindow().attributes = (toolbarHost.provideWindow().attributes ?: WindowManager.LayoutParams()).apply {
                             screenBrightness = when (event.extraBright) {
                                 true -> WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_FULL
                                 false -> WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
@@ -112,6 +147,6 @@ class ExperienceView: CoordinatorLayout, BindableView<ExperienceViewModelInterfa
 
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
-        attachedWindow = null
+        toolbarHost = null
     }
 }

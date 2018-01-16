@@ -385,6 +385,11 @@ interface ExperienceViewModelInterface: BindableViewModel {
         data class ExperienceReady(
             val experienceNavigationViewModel: ExperienceNavigationViewModelInterface
         ): Event()
+
+        data class SetActionBar(
+            val toolbarViewModel: ExperienceToolbarViewModelInterface
+        ): Event()
+
         data class DisplayError(
             val message: String
         ): Event()
@@ -411,7 +416,7 @@ interface ExperienceViewModelInterface: BindableViewModel {
     val state: Parcelable
 }
 
-interface ExperienceNavigationViewModelInterface : BindableViewModel, ExperienceToolbarViewModelInterface {
+interface ExperienceNavigationViewModelInterface : BindableViewModel {
     val events : Observable<Event>
 
     fun pressBack()
@@ -461,7 +466,7 @@ interface ExperienceNavigationViewModelInterface : BindableViewModel, Experience
         ): Event()
 
         data class SetActionBar(
-            val appBarConfiguration: ToolbarConfiguration
+            val experienceToolbarViewModel: ExperienceToolbarViewModelInterface
         ): Event()
 
         /**
@@ -513,14 +518,13 @@ interface ExperienceAppBarViewModelInterface {
 interface ExperienceToolbarViewModelInterface {
     val toolbarEvents: Observable<Event>
 
-    fun setConfiguration(toolbarConfiguration: ToolbarConfiguration)
+    val configuration: ToolbarConfiguration
 
     fun pressedBack()
 
     fun pressedClose()
 
     sealed class Event {
-        data class SetToolbar(val toolbarConfiguration: ToolbarConfiguration): Event()
         class PressedBack(): Event()
         class PressedClose(): Event()
     }

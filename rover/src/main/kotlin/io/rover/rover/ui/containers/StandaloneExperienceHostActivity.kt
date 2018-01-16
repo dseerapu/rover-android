@@ -1,12 +1,16 @@
 package io.rover.rover.ui.containers
 
+import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
+import android.support.v7.app.ActionBar
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.Toolbar
 import android.view.Menu
+import android.view.Window
 import com.facebook.stetho.urlconnection.ByteArrayRequestEntity
 import com.facebook.stetho.urlconnection.StethoURLConnectionManager
 import io.rover.rover.core.logging.log
@@ -23,6 +27,11 @@ import io.rover.rover.services.network.AuthenticationContext
 import io.rover.rover.services.network.NetworkService
 import io.rover.rover.services.network.NetworkServiceInterface
 import io.rover.rover.services.network.WireEncoder
+import io.rover.rover.streams.Observable
+import io.rover.rover.streams.PublishSubject
+import io.rover.rover.streams.Publisher
+import io.rover.rover.streams.Subscriber
+import io.rover.rover.streams.share
 import io.rover.rover.streams.subscribe
 import io.rover.rover.ui.AndroidMeasurementService
 import io.rover.rover.ui.AndroidRichTextToSpannedTransformer
@@ -167,27 +176,37 @@ class StandaloneExperienceHostActivity: AppCompatActivity() {
         }
     }
 
+    // The View needs to know about the Activity-level window and several other
+    // Activity/Fragment context things in order to temporarily change the backlight.
+    private val toolbarHost = ActivityToolbarHost(this)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(
             experiencesView
         )
-        // The View needs to know about the Activity-level window in order to temporarily change the
-        // backlight.
-        experiencesView.attachedWindow = this.window
 
-        setSupportActionBar(experiencesView.toolbar)
+        experiencesView.toolbarHost = toolbarHost
 
-        experiencesView.supportActionBarWrapper = supportActionBar
+        // i left off here. options menu?
 
         experienceViewModel = blockViewModelFactory.viewModelForExperience(
             experienceId, savedInstanceState?.getParcelable("experienceState")
         )
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+    /**
+     * Sadly, menu arrives somewhat asynchronously: specifically, after setSupportActionBar() and
+     * the system interogates the Menu in order to populate things in the toolbar.  In ancient
+     * versions of Android, this would occur even later because it was only done on first press of
+     * the Menu button.
+     */
+    // private var capturedMenu: Menu? = null
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
         super.onCreateOptionsMenu(menu)
-        experiencesView.attachedMenu = menu
+        toolbarHost.menu = menu
+        // capturedMenu = menu
         return true
     }
 
@@ -230,5 +249,51 @@ class StandaloneExperienceHostActivity: AppCompatActivity() {
                     connManager.interpretResponseStream(source)
             }
         }
+    }
+}
+
+/**
+ * Activities that wish to host [ExperienceView] must instantiate [ActivityToolbarHost], and
+ * then also implement [AppCompatActivity.onCreateOptionsMenu] wherein they must then set the menu
+ * on the toolbar host with [ActivityToolbarHost.menu].
+ *
+ * This arrangement is required on account of Android lacking
+ *
+ * It assumes that you are using [AppCompatActivity], which is strongly recommended in standard
+ * Android apps.
+ *
+ * TODO: include direction about either setting the ActionBar feature to off in code or by style.
+ */
+class ActivityToolbarHost(private val activity: AppCompatActivity): ExperienceView.ToolbarHost {
+    var menu: Menu? = null
+        set(newMenu) {
+            field = newMenu
+
+            emitIfPrerequisitesAvailable()
+        }
+
+    private val emitterSubject = PublishSubject<Pair<ActionBar, Menu>>()
+    private val emitter = emitterSubject.share()
+
+    private var actionBar: ActionBar? = null
+
+    private fun emitIfPrerequisitesAvailable() {
+        val actionBar = actionBar
+        val menu = menu
+
+        if (actionBar != null && menu != null) {
+            emitterSubject.onNext(Pair(actionBar, menu))
+        }
+    }
+
+    override fun setToolbarAsActionBar(toolbar: Toolbar): Observable<Pair<ActionBar, Menu>> {
+        activity.setSupportActionBar(toolbar)
+        // and then retrieved the wrapped actionbar delegate
+        actionBar = activity.supportActionBar
+        return emitter
+    }
+
+    override fun provideWindow(): Window {
+        return activity.window
     }
 }
