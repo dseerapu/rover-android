@@ -53,6 +53,7 @@ class RowViewModel(
         val x = bounds.left
         val y = bounds.top
         val width = bounds.width()
+
         val height = height(bounds)
 
         return RectF(
@@ -114,8 +115,15 @@ class RowViewModel(
         val clip = if (!rowFrame.contains(blockFrame)) {
             // and find the intersection with blockFrame to find out what should be exposed and then
             // transform into coord space with origin of blockframe' top left corner:
-            rowFrame.intersection(blockFrame)!!.offset(0 - blockFrame.left, 0 - blockFrame.top)
 
+            val intersection = rowFrame.intersection(blockFrame)
+
+            if(intersection == null) {
+                // there is no intersection. This means the block is *entirely* outside of the bounds.  An unlikely but not impossible situation.  Clip it entirely.
+                RectF(blockFrame.left, blockFrame.top, blockFrame.left, blockFrame.top)
+            } else {
+                intersection.offset(0 - blockFrame.left, 0 - blockFrame.top)
+            }
         } else {
             // no clip is necessary because the blockFrame is contained entirely within the
             // surrounding block.

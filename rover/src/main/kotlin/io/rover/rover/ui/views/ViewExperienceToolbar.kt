@@ -84,7 +84,7 @@ class ViewExperienceToolbar(
         val configuration = toolbarViewModel.configuration
 
         closeButton.setOnClickListener {  }
-        
+
         // I need to keep state for the toolbar subscription so I can unsubscribe it when bind.
         activeMenuSubscription?.cancel()
 

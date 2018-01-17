@@ -28,8 +28,8 @@ android {
         main.java.srcDirs += 'src/main/kotlin'
         test.java.srcDirs += 'src/test/kotlin'
     }
-
 }
+
 androidExtensions {
     // So we can use @Parcelize.  This does not expose risk to consumers; this is a build time-only
     // consideration.
