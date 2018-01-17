@@ -1,6 +1,5 @@
 package io.rover.rover.ui.containers
 
-import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
@@ -29,16 +28,14 @@ import io.rover.rover.services.network.NetworkServiceInterface
 import io.rover.rover.services.network.WireEncoder
 import io.rover.rover.streams.Observable
 import io.rover.rover.streams.PublishSubject
-import io.rover.rover.streams.Publisher
-import io.rover.rover.streams.Subscriber
 import io.rover.rover.streams.share
 import io.rover.rover.streams.subscribe
 import io.rover.rover.ui.AndroidMeasurementService
-import io.rover.rover.ui.AndroidRichTextToSpannedTransformer
+import io.rover.rover.ui.experience.blocks.concerns.text.AndroidRichTextToSpannedTransformer
 import io.rover.rover.ui.ViewModelFactory
 import io.rover.rover.ui.viewmodels.ExperienceExternalNavigationEvent
 import io.rover.rover.ui.viewmodels.ExperienceViewModelInterface
-import io.rover.rover.ui.views.ExperienceView
+import io.rover.rover.ui.experience.ExperienceView
 import java.io.IOException
 import java.io.InputStream
 import java.net.HttpURLConnection

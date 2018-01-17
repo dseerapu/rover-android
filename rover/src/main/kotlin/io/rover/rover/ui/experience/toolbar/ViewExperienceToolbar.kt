@@ -1,43 +1,27 @@
-package io.rover.rover.ui.views
+package io.rover.rover.ui.experience.toolbar
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.res.Resources
-import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Build
-import android.os.Handler
-import android.support.v4.widget.TextViewCompat
 import android.support.v7.app.ActionBar
 import android.support.v7.appcompat.R.attr.borderlessButtonStyle
-import android.support.v7.appcompat.R.attr.toolbarNavigationButtonStyle
-import android.support.v7.view.ContextThemeWrapper
-import android.support.v7.view.menu.MenuBuilder
 import android.support.v7.widget.AppCompatButton
-import android.support.v7.widget.AppCompatTextView
 import android.support.v7.widget.Toolbar
-import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.style.ForegroundColorSpan
 import android.view.Gravity
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.view.ViewGroup
 import android.view.Window
-import android.widget.Button
-import android.widget.LinearLayout
-import android.widget.TextView
 import io.rover.rover.core.logging.log
-import io.rover.rover.streams.Publisher
-import io.rover.rover.streams.Subscriber
 import io.rover.rover.streams.Subscription
 import io.rover.rover.streams.androidLifecycleDispose
 import io.rover.rover.streams.doOnUnsubscribe
 import io.rover.rover.streams.subscribe
-import io.rover.rover.ui.types.ToolbarConfiguration
-import io.rover.rover.ui.viewmodels.ExperienceNavigationViewModel
 import io.rover.rover.ui.viewmodels.ExperienceToolbarViewModelInterface
+import io.rover.rover.ui.experience.ExperienceView
 
 
 class ViewExperienceToolbar(

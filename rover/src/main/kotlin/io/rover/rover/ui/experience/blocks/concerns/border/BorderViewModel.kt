@@ -2,8 +2,7 @@ package io.rover.rover.ui.experience.blocks.concerns.border
 
 import io.rover.rover.core.domain.Border
 import io.rover.rover.ui.types.Rect
-import io.rover.rover.ui.viewmodels.BorderViewModelInterface
-import io.rover.rover.ui.views.asAndroidColor
+import io.rover.rover.ui.types.asAndroidColor
 
 class BorderViewModel(
     val border: Border

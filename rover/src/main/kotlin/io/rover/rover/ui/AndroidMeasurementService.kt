@@ -7,9 +7,8 @@ import android.os.Build
 import android.text.Layout
 import android.text.StaticLayout
 import android.text.TextPaint
-import android.text.TextUtils
 import android.util.DisplayMetrics
-import io.rover.rover.core.logging.log
+import io.rover.rover.ui.experience.blocks.concerns.text.RichTextToSpannedTransformer
 import io.rover.rover.ui.types.Font
 import io.rover.rover.ui.types.FontAppearance
 import io.rover.rover.ui.types.dpAsPx
@@ -18,7 +17,6 @@ import io.rover.rover.ui.viewmodels.BarcodeViewModelInterface
 import io.rover.shaded.zxing.com.google.zxing.BarcodeFormat
 import io.rover.shaded.zxing.com.google.zxing.EncodeHintType
 import io.rover.shaded.zxing.com.google.zxing.MultiFormatWriter
-import io.rover.shaded.zxing.com.google.zxing.pdf417.PDF417Writer
 
 class AndroidMeasurementService(
     private val displayMetrics: DisplayMetrics,

@@ -1,4 +1,4 @@
-package io.rover.rover.ui.viewmodels
+package io.rover.rover.ui.experience.blocks.concerns.layout
 
 import io.rover.rover.core.domain.Block
 import io.rover.rover.core.domain.BlockAction
@@ -9,12 +9,14 @@ import io.rover.rover.core.logging.log
 import io.rover.rover.platform.whenNotNull
 import io.rover.rover.streams.PublishSubject
 import io.rover.rover.streams.share
-import io.rover.rover.ui.measuredAgainst
+import io.rover.rover.ui.types.measuredAgainst
 import io.rover.rover.ui.types.Alignment
 import io.rover.rover.ui.types.Insets
 import io.rover.rover.ui.types.NavigateTo
 import io.rover.rover.ui.types.RectF
 import io.rover.rover.ui.types.ViewType
+import io.rover.rover.ui.viewmodels.BlockViewModelInterface
+import io.rover.rover.ui.viewmodels.Measurable
 
 /**
  * A base class used by all blocks that contains the block layout and positioning concerns.

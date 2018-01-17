@@ -7,11 +7,11 @@ import android.support.v7.widget.AppCompatImageView
 import android.util.AttributeSet
 import io.rover.rover.core.logging.log
 import io.rover.rover.ui.viewmodels.ImageBlockViewModelInterface
-import io.rover.rover.ui.views.LayoutableView
-import io.rover.rover.ui.views.ViewBackground
-import io.rover.rover.ui.views.ViewBlock
+import io.rover.rover.ui.experience.blocks.concerns.layout.LayoutableView
+import io.rover.rover.ui.experience.blocks.concerns.background.ViewBackground
+import io.rover.rover.ui.experience.blocks.concerns.layout.ViewBlock
 import io.rover.rover.ui.experience.blocks.concerns.border.ViewBorder
-import io.rover.rover.ui.views.ViewComposition
+import io.rover.rover.ui.experience.blocks.concerns.ViewComposition
 
 class ImageBlockView : AppCompatImageView, LayoutableView<ImageBlockViewModelInterface> {
     constructor(context: Context?) : super(context)

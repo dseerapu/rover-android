@@ -4,9 +4,10 @@ import android.content.Context
 import android.graphics.Canvas
 import android.support.v7.widget.RecyclerView
 import android.util.AttributeSet
-import android.view.View
 import io.rover.rover.ui.BlockAndRowLayoutManager
 import io.rover.rover.ui.BlockAndRowRecyclerAdapter
+import io.rover.rover.ui.experience.blocks.concerns.ViewComposition
+import io.rover.rover.ui.experience.blocks.concerns.background.ViewBackground
 import io.rover.rover.ui.viewmodels.ScreenViewModelInterface
 
 class ScreenView : RecyclerView, BindableView<ScreenViewModelInterface> {

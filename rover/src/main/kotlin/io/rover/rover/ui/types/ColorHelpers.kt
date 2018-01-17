@@ -1,4 +1,4 @@
-package io.rover.rover.ui.views
+package io.rover.rover.ui.types
 
 import io.rover.rover.core.domain.Color
 

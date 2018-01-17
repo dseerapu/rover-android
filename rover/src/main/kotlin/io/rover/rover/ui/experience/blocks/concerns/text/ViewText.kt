@@ -1,4 +1,4 @@
-package io.rover.rover.ui.views
+package io.rover.rover.ui.experience.blocks.concerns.text
 
 import android.graphics.Paint
 import android.graphics.Typeface
@@ -6,8 +6,6 @@ import android.os.Build
 import android.text.Layout
 import android.view.Gravity
 import android.widget.TextView
-import io.rover.rover.ui.RichTextToSpannedTransformer
-import io.rover.rover.ui.viewmodels.TextBlockViewModelInterface
 import io.rover.rover.ui.viewmodels.TextViewModelInterface
 
 /**

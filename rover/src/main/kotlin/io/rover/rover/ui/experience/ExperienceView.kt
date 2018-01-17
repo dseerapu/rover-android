@@ -1,4 +1,4 @@
-package io.rover.rover.ui.views
+package io.rover.rover.ui.experience
 
 import android.content.Context
 import android.os.Build
@@ -16,7 +16,10 @@ import io.rover.rover.platform.whenNotNull
 import io.rover.rover.streams.Observable
 import io.rover.rover.streams.androidLifecycleDispose
 import io.rover.rover.streams.subscribe
+import io.rover.rover.ui.experience.navigation.ExperienceNavigationView
+import io.rover.rover.ui.experience.toolbar.ViewExperienceToolbar
 import io.rover.rover.ui.viewmodels.ExperienceViewModelInterface
+import io.rover.rover.ui.views.BindableView
 
 class ExperienceView: CoordinatorLayout, BindableView<ExperienceViewModelInterface> {
     constructor(context: Context?) : super(context)

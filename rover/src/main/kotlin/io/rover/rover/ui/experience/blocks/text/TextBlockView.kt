@@ -6,14 +6,14 @@ import android.graphics.Canvas
 import android.util.AttributeSet
 import android.widget.TextView
 import io.rover.rover.core.logging.log
-import io.rover.rover.ui.AndroidRichTextToSpannedTransformer
 import io.rover.rover.ui.viewmodels.TextBlockViewModelInterface
-import io.rover.rover.ui.views.LayoutableView
-import io.rover.rover.ui.views.ViewBackground
-import io.rover.rover.ui.views.ViewBlock
+import io.rover.rover.ui.experience.blocks.concerns.layout.LayoutableView
+import io.rover.rover.ui.experience.blocks.concerns.background.ViewBackground
+import io.rover.rover.ui.experience.blocks.concerns.layout.ViewBlock
 import io.rover.rover.ui.experience.blocks.concerns.border.ViewBorder
-import io.rover.rover.ui.views.ViewComposition
-import io.rover.rover.ui.views.ViewText
+import io.rover.rover.ui.experience.blocks.concerns.text.AndroidRichTextToSpannedTransformer
+import io.rover.rover.ui.experience.blocks.concerns.text.ViewText
+import io.rover.rover.ui.experience.blocks.concerns.ViewComposition
 
 class TextBlockView : TextView, LayoutableView<TextBlockViewModelInterface> {
     constructor(context: Context?) : super(context)

@@ -10,7 +10,8 @@ import io.rover.rover.streams.map
 import io.rover.rover.streams.share
 import io.rover.rover.ui.ViewModelFactoryInterface
 import io.rover.rover.ui.experience.blocks.barcode.BarcodeBlockViewModel
-import io.rover.rover.ui.measuredAgainst
+import io.rover.rover.ui.experience.blocks.concerns.background.BackgroundViewModelInterface
+import io.rover.rover.ui.types.measuredAgainst
 import io.rover.rover.ui.types.DisplayItem
 import io.rover.rover.ui.types.NavigateTo
 import io.rover.rover.ui.types.RectF

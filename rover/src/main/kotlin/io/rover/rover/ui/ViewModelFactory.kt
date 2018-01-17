@@ -15,18 +15,18 @@ import io.rover.rover.core.domain.WebViewBlock
 import io.rover.rover.services.assets.AssetService
 import io.rover.rover.services.assets.ImageOptimizationServiceInterface
 import io.rover.rover.services.network.NetworkServiceInterface
-import io.rover.rover.ui.types.ToolbarConfiguration
+import io.rover.rover.ui.experience.toolbar.ToolbarConfiguration
 import io.rover.rover.ui.experience.blocks.concerns.background.BackgroundViewModel
 import io.rover.rover.ui.experience.blocks.barcode.BarcodeBlockViewModel
 import io.rover.rover.ui.experience.blocks.barcode.BarcodeViewModel
-import io.rover.rover.ui.viewmodels.BlockViewModel
+import io.rover.rover.ui.experience.blocks.concerns.layout.BlockViewModel
 import io.rover.rover.ui.viewmodels.BlockViewModelInterface
 import io.rover.rover.ui.experience.blocks.concerns.border.BorderViewModel
 import io.rover.rover.ui.experience.blocks.button.ButtonBlockViewModel
 import io.rover.rover.ui.experience.blocks.button.ButtonStateViewModel
 import io.rover.rover.ui.viewmodels.ButtonStateViewModelInterface
 import io.rover.rover.ui.experience.blocks.button.ButtonViewModel
-import io.rover.rover.ui.viewmodels.ExperienceNavigationViewModel
+import io.rover.rover.ui.experience.navigation.ExperienceNavigationViewModel
 import io.rover.rover.ui.viewmodels.ExperienceNavigationViewModelInterface
 import io.rover.rover.ui.experience.toolbar.ExperienceToolbarViewModel
 import io.rover.rover.ui.viewmodels.ExperienceToolbarViewModelInterface
@@ -40,7 +40,7 @@ import io.rover.rover.ui.viewmodels.RowViewModelInterface
 import io.rover.rover.ui.viewmodels.ScreenViewModel
 import io.rover.rover.ui.viewmodels.ScreenViewModelInterface
 import io.rover.rover.ui.experience.blocks.text.TextBlockViewModel
-import io.rover.rover.ui.experience.blocks.text.TextViewModel
+import io.rover.rover.ui.experience.blocks.concerns.text.TextViewModel
 import io.rover.rover.ui.experience.blocks.web.WebViewBlockViewModel
 import io.rover.rover.ui.experience.blocks.web.WebViewModel
 

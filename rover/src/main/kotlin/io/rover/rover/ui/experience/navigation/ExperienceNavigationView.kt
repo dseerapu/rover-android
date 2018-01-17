@@ -1,4 +1,4 @@
-package io.rover.rover.ui.views
+package io.rover.rover.ui.experience.navigation
 
 import android.content.Context
 import android.support.transition.Slide
@@ -14,6 +14,8 @@ import io.rover.rover.streams.androidLifecycleDispose
 import io.rover.rover.streams.subscribe
 import io.rover.rover.ui.viewmodels.ExperienceNavigationViewModelInterface
 import io.rover.rover.ui.viewmodels.ScreenViewModelInterface
+import io.rover.rover.ui.views.BindableView
+import io.rover.rover.ui.views.ScreenView
 
 /**
  * Navigation behaviour between screens of an Experience.

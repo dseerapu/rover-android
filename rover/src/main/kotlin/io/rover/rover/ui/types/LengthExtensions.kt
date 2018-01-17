@@ -1,4 +1,4 @@
-package io.rover.rover.ui
+package io.rover.rover.ui.types
 
 import io.rover.rover.core.domain.Length
 import io.rover.rover.core.domain.UnitOfMeasure

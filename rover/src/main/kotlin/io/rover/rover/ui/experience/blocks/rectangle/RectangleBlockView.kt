@@ -7,10 +7,10 @@ import android.util.AttributeSet
 import android.view.View
 import io.rover.rover.core.logging.log
 import io.rover.rover.ui.viewmodels.RectangleBlockViewModelInterface
-import io.rover.rover.ui.views.LayoutableView
-import io.rover.rover.ui.views.ViewBackground
+import io.rover.rover.ui.experience.blocks.concerns.layout.LayoutableView
+import io.rover.rover.ui.experience.blocks.concerns.background.ViewBackground
 import io.rover.rover.ui.experience.blocks.concerns.border.ViewBorder
-import io.rover.rover.ui.views.ViewComposition
+import io.rover.rover.ui.experience.blocks.concerns.ViewComposition
 
 class RectangleBlockView : View, LayoutableView<RectangleBlockViewModelInterface> {
     constructor(context: Context?) : super(context)

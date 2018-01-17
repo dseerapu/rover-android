@@ -1,9 +1,9 @@
 package io.rover.rover.ui.experience.blocks.image
 
 import io.rover.rover.ui.types.ViewType
-import io.rover.rover.ui.viewmodels.BackgroundViewModelInterface
+import io.rover.rover.ui.experience.blocks.concerns.background.BackgroundViewModelInterface
 import io.rover.rover.ui.viewmodels.BlockViewModelInterface
-import io.rover.rover.ui.viewmodels.BorderViewModelInterface
+import io.rover.rover.ui.experience.blocks.concerns.border.BorderViewModelInterface
 import io.rover.rover.ui.viewmodels.ImageBlockViewModelInterface
 import io.rover.rover.ui.viewmodels.ImageViewModelInterface
 

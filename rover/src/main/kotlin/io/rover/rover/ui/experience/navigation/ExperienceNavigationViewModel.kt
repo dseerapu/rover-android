@@ -1,4 +1,4 @@
-package io.rover.rover.ui.viewmodels
+package io.rover.rover.ui.experience.navigation
 
 import android.annotation.SuppressLint
 import android.os.Parcelable
@@ -16,6 +16,10 @@ import io.rover.rover.streams.share
 import io.rover.rover.streams.subscribe
 import io.rover.rover.ui.ViewModelFactoryInterface
 import io.rover.rover.ui.types.NavigateTo
+import io.rover.rover.ui.viewmodels.ExperienceExternalNavigationEvent
+import io.rover.rover.ui.viewmodels.ExperienceNavigationViewModelInterface
+import io.rover.rover.ui.viewmodels.ExperienceToolbarViewModelInterface
+import io.rover.rover.ui.viewmodels.ScreenViewModelInterface
 import kotlinx.android.parcel.Parcelize
 
 /**

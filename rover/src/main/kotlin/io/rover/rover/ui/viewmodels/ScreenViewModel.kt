@@ -6,12 +6,14 @@ import io.rover.rover.streams.Observable
 import io.rover.rover.streams.asPublisher
 import io.rover.rover.streams.flatMap
 import io.rover.rover.ui.ViewModelFactoryInterface
-import io.rover.rover.ui.types.ToolbarConfiguration
+import io.rover.rover.ui.experience.blocks.concerns.background.BackgroundViewModelInterface
+import io.rover.rover.ui.experience.blocks.concerns.layout.LayoutableViewModel
+import io.rover.rover.ui.experience.toolbar.ToolbarConfiguration
 import io.rover.rover.ui.types.DisplayItem
 import io.rover.rover.ui.types.Layout
 import io.rover.rover.ui.types.NavigateTo
 import io.rover.rover.ui.types.RectF
-import io.rover.rover.ui.views.asAndroidColor
+import io.rover.rover.ui.types.asAndroidColor
 
 class ScreenViewModel(
     private val screen: Screen,

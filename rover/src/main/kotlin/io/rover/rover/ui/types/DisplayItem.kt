@@ -1,6 +1,6 @@
 package io.rover.rover.ui.types
 
-import io.rover.rover.ui.viewmodels.LayoutableViewModel
+import io.rover.rover.ui.experience.blocks.concerns.layout.LayoutableViewModel
 import io.rover.rover.ui.viewmodels.ScreenViewModel
 
 /**

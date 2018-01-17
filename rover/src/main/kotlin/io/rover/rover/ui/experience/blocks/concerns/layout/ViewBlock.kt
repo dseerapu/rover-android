@@ -1,11 +1,9 @@
-package io.rover.rover.ui.views
+package io.rover.rover.ui.experience.blocks.concerns.layout
 
 import android.view.MotionEvent
 import android.view.View
-import io.rover.rover.core.logging.log
 import io.rover.rover.ui.types.dpAsPx
 import io.rover.rover.ui.viewmodels.BlockViewModelInterface
-import io.rover.rover.ui.viewmodels.LayoutPaddingDeflection
 
 class ViewBlock(
     private val view: View,

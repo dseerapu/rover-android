@@ -5,11 +5,11 @@ import android.graphics.Canvas
 import android.support.v7.widget.AppCompatImageView
 import android.util.AttributeSet
 import io.rover.rover.ui.viewmodels.BarcodeBlockViewModelInterface
-import io.rover.rover.ui.views.LayoutableView
-import io.rover.rover.ui.views.ViewBackground
-import io.rover.rover.ui.views.ViewBlock
+import io.rover.rover.ui.experience.blocks.concerns.layout.LayoutableView
+import io.rover.rover.ui.experience.blocks.concerns.background.ViewBackground
+import io.rover.rover.ui.experience.blocks.concerns.layout.ViewBlock
 import io.rover.rover.ui.experience.blocks.concerns.border.ViewBorder
-import io.rover.rover.ui.views.ViewComposition
+import io.rover.rover.ui.experience.blocks.concerns.ViewComposition
 
 class BarcodeBlockView : AppCompatImageView, LayoutableView<BarcodeBlockViewModelInterface> {
     constructor(context: Context?) : super(context)

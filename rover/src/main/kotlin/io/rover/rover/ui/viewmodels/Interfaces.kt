@@ -2,19 +2,20 @@ package io.rover.rover.ui.viewmodels
 
 import android.app.Activity
 import android.graphics.Bitmap
-import android.graphics.Shader
 import android.os.Parcelable
 import android.util.DisplayMetrics
 import android.view.WindowManager
-import io.rover.rover.core.domain.Background
-import io.rover.rover.core.domain.Border
 import io.rover.rover.core.domain.Experience
 import io.rover.rover.core.domain.Screen
 import io.rover.rover.services.network.NetworkTask
 import io.rover.rover.streams.Observable
 import io.rover.rover.ui.BlockAndRowLayoutManager
+import io.rover.rover.ui.experience.blocks.concerns.background.BackgroundViewModelInterface
+import io.rover.rover.ui.experience.blocks.concerns.border.BorderViewModelInterface
+import io.rover.rover.ui.experience.blocks.concerns.layout.LayoutPaddingDeflection
+import io.rover.rover.ui.experience.blocks.concerns.layout.LayoutableViewModel
 import io.rover.rover.ui.types.Alignment
-import io.rover.rover.ui.types.ToolbarConfiguration
+import io.rover.rover.ui.experience.toolbar.ToolbarConfiguration
 import io.rover.rover.ui.types.DisplayItem
 import io.rover.rover.ui.types.Font
 import io.rover.rover.ui.types.FontAppearance
@@ -22,106 +23,9 @@ import io.rover.rover.ui.types.Insets
 import io.rover.rover.ui.types.Layout
 import io.rover.rover.ui.types.NavigateTo
 import io.rover.rover.ui.types.PixelSize
-import io.rover.rover.ui.types.Rect
 import io.rover.rover.ui.types.RectF
-import io.rover.rover.ui.views.PaddingContributor
-import io.rover.rover.ui.views.ViewBlock
 import java.net.URI
 import java.net.URL
-
-/**
- * Exposed by a view model that may need to contribute to the padding around the content.  For
- * instance, the [BorderViewModel] exposes this so that content-bearing view models can ensure their
- * content is not occluded by the border.
- *
- * Note that the View mixins will likely need to implement the [PaddingContributor] interface and
- * ensure that they are passed to the [ViewBlock].  Please see the documentation there for more
- * details and the rationale.
- */
-interface LayoutPaddingDeflection {
-    // TODO: consider changing to not use Rect to better indicate that it is not a rectangle but an
-    // inset for each edge
-    val paddingDeflection: Rect
-}
-
-/**
- * Specifies how the view should properly display the given background image.
- *
- * The method these are specified with is a bit idiosyncratic on account of Android implementation
- * details and the combination of Drawables the view uses to achieve the effect.
- */
-class BackgroundImageConfiguration(
-    /**
-     * Bounds in pixels, in *relative insets from their respective edges*.
-     *
-     * TODO: consider changing to not use Rect to better indicate that it is not a rectangle but an inset for each edge
-     *
-     * Our drawable is always set to FILL_XY, which means by specifying these insets you get
-     * complete control over the aspect ratio, sizing, and positioning.  Note that this parameter
-     * cannot be used to specify any sort of scaling for tiling, since the bottom/right bounds are
-     * effectively undefined as the pattern repeats forever.  In that case, consider using using
-     * [imageNativeDensity] to achieve a scale effect (although note that it is in terms of the
-     * display DPI).
-     *
-     * (Note: we use this approach rather than just having a configurable gravity on the drawable
-     * because that would not allow for aspect correct fit scaling.)
-     */
-    val insets: Rect,
-
-    /**
-     * An Android tiling mode.  For no tiling, set as null.
-     */
-    val tileMode: Shader.TileMode?,
-
-    /**
-     * This density value should be set on the bitmap with [Bitmap.setDensity] before drawing it
-     * on an Android canvas.
-     */
-    val imageNativeDensity: Int
-)
-
-/**
- * This interface is exposed by View Models that have support for a background.  Equivalent to
- * the [Background] domain model interface.
- */
-interface BackgroundViewModelInterface {
-    val backgroundColor: Int
-
-    fun requestBackgroundImage(
-        targetViewPixelSize: PixelSize,
-        displayMetrics: DisplayMetrics,
-        callback: (
-            /**
-             * The bitmap to be drawn.  It is recommended that the consumer arrange to have it
-             * scaled to a roughly appropriate amount (need not be exact; that is the purpose of the
-             * view size and the [insets] given above) and also to be uploaded to GPU texture memory
-             * off thread ([Bitmap.prepareToDraw]) before setting it.
-             *
-             * Note: one can set the source density of the bitmap to control its scaling (which is
-             * particularly relevant for tile modes where
-             */
-            Bitmap,
-
-            BackgroundImageConfiguration
-        ) -> Unit
-    ): NetworkTask?
-}
-
-/**
- * This interface is exposed by View Models that have support for a border (of arbitrary width and
- * possibly rounded with a radius).  Equivalent to the [Border] domain model interface.
- */
-interface BorderViewModelInterface : LayoutPaddingDeflection {
-    val borderColor: Int
-
-    // TODO: this should start returning Px instead of Dp
-    val borderRadius: Int
-
-    // TODO: this should start returning Px instead of Dp
-    val borderWidth: Int
-
-    companion object
-}
 
 /**
  * View Model for block content that contains rich text content (decorated with strong, italic, and
@@ -257,8 +161,8 @@ interface BlockViewModelInterface : LayoutableViewModel {
 
     fun width(bounds: RectF): Float
 
-    // TODO: the following may be moved into a mixin view model, even though our domain model atm
-    // has block actions being included for all blocks.
+    // TODO: the following may be moved into a mixin view model for Interactions, even though our
+    // domain model atm has block actions being included for all blocks.
 
     /**
      * The view is clickable.

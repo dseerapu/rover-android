@@ -12,10 +12,8 @@ import android.graphics.RectF
 import android.view.View
 import io.rover.rover.platform.whenNotNull
 import io.rover.rover.ui.types.dpAsPx
-import io.rover.rover.ui.viewmodels.BorderViewModelInterface
-import io.rover.rover.ui.views.PaddingContributor
-import io.rover.rover.ui.views.ViewBorderInterface
-import io.rover.rover.ui.views.ViewCompositionInterface
+import io.rover.rover.ui.experience.blocks.concerns.layout.PaddingContributor
+import io.rover.rover.ui.experience.blocks.concerns.ViewCompositionInterface
 
 class ViewBorder(
     private val view: View,

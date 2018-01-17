@@ -6,9 +6,9 @@ import android.util.AttributeSet
 import android.view.View
 import io.rover.rover.ui.viewmodels.ButtonStateViewModelInterface
 import io.rover.rover.ui.views.BindableView
-import io.rover.rover.ui.views.ViewBackground
+import io.rover.rover.ui.experience.blocks.concerns.background.ViewBackground
 import io.rover.rover.ui.experience.blocks.concerns.border.ViewBorder
-import io.rover.rover.ui.views.ViewComposition
+import io.rover.rover.ui.experience.blocks.concerns.ViewComposition
 
 class ButtonStateView: View, BindableView<ButtonStateViewModelInterface> {
     constructor(context: Context?) : super(context)

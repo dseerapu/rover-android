@@ -10,7 +10,7 @@ import io.rover.rover.core.logging.log
 import io.rover.rover.ui.types.PixelSize
 import io.rover.rover.ui.types.Rect
 import io.rover.rover.ui.types.dpAsPx
-import io.rover.rover.ui.viewmodels.BackgroundImageConfiguration
+import io.rover.rover.ui.experience.blocks.concerns.background.BackgroundImageConfiguration
 import java.net.URI
 
 class ImageOptimizationService: ImageOptimizationServiceInterface {
@@ -104,10 +104,10 @@ class ImageOptimizationService: ImageOptimizationServiceInterface {
 
         return OptimizedImage(
             uri, BackgroundImageConfiguration(
-                insets,
-                tileMode,
-                if(background.backgroundContentMode == BackgroundContentMode.Tile) imageDensity else displayMetrics.densityDpi
-            )
+            insets,
+            tileMode,
+            if (background.backgroundContentMode == BackgroundContentMode.Tile) imageDensity else displayMetrics.densityDpi
+        )
         )
     }
 
@@ -295,7 +295,7 @@ class ImageOptimizationService: ImageOptimizationServiceInterface {
                             0
                         ),
                         Shader.TileMode.REPEAT,
-                        if(imageDensityToDeviceDensityRatio < 1) {
+                        if (imageDensityToDeviceDensityRatio < 1) {
                             // the density differential needs to scale up the image, so we'll have
                             // Android's UI framework do it for us locally:
                             imageDensity
