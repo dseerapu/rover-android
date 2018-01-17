@@ -1,4 +1,4 @@
-package io.rover.rover.ui.viewmodels
+package io.rover.rover.ui.experience.blocks.button
 
 import io.rover.rover.core.domain.ButtonBlock
 import io.rover.rover.core.domain.Color
@@ -6,6 +6,10 @@ import io.rover.rover.streams.Observable
 import io.rover.rover.streams.map
 import io.rover.rover.streams.share
 import io.rover.rover.ui.ViewModelFactoryInterface
+import io.rover.rover.ui.viewmodels.BlockViewModelInterface
+import io.rover.rover.ui.viewmodels.ButtonStateViewModelInterface
+import io.rover.rover.ui.viewmodels.ButtonViewModelInterface
+import io.rover.rover.ui.viewmodels.StateOfButton
 
 class ButtonViewModel(
     private val block: ButtonBlock,

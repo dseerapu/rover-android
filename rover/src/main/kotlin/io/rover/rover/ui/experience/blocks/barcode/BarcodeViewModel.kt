@@ -1,10 +1,11 @@
-package io.rover.rover.ui.viewmodels
+package io.rover.rover.ui.experience.blocks.barcode
 
 import io.rover.rover.core.domain.BarcodeBlock
 import io.rover.rover.core.domain.BarcodeFormat
 import io.rover.rover.ui.MeasurementService
 import io.rover.rover.ui.types.Rect
 import io.rover.rover.ui.types.RectF
+import io.rover.rover.ui.viewmodels.BarcodeViewModelInterface
 
 /**
  * Barcode display view model.

@@ -2,15 +2,14 @@ package io.rover.rover.ui.viewmodels
 
 import io.rover.rover.core.domain.Row
 import io.rover.rover.core.logging.log
-import io.rover.rover.services.assets.AssetService
 import io.rover.rover.streams.Observable
 import io.rover.rover.streams.asPublisher
-import io.rover.rover.streams.filter
 import io.rover.rover.streams.filterNulls
 import io.rover.rover.streams.flatMap
 import io.rover.rover.streams.map
 import io.rover.rover.streams.share
 import io.rover.rover.ui.ViewModelFactoryInterface
+import io.rover.rover.ui.experience.blocks.barcode.BarcodeBlockViewModel
 import io.rover.rover.ui.measuredAgainst
 import io.rover.rover.ui.types.DisplayItem
 import io.rover.rover.ui.types.NavigateTo

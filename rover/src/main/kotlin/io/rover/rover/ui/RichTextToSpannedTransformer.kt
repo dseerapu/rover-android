@@ -5,7 +5,7 @@ import android.text.Spanned
 import android.text.style.StyleSpan
 import io.rover.rover.platform.roverTextHtmlAsSpanned
 import io.rover.rover.ui.types.Font
-import io.rover.rover.ui.viewmodels.TextBlockViewModel
+import io.rover.rover.ui.experience.blocks.text.TextBlockViewModel
 import io.rover.rover.ui.views.TypefaceAndExplicitBoldSpan
 
 /**

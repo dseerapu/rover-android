@@ -1,7 +1,8 @@
-package io.rover.rover.ui.viewmodels
+package io.rover.rover.ui.experience.blocks.concerns.border
 
 import io.rover.rover.core.domain.Border
 import io.rover.rover.ui.types.Rect
+import io.rover.rover.ui.viewmodels.BorderViewModelInterface
 import io.rover.rover.ui.views.asAndroidColor
 
 class BorderViewModel(

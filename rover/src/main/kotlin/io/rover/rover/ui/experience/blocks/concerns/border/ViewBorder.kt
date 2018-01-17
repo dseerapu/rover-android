@@ -1,4 +1,4 @@
-package io.rover.rover.ui.views
+package io.rover.rover.ui.experience.blocks.concerns.border
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -13,6 +13,9 @@ import android.view.View
 import io.rover.rover.platform.whenNotNull
 import io.rover.rover.ui.types.dpAsPx
 import io.rover.rover.ui.viewmodels.BorderViewModelInterface
+import io.rover.rover.ui.views.PaddingContributor
+import io.rover.rover.ui.views.ViewBorderInterface
+import io.rover.rover.ui.views.ViewCompositionInterface
 
 class ViewBorder(
     private val view: View,

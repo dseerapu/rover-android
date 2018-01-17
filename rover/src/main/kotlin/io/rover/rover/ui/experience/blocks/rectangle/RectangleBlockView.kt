@@ -1,35 +1,36 @@
-package io.rover.rover.ui.views
+package io.rover.rover.ui.experience.blocks.rectangle
 
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
 import android.util.AttributeSet
-import android.widget.TextView
+import android.view.View
 import io.rover.rover.core.logging.log
-import io.rover.rover.ui.AndroidRichTextToSpannedTransformer
-import io.rover.rover.ui.viewmodels.TextBlockViewModelInterface
+import io.rover.rover.ui.viewmodels.RectangleBlockViewModelInterface
+import io.rover.rover.ui.views.LayoutableView
+import io.rover.rover.ui.views.ViewBackground
+import io.rover.rover.ui.experience.blocks.concerns.border.ViewBorder
+import io.rover.rover.ui.views.ViewComposition
 
-class TextBlockView : TextView, LayoutableView<TextBlockViewModelInterface> {
+class RectangleBlockView : View, LayoutableView<RectangleBlockViewModelInterface> {
     constructor(context: Context?) : super(context)
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes)
 
-    // mixins (TODO: injections)
+    // mixins
     private val viewComposition = ViewComposition()
-
     private val viewBackground = ViewBackground(this, viewComposition)
     private val viewBorder = ViewBorder(this, viewComposition)
-    private val viewBlock = ViewBlock(this, setOf(viewBorder))
-    private val viewText = ViewText(this, AndroidRichTextToSpannedTransformer())
 
-    override var viewModel: TextBlockViewModelInterface? = null
+    override var viewModel: RectangleBlockViewModelInterface? = null
         set(viewModel) {
-            viewBorder.borderViewModel = viewModel
-            viewBlock.blockViewModel = viewModel
             viewBackground.backgroundViewModel = viewModel
-            viewText.textViewModel = viewModel
+            viewBorder.borderViewModel = viewModel
         }
+
+    override val view: View
+        get() = this
 
     override fun onDraw(canvas: Canvas) {
         viewComposition.beforeOnDraw(canvas)

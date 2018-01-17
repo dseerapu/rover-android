@@ -1,4 +1,4 @@
-package io.rover.rover.ui.viewmodels
+package io.rover.rover.ui.experience.blocks.text
 
 import android.graphics.Paint
 import android.graphics.Typeface
@@ -9,6 +9,7 @@ import io.rover.rover.ui.MeasurementService
 import io.rover.rover.ui.types.Font
 import io.rover.rover.ui.types.FontAppearance
 import io.rover.rover.ui.types.RectF
+import io.rover.rover.ui.viewmodels.TextViewModelInterface
 import io.rover.rover.ui.views.asAndroidColor
 
 /**

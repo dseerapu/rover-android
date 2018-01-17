@@ -7,6 +7,7 @@ import io.rover.rover.core.domain.Offsets
 import io.rover.rover.core.domain.UnitOfMeasure
 import io.rover.rover.core.domain.VerticalAlignment
 import io.rover.rover.ui.ViewModelFactory
+import io.rover.rover.ui.experience.blocks.rectangle.RectangleBlockViewModel
 import io.rover.rover.ui.types.DisplayItem
 import io.rover.rover.ui.types.RectF
 import org.amshove.kluent.mock

@@ -1,13 +1,9 @@
-package io.rover.rover.ui.viewmodels
+package io.rover.rover.ui.experience.toolbar
 
-import io.rover.rover.streams.Observable
 import io.rover.rover.streams.PublishSubject
-import io.rover.rover.streams.filterNulls
-import io.rover.rover.streams.map
 import io.rover.rover.streams.share
-import io.rover.rover.streams.shareAndReplayTypesOnResubscribe
-import io.rover.rover.streams.subscribe
 import io.rover.rover.ui.types.ToolbarConfiguration
+import io.rover.rover.ui.viewmodels.ExperienceToolbarViewModelInterface
 
 class ExperienceToolbarViewModel(
     override val configuration: ToolbarConfiguration

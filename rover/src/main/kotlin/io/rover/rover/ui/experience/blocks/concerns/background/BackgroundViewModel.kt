@@ -1,4 +1,4 @@
-package io.rover.rover.ui.viewmodels
+package io.rover.rover.ui.experience.blocks.concerns.background
 
 import android.graphics.Bitmap
 import android.util.DisplayMetrics
@@ -9,6 +9,8 @@ import io.rover.rover.services.assets.ImageOptimizationServiceInterface
 import io.rover.rover.services.network.NetworkResult
 import io.rover.rover.services.network.NetworkTask
 import io.rover.rover.ui.types.PixelSize
+import io.rover.rover.ui.viewmodels.BackgroundImageConfiguration
+import io.rover.rover.ui.viewmodels.BackgroundViewModelInterface
 import io.rover.rover.ui.views.asAndroidColor
 
 class BackgroundViewModel(

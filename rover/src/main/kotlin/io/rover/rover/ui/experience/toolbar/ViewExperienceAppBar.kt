@@ -1,4 +1,4 @@
-package io.rover.rover.ui.views
+package io.rover.rover.ui.experience.toolbar
 
 import android.graphics.drawable.ColorDrawable
 import android.os.Build
@@ -14,6 +14,7 @@ import android.view.Window
 import io.rover.rover.streams.androidLifecycleDispose
 import io.rover.rover.streams.subscribe
 import io.rover.rover.ui.viewmodels.ExperienceAppBarViewModelInterface
+import io.rover.rover.ui.views.ViewExperienceAppBarInterface
 
 /**
  * This view concern wraps an [ActionBar] (that is, the specialized [Toolbar] that is provided as

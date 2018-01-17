@@ -1,7 +1,12 @@
-package io.rover.rover.ui.viewmodels
+package io.rover.rover.ui.experience.blocks.barcode
 
 import io.rover.rover.ui.types.Rect
 import io.rover.rover.ui.types.ViewType
+import io.rover.rover.ui.viewmodels.BackgroundViewModelInterface
+import io.rover.rover.ui.viewmodels.BarcodeBlockViewModelInterface
+import io.rover.rover.ui.viewmodels.BarcodeViewModelInterface
+import io.rover.rover.ui.viewmodels.BlockViewModelInterface
+import io.rover.rover.ui.viewmodels.BorderViewModelInterface
 
 class BarcodeBlockViewModel(
     private val blockViewModel: BlockViewModelInterface,

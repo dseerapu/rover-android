@@ -1,6 +1,10 @@
-package io.rover.rover.ui.viewmodels
+package io.rover.rover.ui.experience.blocks.button
 
 import io.rover.rover.core.domain.ButtonState
+import io.rover.rover.ui.viewmodels.BackgroundViewModelInterface
+import io.rover.rover.ui.viewmodels.BorderViewModelInterface
+import io.rover.rover.ui.viewmodels.ButtonStateViewModelInterface
+import io.rover.rover.ui.viewmodels.TextViewModelInterface
 
 class ButtonStateViewModel(
     val buttonState: ButtonState,

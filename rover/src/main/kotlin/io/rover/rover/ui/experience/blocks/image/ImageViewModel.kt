@@ -1,4 +1,4 @@
-package io.rover.rover.ui.viewmodels
+package io.rover.rover.ui.experience.blocks.image
 
 import android.graphics.Bitmap
 import android.util.DisplayMetrics
@@ -10,6 +10,7 @@ import io.rover.rover.services.network.NetworkResult
 import io.rover.rover.services.network.NetworkTask
 import io.rover.rover.ui.types.PixelSize
 import io.rover.rover.ui.types.RectF
+import io.rover.rover.ui.viewmodels.ImageViewModelInterface
 import java.net.URL
 
 class ImageViewModel(
