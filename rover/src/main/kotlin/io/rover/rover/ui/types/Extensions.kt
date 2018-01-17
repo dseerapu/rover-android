@@ -1,6 +1,7 @@
 package io.rover.rover.ui.types
 
 import android.util.DisplayMetrics
+import io.rover.rover.core.domain.Color
 
 /**
  * Convert display-independent DP metrics to an appropriate value for this display.
@@ -49,5 +50,14 @@ fun RectF.dpAsPx(displayMetrics: DisplayMetrics): Rect {
         top.dpAsPx(displayMetrics),
         right.dpAsPx(displayMetrics),
         bottom.dpAsPx(displayMetrics)
+    )
+}
+
+fun Color.asAndroidColor(): Int {
+    return android.graphics.Color.argb(
+        (alpha * 255).toInt(),
+        red,
+        green,
+        blue
     )
 }

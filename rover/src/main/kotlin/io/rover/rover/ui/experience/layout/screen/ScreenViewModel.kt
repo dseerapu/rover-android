@@ -1,4 +1,4 @@
-package io.rover.rover.ui.viewmodels
+package io.rover.rover.ui.experience.layout.screen
 
 import io.rover.rover.core.domain.Screen
 import io.rover.rover.core.domain.TitleBarButtons
@@ -9,11 +9,12 @@ import io.rover.rover.ui.ViewModelFactoryInterface
 import io.rover.rover.ui.experience.blocks.concerns.background.BackgroundViewModelInterface
 import io.rover.rover.ui.experience.blocks.concerns.layout.LayoutableViewModel
 import io.rover.rover.ui.experience.toolbar.ToolbarConfiguration
-import io.rover.rover.ui.types.DisplayItem
-import io.rover.rover.ui.types.Layout
-import io.rover.rover.ui.types.NavigateTo
+import io.rover.rover.ui.experience.layout.DisplayItem
+import io.rover.rover.ui.experience.layout.Layout
+import io.rover.rover.ui.experience.navigation.NavigateTo
 import io.rover.rover.ui.types.RectF
 import io.rover.rover.ui.types.asAndroidColor
+import io.rover.rover.ui.experience.layout.row.RowViewModelInterface
 
 class ScreenViewModel(
     private val screen: Screen,

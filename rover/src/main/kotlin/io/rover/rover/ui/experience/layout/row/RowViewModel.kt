@@ -1,4 +1,4 @@
-package io.rover.rover.ui.viewmodels
+package io.rover.rover.ui.experience.layout.row
 
 import io.rover.rover.core.domain.Row
 import io.rover.rover.core.logging.log
@@ -9,13 +9,14 @@ import io.rover.rover.streams.flatMap
 import io.rover.rover.streams.map
 import io.rover.rover.streams.share
 import io.rover.rover.ui.ViewModelFactoryInterface
+import io.rover.rover.ui.experience.blocks.concerns.layout.BlockViewModelInterface
 import io.rover.rover.ui.experience.blocks.barcode.BarcodeBlockViewModel
 import io.rover.rover.ui.experience.blocks.concerns.background.BackgroundViewModelInterface
-import io.rover.rover.ui.types.measuredAgainst
-import io.rover.rover.ui.types.DisplayItem
-import io.rover.rover.ui.types.NavigateTo
+import io.rover.rover.ui.experience.layout.measuredAgainst
+import io.rover.rover.ui.experience.layout.DisplayItem
+import io.rover.rover.ui.experience.navigation.NavigateTo
 import io.rover.rover.ui.types.RectF
-import io.rover.rover.ui.types.ViewType
+import io.rover.rover.ui.experience.layout.ViewType
 
 class RowViewModel(
     private val row: Row,

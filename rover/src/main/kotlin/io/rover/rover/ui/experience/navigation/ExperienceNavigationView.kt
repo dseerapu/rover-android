@@ -12,10 +12,9 @@ import android.widget.FrameLayout
 import io.rover.rover.platform.whenNotNull
 import io.rover.rover.streams.androidLifecycleDispose
 import io.rover.rover.streams.subscribe
-import io.rover.rover.ui.viewmodels.ExperienceNavigationViewModelInterface
-import io.rover.rover.ui.viewmodels.ScreenViewModelInterface
-import io.rover.rover.ui.views.BindableView
-import io.rover.rover.ui.views.ScreenView
+import io.rover.rover.ui.experience.layout.screen.ScreenViewModelInterface
+import io.rover.rover.ui.experience.concerns.BindableView
+import io.rover.rover.ui.experience.layout.screen.ScreenView
 
 /**
  * Navigation behaviour between screens of an Experience.

@@ -4,7 +4,6 @@ import android.content.Context
 import android.graphics.Canvas
 import android.support.v7.widget.AppCompatImageView
 import android.util.AttributeSet
-import io.rover.rover.ui.viewmodels.BarcodeBlockViewModelInterface
 import io.rover.rover.ui.experience.blocks.concerns.layout.LayoutableView
 import io.rover.rover.ui.experience.blocks.concerns.background.ViewBackground
 import io.rover.rover.ui.experience.blocks.concerns.layout.ViewBlock

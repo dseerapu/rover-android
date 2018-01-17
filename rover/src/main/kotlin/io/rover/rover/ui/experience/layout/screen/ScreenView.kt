@@ -1,14 +1,14 @@
-package io.rover.rover.ui.views
+package io.rover.rover.ui.experience.layout.screen
 
 import android.content.Context
 import android.graphics.Canvas
 import android.support.v7.widget.RecyclerView
 import android.util.AttributeSet
-import io.rover.rover.ui.BlockAndRowLayoutManager
-import io.rover.rover.ui.BlockAndRowRecyclerAdapter
+import io.rover.rover.ui.experience.layout.BlockAndRowLayoutManager
+import io.rover.rover.ui.experience.layout.BlockAndRowRecyclerAdapter
 import io.rover.rover.ui.experience.blocks.concerns.ViewComposition
 import io.rover.rover.ui.experience.blocks.concerns.background.ViewBackground
-import io.rover.rover.ui.viewmodels.ScreenViewModelInterface
+import io.rover.rover.ui.experience.concerns.BindableView
 
 class ScreenView : RecyclerView, BindableView<ScreenViewModelInterface> {
     constructor(context: Context?) : super(context)

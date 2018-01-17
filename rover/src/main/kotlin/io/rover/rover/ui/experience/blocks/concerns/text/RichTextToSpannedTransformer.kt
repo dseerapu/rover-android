@@ -4,7 +4,6 @@ import android.graphics.Typeface
 import android.text.Spanned
 import android.text.style.StyleSpan
 import io.rover.rover.platform.roverTextHtmlAsSpanned
-import io.rover.rover.ui.types.Font
 
 /**
  * Transform a Rover HTML-decorated rich text string (as seen in Text blocks).

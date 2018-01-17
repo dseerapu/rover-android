@@ -5,7 +5,6 @@ import io.rover.rover.core.domain.BarcodeFormat
 import io.rover.rover.ui.MeasurementService
 import io.rover.rover.ui.types.Rect
 import io.rover.rover.ui.types.RectF
-import io.rover.rover.ui.viewmodels.BarcodeViewModelInterface
 
 /**
  * Barcode display view model.

@@ -1,7 +1,9 @@
 package io.rover.rover.ui.experience.blocks.concerns.layout
 
 import android.graphics.Rect
-import io.rover.rover.ui.viewmodels.BlockViewModelInterface
+import io.rover.rover.streams.Observable
+import io.rover.rover.ui.types.RectF
+import io.rover.rover.ui.experience.navigation.NavigateTo
 
 /**
  * Binds [BlockViewModelInterface] properties to that of a view.
@@ -38,3 +40,104 @@ interface LayoutPaddingDeflection {
     // inset for each edge
     val paddingDeflection: io.rover.rover.ui.types.Rect
 }
+
+/**
+ * Can vertically measure its content for stacked/autoheight purposes.
+ */
+interface Measurable {
+    /**
+     * Measure the "natural" height for the content contained in this block (for
+     * example, a wrapped block of text will consume up to some height depending on content and
+     * other factors), given the width of the bounds.  Used for our auto-height feature.
+     */
+    fun intrinsicHeight(bounds: RectF): Float
+}
+
+/**
+ * A view model for Blocks (particularly, the dynamic layout thereof).
+ */
+interface BlockViewModelInterface : LayoutableViewModel {
+
+    /**
+     * The full amount contributed by this block (including its own height and offsets) to the
+     * height of all the stacked blocks within the row.  So, the subsequent stacked block must be
+     * laid out at a y position that is the sum of all the [stackedHeight]s of all the prior stacked
+     * blocks.
+     */
+    fun stackedHeight(bounds: RectF): Float
+
+    val insets: Insets
+
+    val isStacked: Boolean
+
+    /**
+     * Alpha applied to the entire view.
+     *
+     * Between 0 (transparent) and 1 (fully opaque).
+     */
+    val opacity: Float
+
+    val verticalAlignment: Alignment
+
+    fun width(bounds: RectF): Float
+
+    // TODO: the following may be moved into a mixin view model for Interactions, even though our
+    // domain model atm has block actions being included for all blocks.
+
+    /**
+     * The view is clickable.
+     */
+    val isClickable: Boolean
+
+    /**
+     * User has clicked the view.
+     */
+    fun click()
+
+    /**
+     * User has touched the view, but not necessarily clicked it.
+     */
+    fun touched()
+
+    /**
+     * User has released the view, but not necessarily clicked it.
+     */
+    fun released()
+
+    sealed class Event {
+        /**
+         * Block has been clicked, requesting that we [navigateTo] something.
+         */
+        data class Clicked(
+            val navigateTo: NavigateTo
+        ): Event()
+
+        /**
+         * Block has been touched, but not clicked.
+         *
+         * TODO: may not be appropriate to use MotionEvent.
+         */
+        class Touched(): Event()
+
+        /**
+         * Block has been released, but not necessarily clicked.
+         */
+        class Released(): Event()
+    }
+
+    val events: Observable<Event>
+}
+
+enum class Alignment {
+    Bottom,
+    Fill,
+    Center,
+    Top
+}
+
+data class Insets(
+    val top: Int,
+    val left: Int,
+    val bottom: Int,
+    val right: Int
+)

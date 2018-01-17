@@ -1,4 +1,4 @@
-package io.rover.rover.ui.types
+package io.rover.rover.ui.experience.blocks.concerns.text
 
 import android.graphics.Paint
 

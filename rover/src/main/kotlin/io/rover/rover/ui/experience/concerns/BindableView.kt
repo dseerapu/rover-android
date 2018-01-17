@@ -1,7 +1,6 @@
-package io.rover.rover.ui.views
+package io.rover.rover.ui.experience.concerns
 
 import android.view.View
-import io.rover.rover.ui.viewmodels.BindableViewModel
 
 /**
  * Wraps a Rover Android [View] that can be bound to a [BindableViewModel].

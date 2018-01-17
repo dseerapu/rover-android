@@ -18,8 +18,7 @@ import io.rover.rover.streams.androidLifecycleDispose
 import io.rover.rover.streams.subscribe
 import io.rover.rover.ui.experience.navigation.ExperienceNavigationView
 import io.rover.rover.ui.experience.toolbar.ViewExperienceToolbar
-import io.rover.rover.ui.viewmodels.ExperienceViewModelInterface
-import io.rover.rover.ui.views.BindableView
+import io.rover.rover.ui.experience.concerns.BindableView
 
 class ExperienceView: CoordinatorLayout, BindableView<ExperienceViewModelInterface> {
     constructor(context: Context?) : super(context)

@@ -10,7 +10,6 @@ import io.rover.rover.services.network.NetworkResult
 import io.rover.rover.services.network.NetworkTask
 import io.rover.rover.ui.types.PixelSize
 import io.rover.rover.ui.types.RectF
-import io.rover.rover.ui.viewmodels.ImageViewModelInterface
 import java.net.URL
 
 class ImageViewModel(

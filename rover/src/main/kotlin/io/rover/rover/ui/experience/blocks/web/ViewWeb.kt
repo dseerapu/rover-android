@@ -2,7 +2,6 @@ package io.rover.rover.ui.experience.blocks.web
 
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import io.rover.rover.ui.viewmodels.WebViewModelInterface
 
 class ViewWeb(
     private val webView: WebView

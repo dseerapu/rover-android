@@ -1,15 +1,14 @@
-package io.rover.rover.ui
+package io.rover.rover.ui.experience.layout
 
 import android.support.v7.widget.RecyclerView
 import android.view.ViewGroup
-import io.rover.rover.ui.types.ViewType
 import io.rover.rover.ui.experience.blocks.concerns.layout.LayoutableViewModel
 import io.rover.rover.ui.experience.blocks.barcode.BarcodeBlockView
 import io.rover.rover.ui.experience.blocks.button.ButtonBlockView
 import io.rover.rover.ui.experience.blocks.image.ImageBlockView
 import io.rover.rover.ui.experience.blocks.concerns.layout.LayoutableView
 import io.rover.rover.ui.experience.blocks.rectangle.RectangleBlockView
-import io.rover.rover.ui.views.RowView
+import io.rover.rover.ui.experience.layout.row.RowView
 import io.rover.rover.ui.experience.blocks.text.TextBlockView
 import io.rover.rover.ui.experience.blocks.web.WebBlockView
 

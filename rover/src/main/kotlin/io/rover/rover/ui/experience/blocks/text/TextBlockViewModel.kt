@@ -1,11 +1,10 @@
 package io.rover.rover.ui.experience.blocks.text
 
-import io.rover.rover.ui.types.ViewType
+import io.rover.rover.ui.experience.layout.ViewType
 import io.rover.rover.ui.experience.blocks.concerns.background.BackgroundViewModelInterface
-import io.rover.rover.ui.viewmodels.BlockViewModelInterface
+import io.rover.rover.ui.experience.blocks.concerns.layout.BlockViewModelInterface
 import io.rover.rover.ui.experience.blocks.concerns.border.BorderViewModelInterface
-import io.rover.rover.ui.viewmodels.TextBlockViewModelInterface
-import io.rover.rover.ui.viewmodels.TextViewModelInterface
+import io.rover.rover.ui.experience.blocks.concerns.text.TextViewModelInterface
 
 class TextBlockViewModel(
     private val blockViewModel: BlockViewModelInterface,

@@ -1,4 +1,4 @@
-package io.rover.rover.ui.types
+package io.rover.rover.ui.experience.layout
 
 /**
  * The output of a Rover layout pass.

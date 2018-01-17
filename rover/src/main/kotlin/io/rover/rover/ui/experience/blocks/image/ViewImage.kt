@@ -7,7 +7,6 @@ import io.rover.rover.core.logging.log
 import io.rover.rover.platform.whenNotNull
 import io.rover.rover.services.network.NetworkTask
 import io.rover.rover.ui.types.PixelSize
-import io.rover.rover.ui.viewmodels.ImageBlockViewModelInterface
 
 /**
  * Mixin that binds an image block view model to the relevant parts of an [ImageView].

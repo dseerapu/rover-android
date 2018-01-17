@@ -1,4 +1,4 @@
-package io.rover.rover.ui.viewmodels
+package io.rover.rover.ui.experience
 
 import android.annotation.SuppressLint
 import android.os.Parcelable
@@ -18,6 +18,8 @@ import io.rover.rover.streams.map
 import io.rover.rover.streams.shareAndReplayTypesOnResubscribe
 import io.rover.rover.streams.share
 import io.rover.rover.ui.ViewModelFactoryInterface
+import io.rover.rover.ui.experience.navigation.ExperienceExternalNavigationEvent
+import io.rover.rover.ui.experience.navigation.ExperienceNavigationViewModelInterface
 import kotlinx.android.parcel.Parcelize
 
 class ExperienceViewModel(
@@ -107,9 +109,6 @@ class ExperienceViewModel(
                         log.v("Remembering experience view model.")
                         navigationViewModel = event.experienceNavigationViewModel
                     }
-
-
-
                     event
                 }
             ).share()

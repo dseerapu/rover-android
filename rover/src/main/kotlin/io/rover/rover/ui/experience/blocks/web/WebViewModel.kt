@@ -1,7 +1,6 @@
 package io.rover.rover.ui.experience.blocks.web
 
 import io.rover.rover.core.domain.WebViewBlock
-import io.rover.rover.ui.viewmodels.WebViewModelInterface
 import java.net.URL
 
 

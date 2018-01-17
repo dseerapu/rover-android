@@ -9,7 +9,9 @@ import io.rover.rover.core.domain.VerticalAlignment
 import io.rover.rover.ui.ViewModelFactory
 import io.rover.rover.ui.experience.blocks.concerns.layout.LayoutableViewModel
 import io.rover.rover.ui.experience.blocks.rectangle.RectangleBlockViewModel
-import io.rover.rover.ui.types.DisplayItem
+import io.rover.rover.ui.experience.layout.row.RowViewModel
+import io.rover.rover.ui.experience.layout.screen.ScreenViewModel
+import io.rover.rover.ui.experience.layout.DisplayItem
 import io.rover.rover.ui.types.RectF
 import org.amshove.kluent.mock
 import org.amshove.kluent.shouldBeInstanceOf

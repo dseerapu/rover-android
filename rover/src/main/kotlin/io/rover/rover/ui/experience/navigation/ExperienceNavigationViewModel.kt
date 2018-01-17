@@ -15,11 +15,8 @@ import io.rover.rover.streams.shareAndReplayTypesOnResubscribe
 import io.rover.rover.streams.share
 import io.rover.rover.streams.subscribe
 import io.rover.rover.ui.ViewModelFactoryInterface
-import io.rover.rover.ui.types.NavigateTo
-import io.rover.rover.ui.viewmodels.ExperienceExternalNavigationEvent
-import io.rover.rover.ui.viewmodels.ExperienceNavigationViewModelInterface
-import io.rover.rover.ui.viewmodels.ExperienceToolbarViewModelInterface
-import io.rover.rover.ui.viewmodels.ScreenViewModelInterface
+import io.rover.rover.ui.experience.toolbar.ExperienceToolbarViewModelInterface
+import io.rover.rover.ui.experience.layout.screen.ScreenViewModelInterface
 import kotlinx.android.parcel.Parcelize
 
 /**

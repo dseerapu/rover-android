@@ -13,7 +13,6 @@ import android.view.View
 import android.view.Window
 import io.rover.rover.streams.androidLifecycleDispose
 import io.rover.rover.streams.subscribe
-import io.rover.rover.ui.viewmodels.ExperienceAppBarViewModelInterface
 
 /**
  * This view concern wraps an [ActionBar] (that is, the specialized [Toolbar] that is provided as

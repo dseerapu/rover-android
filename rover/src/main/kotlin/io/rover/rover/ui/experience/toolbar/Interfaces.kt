@@ -1,8 +1,7 @@
 package io.rover.rover.ui.experience.toolbar
 
 import android.support.v7.widget.Toolbar
-import io.rover.rover.ui.viewmodels.ExperienceAppBarViewModelInterface
-import io.rover.rover.ui.viewmodels.ExperienceToolbarViewModelInterface
+import io.rover.rover.streams.Observable
 
 interface ViewExperienceAppBarInterface {
     var experienceAppBarViewModel: ExperienceAppBarViewModelInterface?
@@ -19,4 +18,27 @@ interface ViewExperienceToolbarInterface {
     fun setViewModelAndReturnToolbar(
         toolbarViewModel: ExperienceToolbarViewModelInterface
     ): Toolbar
+}
+
+interface ExperienceAppBarViewModelInterface {
+    val events: Observable<Event>
+
+    class Event(
+        val appBarConfiguration: ToolbarConfiguration
+    )
+}
+
+interface ExperienceToolbarViewModelInterface {
+    val toolbarEvents: Observable<Event>
+
+    val configuration: ToolbarConfiguration
+
+    fun pressedBack()
+
+    fun pressedClose()
+
+    sealed class Event {
+        class PressedBack(): Event()
+        class PressedClose(): Event()
+    }
 }

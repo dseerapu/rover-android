@@ -1,9 +1,7 @@
 package io.rover.rover.ui.experience.blocks.button
 
-import io.rover.rover.ui.types.ViewType
-import io.rover.rover.ui.viewmodels.BlockViewModelInterface
-import io.rover.rover.ui.viewmodels.ButtonBlockViewModelInterface
-import io.rover.rover.ui.viewmodels.ButtonViewModelInterface
+import io.rover.rover.ui.experience.layout.ViewType
+import io.rover.rover.ui.experience.blocks.concerns.layout.BlockViewModelInterface
 
 class ButtonBlockViewModel(
     blockViewModel: BlockViewModelInterface,

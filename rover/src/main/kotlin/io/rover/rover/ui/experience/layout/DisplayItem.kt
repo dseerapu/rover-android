@@ -1,7 +1,8 @@
-package io.rover.rover.ui.types
+package io.rover.rover.ui.experience.layout
 
 import io.rover.rover.ui.experience.blocks.concerns.layout.LayoutableViewModel
-import io.rover.rover.ui.viewmodels.ScreenViewModel
+import io.rover.rover.ui.experience.layout.screen.ScreenViewModel
+import io.rover.rover.ui.types.RectF
 
 /**
  * A sequence of [LayoutableViewModel]s in two-dimensional space, with optional clips,

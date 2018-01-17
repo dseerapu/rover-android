@@ -6,7 +6,6 @@ import android.support.v7.widget.AppCompatImageView
 import android.widget.ImageView
 import io.rover.rover.platform.toAndroidBitmap
 import io.rover.rover.ui.types.asAndroidRect
-import io.rover.rover.ui.viewmodels.BarcodeViewModelInterface
 import io.rover.rover.ui.experience.blocks.concerns.layout.PaddingContributor
 import io.rover.shaded.zxing.com.google.zxing.BarcodeFormat
 import io.rover.shaded.zxing.com.google.zxing.EncodeHintType

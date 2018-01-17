@@ -9,17 +9,13 @@ import io.rover.rover.core.logging.log
 import io.rover.rover.platform.whenNotNull
 import io.rover.rover.streams.PublishSubject
 import io.rover.rover.streams.share
-import io.rover.rover.ui.types.measuredAgainst
-import io.rover.rover.ui.types.Alignment
-import io.rover.rover.ui.types.Insets
-import io.rover.rover.ui.types.NavigateTo
+import io.rover.rover.ui.experience.layout.measuredAgainst
+import io.rover.rover.ui.experience.navigation.NavigateTo
 import io.rover.rover.ui.types.RectF
-import io.rover.rover.ui.types.ViewType
-import io.rover.rover.ui.viewmodels.BlockViewModelInterface
-import io.rover.rover.ui.viewmodels.Measurable
+import io.rover.rover.ui.experience.layout.ViewType
 
 /**
- * A base class used by all blocks that contains the block layout and positioning concerns.
+ * A mixin used by all blocks that contains the block layout and positioning concerns.
  *
  * - LayoutableViewModel probably needs to split, because we want to be able to delegate the frame()
  *   method to the new mixin version of BlockViewModel but obviously it should not specify view type

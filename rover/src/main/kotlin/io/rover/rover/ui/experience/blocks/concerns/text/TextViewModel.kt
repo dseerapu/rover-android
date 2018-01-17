@@ -6,10 +6,7 @@ import io.rover.rover.core.domain.FontWeight
 import io.rover.rover.core.domain.Text
 import io.rover.rover.core.domain.TextAlignment
 import io.rover.rover.ui.MeasurementService
-import io.rover.rover.ui.types.Font
-import io.rover.rover.ui.types.FontAppearance
 import io.rover.rover.ui.types.RectF
-import io.rover.rover.ui.viewmodels.TextViewModelInterface
 import io.rover.rover.ui.types.asAndroidColor
 
 /**

@@ -6,10 +6,7 @@ import io.rover.rover.streams.Observable
 import io.rover.rover.streams.map
 import io.rover.rover.streams.share
 import io.rover.rover.ui.ViewModelFactoryInterface
-import io.rover.rover.ui.viewmodels.BlockViewModelInterface
-import io.rover.rover.ui.viewmodels.ButtonStateViewModelInterface
-import io.rover.rover.ui.viewmodels.ButtonViewModelInterface
-import io.rover.rover.ui.viewmodels.StateOfButton
+import io.rover.rover.ui.experience.blocks.concerns.layout.BlockViewModelInterface
 
 class ButtonViewModel(
     private val block: ButtonBlock,

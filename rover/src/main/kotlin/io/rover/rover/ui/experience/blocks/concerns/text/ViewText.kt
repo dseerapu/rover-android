@@ -6,7 +6,6 @@ import android.os.Build
 import android.text.Layout
 import android.view.Gravity
 import android.widget.TextView
-import io.rover.rover.ui.viewmodels.TextViewModelInterface
 
 /**
  * Mixin that binds a text block view model to the relevant parts of a [TextView].

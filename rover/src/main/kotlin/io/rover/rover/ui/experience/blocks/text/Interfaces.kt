@@ -1,23 +1,18 @@
-package io.rover.rover.ui.experience.blocks.web
+package io.rover.rover.ui.experience.blocks.text
 
 import io.rover.rover.ui.experience.blocks.concerns.background.BackgroundViewModelInterface
 import io.rover.rover.ui.experience.blocks.concerns.border.BorderViewModelInterface
 import io.rover.rover.ui.experience.blocks.concerns.layout.BlockViewModelInterface
 import io.rover.rover.ui.experience.blocks.concerns.layout.LayoutableViewModel
-import java.net.URL
+import io.rover.rover.ui.experience.blocks.concerns.text.TextViewModelInterface
 
-interface ViewWebInterface {
-    var webViewModel: WebViewModelInterface?
-}
-
-interface WebViewModelInterface {
-    val url: URL
-    val scrollingEnabled: Boolean
-}
-
-interface WebViewBlockViewModelInterface :
+/**
+ * View Model for a block that contains rich text content (decorated with strong, italic, and
+ * underline HTML tags).
+ */
+interface TextBlockViewModelInterface :
     LayoutableViewModel,
     BlockViewModelInterface,
     BackgroundViewModelInterface,
     BorderViewModelInterface,
-    WebViewModelInterface
+    TextViewModelInterface

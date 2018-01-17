@@ -6,7 +6,6 @@ import android.graphics.Canvas
 import android.util.AttributeSet
 import android.view.View
 import io.rover.rover.core.logging.log
-import io.rover.rover.ui.viewmodels.RectangleBlockViewModelInterface
 import io.rover.rover.ui.experience.blocks.concerns.layout.LayoutableView
 import io.rover.rover.ui.experience.blocks.concerns.background.ViewBackground
 import io.rover.rover.ui.experience.blocks.concerns.border.ViewBorder

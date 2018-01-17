@@ -1,4 +1,4 @@
-package io.rover.rover.ui.containers
+package io.rover.rover.ui.experience.containers
 
 import android.content.ActivityNotFoundException
 import android.content.Context
@@ -33,8 +33,8 @@ import io.rover.rover.streams.subscribe
 import io.rover.rover.ui.AndroidMeasurementService
 import io.rover.rover.ui.experience.blocks.concerns.text.AndroidRichTextToSpannedTransformer
 import io.rover.rover.ui.ViewModelFactory
-import io.rover.rover.ui.viewmodels.ExperienceExternalNavigationEvent
-import io.rover.rover.ui.viewmodels.ExperienceViewModelInterface
+import io.rover.rover.ui.experience.navigation.ExperienceExternalNavigationEvent
+import io.rover.rover.ui.experience.ExperienceViewModelInterface
 import io.rover.rover.ui.experience.ExperienceView
 import java.io.IOException
 import java.io.InputStream

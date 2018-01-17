@@ -4,8 +4,7 @@ import android.content.Context
 import android.graphics.Canvas
 import android.util.AttributeSet
 import android.view.View
-import io.rover.rover.ui.viewmodels.ButtonStateViewModelInterface
-import io.rover.rover.ui.views.BindableView
+import io.rover.rover.ui.experience.concerns.BindableView
 import io.rover.rover.ui.experience.blocks.concerns.background.ViewBackground
 import io.rover.rover.ui.experience.blocks.concerns.border.ViewBorder
 import io.rover.rover.ui.experience.blocks.concerns.ViewComposition

@@ -9,11 +9,11 @@ import android.text.StaticLayout
 import android.text.TextPaint
 import android.util.DisplayMetrics
 import io.rover.rover.ui.experience.blocks.concerns.text.RichTextToSpannedTransformer
-import io.rover.rover.ui.types.Font
-import io.rover.rover.ui.types.FontAppearance
+import io.rover.rover.ui.experience.blocks.concerns.text.Font
+import io.rover.rover.ui.experience.blocks.concerns.text.FontAppearance
 import io.rover.rover.ui.types.dpAsPx
 import io.rover.rover.ui.types.pxAsDp
-import io.rover.rover.ui.viewmodels.BarcodeViewModelInterface
+import io.rover.rover.ui.experience.blocks.barcode.BarcodeViewModelInterface
 import io.rover.shaded.zxing.com.google.zxing.BarcodeFormat
 import io.rover.shaded.zxing.com.google.zxing.EncodeHintType
 import io.rover.shaded.zxing.com.google.zxing.MultiFormatWriter

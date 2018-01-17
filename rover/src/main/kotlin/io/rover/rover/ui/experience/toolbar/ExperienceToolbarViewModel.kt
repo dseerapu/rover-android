@@ -2,7 +2,6 @@ package io.rover.rover.ui.experience.toolbar
 
 import io.rover.rover.streams.PublishSubject
 import io.rover.rover.streams.share
-import io.rover.rover.ui.viewmodels.ExperienceToolbarViewModelInterface
 
 class ExperienceToolbarViewModel(
     override val configuration: ToolbarConfiguration

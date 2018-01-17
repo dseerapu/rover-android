@@ -6,7 +6,6 @@ import android.graphics.Canvas
 import android.util.AttributeSet
 import android.webkit.WebView
 import io.rover.rover.core.logging.log
-import io.rover.rover.ui.viewmodels.WebViewBlockViewModelInterface
 import android.view.MotionEvent
 import io.rover.rover.ui.experience.blocks.concerns.border.ViewBorder
 import io.rover.rover.ui.experience.blocks.concerns.layout.LayoutableView
