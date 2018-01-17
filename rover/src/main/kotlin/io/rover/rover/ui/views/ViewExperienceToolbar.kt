@@ -84,8 +84,7 @@ class ViewExperienceToolbar(
         val configuration = toolbarViewModel.configuration
 
         closeButton.setOnClickListener {  }
-
-
+        
         // I need to keep state for the toolbar subscription so I can unsubscribe it when bind.
         activeMenuSubscription?.cancel()
 
@@ -103,29 +102,8 @@ class ViewExperienceToolbar(
                     context, null, borderlessButtonStyle
                 )
 
-
-
-                if(retrievedMenu != menu) {
-                    // the menu has changed.  We'll recreate our dynamic menu option.
-                    retrievedMenu = menu
-//                    activeCloseMenuItem = menu.add(Menu.NONE, menuItemId, Menu.NONE, "Close").apply {
-//                        isVisible = false
-//                        setOnMenuItemClickListener {
-//                            toolbarViewModel.pressedClose()
-//                            true
-//                        }
-//                        setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
-//
-//                        title = "Close"
-//                        //                    if(viewModel.configuration.useExistingStyle) {
-//                        //                        "Close"
-//                        //                    } else {
-//                        //                        SpannableStringBuilder("Close").apply {
-//                        //                            setSpan(ForegroundColorSpan(Color.RED), 0, "Close".length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-//                        //                        }
-//                        //                    }
-//                    }
-                }
+                // we must keep a hold of this so we can remove it on unsubscribe
+                retrievedMenu = menu
 
                 toolbar.setNavigationOnClickListener {
                     toolbarViewModel.pressedBack()
