@@ -32,7 +32,7 @@ import io.rover.rover.streams.share
 import io.rover.rover.streams.subscribe
 import io.rover.rover.ui.AndroidMeasurementService
 import io.rover.rover.ui.experience.blocks.concerns.text.AndroidRichTextToSpannedTransformer
-import io.rover.rover.ui.ViewModelFactory
+import io.rover.rover.ui.experience.ViewModelFactory
 import io.rover.rover.ui.experience.navigation.ExperienceExternalNavigationEvent
 import io.rover.rover.ui.experience.ExperienceViewModelInterface
 import io.rover.rover.ui.experience.ExperienceView

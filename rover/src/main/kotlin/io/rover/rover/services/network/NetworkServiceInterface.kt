@@ -1,3 +1,5 @@
+@file:JvmName("NetworkServiceInterface")
+
 package io.rover.rover.services.network
 
 import io.rover.rover.core.domain.Context

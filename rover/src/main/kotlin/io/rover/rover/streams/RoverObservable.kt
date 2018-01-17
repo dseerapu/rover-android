@@ -1,3 +1,5 @@
+@file:JvmName("RoverObservable")
+
 package io.rover.rover.streams
 
 import android.arch.lifecycle.GenericLifecycleObserver

@@ -13,7 +13,7 @@ interface SimpleLogger {
     fun d(message: String)
 }
 
-val Any.log: SimpleLogger
+internal val Any.log: SimpleLogger
     get() {
         val logTag = "Rover::${this.javaClass.simpleName}"
 

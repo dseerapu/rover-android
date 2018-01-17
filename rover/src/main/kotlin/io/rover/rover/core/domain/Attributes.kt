@@ -1,3 +1,5 @@
+@file:JvmName("Attributes")
+
 package io.rover.rover.core.domain
 
 /**

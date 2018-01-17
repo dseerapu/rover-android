@@ -1,3 +1,5 @@
+@file:JvmName("ZXingExtensions")
+
 /*
  * Copyright (C) 2008 ZXing authors
  * Copyright (C) 2017 Rover Inc.

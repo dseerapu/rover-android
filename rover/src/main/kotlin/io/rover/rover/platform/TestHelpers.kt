@@ -1,3 +1,5 @@
+@file:JvmName("TestHelpers")
+
 package io.rover.rover.platform
 
 import io.rover.rover.core.domain.DeviceState

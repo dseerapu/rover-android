@@ -1,3 +1,5 @@
+@file:JvmName("UriExtensions")
+
 package io.rover.rover.platform
 
 import android.net.Uri

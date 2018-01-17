@@ -1,5 +1,8 @@
+@file:JvmName("Interfaces")
+
 package io.rover.rover.ui.experience.blocks.concerns.text
 
+import android.text.Spanned
 import io.rover.rover.ui.experience.blocks.concerns.layout.Measurable
 
 interface ViewTextInterface {
@@ -23,4 +26,14 @@ interface TextViewModelInterface : Measurable {
     val fontAppearance: FontAppearance
 
     fun boldRelativeToBlockWeight(): Font
+}
+
+/**
+ * Transform a Rover HTML-decorated rich text string (as seen in Text blocks).
+ *
+ * This logic is kept outside of the [TextBlockViewModel] because it has runtime Android
+ * dependencies.
+ */
+interface RichTextToSpannedTransformer {
+    fun transform(string: String, boldRelativeToBlockWeight: Font): Spanned
 }

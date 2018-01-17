@@ -1,3 +1,5 @@
+@file:JvmName("LocalStorage")
+
 package io.rover.rover.platform
 
 import android.content.Context

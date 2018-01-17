@@ -1,3 +1,5 @@
+@file:JvmName("StringExtensions")
+
 package io.rover.rover.platform
 
 import android.os.Build

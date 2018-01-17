@@ -1,3 +1,5 @@
+@file:JvmName("JsonExtensions")
+
 package io.rover.rover.services.network
 
 import org.json.JSONObject

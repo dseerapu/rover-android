@@ -1,3 +1,5 @@
+@file:JvmName("AnyExtensions")
+
 package io.rover.rover.platform
 
 /**

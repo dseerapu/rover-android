@@ -1,3 +1,5 @@
+@file:JvmName("NetworkClient")
+
 package io.rover.rover.services.network
 
 import android.annotation.SuppressLint

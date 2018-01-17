@@ -1,3 +1,5 @@
+@file:JvmName("RoverSingle")
+
 package io.rover.rover.streams
 
 import java.util.*

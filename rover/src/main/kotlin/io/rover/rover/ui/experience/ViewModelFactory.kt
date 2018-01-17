@@ -1,4 +1,4 @@
-package io.rover.rover.ui
+package io.rover.rover.ui.experience
 
 import android.os.Parcelable
 import io.rover.rover.core.domain.BarcodeBlock
@@ -15,6 +15,7 @@ import io.rover.rover.core.domain.WebViewBlock
 import io.rover.rover.services.assets.AssetService
 import io.rover.rover.services.assets.ImageOptimizationServiceInterface
 import io.rover.rover.services.network.NetworkServiceInterface
+import io.rover.rover.ui.MeasurementService
 import io.rover.rover.ui.experience.toolbar.ToolbarConfiguration
 import io.rover.rover.ui.experience.blocks.concerns.background.BackgroundViewModel
 import io.rover.rover.ui.experience.blocks.barcode.BarcodeBlockViewModel
@@ -30,8 +31,6 @@ import io.rover.rover.ui.experience.navigation.ExperienceNavigationViewModel
 import io.rover.rover.ui.experience.navigation.ExperienceNavigationViewModelInterface
 import io.rover.rover.ui.experience.toolbar.ExperienceToolbarViewModel
 import io.rover.rover.ui.experience.toolbar.ExperienceToolbarViewModelInterface
-import io.rover.rover.ui.experience.ExperienceViewModel
-import io.rover.rover.ui.experience.ExperienceViewModelInterface
 import io.rover.rover.ui.experience.blocks.image.ImageBlockViewModel
 import io.rover.rover.ui.experience.blocks.image.ImageViewModel
 import io.rover.rover.ui.experience.blocks.rectangle.RectangleBlockViewModel
@@ -43,22 +42,6 @@ import io.rover.rover.ui.experience.blocks.text.TextBlockViewModel
 import io.rover.rover.ui.experience.blocks.concerns.text.TextViewModel
 import io.rover.rover.ui.experience.blocks.web.WebViewBlockViewModel
 import io.rover.rover.ui.experience.blocks.web.WebViewModel
-
-interface ViewModelFactoryInterface {
-    fun viewModelForExperienceNavigation(experience: Experience, icicle: Parcelable?): ExperienceNavigationViewModelInterface
-
-    fun viewModelForExperience(experienceId: String, icicle: Parcelable?): ExperienceViewModelInterface
-
-    fun viewModelForExperienceToolbar(toolbarConfiguration: ToolbarConfiguration): ExperienceToolbarViewModelInterface
-
-    fun viewModelForBlock(block: Block): BlockViewModelInterface
-
-    fun viewModelForRow(row: Row): RowViewModelInterface
-
-    fun viewModelForScreen(screen: Screen): ScreenViewModelInterface
-
-    fun viewModelForButtonState(buttonState: ButtonState): ButtonStateViewModelInterface
-}
 
 class ViewModelFactory(
     private val measurementService: MeasurementService,

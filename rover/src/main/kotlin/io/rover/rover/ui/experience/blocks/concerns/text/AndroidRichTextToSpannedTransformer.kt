@@ -5,16 +5,6 @@ import android.text.Spanned
 import android.text.style.StyleSpan
 import io.rover.rover.platform.roverTextHtmlAsSpanned
 
-/**
- * Transform a Rover HTML-decorated rich text string (as seen in Text blocks).
- *
- * This logic is kept outside of the [TextBlockViewModel] because it has runtime Android
- * dependencies.
- */
-interface RichTextToSpannedTransformer {
-    fun transform(string: String, boldRelativeToBlockWeight: Font): Spanned
-}
-
 class AndroidRichTextToSpannedTransformer : RichTextToSpannedTransformer {
     override fun transform(string: String, boldRelativeToBlockWeight: Font): Spanned {
         val spanned = string.roverTextHtmlAsSpanned()

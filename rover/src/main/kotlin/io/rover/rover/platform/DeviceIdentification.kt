@@ -1,3 +1,5 @@
+@file:JvmName("DeviceIdentification")
+
 package io.rover.rover.platform
 
 import java.util.*

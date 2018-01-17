@@ -12,28 +12,10 @@ import io.rover.rover.ui.experience.layout.row.RowView
 import io.rover.rover.ui.experience.blocks.text.TextBlockView
 import io.rover.rover.ui.experience.blocks.web.WebBlockView
 
-/**
- * This [RecyclerView.ViewHolder] wraps a [LayoutableViewModel].
- */
-class LayoutableBlockHolder(
-    private val layoutableItemView: LayoutableView<in LayoutableViewModel>,
-    private val viewType: ViewType
-) : RecyclerView.ViewHolder(
-    layoutableItemView.view
-) {
-    var viewModel: LayoutableViewModel? = null
-        set(value) {
-            if (value != null) {
-
-                layoutableItemView.viewModel = value
-            }
-            field = value
-        }
-}
 
 class BlockAndRowRecyclerAdapter(
     private val viewModelSequence: List<LayoutableViewModel>
-) : RecyclerView.Adapter<LayoutableBlockHolder>() {
+) : RecyclerView.Adapter<BlockAndRowRecyclerAdapter.LayoutableBlockHolder>() {
     override fun getItemCount(): Int {
         return viewModelSequence.size
     }
@@ -65,5 +47,24 @@ class BlockAndRowRecyclerAdapter(
             ViewType.WebView -> WebBlockView(parent.context)
             ViewType.Barcode -> BarcodeBlockView(parent.context)
         } as LayoutableView<LayoutableViewModel>
+    }
+
+    /**
+     * This [RecyclerView.ViewHolder] wraps a [LayoutableViewModel].
+     */
+    class LayoutableBlockHolder(
+        private val layoutableItemView: LayoutableView<in LayoutableViewModel>,
+        private val viewType: ViewType
+    ) : RecyclerView.ViewHolder(
+        layoutableItemView.view
+    ) {
+        var viewModel: LayoutableViewModel? = null
+            set(value) {
+                if (value != null) {
+
+                    layoutableItemView.viewModel = value
+                }
+                field = value
+            }
     }
 }

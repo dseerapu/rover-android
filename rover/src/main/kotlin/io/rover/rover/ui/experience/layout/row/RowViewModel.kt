@@ -8,7 +8,7 @@ import io.rover.rover.streams.filterNulls
 import io.rover.rover.streams.flatMap
 import io.rover.rover.streams.map
 import io.rover.rover.streams.share
-import io.rover.rover.ui.ViewModelFactoryInterface
+import io.rover.rover.ui.experience.ViewModelFactoryInterface
 import io.rover.rover.ui.experience.blocks.concerns.layout.BlockViewModelInterface
 import io.rover.rover.ui.experience.blocks.barcode.BarcodeBlockViewModel
 import io.rover.rover.ui.experience.blocks.concerns.background.BackgroundViewModelInterface

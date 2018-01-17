@@ -1,3 +1,5 @@
+@file:JvmName("LengthExtensions")
+
 package io.rover.rover.ui.experience.layout
 
 import io.rover.rover.core.domain.Length

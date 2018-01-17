@@ -5,7 +5,7 @@ import io.rover.rover.core.domain.TitleBarButtons
 import io.rover.rover.streams.Observable
 import io.rover.rover.streams.asPublisher
 import io.rover.rover.streams.flatMap
-import io.rover.rover.ui.ViewModelFactoryInterface
+import io.rover.rover.ui.experience.ViewModelFactoryInterface
 import io.rover.rover.ui.experience.blocks.concerns.background.BackgroundViewModelInterface
 import io.rover.rover.ui.experience.blocks.concerns.layout.LayoutableViewModel
 import io.rover.rover.ui.experience.toolbar.ToolbarConfiguration

@@ -1,3 +1,5 @@
+@file:JvmName("NetworkClientInterface")
+
 package io.rover.rover.services.network
 
 import android.os.AsyncTask

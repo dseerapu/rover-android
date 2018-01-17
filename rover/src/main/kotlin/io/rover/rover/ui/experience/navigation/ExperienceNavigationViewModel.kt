@@ -14,7 +14,7 @@ import io.rover.rover.streams.map
 import io.rover.rover.streams.shareAndReplayTypesOnResubscribe
 import io.rover.rover.streams.share
 import io.rover.rover.streams.subscribe
-import io.rover.rover.ui.ViewModelFactoryInterface
+import io.rover.rover.ui.experience.ViewModelFactoryInterface
 import io.rover.rover.ui.experience.toolbar.ExperienceToolbarViewModelInterface
 import io.rover.rover.ui.experience.layout.screen.ScreenViewModelInterface
 import kotlinx.android.parcel.Parcelize

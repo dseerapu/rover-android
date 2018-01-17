@@ -6,7 +6,7 @@ import io.rover.rover.core.domain.Length
 import io.rover.rover.core.domain.Offsets
 import io.rover.rover.core.domain.UnitOfMeasure
 import io.rover.rover.core.domain.VerticalAlignment
-import io.rover.rover.ui.ViewModelFactory
+import io.rover.rover.ui.experience.ViewModelFactory
 import io.rover.rover.ui.experience.blocks.concerns.layout.LayoutableViewModel
 import io.rover.rover.ui.experience.blocks.rectangle.RectangleBlockViewModel
 import io.rover.rover.ui.experience.layout.row.RowViewModel

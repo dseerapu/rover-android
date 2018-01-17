@@ -1,3 +1,5 @@
+@file:JvmName("Extensions")
+
 package io.rover.rover.ui.types
 
 import android.util.DisplayMetrics

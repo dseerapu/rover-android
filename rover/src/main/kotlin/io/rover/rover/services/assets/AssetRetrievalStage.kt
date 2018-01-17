@@ -1,3 +1,5 @@
+@file:JvmName("AssetRetrievalStage")
+
 package io.rover.rover.services.assets
 
 import io.rover.rover.services.network.HttpClientResponse
@@ -27,34 +29,35 @@ class AssetRetrievalStage(
             )
         }
     }
-}
 
-internal fun blockWaitForNetworkTask(invocation: (completionHandler: (HttpClientResponse) -> Unit) -> NetworkTask): PipelineStageResult<BufferedInputStream> {
-    val latch = CountDownLatch(1)
-    var returnStream: PipelineStageResult<BufferedInputStream>? = null
-    invocation { clientResponse ->
-        returnStream = when (clientResponse) {
-            is HttpClientResponse.ConnectionFailure -> {
-                PipelineStageResult.Failed(
-                    RuntimeException("Network or HTTP error downloading asset", clientResponse.reason)
-                )
+    private fun blockWaitForNetworkTask(invocation: (completionHandler: (HttpClientResponse) -> Unit) -> NetworkTask): PipelineStageResult<BufferedInputStream> {
+        val latch = CountDownLatch(1)
+        var returnStream: PipelineStageResult<BufferedInputStream>? = null
+        invocation { clientResponse ->
+            returnStream = when (clientResponse) {
+                is HttpClientResponse.ConnectionFailure -> {
+                    PipelineStageResult.Failed(
+                        RuntimeException("Network or HTTP error downloading asset", clientResponse.reason)
+                    )
+                }
+                is HttpClientResponse.ApplicationError -> {
+                    PipelineStageResult.Failed(
+                        RuntimeException("Remote HTTP API error downloading asset (code ${clientResponse.responseCode}): ${clientResponse.reportedReason}")
+                    )
+                }
+                is HttpClientResponse.Success -> {
+                    PipelineStageResult.Successful(
+                        clientResponse.bufferedInputStream
+                    )
+                }
             }
-            is HttpClientResponse.ApplicationError -> {
-                PipelineStageResult.Failed(
-                    RuntimeException("Remote HTTP API error downloading asset (code ${clientResponse.responseCode}): ${clientResponse.reportedReason}")
-                )
-            }
-            is HttpClientResponse.Success -> {
-                PipelineStageResult.Successful(
-                clientResponse.bufferedInputStream
-                )
-            }
-        }
-        latch.countDown()
-    }.resume()
-    // we rely on the network task to handle network timeout for us, so we'll just wait
-    // patiently indefinitely here.
-    latch.await()
+            latch.countDown()
+        }.resume()
+        // we rely on the network task to handle network timeout for us, so we'll just wait
+        // patiently indefinitely here.
+        latch.await()
 
-    return returnStream!!
+        return returnStream!!
+    }
+
 }

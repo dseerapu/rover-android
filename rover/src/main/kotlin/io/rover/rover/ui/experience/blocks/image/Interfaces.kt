@@ -1,3 +1,5 @@
+@file:JvmName("Interfaces")
+
 package io.rover.rover.ui.experience.blocks.image
 
 import android.graphics.Bitmap
@@ -39,3 +41,5 @@ interface ImageBlockViewModelInterface :
     BackgroundViewModelInterface,
     BorderViewModelInterface,
     ImageViewModelInterface
+
+typealias DimensionCallback = (width: Int, height: Int) -> Unit

@@ -1,3 +1,5 @@
+@file:JvmName("Interfaces")
+
 package io.rover.rover.ui.experience.blocks.concerns.border
 
 import io.rover.rover.ui.experience.blocks.concerns.layout.LayoutPaddingDeflection

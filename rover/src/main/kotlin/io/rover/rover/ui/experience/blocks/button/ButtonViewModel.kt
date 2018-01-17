@@ -5,7 +5,7 @@ import io.rover.rover.core.domain.Color
 import io.rover.rover.streams.Observable
 import io.rover.rover.streams.map
 import io.rover.rover.streams.share
-import io.rover.rover.ui.ViewModelFactoryInterface
+import io.rover.rover.ui.experience.ViewModelFactoryInterface
 import io.rover.rover.ui.experience.blocks.concerns.layout.BlockViewModelInterface
 
 class ButtonViewModel(

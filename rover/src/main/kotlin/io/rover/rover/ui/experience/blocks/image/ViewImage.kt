@@ -90,5 +90,3 @@ class ViewImage(
             }
         }
 }
-
-typealias DimensionCallback = (width: Int, height: Int) -> Unit
