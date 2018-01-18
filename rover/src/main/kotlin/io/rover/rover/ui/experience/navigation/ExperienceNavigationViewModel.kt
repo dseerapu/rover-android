@@ -51,7 +51,8 @@ class ExperienceNavigationViewModel(
     // TODO: right now we bring up viewmodels for the *entire* experience (ie., all the screens at
     // once).  This is unnecessary.
     private val screenViewModelsById: Map<String, ScreenViewModelInterface> = screensById.mapValues {
-        // TODO: use DI to inject the screen view models
+        // TODO: this should be lazy instead! which means I also need to change how the event
+        // subscription below works
         viewModelFactory.viewModelForScreen(it.value)
     }
 
@@ -231,8 +232,8 @@ class ExperienceNavigationViewModel(
     override val events: Observable<ExperienceNavigationViewModelInterface.Event> = epic.shareAndReplayTypesOnResubscribe(
         // So, GoToScreen will retain its animation values.  it needs to be transformed.  However,
         // because in the event of a re-subscribe it is very likely that the
-        // ExperienceNavigationView is new and has no current view, in which case it defaults to no
-        // animation anyway.
+        // ExperienceNavigationView is new and has no current screen view, in which case it defaults
+        // to no animation anyway.
         ExperienceNavigationViewModelInterface.Event.GoToScreen::class.java,
         ExperienceNavigationViewModelInterface.Event.SetActionBar::class.java,
         ExperienceNavigationViewModelInterface.Event.SetBacklightBoost::class.java
