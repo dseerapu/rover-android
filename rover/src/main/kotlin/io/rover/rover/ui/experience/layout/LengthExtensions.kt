@@ -5,7 +5,6 @@ package io.rover.rover.ui.experience.layout
 import io.rover.rover.core.domain.Length
 import io.rover.rover.core.domain.UnitOfMeasure
 
-
 /**
  * Returns the amount the Length's absolute value, taking into
  * account the given [against] denominator if the Length is a proportional one (percentage).

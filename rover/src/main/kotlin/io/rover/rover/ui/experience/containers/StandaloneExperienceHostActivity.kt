@@ -47,7 +47,7 @@ import java.util.concurrent.TimeUnit
 /**
  * This can display a Rover experience in an Activity, self-contained.
  */
-class StandaloneExperienceHostActivity: AppCompatActivity() {
+class StandaloneExperienceHostActivity : AppCompatActivity() {
     // so, a few constraints:
 
     // may be booted inside any app, so needs to start up our object graph as needed. this story
@@ -133,10 +133,10 @@ class StandaloneExperienceHostActivity: AppCompatActivity() {
             // TODO: this subscription must be lifecycle-managed
             viewModel?.events?.subscribe(
                 { event ->
-                    when(event) {
+                    when (event) {
                         is ExperienceViewModelInterface.Event.ExternalNavigation -> {
                             log.v("Received a view event: ${event.event}")
-                            when(event.event) {
+                            when (event.event) {
                                 is ExperienceExternalNavigationEvent.Exit -> {
                                     finish()
                                 }
@@ -164,7 +164,7 @@ class StandaloneExperienceHostActivity: AppCompatActivity() {
         }
 
     override fun onBackPressed() {
-        if(experienceViewModel != null) {
+        if (experienceViewModel != null) {
             experienceViewModel?.pressBack()
         } else {
             // default to standard Android back-button behaviour (ie., pop the activity) if our view
@@ -261,7 +261,7 @@ class StandaloneExperienceHostActivity: AppCompatActivity() {
  *
  * TODO: include direction about either setting the ActionBar feature to off in code or by style.
  */
-class ActivityToolbarHost(private val activity: AppCompatActivity): ExperienceView.ToolbarHost {
+class ActivityToolbarHost(private val activity: AppCompatActivity) : ExperienceView.ToolbarHost {
     var menu: Menu? = null
         set(newMenu) {
             field = newMenu

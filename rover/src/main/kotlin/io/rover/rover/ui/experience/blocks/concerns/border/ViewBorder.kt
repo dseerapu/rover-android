@@ -76,7 +76,6 @@ class ViewBorder(
         }
     }
 
-
     /**
      * Compute and memoize some state in this view mixin depending on the set view model and
      * the size of the view.  Idempotent; this method must be run whenever the view

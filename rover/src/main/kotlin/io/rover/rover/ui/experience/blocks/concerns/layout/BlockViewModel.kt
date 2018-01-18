@@ -131,7 +131,6 @@ class BlockViewModel(
         return listOf(width, 0.0f).max()!!
     }
 
-
     private val eventSource = PublishSubject<BlockViewModelInterface.Event>()
     override val events = eventSource.share()
 
@@ -143,10 +142,10 @@ class BlockViewModel(
         // event emitter, so I'll just publish an event directly.
         val action = block.action
 
-        val navigateTo = when(action) {
+        val navigateTo = when (action) {
             null -> null
             is BlockAction.GoToScreenAction -> { NavigateTo.GoToScreenAction(action.screenId.rawValue) }
-            is BlockAction.OpenUrlAction -> { NavigateTo.OpenUrlAction(action.url)}
+            is BlockAction.OpenUrlAction -> { NavigateTo.OpenUrlAction(action.url) }
         }
 
         navigateTo.whenNotNull {

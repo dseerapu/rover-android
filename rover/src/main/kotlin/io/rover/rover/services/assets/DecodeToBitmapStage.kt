@@ -22,7 +22,7 @@ class DecodeToBitmapStage(
         // an Executor tuned for multiplexing I/O and not for CPU work); see
         // SynchronousPipelineStage's documentation. If it proves problematic we can offload it to
         // another worker.
-        return when(stream) {
+        return when (stream) {
             is PipelineStageResult.Successful -> PipelineStageResult.Successful(BitmapFactory.decodeStream(stream.output))
             is PipelineStageResult.Failed -> PipelineStageResult.Failed(stream.reason)
         }

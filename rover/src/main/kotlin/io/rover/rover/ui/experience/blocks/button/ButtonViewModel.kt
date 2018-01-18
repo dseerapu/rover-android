@@ -1,7 +1,6 @@
 package io.rover.rover.ui.experience.blocks.button
 
 import io.rover.rover.core.domain.ButtonBlock
-import io.rover.rover.core.domain.Color
 import io.rover.rover.streams.Observable
 import io.rover.rover.streams.map
 import io.rover.rover.streams.share
@@ -21,7 +20,7 @@ class ButtonViewModel(
     private val epic = blockViewModel
         .events
         .map { event ->
-            when(event) {
+            when (event) {
                 is BlockViewModelInterface.Event.Touched -> ButtonViewModelInterface.Event.DisplayState(
                     highlightedStateViewModel, true, StateOfButton.Highlighted, false
                 )
@@ -47,7 +46,7 @@ class ButtonViewModel(
     )
 
     override fun viewModelForState(state: StateOfButton): ButtonStateViewModelInterface {
-        return when(state) {
+        return when (state) {
             StateOfButton.Selected -> selectedStateViewModel
             StateOfButton.Highlighted -> highlightedStateViewModel
             StateOfButton.Normal -> normalStateViewModel

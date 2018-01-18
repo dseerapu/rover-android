@@ -5,7 +5,7 @@ import io.rover.rover.streams.share
 
 class ExperienceToolbarViewModel(
     override val configuration: ToolbarConfiguration
-): ExperienceToolbarViewModelInterface {
+) : ExperienceToolbarViewModelInterface {
 
     override fun pressedBack() {
         actions.onNext(ExperienceToolbarViewModelInterface.Event.PressedBack())

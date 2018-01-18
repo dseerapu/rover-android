@@ -24,7 +24,7 @@ class ScreenView : RecyclerView, BindableView<ScreenViewModelInterface> {
 
             viewBackground.backgroundViewModel = viewModel
 
-            if(viewModel != null) {
+            if (viewModel != null) {
                 // set up the Experience layout manager for the RecyclerView.  Unlike a typical
                 // RecyclerView layout manager, in our system our layout is indeed data, so the
                 // layout manager needs the Screen view model.

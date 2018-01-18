@@ -4,7 +4,7 @@ import io.rover.rover.core.domain.Region
 import io.rover.rover.services.network.optIntOrNull
 import io.rover.rover.services.network.putProp
 import org.json.JSONObject
-import java.util.*
+import java.util.UUID
 
 val Region.BeaconRegion.Companion.resourceName get() = "BeaconRegion"
 val Region.GeofenceRegion.Companion.resourceName get() = "GeofenceRegion"

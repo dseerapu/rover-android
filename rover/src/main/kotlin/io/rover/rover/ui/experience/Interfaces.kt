@@ -24,7 +24,7 @@ import io.rover.rover.ui.experience.toolbar.ToolbarConfiguration
  * Responsible for fetching and displaying an Experience, with the appropriate Android toolbar along
  * the top.
  */
-interface ExperienceViewModelInterface: BindableViewModel {
+interface ExperienceViewModelInterface : BindableViewModel {
     val events: Observable<Event>
 
     fun pressBack()
@@ -32,28 +32,28 @@ interface ExperienceViewModelInterface: BindableViewModel {
     sealed class Event {
         data class ExperienceReady(
             val experienceNavigationViewModel: ExperienceNavigationViewModelInterface
-        ): Event()
+        ) : Event()
 
         data class SetActionBar(
             val toolbarViewModel: ExperienceToolbarViewModelInterface
-        ): Event()
+        ) : Event()
 
         data class DisplayError(
             val message: String
-        ): Event()
+        ) : Event()
 
         /**
          * This event signifies that the LayoutParams of the containing window should either be set
          * to either 1 or [WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE].
          */
-        data class SetBacklightBoost(val extraBright: Boolean): Event()
+        data class SetBacklightBoost(val extraBright: Boolean) : Event()
 
         /**
          * The user should be navigated somewhere external to
          */
         data class ExternalNavigation(
             val event: ExperienceExternalNavigationEvent
-        ): Event()
+        ) : Event()
     }
 
     /**

@@ -12,7 +12,7 @@ class WebViewBlockViewModel(
     private val backgroundViewModel: BackgroundViewModelInterface,
     private val borderViewModel: BorderViewModelInterface,
     private val webViewModel: WebViewModelInterface
-): WebViewBlockViewModelInterface,
+) : WebViewBlockViewModelInterface,
     BlockViewModelInterface by blockViewModel,
     BackgroundViewModelInterface by backgroundViewModel,
     BorderViewModelInterface by borderViewModel,

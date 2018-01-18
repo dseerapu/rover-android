@@ -43,9 +43,8 @@ interface ButtonViewModelInterface {
              * The given animation should undo itself afterwards.
              */
             val selfRevert: Boolean
-        ): Event()
+        ) : Event()
     }
-
 
     /**
      * The owning view will maintain a set of background views itself for allowing for partially
@@ -60,7 +59,7 @@ interface ButtonBlockViewModelInterface :
     BlockViewModelInterface,
     ButtonViewModelInterface
 
-interface ButtonStateViewModelInterface:
+interface ButtonStateViewModelInterface :
     BindableViewModel,
     TextViewModelInterface,
     BackgroundViewModelInterface,

@@ -9,7 +9,7 @@ import io.rover.rover.ui.experience.blocks.concerns.background.ViewBackground
 import io.rover.rover.ui.experience.blocks.concerns.border.ViewBorder
 import io.rover.rover.ui.experience.blocks.concerns.ViewComposition
 
-class ButtonStateView: View, BindableView<ButtonStateViewModelInterface> {
+class ButtonStateView : View, BindableView<ButtonStateViewModelInterface> {
     constructor(context: Context?) : super(context)
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)

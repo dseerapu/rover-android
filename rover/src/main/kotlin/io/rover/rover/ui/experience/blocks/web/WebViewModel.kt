@@ -3,7 +3,6 @@ package io.rover.rover.ui.experience.blocks.web
 import io.rover.rover.core.domain.WebViewBlock
 import java.net.URL
 
-
 class WebViewModel(
     private val webViewBlock: WebViewBlock
 ) : WebViewModelInterface {

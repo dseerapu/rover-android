@@ -53,7 +53,7 @@ class ViewImage(
      * If dimensions are ready (or when they become ready), execute the given callback.
      */
     private fun whenDimensionsReady(callback: DimensionCallback) {
-        if(width == 0 && height == 0) {
+        if (width == 0 && height == 0) {
             // dimensions aren't ready. wait.
             log.v("Dimensions aren't ready.  Waiting.")
             dimensionCallbacks.add(callback)

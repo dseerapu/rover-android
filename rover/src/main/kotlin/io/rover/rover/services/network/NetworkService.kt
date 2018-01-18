@@ -27,9 +27,9 @@ class NetworkService(
 
     private fun authHeaders(profileIdentifier: String?): HashMap<String, String> {
         val authHeaders = hashMapOf<String, String>()
-        if(authenticationContext.sdkToken != null) {
+        if (authenticationContext.sdkToken != null) {
             authHeaders["x-rover-account-token"] = authenticationContext.sdkToken!!
-        } else if(authenticationContext.bearerToken != null) {
+        } else if (authenticationContext.bearerToken != null) {
             authHeaders["authorization"] = "Bearer ${authenticationContext.bearerToken}"
         } else {
             throw RuntimeException("Attempt to use NetworkService when authentication is not available.")
@@ -163,4 +163,3 @@ class NetworkService(
         }
     }
 }
-

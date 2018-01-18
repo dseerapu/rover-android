@@ -9,12 +9,12 @@ class AndroidRichTextToSpannedTransformer : RichTextToSpannedTransformer {
     override fun transform(string: String, boldRelativeToBlockWeight: Font): Spanned {
         val spanned = string.roverTextHtmlAsSpanned()
 
-        return if(spanned.isEmpty()) {
+        return if (spanned.isEmpty()) {
             spanned
         } else {
 
             // spans can arrive with a trailing newline; clip it off if present.
-            if(spanned[spanned.lastIndex] == '\n') {
+            if (spanned[spanned.lastIndex] == '\n') {
                 spanned.delete(spanned.lastIndex, spanned.length)
             }
 

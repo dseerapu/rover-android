@@ -32,7 +32,7 @@ class ExperienceNavigationViewModel(
     private val experience: Experience,
     private val viewModelFactory: ViewModelFactoryInterface,
     icicle: Parcelable? = null
-): ExperienceNavigationViewModelInterface {
+) : ExperienceNavigationViewModelInterface {
 
     override fun pressBack() {
         actions.onNext(Action.PressedBack())
@@ -44,7 +44,7 @@ class ExperienceNavigationViewModel(
     // Incoming button events/initial subscribe -> switch screen event for view -> which
     // events I subscribe to has to change
 
-    private val actions : PublishSubject<Action> = PublishSubject()
+    private val actions: PublishSubject<Action> = PublishSubject()
 
     private val screensById = experience.screens.associateBy { it.id.rawValue }
 
@@ -64,27 +64,27 @@ class ExperienceNavigationViewModel(
         .values
         .asPublisher()
         .flatMap { screen ->
-            screen.events.map { Pair(screen, it)}
+            screen.events.map { Pair(screen, it) }
         }
         .subscribe({ (screen, navigateTo) ->
             // filter out the the events that are not meant for the currently active screen:
-            if(activeScreen() == screen) {
+            if (activeScreen() == screen) {
                 actions.onNext(Action.Navigate(navigateTo))
             }
         }, { error -> actions.onError(error) })
 
     private sealed class Action {
-        class PressedBack: Action()
+        class PressedBack : Action()
         /**
          * Emitted into the actions stream if the close button is pressed on the toolbar.
          */
         class PressedClose : Action()
         class Navigate(
             val navigateTo: NavigateTo
-        ): Action()
+        ) : Action()
     }
 
-    override var state = if(icicle != null) {
+    override var state = if (icicle != null) {
         icicle as State
     } else {
         // the default starting state.  One stack frame, pointing to the experience screen set as
@@ -104,7 +104,7 @@ class ExperienceNavigationViewModel(
     private fun actionBehaviour(action: Action): StateChange? {
         val activeScreen = activeScreen()
         val possiblePreviousScreenId = state.backStack.getOrNull(state.backStack.lastIndex - 1)?.screenId
-        return when(action) {
+        return when (action) {
             is Action.PressedBack -> {
                 possiblePreviousScreenId.whenNotNull { previousScreenId ->
                     StateChange(
@@ -128,7 +128,7 @@ class ExperienceNavigationViewModel(
                 )
             }
             is Action.Navigate -> {
-                when(action.navigateTo) {
+                when (action.navigateTo) {
                     is NavigateTo.OpenUrlAction -> StateChange(
                         ExperienceNavigationViewModelInterface.Event.ViewEvent(
                             ExperienceExternalNavigationEvent.OpenExternalWebBrowser(action.navigateTo.uri)
@@ -137,7 +137,7 @@ class ExperienceNavigationViewModel(
                     )
                     is NavigateTo.GoToScreenAction -> {
                         val viewModel = screenViewModelsById[action.navigateTo.screenId]
-                            if(viewModel == null) {
+                            if (viewModel == null) {
                                 log.w("Screen by id ${action.navigateTo.screenId} missing from Experience with id ${experience.id.rawValue}.")
                                 null
                             } else {
@@ -165,12 +165,12 @@ class ExperienceNavigationViewModel(
         // now take the event from the state change and inject some behavioural transient events
         // into the stream as needed (backlight and toolbar behaviours).
         // emit app bar update and BacklightBoost events (as needed) and into the stream for screen changes.
-        val backlightEvent = when(event) {
+        val backlightEvent = when (event) {
             is ExperienceNavigationViewModelInterface.Event.GoToScreen -> event.screenViewModel.needsBrightBacklight
             else -> null
         }.whenNotNull { ExperienceNavigationViewModelInterface.Event.SetBacklightBoost(it) }
 
-        val appBarEvent = when(event) {
+        val appBarEvent = when (event) {
             is ExperienceNavigationViewModelInterface.Event.GoToScreen -> event.screenViewModel.appBarConfiguration
             else -> null
         }.whenNotNull {
@@ -215,7 +215,7 @@ class ExperienceNavigationViewModel(
                 .subscribe { toolbarEvent ->
                     // subscribe to the events from the toolbar and dispatch them
                     actions.onNext(
-                        when(toolbarEvent) {
+                        when (toolbarEvent) {
                             is ExperienceToolbarViewModelInterface.Event.PressedBack -> Action.PressedBack()
                             is ExperienceToolbarViewModelInterface.Event.PressedClose -> Action.PressedClose()
                         }
@@ -244,14 +244,12 @@ class ExperienceNavigationViewModel(
     @Parcelize
     data class BackStackFrame(
         val screenId: String
-    ): Parcelable
+    ) : Parcelable
 
     // @Parcelize Kotlin synthetics are generating the CREATOR method for us.
     @SuppressLint("ParcelCreator")
     @Parcelize
     data class State(
         val backStack: List<BackStackFrame>
-    ): Parcelable
+    ) : Parcelable
 }
-
-

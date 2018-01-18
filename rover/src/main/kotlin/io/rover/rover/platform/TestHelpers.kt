@@ -26,6 +26,5 @@ fun DeviceState.encodeJsonToStringForTests(): String = this.encodeJson().toStrin
 
 fun Experience.encodeJsonToStringForTests(): String = this.encodeJson().toString(4)
 
-
 fun WireEncoder.decodeExperienceFromStringForTests(json: String): Experience =
     this.decodeExperience(JSONObject(json))

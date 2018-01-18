@@ -1,6 +1,7 @@
 package io.rover.rover.core.domain
 
-import java.util.*
+import java.util.Date
+import java.util.UUID
 
 data class Event(
     val attributes: Attributes,
@@ -10,5 +11,3 @@ data class Event(
 ) {
     companion object
 }
-
-//

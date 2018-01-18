@@ -32,7 +32,7 @@ class ImageViewModel(
                 targetViewPixelSize,
                 displayMetrics
             )
-            
+
             val url = URL(uriWithParameters.toString())
 
             assetService.getImageByUrl(url) { result ->

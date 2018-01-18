@@ -58,11 +58,9 @@ data class RectF(
             && this.right >= other.right && this.bottom >= other.bottom)
     }
 
-
     fun asAndroidRectF(): android.graphics.RectF {
         return android.graphics.RectF(
             left, top, right, bottom
         )
     }
-
 }

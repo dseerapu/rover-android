@@ -47,7 +47,7 @@ class AndroidMeasurementService(
 
         // now ask Android's StaticLayout to measure the needed height of the text soft-wrapped to
         // the width.
-        val layout = if((Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)) {
+        val layout = if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)) {
             StaticLayout
                 .Builder.obtain(spanned, 0, spanned.length, paint, width.dpAsPx(displayMetrics))
                 .setAlignment(textLayoutAlign)
@@ -91,7 +91,7 @@ class AndroidMeasurementService(
 
         val renderedBitmap = MultiFormatWriter().encode(
             text,
-            when(type) {
+            when (type) {
                 BarcodeViewModelInterface.BarcodeType.PDF417 -> BarcodeFormat.PDF_417
                 // this one will happily collapse to a minimum height of 1.  That ain't going to do
                 BarcodeViewModelInterface.BarcodeType.Code128 -> BarcodeFormat.CODE_128
@@ -109,7 +109,7 @@ class AndroidMeasurementService(
             )
         )
 
-        val aspectRatio = if(type == BarcodeViewModelInterface.BarcodeType.Code128) {
+        val aspectRatio = if (type == BarcodeViewModelInterface.BarcodeType.Code128) {
             // Code 128 is our only 1 dimensional barcode type, but naturally it ultimately renders
             // into 2D space, so we want to define an appropriate hard-coded aspect ratio for it.
             2.26086956521739f

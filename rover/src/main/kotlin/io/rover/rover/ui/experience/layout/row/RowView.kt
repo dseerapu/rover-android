@@ -28,7 +28,6 @@ class RowView : View, LayoutableView<RowViewModelInterface> {
         viewComposition.afterOnDraw(canvas)
     }
 
-
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
         viewComposition.onSizeChanged(w, h, oldw, oldh)

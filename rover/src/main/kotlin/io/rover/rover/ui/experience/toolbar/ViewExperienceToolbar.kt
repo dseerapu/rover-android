@@ -22,13 +22,12 @@ import io.rover.rover.streams.doOnUnsubscribe
 import io.rover.rover.streams.subscribe
 import io.rover.rover.ui.experience.ExperienceView
 
-
 class ViewExperienceToolbar(
     private val hostView: View,
     private val hostWindowForStatusBar: Window,
     private val context: Context,
     private val toolbarHost: ExperienceView.ToolbarHost
-): ViewExperienceToolbarInterface {
+) : ViewExperienceToolbarInterface {
     private val menuItemId = View.generateViewId()
 
     private val defaultStatusBarColor = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -43,7 +42,7 @@ class ViewExperienceToolbar(
      */
     private var activeMenuSubscription: Subscription? = null
 
-    private var retrievedMenu : Menu? = null
+    private var retrievedMenu: Menu? = null
 
     val toolbar = Toolbar(context)
 
@@ -66,7 +65,7 @@ class ViewExperienceToolbar(
     ): Toolbar {
         val configuration = toolbarViewModel.configuration
 
-        closeButton.setOnClickListener {  }
+        closeButton.setOnClickListener { }
 
         // I need to keep state for the toolbar subscription so I can unsubscribe it when bind.
         activeMenuSubscription?.cancel()
@@ -76,7 +75,6 @@ class ViewExperienceToolbar(
             .doOnUnsubscribe {
                 log.v("Removing exist item with id $menuItemId from $retrievedMenu")
                 retrievedMenu?.removeItem(menuItemId)
-
             }
             .subscribe({ (actionBar, menu) ->
                 actionBar.setDisplayHomeAsUpEnabled(true)

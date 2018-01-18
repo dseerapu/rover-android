@@ -40,6 +40,3 @@ internal val Any.log: SimpleLogger
             }
         }
     }
-
-
-

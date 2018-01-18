@@ -16,7 +16,7 @@ import io.rover.shaded.zxing.com.google.zxing.MultiFormatWriter
  */
 class ViewBarcode(
     private val barcodeView: AppCompatImageView
-): ViewBarcodeInterface, PaddingContributor {
+) : ViewBarcodeInterface, PaddingContributor {
     init {
         // Using stretch fit because (at least for auto-height) we've ensured that the image will
         // scale aspect-correct, and we also are using integer scaling to ensure a sharp scale of
@@ -31,11 +31,11 @@ class ViewBarcode(
             field = viewModel
             // TODO: render off-thread (although generation seems fast so it may not matter too
             // much).
-            if(viewModel != null) {
+            if (viewModel != null) {
                 // TODO: factor this out into a "BarcodeService"
                 val bitmap = MultiFormatWriter().encode(
                     viewModel.barcodeValue,
-                    when(viewModel.barcodeType) {
+                    when (viewModel.barcodeType) {
                         BarcodeViewModelInterface.BarcodeType.PDF417 -> BarcodeFormat.PDF_417
                         BarcodeViewModelInterface.BarcodeType.Code128 -> BarcodeFormat.CODE_128
                         BarcodeViewModelInterface.BarcodeType.Aztec -> BarcodeFormat.AZTEC

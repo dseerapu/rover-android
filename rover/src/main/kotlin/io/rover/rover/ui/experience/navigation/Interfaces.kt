@@ -10,7 +10,7 @@ import io.rover.rover.ui.experience.layout.screen.ScreenViewModelInterface
 import java.net.URI
 
 interface ExperienceNavigationViewModelInterface : BindableViewModel {
-    val events : Observable<Event>
+    val events: Observable<Event>
 
     fun pressBack()
 
@@ -37,21 +37,21 @@ interface ExperienceNavigationViewModelInterface : BindableViewModel {
             val screenViewModel: ScreenViewModelInterface,
             val backwards: Boolean,
             val animate: Boolean
-        ): Event()
+        ) : Event()
 
         data class ViewEvent(
             val event: ExperienceExternalNavigationEvent
-        ): Event()
+        ) : Event()
 
         data class SetActionBar(
             val experienceToolbarViewModel: ExperienceToolbarViewModelInterface
-        ): Event()
+        ) : Event()
 
         /**
          * This event signifies that the LayoutParams of the containing window should either be set
          * to either 1 or [WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE].
          */
-        data class SetBacklightBoost(val extraBright: Boolean): Event()
+        data class SetBacklightBoost(val extraBright: Boolean) : Event()
     }
 }
 
@@ -74,7 +74,7 @@ sealed class ExperienceExternalNavigationEvent {
      *  to the internal Rover ExperienceNavigationViewModel, whatever it happens to be in the
      *  surrounding app.
      */
-    data class OpenExternalWebBrowser(val uri: URI): ExperienceExternalNavigationEvent()
+    data class OpenExternalWebBrowser(val uri: URI) : ExperienceExternalNavigationEvent()
 
     /**
      * Containing view context (hosting the Experience) should pop itself ([Activity.finish], etc.)
@@ -82,5 +82,5 @@ sealed class ExperienceExternalNavigationEvent {
      * backstack, etc.) external to the internal Rover ExperienceNavigationViewModel, whatever it
      * happens to be in the surrounding app.
      */
-    class Exit(): ExperienceExternalNavigationEvent()
+    class Exit() : ExperienceExternalNavigationEvent()
 }

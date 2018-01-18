@@ -26,7 +26,7 @@ class ExperienceViewModel(
     private val networkService: NetworkServiceInterface,
     private val viewModelFactory: ViewModelFactoryInterface,
     private val icicle: Parcelable? = null
-): ExperienceViewModelInterface {
+) : ExperienceViewModelInterface {
     private var navigationViewModel: ExperienceNavigationViewModelInterface? = null
 
     // TODO: Perhaps separate fetch concern from toolbar hosting concern.
@@ -36,7 +36,7 @@ class ExperienceViewModel(
             // this is a slightly strange arrangement: since all state is really within a contained
             // view model (that only becomes available synchronously) we effectively assume we have
             // only our icicle state when that nested view model is not available.
-            return if(navigationViewModel == null) {
+            return if (navigationViewModel == null) {
                 icicle ?: State(null)
             } else {
                 State(
@@ -52,10 +52,10 @@ class ExperienceViewModel(
     private fun fetchExperience(): Publisher<NetworkResult<Experience>> =
         ({ callback: CallbackReceiver<NetworkResult<Experience>> -> networkService.fetchExperienceTask(ID(experienceId), callback) }).asPublisher()
 
-    private val epic : Observable<ExperienceViewModelInterface.Event> =
+    private val epic: Observable<ExperienceViewModelInterface.Event> =
         Observable.merge(
             actions.map { action ->
-                when(action) {
+                when (action) {
                     Action.BackPressedBeforeExperienceReady -> {
                         // when view model isn't available (yet) but the user mashed the back button,
                         // just emit Exit immediately.
@@ -66,7 +66,7 @@ class ExperienceViewModel(
             fetchExperience()
                 .flatMap { networkResult ->
                     when (networkResult) {
-                        is NetworkResult.Error-> Observable.just(
+                        is NetworkResult.Error -> Observable.just(
                             ExperienceViewModelInterface.Event.DisplayError(
                                 networkResult.throwable.message ?: "Unknown"
                             )
@@ -118,7 +118,7 @@ class ExperienceViewModel(
     )
 
     override fun pressBack() {
-        if(navigationViewModel == null) {
+        if (navigationViewModel == null) {
             actionSource.onNext(Action.BackPressedBeforeExperienceReady)
         } else {
             navigationViewModel?.pressBack()
@@ -139,5 +139,5 @@ class ExperienceViewModel(
     @Parcelize
     data class State(
         val navigationState: Parcelable? // TODO: see comment on ExperienceNavigationViewModelInterface.state
-    ): Parcelable
+    ) : Parcelable
 }

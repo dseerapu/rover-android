@@ -51,16 +51,16 @@ class ExperienceNavigationView : FrameLayout, BindableView<ExperienceNavigationV
 
             field = experienceViewModel
 
-            field?.events?.androidLifecycleDispose(this)?.subscribe( { event ->
-                when(event) {
+            field?.events?.androidLifecycleDispose(this)?.subscribe({ event ->
+                when (event) {
                     is ExperienceNavigationViewModelInterface.Event.GoToScreen -> {
-                        if(!event.animate) {
+                        if (!event.animate) {
                             val newView = getViewForScreenViewModel(event.screenViewModel)
                             activeView?.visibility = View.GONE
                             newView.visibility = View.VISIBLE
                             activeView = newView
                         } else {
-                            if(event.backwards) {
+                            if (event.backwards) {
                                 val newView = getViewForScreenViewModel(event.screenViewModel)
                                 newView.bringToFront()
                                 newView.visibility = View.GONE

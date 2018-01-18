@@ -40,7 +40,7 @@ interface ExperienceToolbarViewModelInterface {
     fun pressedClose()
 
     sealed class Event {
-        class PressedBack(): Event()
-        class PressedClose(): Event()
+        class PressedBack() : Event()
+        class PressedClose() : Event()
     }
 }

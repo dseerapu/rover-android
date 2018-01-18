@@ -12,9 +12,9 @@ import io.rover.rover.ui.types.RectF
 class BarcodeViewModel(
     private val barcode: BarcodeBlock,
     private val measurementService: MeasurementService
-): BarcodeViewModelInterface {
+) : BarcodeViewModelInterface {
     override val barcodeType: BarcodeViewModelInterface.BarcodeType
-        get() = when(barcode.barcodeFormat) {
+        get() = when (barcode.barcodeFormat) {
             BarcodeFormat.AztecCode -> BarcodeViewModelInterface.BarcodeType.Aztec
             BarcodeFormat.Code128 -> BarcodeViewModelInterface.BarcodeType.Code128
             BarcodeFormat.Pdf417 -> BarcodeViewModelInterface.BarcodeType.PDF417
@@ -33,7 +33,7 @@ class BarcodeViewModel(
     }
 
     override val paddingDeflection: Rect
-        get() = when(barcode.barcodeFormat) {
+        get() = when (barcode.barcodeFormat) {
             BarcodeFormat.Pdf417 -> Rect(5, 5, 5, 5)
             else -> Rect(20, 20, 20, 20)
         }

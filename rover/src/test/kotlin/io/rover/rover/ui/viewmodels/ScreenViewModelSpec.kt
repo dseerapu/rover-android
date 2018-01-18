@@ -21,7 +21,7 @@ import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 
-class ScreenViewModelSpec: Spek({
+class ScreenViewModelSpec : Spek({
     given("integration tests with real row view models") {
         given("a basic screen with one row with a rectangle block") {
             val screen = ModelFactories.emptyScreen().copy(

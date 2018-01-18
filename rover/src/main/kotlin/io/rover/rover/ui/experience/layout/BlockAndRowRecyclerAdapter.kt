@@ -12,7 +12,6 @@ import io.rover.rover.ui.experience.layout.row.RowView
 import io.rover.rover.ui.experience.blocks.text.TextBlockView
 import io.rover.rover.ui.experience.blocks.web.WebBlockView
 
-
 class BlockAndRowRecyclerAdapter(
     private val viewModelSequence: List<LayoutableViewModel>
 ) : RecyclerView.Adapter<BlockAndRowRecyclerAdapter.LayoutableBlockHolder>() {

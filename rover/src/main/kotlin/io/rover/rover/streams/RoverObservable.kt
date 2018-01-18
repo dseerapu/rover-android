@@ -7,9 +7,8 @@ import android.arch.lifecycle.Lifecycle
 import android.arch.lifecycle.LifecycleOwner
 import android.os.Looper
 import android.view.View
-import io.rover.rover.core.logging.log
 import io.rover.rover.services.network.NetworkTask
-import java.util.*
+import java.util.ArrayDeque
 import java.util.concurrent.ConcurrentHashMap
 
 interface Subscription {
@@ -25,7 +24,6 @@ interface Subscriber<in T> {
 
     fun onSubscribe(subscription: Subscription)
 }
-
 
 interface Publisher<out T> {
     fun subscribe(subscriber: Subscriber<T>)
@@ -67,7 +65,7 @@ interface Publisher<out T> {
 
                     // subscribe to first thing, wait for it to complete, then subscribe to second thing, wait for it to complete, etc.
                     fun recursiveSubscribe(remainingSources: List<Publisher<T>>) {
-                        if(remainingSources.isEmpty()) {
+                        if (remainingSources.isEmpty()) {
                             subscriber.onComplete()
                         } else {
                             // subscribe to the source:
@@ -76,17 +74,17 @@ interface Publisher<out T> {
                                     // While there is potentially a risk of a stack overflow here,
                                     // but in practical terms, there will not be that many sources
                                     // given to concat().
-                                    if(!cancelled) recursiveSubscribe(
+                                    if (!cancelled) recursiveSubscribe(
                                         remainingSources.subList(1, remainingSources.size)
                                     )
                                 }
 
                                 override fun onError(error: Throwable) {
-                                    if(!cancelled) subscriber.onError(error)
+                                    if (!cancelled) subscriber.onError(error)
                                 }
 
                                 override fun onNext(item: T) {
-                                    if(!cancelled) subscriber.onNext(item)
+                                    if (!cancelled) subscriber.onNext(item)
                                 }
 
                                 override fun onSubscribe(subscription: Subscription) { /* no-op: we don't tell our subscribers about each source subscribing */ }
@@ -110,7 +108,7 @@ interface Publisher<out T> {
                 override fun subscribe(subscriber: Subscriber<T>) {
                     var cancelled = false
 
-                    val subscriptions : MutableSet<Subscription> = mutableSetOf()
+                    val subscriptions: MutableSet<Subscription> = mutableSetOf()
 
                     val subscription = object : Subscription {
                         override fun cancel() {
@@ -128,7 +126,7 @@ interface Publisher<out T> {
                         source.subscribe(object : Subscriber<T> {
                             override fun onComplete() {
                                 remainingSources.remove(source)
-                                if(remainingSources.isEmpty() && !cancelled) {
+                                if (remainingSources.isEmpty() && !cancelled) {
                                     subscriber.onComplete()
                                 }
                             }
@@ -168,12 +166,12 @@ interface Publisher<out T> {
     }
 }
 
-interface Processor<T, R>: Subscriber<T>, Publisher<R>
+interface Processor<T, R> : Subscriber<T>, Publisher<R>
 
 typealias Observable<T> = Publisher<T>
 
 fun <T> Publisher<T>.subscribe(onNext: (item: T) -> Unit, onError: (throwable: Throwable) -> Unit, subscriptionReceiver: ((Subscription) -> Unit)? = null) {
-    this.subscribe(object: Subscriber<T> {
+    this.subscribe(object : Subscriber<T> {
         override fun onComplete() { }
 
         override fun onError(error: Throwable) { onError(error) }
@@ -181,7 +179,7 @@ fun <T> Publisher<T>.subscribe(onNext: (item: T) -> Unit, onError: (throwable: T
         override fun onNext(item: T) { onNext(item) }
 
         override fun onSubscribe(subscription: Subscription) {
-            if(subscriptionReceiver != null) {
+            if (subscriptionReceiver != null) {
                 subscriptionReceiver(subscription)
             }
         }
@@ -189,7 +187,7 @@ fun <T> Publisher<T>.subscribe(onNext: (item: T) -> Unit, onError: (throwable: T
 }
 
 fun <T> Publisher<T>.subscribe(onNext: (item: T) -> Unit) {
-    this.subscribe(object: Subscriber<T> {
+    this.subscribe(object : Subscriber<T> {
         override fun onComplete() { }
 
         override fun onError(error: Throwable) {
@@ -209,7 +207,7 @@ fun <T, R> Publisher<T>.map(transform: (T) -> R): Publisher<R> {
             prior.subscribe(
                 object : Subscriber<T> {
                     override fun onComplete() {
-                        if(Looper.myLooper() != Looper.getMainLooper()) {
+                        if (Looper.myLooper() != Looper.getMainLooper()) {
                             throw RuntimeException("Completion result on bogus thread?!  Running on thread ${Thread.currentThread()}")
                         }
 
@@ -275,11 +273,11 @@ fun <T, R> Publisher<T>.flatMap(transform: (T) -> Publisher<R>): Publisher<R> {
     val prior = this
     return object : Publisher<R> {
         override fun subscribe(subscriber: Subscriber<R>) {
-            val outstanding : ConcurrentHashMap<Subscriber<*>, Boolean> = ConcurrentHashMap()
+            val outstanding: ConcurrentHashMap<Subscriber<*>, Boolean> = ConcurrentHashMap()
 
             fun informSubscriberCompleteIfAllCompleted() {
                 // TODO: wait for all waiting transform subscriptions to complete too.
-                if(outstanding.isEmpty()) {
+                if (outstanding.isEmpty()) {
                     subscriber.onComplete()
                 }
             }
@@ -302,7 +300,7 @@ fun <T, R> Publisher<T>.flatMap(transform: (T) -> Publisher<R>): Publisher<R> {
                         return
                     }
 
-                    val transformSubscriber =  object : Subscriber<R> {
+                    val transformSubscriber = object : Subscriber<R> {
                         override fun onComplete() {
                             outstanding.remove(this)
                             informSubscriberCompleteIfAllCompleted()
@@ -321,7 +319,6 @@ fun <T, R> Publisher<T>.flatMap(transform: (T) -> Publisher<R>): Publisher<R> {
                         }
                     }
                     transformPublisher.subscribe(transformSubscriber)
-
                 }
 
                 override fun onSubscribe(sourceSubscription: Subscription) {
@@ -369,7 +366,7 @@ fun <T> Publisher<T>.share(): Publisher<T> {
             subscriber.onSubscribe(subscription)
 
             // subscribe on initial.
-            if(!subscribed) {
+            if (!subscribed) {
                 subscribed = true
                 this@share.subscribe(
                     object : Subscriber<T> {
@@ -419,12 +416,12 @@ fun <T> Publisher<T>.shareHotAndReplay(count: Int): Publisher<T> {
                 multicastTo.forEach { it.onNext(item) }
                 buffer.addLast(item)
                 // emulate a ring buffer by removing any older entries than `count`
-                for(i in 1..buffer.size - count) {
+                for (i in 1..buffer.size - count) {
                     buffer.removeFirst()
                 }
             }
 
-            override fun onSubscribe(subscription: Subscription) { /* no-op */}
+            override fun onSubscribe(subscription: Subscription) { /* no-op */ }
         }
     )
 
@@ -466,7 +463,7 @@ fun <T> Publisher<T>.shareAndReplay(count: Int): Publisher<T> {
     return object : Publisher<T> {
         override fun subscribe(subscriber: Subscriber<T>) {
             // subscribe to source on initial subscribe.
-            if(!subscribed) {
+            if (!subscribed) {
                 // note that this is not re-entrant without a race condition.
                 subscribed = true
                 this@shareAndReplay.subscribe(
@@ -484,7 +481,7 @@ fun <T> Publisher<T>.shareAndReplay(count: Int): Publisher<T> {
                             multicastTo.forEach { it.onNext(item) }
                             buffer.addLast(item)
                             // emulate a ring buffer by removing any older entries than `count`
-                            for(i in 1..buffer.size - count) {
+                            for (i in 1..buffer.size - count) {
                                 buffer.removeFirst()
                             }
                         }
@@ -521,8 +518,8 @@ fun <T> Publisher<T>.shareAndReplay(count: Int): Publisher<T> {
  *
  * Not thread safe.
  */
-fun <T: Any> Publisher<T>.shareAndReplayTypesOnResubscribe(vararg types: Class<out T>): Publisher<T> {
-    val lastSeen : MutableMap<Class<out T>, T?> = types.associate { Pair(it, null) }.toMutableMap()
+fun <T : Any> Publisher<T>.shareAndReplayTypesOnResubscribe(vararg types: Class<out T>): Publisher<T> {
+    val lastSeen: MutableMap<Class<out T>, T?> = types.associate { Pair(it, null) }.toMutableMap()
 
     val shared = this.share()
 
@@ -542,7 +539,7 @@ fun <T: Any> Publisher<T>.shareAndReplayTypesOnResubscribe(vararg types: Class<o
                         subscriber.onNext(item)
                         // TODO this has a problem: it does not check for descendant classes, it
                         // must be an exact match.
-                        if(lastSeen.keys.contains(item.javaClass)) {
+                        if (lastSeen.keys.contains(item.javaClass)) {
                             lastSeen[item.javaClass] = item
                         }
                     }
@@ -575,7 +572,6 @@ fun <T> Publisher<T>.doOnUnsubscribe(behaviour: () -> Unit): Publisher<T> {
                             behaviour()
                             subscription.cancel()
                         }
-
                     }
                     subscriber.onSubscribe(wrappedSubscription)
                 }
@@ -588,20 +584,19 @@ fun <T> Publisher<T>.doOnUnsubscribe(behaviour: () -> Unit): Publisher<T> {
 
             this@doOnUnsubscribe.subscribe(wrappedSubscriber)
         }
-
     }
 }
 
-interface Subject<T>: Processor<T, T>
+interface Subject<T> : Processor<T, T>
 
 /**
  *
  */
 class PublishSubject<T> : Subject<T> {
-    var subscriber : Subscriber<T>? = null
+    var subscriber: Subscriber<T>? = null
 
     override fun subscribe(subscriber: Subscriber<T>) {
-        if(this.subscriber != null) {
+        if (this.subscriber != null) {
             throw RuntimeException("PublishSubject() already subscribed.  Consider using .share().")
         }
         this.subscriber = subscriber
@@ -690,13 +685,12 @@ fun <T, S> Publisher<T>.takeUntil(stopper: Publisher<S>): Publisher<T> {
                 }
             })
         }
-
     }
 }
 
 sealed class ViewEvent {
-    class Attach: ViewEvent()
-    class Detach: ViewEvent()
+    class Attach : ViewEvent()
+    class Detach : ViewEvent()
 }
 
 /**
@@ -705,7 +699,7 @@ sealed class ViewEvent {
 fun View.attachEvents(): Publisher<ViewEvent> {
     return object : Publisher<ViewEvent> {
         override fun subscribe(subscriber: Subscriber<ViewEvent>) {
-            val listener = object :  View.OnAttachStateChangeListener {
+            val listener = object : View.OnAttachStateChangeListener {
                 override fun onViewDetachedFromWindow(v: View) {
                     subscriber.onNext(ViewEvent.Detach())
                 }
@@ -726,7 +720,7 @@ fun View.attachEvents(): Publisher<ViewEvent> {
 }
 
 fun LifecycleOwner.asPublisher(): Publisher<Lifecycle.Event> {
-    return object: Publisher<Lifecycle.Event> {
+    return object : Publisher<Lifecycle.Event> {
         override fun subscribe(subscriber: Subscriber<Lifecycle.Event>) {
             val observer = object : GenericLifecycleObserver {
                 override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
@@ -767,7 +761,7 @@ fun <T> Publisher<T>.androidLifecycleDispose(lifecycleOwner: LifecycleOwner): Pu
  * specification for a closure, for that you may use this.  See the [asPublisher] documentation for
  * details.
  */
-typealias  CallbackReceiver<T> = (T) -> Unit
+typealias CallbackReceiver<T> = (T) -> Unit
 
 /**
  * This allows you to map a method call that returns a NetworkTask, a convention in the Rover SDK
@@ -790,7 +784,7 @@ fun <T> (((r: T) -> Unit) -> NetworkTask).asPublisher(): Publisher<T> {
     return object : Publisher<T> {
         override fun subscribe(subscriber: Subscriber<T>) {
             val networkTask = this@asPublisher.invoke { result: T ->
-                if(Looper.myLooper() != Looper.getMainLooper()) {
+                if (Looper.myLooper() != Looper.getMainLooper()) {
                     throw RuntimeException("NetworkService did not dispatch result handler to main thread correctly.  Running on thread ${Thread.currentThread()}")
                 }
                 subscriber.onNext(result)
@@ -798,7 +792,7 @@ fun <T> (((r: T) -> Unit) -> NetworkTask).asPublisher(): Publisher<T> {
             }
             val subscription = object : Subscription {
                 override fun cancel() {
-                    if(Looper.myLooper() != Looper.getMainLooper()) {
+                    if (Looper.myLooper() != Looper.getMainLooper()) {
                         throw RuntimeException("NetworkService did not dispatch cancel handler to main thread correctly.  Running on thread ${Thread.currentThread()}")
                     }
                     networkTask.cancel()

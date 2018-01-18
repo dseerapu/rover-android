@@ -17,7 +17,7 @@ import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 
-class RowViewModelSpec: Spek({
+class RowViewModelSpec : Spek({
     given("an autoheight row with stacked blocks") {
         val rowViewModel = RowViewModel(
             ModelFactories

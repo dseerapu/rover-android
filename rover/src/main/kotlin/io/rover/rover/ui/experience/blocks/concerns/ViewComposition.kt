@@ -52,7 +52,6 @@ class ViewComposition : ViewCompositionInterface {
     }
 }
 
-
 interface ViewCompositionInterface {
     /**
      * Execute the given callback against the [Canvas] just before the view's main [draw]

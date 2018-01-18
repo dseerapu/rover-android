@@ -17,7 +17,7 @@ class ViewBlock(
             view.setOnClickListener { viewModel?.click() }
 
             view.setOnTouchListener { _, event ->
-                when(event.action) {
+                when (event.action) {
                     MotionEvent.ACTION_DOWN -> viewModel?.touched()
                     MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> viewModel?.released()
                 }

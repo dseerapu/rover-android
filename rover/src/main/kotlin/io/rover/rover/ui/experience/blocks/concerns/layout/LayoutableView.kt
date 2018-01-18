@@ -11,7 +11,7 @@ import io.rover.rover.ui.experience.concerns.BindableView
  * interface rather than an abstract [View] subclass in order to allow implementers to inherit from
  * various different [View] subclasses.
  */
-interface LayoutableView<VM : LayoutableViewModel>: BindableView<VM> {
+interface LayoutableView<VM : LayoutableViewModel> : BindableView<VM> {
     override var viewModel: VM?
 
     override val view: View

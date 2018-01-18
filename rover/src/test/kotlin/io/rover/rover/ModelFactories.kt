@@ -2,11 +2,9 @@ package io.rover.rover
 
 import io.rover.rover.core.domain.BackgroundContentMode
 import io.rover.rover.core.domain.BackgroundScale
-import io.rover.rover.core.domain.Block
 import io.rover.rover.core.domain.Color
 import io.rover.rover.core.domain.HorizontalAlignment
 import io.rover.rover.core.domain.ID
-import io.rover.rover.core.domain.Image
 import io.rover.rover.core.domain.Insets
 import io.rover.rover.core.domain.Length
 import io.rover.rover.core.domain.Offsets

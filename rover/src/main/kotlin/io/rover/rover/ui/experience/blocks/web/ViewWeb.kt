@@ -5,9 +5,9 @@ import android.webkit.WebViewClient
 
 class ViewWeb(
     private val webView: WebView
-): ViewWebInterface {
+) : ViewWebInterface {
     init {
-        WebView.setWebContentsDebuggingEnabled(true);
+        WebView.setWebContentsDebuggingEnabled(true)
         // Setting an otherwise unconfigured WebViewClient will have the webview navigate (follow
         // links) internally.
         webView.webViewClient = WebViewClient()

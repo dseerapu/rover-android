@@ -20,7 +20,7 @@ import io.rover.rover.ui.experience.navigation.ExperienceNavigationView
 import io.rover.rover.ui.experience.toolbar.ViewExperienceToolbar
 import io.rover.rover.ui.experience.concerns.BindableView
 
-class ExperienceView: CoordinatorLayout, BindableView<ExperienceViewModelInterface> {
+class ExperienceView : CoordinatorLayout, BindableView<ExperienceViewModelInterface> {
     constructor(context: Context?) : super(context)
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
@@ -75,7 +75,7 @@ class ExperienceView: CoordinatorLayout, BindableView<ExperienceViewModelInterfa
             } else 0
         }
 
-    var originalStatusBarColor : Int = 0 // this is set as a side-effect of the attached window
+    var originalStatusBarColor: Int = 0 // this is set as a side-effect of the attached window
 
     private fun connectToolbar(newToolbar: Toolbar) {
         toolbar.whenNotNull { appBarLayout.removeView(it) }
@@ -100,18 +100,18 @@ class ExperienceView: CoordinatorLayout, BindableView<ExperienceViewModelInterfa
 
     override var viewModel: ExperienceViewModelInterface? = null
         set(experienceViewModel) {
-            if(viewModel != null) {
+            if (viewModel != null) {
                 // sadly have to add this invariant because of complexity dealing with the toolbar.
                 // May fix it later as required.
                 throw RuntimeException("ExperienceView does not support being re-bound to a new ExperienceViewModel.")
             }
             field = experienceViewModel
-            val toolbarHost = toolbarHost ?:
-                throw RuntimeException("You must set the ToolbarHost up on ExperienceView before binding the view to a view model.")
+            val toolbarHost = toolbarHost
+                ?: throw RuntimeException("You must set the ToolbarHost up on ExperienceView before binding the view to a view model.")
 
             experienceNavigationView.viewModel = null
 
-            if(experienceViewModel != null) {
+            if (experienceViewModel != null) {
                 experienceViewModel.events.androidLifecycleDispose(this).subscribe({ event ->
                     when (event) {
                         is ExperienceViewModelInterface.Event.ExperienceReady -> {

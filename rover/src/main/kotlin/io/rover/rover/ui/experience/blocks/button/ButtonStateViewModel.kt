@@ -10,7 +10,7 @@ class ButtonStateViewModel(
     val borderViewModel: BorderViewModelInterface,
     val backgroundViewModel: BackgroundViewModelInterface,
     val textViewModel: TextViewModelInterface
-): ButtonStateViewModelInterface,
+) : ButtonStateViewModelInterface,
     BorderViewModelInterface by borderViewModel,
     BackgroundViewModelInterface by backgroundViewModel,
     TextViewModelInterface by textViewModel

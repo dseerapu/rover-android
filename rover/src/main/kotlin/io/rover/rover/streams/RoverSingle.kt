@@ -2,7 +2,7 @@
 
 package io.rover.rover.streams
 
-import java.util.*
+import java.util.Collections
 
 interface SingleSubscription<T> {
     // TODO: technically needs unsubscription support.  but it's not a priority.
@@ -22,7 +22,7 @@ interface Scheduler {
     fun scheduleSideEffectOperation(operation: () -> Unit)
 }
 
-interface SingleSubscriber<T>: SingleSubscription<T> {
+interface SingleSubscriber<T> : SingleSubscription<T> {
     fun onCompleted(value: T)
 
     fun onError(error: Throwable)
@@ -125,11 +125,11 @@ fun <T, M> Single<T>.map(processingScheduler: Scheduler, predicate: (T) -> M): S
 /**
  * An implementation of [SingleSubscriber] that implements maintaining a list of Subscribers.
  */
-open class SinglePublisher<T>: Single<T>, SingleSubscriber<T> {
+open class SinglePublisher<T> : Single<T>, SingleSubscriber<T> {
     private val subscriptions = Collections.synchronizedSet(mutableSetOf<Pair<SingleSubscriber<T>, Scheduler>>())
 
     override fun onCompleted(value: T) {
-        subscriptions.forEach { it.second.scheduleSideEffectOperation { it.first.onCompleted(value) }  }
+        subscriptions.forEach { it.second.scheduleSideEffectOperation { it.first.onCompleted(value) } }
     }
 
     override fun onError(error: Throwable) {

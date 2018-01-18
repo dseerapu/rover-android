@@ -1,6 +1,6 @@
 package io.rover.rover.core.domain
 
-import java.util.*
+import java.util.UUID
 
 sealed class Region {
     data class BeaconRegion(

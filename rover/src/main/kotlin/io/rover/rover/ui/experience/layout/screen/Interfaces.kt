@@ -25,7 +25,7 @@ import io.rover.rover.ui.experience.navigation.NavigateTo
  *
  * Primarily used by [BlockAndRowLayoutManager].
  */
-interface ScreenViewModelInterface: BindableViewModel, BackgroundViewModelInterface {
+interface ScreenViewModelInterface : BindableViewModel, BackgroundViewModelInterface {
     /**
      * Do the computationally expensive operation of laying out the entire graph of UI view models.
      */

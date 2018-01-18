@@ -13,7 +13,6 @@ import io.rover.rover.ui.experience.blocks.concerns.background.ViewBackground
 import io.rover.rover.ui.experience.blocks.concerns.layout.ViewBlock
 import io.rover.rover.ui.experience.blocks.concerns.ViewComposition
 
-
 class WebBlockView : WebView, LayoutableView<WebViewBlockViewModelInterface> {
     constructor(context: Context?) : super(context)
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)

@@ -15,8 +15,7 @@ import org.jetbrains.spek.api.dsl.on
 import java.net.URI
 import java.net.URLDecoder
 
-class ImageOptimizationServiceSpec: Spek({
-
+class ImageOptimizationServiceSpec : Spek({
 
     fun createDisplayMetrics(dpi: Int): DisplayMetrics {
         val mdpi = 160
@@ -317,7 +316,7 @@ class ImageOptimizationServiceSpec: Spek({
 
             val (uri, optimizedConfiguration) = imageOptimizationService.optimizeImageBackground(
                 background,
-                PixelSize(40, 33),  // * 0.3 (480 dp -> 160 dp factor)
+                PixelSize(40, 33), // * 0.3 (480 dp -> 160 dp factor)
                 displayMetrics
             )!!
 
@@ -325,7 +324,6 @@ class ImageOptimizationServiceSpec: Spek({
 
             it("asks imgix for a no-op crop") {
                 decodedParams["rect"].shouldEqual("0,0,120,100")
-
             }
 
             it("asks imgix to scale down by a factor of three ") {
@@ -346,7 +344,7 @@ class ImageOptimizationServiceSpec: Spek({
 
             val (uri, optimizedConfiguration) = imageOptimizationService.optimizeImageBackground(
                 background,
-                PixelSize(33, 33),  // 20 image pixels narrower and then * 0.3 (480 dp -> 160 dp factor)
+                PixelSize(33, 33), // 20 image pixels narrower and then * 0.3 (480 dp -> 160 dp factor)
                 displayMetrics
             )!!
 

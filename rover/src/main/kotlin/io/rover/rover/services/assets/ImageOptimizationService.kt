@@ -13,12 +13,12 @@ import io.rover.rover.ui.types.dpAsPx
 import io.rover.rover.ui.experience.blocks.concerns.background.BackgroundImageConfiguration
 import java.net.URI
 
-class ImageOptimizationService: ImageOptimizationServiceInterface {
+class ImageOptimizationService : ImageOptimizationServiceInterface {
 
     private val urlOptimizationEnabled = true
 
     override fun optimizeImageBackground(background: Background, targetViewPixelSize: PixelSize, displayMetrics: DisplayMetrics): OptimizedImage? {
-        return if(urlOptimizationEnabled) {
+        return if (urlOptimizationEnabled) {
             imageConfigurationOptimizedByImgix(background, targetViewPixelSize, displayMetrics)
         } else {
             localScaleOnlyImageConfiguration(background, targetViewPixelSize, displayMetrics)
@@ -37,7 +37,7 @@ class ImageOptimizationService: ImageOptimizationServiceInterface {
         val imageWidthPx = (appleScalingFactor * backgroundImage.width).toInt()
         val imageHeightPx = (appleScalingFactor * backgroundImage.height).toInt()
 
-        val insets = when(background.backgroundContentMode) {
+        val insets = when (background.backgroundContentMode) {
             BackgroundContentMode.Original -> {
                 // Note: these may go negative for when the image is bigger than the view (ie.,
                 // cropping will be required)
@@ -85,7 +85,6 @@ class ImageOptimizationService: ImageOptimizationServiceInterface {
                 val widthInset = ((targetViewPixelSize.width / 2) - (fitScaledImageWidthPx / 2)).toInt()
                 val heightInset = ((targetViewPixelSize.height / 2) - (fitScaledImageHeightPx / 2)).toInt()
 
-
                 log.v("fitScaleFactor: $fitScaleFactor fitScaledImageWidthPx: $fitScaledImageHeightPx fitScaledImageHeightPx: $fitScaledImageHeightPx")
 
                 Rect(
@@ -97,7 +96,7 @@ class ImageOptimizationService: ImageOptimizationServiceInterface {
             }
         }
 
-        val tileMode = when(background.backgroundContentMode) {
+        val tileMode = when (background.backgroundContentMode) {
             BackgroundContentMode.Tile -> Shader.TileMode.REPEAT
             else -> null
         }
@@ -126,7 +125,7 @@ class ImageOptimizationService: ImageOptimizationServiceInterface {
             backgroundImage.height
         ) * imageDensityScalingFactor
 
-        val (imgixParameters: Map<String, String>, optimizedImageConfiguration) = when(background.backgroundContentMode) {
+        val (imgixParameters: Map<String, String>, optimizedImageConfiguration) = when (background.backgroundContentMode) {
             BackgroundContentMode.Original -> {
                 // Imgix has a mode where I can crop & scale at the same time: apply `rect` and
                 // then `w` and `h` after the fact.
@@ -142,7 +141,7 @@ class ImageOptimizationService: ImageOptimizationServiceInterface {
                     backgroundImage.height - verticalInsetImagePixels
                 )
 
-                val scalingFactor = if(imageDensityScalingFactor > 1) {
+                val scalingFactor = if (imageDensityScalingFactor > 1) {
                     // image will be scaled up locally using the local insets, so do not apply
                     // any scaling on imgix.
                     1f
@@ -202,12 +201,12 @@ class ImageOptimizationService: ImageOptimizationServiceInterface {
                 )
 
                 val fitScaleFactor = minOf(
-                    targetViewPixelSizeAccountingForBorder.width  / imageDimsPx.width.toFloat(),
+                    targetViewPixelSizeAccountingForBorder.width / imageDimsPx.width.toFloat(),
                     targetViewPixelSizeAccountingForBorder.height / imageDimsPx.height.toFloat()
                 )
 
                 val fitScaledImageDims = imageDimsPx * fitScaleFactor
-                val  insets = (targetViewPixelSizeAccountingForBorder / 2) - (fitScaledImageDims / 2)
+                val insets = (targetViewPixelSizeAccountingForBorder / 2) - (fitScaledImageDims / 2)
 
                 Pair(
                     hashMapOf(
@@ -275,7 +274,7 @@ class ImageOptimizationService: ImageOptimizationServiceInterface {
                     // if we have a low-dpi device then we have an opportunity to ask imgix to scale
                     // down the image for us and cut down on the amount of pixels downloaded.
 
-                    if(imageDensityToDeviceDensityRatio < 1) {
+                    if (imageDensityToDeviceDensityRatio < 1) {
                         // image density is lower than the screen, so will need to be scaled up
                         // to match the display (which should be done locally)
                         hashMapOf()
@@ -309,7 +308,6 @@ class ImageOptimizationService: ImageOptimizationServiceInterface {
 
         // Parse with java.net.URI and then use URLEncoder to safely encode the params
 
-
         val uriWithParameters = setQueryParameters(uri, imgixParameters)
 
         return OptimizedImage(
@@ -329,7 +327,7 @@ class ImageOptimizationService: ImageOptimizationServiceInterface {
         targetViewPixelSize: PixelSize,
         displayMetrics: DisplayMetrics
     ): URI? {
-        return if(block.image != null) {
+        return if (block.image != null) {
             val imageSizePixels = PixelSize(
                 block.image.width,
                 block.image.height
@@ -364,7 +362,7 @@ class ImageOptimizationService: ImageOptimizationServiceInterface {
      * Map the 1X, 2X, and 3X background scale values (which are an iOS convention) to DPI values.
      */
     private fun imageDensity(background: Background): Int {
-        return when(background.backgroundScale) {
+        return when (background.backgroundScale) {
             BackgroundScale.X1 -> 160
             BackgroundScale.X2 -> 320
             BackgroundScale.X3 -> 480

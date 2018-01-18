@@ -34,7 +34,7 @@ class AndroidAssetService(
             ioExecutor,
             { synchronousImagePipeline.request(url) },
             { pipelineResult ->
-                when(pipelineResult) {
+                when (pipelineResult) {
                     is PipelineStageResult.Successful -> {
                         mainThreadHandler.post {
                             completionHandler(

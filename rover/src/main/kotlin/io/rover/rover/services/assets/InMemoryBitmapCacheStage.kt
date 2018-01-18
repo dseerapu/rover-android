@@ -45,7 +45,7 @@ class InMemoryBitmapCacheStage(
         override fun create(key: URL): Bitmap {
             this@InMemoryBitmapCacheStage.log.v("Image not available in cache, faulting to next layer.")
             val created = faultTo.request(key)
-            return when(created) {
+            return when (created) {
                 is PipelineStageResult.Failed -> throw UnableToCreateEntryException(created.reason)
                 is PipelineStageResult.Successful -> created.output
             }
@@ -60,5 +60,5 @@ class InMemoryBitmapCacheStage(
         }
     }
 
-    private class UnableToCreateEntryException(val reason: Throwable): Exception(reason)
+    private class UnableToCreateEntryException(val reason: Throwable) : Exception(reason)
 }

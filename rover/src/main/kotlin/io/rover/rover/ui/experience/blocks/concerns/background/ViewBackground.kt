@@ -50,7 +50,7 @@ class ViewBackground(
      * If dimensions are ready (or when they become ready), execute the given callback.
      */
     private fun whenDimensionsReady(callback: DimensionCallback) {
-        if(width == 0 && height == 0) {
+        if (width == 0 && height == 0) {
             log.v("Dimensions aren't ready.  Waiting.")
             dimensionCallbacks.add(callback)
         } else {
@@ -87,7 +87,7 @@ class ViewBackground(
                                 bitmap
                             ).apply {
                                 this.gravity = Gravity.FILL
-                                if(backgroundImageConfiguration.tileMode != null) {
+                                if (backgroundImageConfiguration.tileMode != null) {
                                     tileModeX = backgroundImageConfiguration.tileMode
                                     tileModeY = backgroundImageConfiguration.tileMode
                                 }
@@ -112,7 +112,6 @@ class ViewBackground(
                         }
 
                         view.background = backgroundDrawable
-
                     }.apply { this.whenNotNull { it.resume() } }
                 }
             }
@@ -122,7 +121,7 @@ class ViewBackground(
 class BackgroundColorDrawableWrapper(
     private val backgroundColor: Int,
     private val drawableOnTopOfColor: Drawable
-): DrawableWrapper(drawableOnTopOfColor) {
+) : DrawableWrapper(drawableOnTopOfColor) {
 
     override fun draw(canvas: Canvas) {
         canvas.drawColor(backgroundColor)

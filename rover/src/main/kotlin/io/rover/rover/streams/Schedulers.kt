@@ -10,14 +10,13 @@ import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 
-
 /**
  * Use this scheduler to run an operation on the main thread, receiving a Single<T> that yields the
  * returned value when the operation is complete.
  *
  * This should be a singleton.
  */
-class MainThreadScheduler: Scheduler {
+class MainThreadScheduler : Scheduler {
     // TODO: this should be injected maybe.
     private val looper = Looper.getMainLooper()
 
@@ -59,7 +58,7 @@ class MainThreadScheduler: Scheduler {
  *
  * This should be a singleton.
  */
-class BackgroundExecutorServiceScheduler: Scheduler {
+class BackgroundExecutorServiceScheduler : Scheduler {
     // TODO: set parameters appropriately.
     private val executor = ThreadPoolExecutor(10, 20, 2, TimeUnit.SECONDS, LinkedBlockingQueue<Runnable>())
 

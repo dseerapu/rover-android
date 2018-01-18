@@ -6,9 +6,8 @@ import io.rover.rover.ui.experience.blocks.concerns.layout.BlockViewModelInterfa
 class ButtonBlockViewModel(
     blockViewModel: BlockViewModelInterface,
     buttonViewModel: ButtonViewModelInterface
-): ButtonBlockViewModelInterface,
+) : ButtonBlockViewModelInterface,
     BlockViewModelInterface by blockViewModel,
-    ButtonViewModelInterface by buttonViewModel
-{
+    ButtonViewModelInterface by buttonViewModel {
     override val viewType: ViewType = ViewType.Button
 }

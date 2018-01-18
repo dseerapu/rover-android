@@ -26,7 +26,7 @@ class ViewExperienceAppBar(
     val hostView: View,
     val supportActionBar: ActionBar,
     val hostWindowForStatusBar: Window
-): ViewExperienceAppBarInterface {
+) : ViewExperienceAppBarInterface {
     // This is a bit of a bug because the action bar style (by default) indirects to colorPrimary
     // from the theme.  However, if the developer has directly replaced or changed the action bar
     // style to do something different than the primary colour, than our attempt to use
@@ -52,7 +52,7 @@ class ViewExperienceAppBar(
                     supportActionBar.show()
                     val configuration = event.appBarConfiguration
 
-                    supportActionBar.title = if(configuration.useExistingStyle) {
+                    supportActionBar.title = if (configuration.useExistingStyle) {
                         configuration.appBarText
                     } else {
                         SpannableStringBuilder(configuration.appBarText).apply {
@@ -60,7 +60,7 @@ class ViewExperienceAppBar(
                         }
                     }
 
-                    val actionBarBackgroundColor = if(configuration.useExistingStyle) themeColorPrimary else configuration.color
+                    val actionBarBackgroundColor = if (configuration.useExistingStyle) themeColorPrimary else configuration.color
 
                     supportActionBar.setBackgroundDrawable(
                         ColorDrawable(actionBarBackgroundColor)
@@ -68,7 +68,7 @@ class ViewExperienceAppBar(
 
                     // status bar color only supported on Lollipop and greater.
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        hostWindowForStatusBar.statusBarColor = if(configuration.useExistingStyle) themeColorPrimaryDark else {
+                        hostWindowForStatusBar.statusBarColor = if (configuration.useExistingStyle) themeColorPrimaryDark else {
                             configuration.statusBarColor
                         }
                     }

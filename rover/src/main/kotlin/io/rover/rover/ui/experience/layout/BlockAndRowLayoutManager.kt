@@ -31,7 +31,6 @@ class BlockAndRowLayoutManager(
      */
     private var layout: Layout? = null
 
-
     /**
      * The current scroll position of the recycler view (specifically, the top of the RecyclerView's
      * 'viewport' into the list contents).  This is kept as state because it is
@@ -72,7 +71,7 @@ class BlockAndRowLayoutManager(
 
         val existingLayout = layout
 
-        if(existingLayout == null || existingLayout.width != widthDp) {
+        if (existingLayout == null || existingLayout.width != widthDp) {
             // a layout (re-)pass is needed.
             layout = screenViewModel.render(
                 widthDp
@@ -84,7 +83,7 @@ class BlockAndRowLayoutManager(
         // print a warning if this is a patently unnecessary layout pass.  This is probably caused
         // by a content-bearing view based on a stock Android view triggering an Android layout
         // pass (which under our custom layout regime is unnecessary).
-        if(existingLayout != null && existingLayout.width == widthDp) {
+        if (existingLayout != null && existingLayout.width == widthDp) {
             log.w("Unnecessary layout pass.  Make sure all views are inhibiting requestLayout() and forceLayout().")
         }
     }

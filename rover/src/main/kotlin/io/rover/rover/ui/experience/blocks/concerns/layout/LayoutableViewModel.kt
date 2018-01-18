@@ -11,7 +11,7 @@ import io.rover.rover.ui.experience.concerns.BindableViewModel
  * (View models that do not implement this interface are typically used in a compositional way
  * as a part of other view models that do implement [LayoutableViewModel].
  */
-interface LayoutableViewModel: BindableViewModel {
+interface LayoutableViewModel : BindableViewModel {
     // TODO: in here go parameters common to the display of both Rows and Blocks.  So, possibly,
     // insets, backgrounds, and colours.  Basically, these ViewModels will
     // wrap the [Background] and [Border] model interfaces.

@@ -52,7 +52,7 @@ class ButtonBlockView : FrameLayout, LayoutableView<ButtonBlockViewModelInterfac
 
     @SuppressLint("NewApi")
     fun setupRippleEffect() {
-        if(fauxRippleEffect) textView.elevation = 0f
+        if (fauxRippleEffect) textView.elevation = 0f
 
         // start all the layer views at a low elevation
         disabledView.z = -2f
@@ -76,7 +76,7 @@ class ButtonBlockView : FrameLayout, LayoutableView<ButtonBlockViewModelInterfac
             selectedView.viewModel = buttonBlockViewModel?.viewModelForState(StateOfButton.Selected)
 
             buttonBlockViewModel?.buttonEvents?.subscribe({ event ->
-                when(event) {
+                when (event) {
                     is ButtonViewModelInterface.Event.DisplayState -> {
                         viewText.textViewModel = event.viewModel
 
@@ -86,20 +86,20 @@ class ButtonBlockView : FrameLayout, LayoutableView<ButtonBlockViewModelInterfac
 
                         val sourceView = currentlyActiveView
 
-                        val viewToTransitionTo = when(viewStateBeingTransitionedTo) {
+                        val viewToTransitionTo = when (viewStateBeingTransitionedTo) {
                             StateOfButton.Disabled -> disabledView
                             StateOfButton.Normal -> normalView
                             StateOfButton.Highlighted -> highlightedView
                             StateOfButton.Selected -> selectedView
                         }
 
-                        if(sourceView == null || !viewToTransitionTo.isAttachedToWindow) {
+                        if (sourceView == null || !viewToTransitionTo.isAttachedToWindow) {
                             // no prior state to transition from, or the views are not currently
                             // attached, then no animation is appropriate.
                             viewToTransitionTo.visibility = View.VISIBLE
                             currentlyActiveView = viewToTransitionTo
                         } else {
-                            if(fauxRippleEffect && event.animate) {
+                            if (fauxRippleEffect && event.animate) {
                                 activeAnimator?.end()
 
                                 // ensure the one to transition to is on top because we will reveal
@@ -111,7 +111,7 @@ class ButtonBlockView : FrameLayout, LayoutableView<ButtonBlockViewModelInterfac
 
                                 // all the other views that are not either of the current views in
                                 // operation should be invisible.
-                                allStateLayerViews.filter { it != viewToTransitionTo && it != sourceView}.forEach { it.visibility = View.INVISIBLE }
+                                allStateLayerViews.filter { it != viewToTransitionTo && it != sourceView }.forEach { it.visibility = View.INVISIBLE }
 
                                 // make both visible
                                 sourceView.visibility = View.VISIBLE
@@ -129,7 +129,7 @@ class ButtonBlockView : FrameLayout, LayoutableView<ButtonBlockViewModelInterfac
                                     Math.hypot(width / 2.0, height / 2.0).toFloat()
                                 )
 
-                                val animator = if(event.selfRevert) {
+                                val animator = if (event.selfRevert) {
                                     AnimatorSet().apply {
                                         play(revealOutwards).before(
                                             ViewAnimationUtils.createCircularReveal(
@@ -149,7 +149,7 @@ class ButtonBlockView : FrameLayout, LayoutableView<ButtonBlockViewModelInterfac
                                 // completes or it will simply pop back into view.  Works by
                                 // dead-reckoning the animation time. :(
                                 postDelayed({
-                                    if(activeAnimator == animator) {
+                                    if (activeAnimator == animator) {
                                         if (event.selfRevert) {
                                             viewToTransitionTo.visibility = View.INVISIBLE
                                         } else {
@@ -160,7 +160,7 @@ class ButtonBlockView : FrameLayout, LayoutableView<ButtonBlockViewModelInterfac
 
                                 // TODO: ADDRESS POTENTIAL LEAK ISSUES
                                 animator.start()
-                                if(!event.selfRevert) currentlyActiveView = viewToTransitionTo
+                                if (!event.selfRevert) currentlyActiveView = viewToTransitionTo
                                 activeAnimator = animator
                             } else {
                                 // On older Android versions just snap.

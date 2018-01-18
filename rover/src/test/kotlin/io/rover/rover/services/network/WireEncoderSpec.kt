@@ -36,9 +36,10 @@ import org.json.JSONObject
 import org.skyscreamer.jsonassert.JSONAssert
 import java.net.URI
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Locale
+import java.util.UUID
 
-class WireEncoderSpec: Spek({
+class WireEncoderSpec : Spek({
     given("a wire encoder") {
 
         val dateFormatting = mock<DateFormattingInterface>()

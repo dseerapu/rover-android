@@ -1,7 +1,6 @@
 package io.rover.rover.ui.experience.layout.row
 
 import io.rover.rover.core.domain.Row
-import io.rover.rover.core.logging.log
 import io.rover.rover.streams.Observable
 import io.rover.rover.streams.asPublisher
 import io.rover.rover.streams.filterNulls
@@ -29,9 +28,9 @@ class RowViewModel(
         row.blocks.map { viewModelFactory.viewModelForBlock(it) }
     }
 
-    override val eventSource : Observable<NavigateTo> = blockViewModels.map { blockViewModel ->
+    override val eventSource: Observable<NavigateTo> = blockViewModels.map { blockViewModel ->
         blockViewModel.events.map {
-            when(it) {
+            when (it) {
                 is BlockViewModelInterface.Event.Clicked -> it.navigateTo
                 is BlockViewModelInterface.Event.Touched, is BlockViewModelInterface.Event.Released -> null
             }
@@ -116,7 +115,7 @@ class RowViewModel(
 
             val intersection = rowFrame.intersection(blockFrame)
 
-            if(intersection == null) {
+            if (intersection == null) {
                 // there is no intersection. This means the block is *entirely* outside of the bounds.  An unlikely but not impossible situation.  Clip it entirely.
                 RectF(blockFrame.left, blockFrame.top, blockFrame.left, blockFrame.top)
             } else {

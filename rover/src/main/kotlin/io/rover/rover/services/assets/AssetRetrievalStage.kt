@@ -59,5 +59,4 @@ class AssetRetrievalStage(
 
         return returnStream!!
     }
-
 }

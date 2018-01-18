@@ -18,7 +18,7 @@ class BitmapWarmGpuCacheStage(
             // expensive texture uploads happening in the hot-path of rendering frames on the UI
             // thread. This is also an LRU akin to our InMemoryBitmapCacheStage stage; but in this
             // case Android's framework maintains the LRU itself.
-            when(this) {
+            when (this) {
                 is PipelineStageResult.Successful -> this.output.prepareToDraw()
             }
         }

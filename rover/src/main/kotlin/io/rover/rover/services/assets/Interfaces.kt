@@ -24,8 +24,8 @@ interface SynchronousPipelineStage<in TInput, TOutput> {
 }
 
 sealed class PipelineStageResult<TOutput> {
-    class Successful<TOutput>(val output: TOutput): PipelineStageResult<TOutput>()
-    class Failed<TOutput>(val reason: Throwable): PipelineStageResult<TOutput>() {}
+    class Successful<TOutput>(val output: TOutput) : PipelineStageResult<TOutput>()
+    class Failed<TOutput>(val reason: Throwable) : PipelineStageResult<TOutput>()
 }
 
 interface AssetService {

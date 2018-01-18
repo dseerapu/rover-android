@@ -2,7 +2,7 @@
 
 package io.rover.rover.platform
 
-import java.util.*
+import java.util.UUID
 
 interface DeviceIdentificationInterface {
     val installationIdentifier: String

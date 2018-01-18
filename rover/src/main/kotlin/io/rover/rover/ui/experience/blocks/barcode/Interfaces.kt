@@ -13,7 +13,7 @@ interface ViewBarcodeInterface {
     var barcodeViewModel: BarcodeViewModelInterface?
 }
 
-interface BarcodeViewModelInterface: Measurable, LayoutPaddingDeflection {
+interface BarcodeViewModelInterface : Measurable, LayoutPaddingDeflection {
     val barcodeType: BarcodeType
 
     val barcodeValue: String

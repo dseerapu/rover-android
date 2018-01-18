@@ -112,7 +112,6 @@ fun Length.Companion.decodeJson(json: JSONObject): Length {
     )
 }
 
-
 fun Length.encodeJson(): JSONObject {
     return JSONObject().apply {
         putProp(this@encodeJson, Length::unit) { it.wireFormat }
