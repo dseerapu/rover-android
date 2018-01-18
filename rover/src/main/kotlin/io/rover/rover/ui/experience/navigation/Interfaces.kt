@@ -39,21 +39,6 @@ interface ExperienceNavigationViewModelInterface : BindableViewModel {
             val animate: Boolean
         ): Event()
 
-//        data class GoForwardToScreen(
-//            val screenViewModel: ScreenViewModelInterface
-//        ): Event()
-//
-//        data class GoBackwardToScreen(
-//            val screenViewModel: ScreenViewModelInterface
-//        ): Event()
-//
-//        /**
-//         * This event signifies that the view should immediately display the given view model.
-//         */
-//        data class WarpToScreen(
-//            val screenViewModel: ScreenViewModelInterface
-//        ): Event()
-
         data class ViewEvent(
             val event: ExperienceExternalNavigationEvent
         ): Event()

@@ -64,6 +64,16 @@ interface ExperienceViewModelInterface: BindableViewModel {
     val state: Parcelable
 }
 
+/**
+ * Construct and provide view model instances for the given parameters.  May implement singleton &
+ * caching behaviour for some of them.
+ *
+ * You can use override or delegate to our implementation [ViewModelFactory] in order to return
+ * custom implementations of given view models in order to extend behaviour.
+ *
+ * This can be passed into constructors of view models so they can lazily create other view models,
+ * particularly if such creation is data driven.
+ */
 interface ViewModelFactoryInterface {
     fun viewModelForExperienceNavigation(experience: Experience, icicle: Parcelable?): ExperienceNavigationViewModelInterface
 

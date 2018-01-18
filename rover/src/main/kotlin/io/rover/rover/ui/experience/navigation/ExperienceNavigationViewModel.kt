@@ -212,6 +212,7 @@ class ExperienceNavigationViewModel(
                 .experienceToolbarViewModel
                 .toolbarEvents
                 .subscribe { toolbarEvent ->
+                    // subscribe to the events from the toolbar and dispatch them
                     actions.onNext(
                         when(toolbarEvent) {
                             is ExperienceToolbarViewModelInterface.Event.PressedBack -> Action.PressedBack()
@@ -221,17 +222,17 @@ class ExperienceNavigationViewModel(
                 }
         }
 
-        // and subscribe to the events from the toolbar and dispatch them
-
         event
     }.map {
         log.v("Event: $it")
         it
     }.share()
 
-
     override val events: Observable<ExperienceNavigationViewModelInterface.Event> = epic.shareAndReplayTypesOnResubscribe(
-        // TODO oh shit.  GoToScreen would retain its animation values.  it needs to be transformed.
+        // So, GoToScreen will retain its animation values.  it needs to be transformed.  However,
+        // because in the event of a re-subscribe it is very likely that the
+        // ExperienceNavigationView is new and has no current view, in which case it defaults to no
+        // animation anyway.
         ExperienceNavigationViewModelInterface.Event.GoToScreen::class.java,
         ExperienceNavigationViewModelInterface.Event.SetActionBar::class.java,
         ExperienceNavigationViewModelInterface.Event.SetBacklightBoost::class.java

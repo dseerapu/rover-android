@@ -49,6 +49,11 @@ class ViewModelFactory(
     private val imageOptimizationService: ImageOptimizationServiceInterface,
     private val networkService: NetworkServiceInterface
 ) : ViewModelFactoryInterface {
+    /**
+     * We'll cache the experience view models.  We don't need to worry about caching the others,
+     * though: ExperienceViewModel itself is the start of the whole tree, and it will hold the rest.
+     */
+    private val cachedExperienceViewModels: MutableMap<String, ExperienceViewModelInterface> = hashMapOf()
 
     override fun viewModelForBlock(block: Block): BlockViewModelInterface {
         return when (block) {
@@ -154,12 +159,16 @@ class ViewModelFactory(
     }
 
     override fun viewModelForExperience(experienceId: String, icicle: Parcelable?): ExperienceViewModelInterface {
-        return ExperienceViewModel(
-            experienceId,
-            networkService,
-            this,
-            icicle
-        )
+        // Experience view models are singletons: ie., only one for each given experience. return a
+        // cached live instance if we already have one, or recreate it from state if needed.
+        return cachedExperienceViewModels.getOrPut(experienceId) {
+            ExperienceViewModel(
+                experienceId,
+                networkService,
+                this,
+                icicle
+            )
+        }
     }
 
     override fun viewModelForExperienceToolbar(toolbarConfiguration: ToolbarConfiguration): ExperienceToolbarViewModelInterface {

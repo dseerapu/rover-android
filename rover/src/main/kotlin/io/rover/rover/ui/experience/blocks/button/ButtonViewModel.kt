@@ -15,8 +15,8 @@ class ButtonViewModel(
 ) : ButtonViewModelInterface {
     private val normalStateViewModel = viewModelFactory.viewModelForButtonState(block.normal)
     private val disabledStateViewModel = viewModelFactory.viewModelForButtonState(block.disabled)
-    private val highlightedStateViewModel = viewModelFactory.viewModelForButtonState(block.highlighted.copy(backgroundColor = Color(0xff, 0, 0, 1.0)))
-    private val selectedStateViewModel = viewModelFactory.viewModelForButtonState(block.selected.copy(backgroundColor = Color(0, 0xff, 0, 1.0)))
+    private val highlightedStateViewModel = viewModelFactory.viewModelForButtonState(block.highlighted)
+    private val selectedStateViewModel = viewModelFactory.viewModelForButtonState(block.selected)
 
     private val epic = blockViewModel
         .events

@@ -63,11 +63,10 @@ class BlockAndRowLayoutManager(
     override fun onLayoutChildren(recycler: RecyclerView.Recycler, state: RecyclerView.State) {
         log.d("Expensive onLayoutChildren() called.")
 
-        // call the expensive operation of having the screen view model (and nested view models)
-        // lay out all of their view models into an abstract representation of their positions on the
+        // call the expensive operation of having the screen view model (and nested view models) lay
+        // out all of their view models into an abstract representation of their positions on the
         // display.  This also flattens out all the rows and blocks into a single dimensional
-        // sequence.
-        // We then persist this as in-memory state
+        // sequence. We then persist this as in-memory state for fast iteration by fill().
 
         val widthDp = this.width.pxAsDp(displayMetrics)
 

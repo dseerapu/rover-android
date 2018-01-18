@@ -36,10 +36,7 @@ class RowViewModel(
                 is BlockViewModelInterface.Event.Touched, is BlockViewModelInterface.Event.Released -> null
             }
         }.filterNulls()
-    }.asPublisher().flatMap { it }.share().map {
-        log.v("Row event: $it")
-        it
-    }
+    }.asPublisher().flatMap { it }.share()
 
     /**
      * Returns the position (with origin being the bounds) that this view model should

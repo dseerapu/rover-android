@@ -93,8 +93,9 @@ class ButtonBlockView : FrameLayout, LayoutableView<ButtonBlockViewModelInterfac
                             StateOfButton.Selected -> selectedView
                         }
 
-                        if(sourceView == null) {
-                            // no prior state to transition from, no animation is appropriate.
+                        if(sourceView == null || !viewToTransitionTo.isAttachedToWindow) {
+                            // no prior state to transition from, or the views are not currently
+                            // attached, then no animation is appropriate.
                             viewToTransitionTo.visibility = View.VISIBLE
                             currentlyActiveView = viewToTransitionTo
                         } else {
