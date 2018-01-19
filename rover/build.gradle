@@ -104,3 +104,19 @@ task ktlintFormat(type: JavaExec, group: "formatting") {
     main = "com.github.shyiko.ktlint.Main"
     args "--android", "-F", "src/**/*.kt"
 }
+
+
+task shadeExternalLibraries(type: Exec, group: "build") {
+    description("Download and prepare external libraries for being shaded into the build")
+    // we have one external (and non-Android Support) dependency, and that is
+    // the ZXing barcode library.  We do not want to depend on it as a
+    // transitive dependency, inflicting potential for conflicts for customers
+    // interating the Rover SDK, so we bundle an inline copy.  It's decently
+    // big, however, so to avoid checking it into our repo we download it, unzip
+    // it, and replace all of the package and import directives to nest it
+    // inside of our own namespace.  While shading gradle plugins do exist, they
+    // are unreliable and barely maintained.
+    workingDir '..'
+    commandLine 'bash', 'shade_external_libraries.sh'
+}
+assemble.dependsOn shadeExternalLibraries

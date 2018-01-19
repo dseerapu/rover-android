@@ -5,6 +5,11 @@ export ZXING_SOURCE=https://github.com/zxing/zxing/archive/zxing-3.3.1.zip
 set -x
 set -e
 
+if [ -d "rover/src/main/java/io/rover/shaded/zxing" ]; then
+    echo "ZXing library already fetched and shaded into the build.  Skipping."
+    exit
+fi
+
 mkdir -p shade/bits
 
 curl -C - -L $ZXING_SOURCE -o shade/bits/zxing.zip 
