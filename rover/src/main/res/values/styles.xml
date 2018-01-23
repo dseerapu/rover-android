@@ -1,0 +1,12 @@
+<resources>
+
+    <!-- A blank, simple theme to disable the action bar so the Rover Experiences view can display its own toolbar.
+       However, it will have default Android colours, and not your brand colours.  As per the documentation, please
+       consider setting a theme for StandaloneExperienceHostActivity in your AndroidManifest.xml. -->
+    <style name="EmptyThemeToDisableActionBar" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="displayNoCustomThemeWarningMessage">true</item>
+    </style>
+
+</resources>

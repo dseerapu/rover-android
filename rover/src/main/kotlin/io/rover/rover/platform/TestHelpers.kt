@@ -2,11 +2,11 @@
 
 package io.rover.rover.platform
 
-import io.rover.rover.core.domain.DeviceState
-import io.rover.rover.core.domain.Event
-import io.rover.rover.core.domain.Experience
-import io.rover.rover.services.network.WireEncoder
-import io.rover.rover.services.network.requests.data.encodeJson
+import io.rover.rover.plugins.data.domain.DeviceState
+import io.rover.rover.plugins.data.domain.Event
+import io.rover.rover.plugins.data.domain.Experience
+import io.rover.rover.plugins.data.WireEncoder
+import io.rover.rover.plugins.data.requests.data.encodeJson
 import org.json.JSONObject
 
 // Android's build system (or perhaps the Kotlin compiler) recently changed to apparently not allow
