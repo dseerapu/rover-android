@@ -68,7 +68,7 @@ interface ExperienceViewModelInterface : BindableViewModel {
  * Construct and provide view model instances for the given parameters.  May implement singleton &
  * caching behaviour for some of them.
  *
- * You can use override or delegate to our implementation [ViewModelFactory] in order to return
+ * You can use override or delegate to our implementation [StockViewModelFactory] in order to return
  * custom implementations of given view models in order to extend behaviour.
  *
  * This can be passed into constructors of view models so they can lazily create other view models,

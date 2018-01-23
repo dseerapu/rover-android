@@ -1,11 +1,15 @@
 package io.rover.rover.plugins.data
 
+import android.content.Context
 import io.rover.rover.DataPluginComponents
 import io.rover.rover.core.container.Assembler
 import io.rover.rover.core.container.Container
 import io.rover.rover.platform.DateFormatting
 import io.rover.rover.platform.DateFormattingInterface
+import io.rover.rover.platform.DeviceIdentification
 import io.rover.rover.platform.DeviceIdentificationInterface
+import io.rover.rover.platform.LocalStorage
+import io.rover.rover.platform.SharedPreferencesLocalStorage
 import java.net.URL
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.ThreadPoolExecutor
@@ -25,7 +29,8 @@ data class ServerKey(
 // TODO: should the assembler provide an instance of what is currently called DataPluginComponents (and rename
 // it to DataPluginComponents or similar)?
 class LiveDataPluginComponents(
-    serverKey: ServerKey
+    serverKey: ServerKey,
+    applicationContext: Context
 ): DataPluginComponents {
     override val authenticationContext: AuthenticationContext = serverKey
 
@@ -53,19 +58,26 @@ class LiveDataPluginComponents(
         )
     }
 
-    override val deviceIdentification: DeviceIdentificationInterface
-        get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
+    override val deviceIdentification: DeviceIdentificationInterface by lazy {
+        DeviceIdentification(localStorage)
+    }
+
+    private val localStorage: LocalStorage by lazy {
+        SharedPreferencesLocalStorage(applicationContext)
+    }
 }
 
 open class DataPluginAssembler(
-    private val sdkKey: String
+    private val sdkKey: String,
+    private val applicationContext: Context
 ) : Assembler {
     override fun register(container: Container) {
-        container.register(DataPlugin::class.java) { resolver ->
+        container.register(DataPluginInterface::class.java) { resolver ->
             DataPlugin(
-                URL("https://api.rover.io"),
+                URL("https://api.rover.io/graphql"),
                 LiveDataPluginComponents(
-                    ServerKey(sdkKey)
+                    ServerKey(sdkKey),
+                    applicationContext
                 )
             )
         }

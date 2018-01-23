@@ -10,6 +10,7 @@ import android.view.Menu
 import com.facebook.stetho.urlconnection.ByteArrayRequestEntity
 import com.facebook.stetho.urlconnection.StethoURLConnectionManager
 import io.rover.rover.R
+import io.rover.rover.Rover
 import io.rover.rover.core.logging.log
 import io.rover.rover.platform.DateFormatting
 import io.rover.rover.platform.DeviceIdentification
@@ -27,7 +28,7 @@ import io.rover.rover.plugins.data.WireEncoder
 import io.rover.rover.core.streams.subscribe
 import io.rover.rover.plugins.userexperience.AndroidMeasurementService
 import io.rover.rover.plugins.userexperience.experience.blocks.concerns.text.AndroidRichTextToSpannedTransformer
-import io.rover.rover.plugins.userexperience.experience.ViewModelFactory
+import io.rover.rover.plugins.userexperience.experience.StockViewModelFactory
 import io.rover.rover.plugins.userexperience.experience.navigation.ExperienceExternalNavigationEvent
 import io.rover.rover.plugins.userexperience.experience.ExperienceViewModelInterface
 import io.rover.rover.plugins.userexperience.experience.ExperienceView
@@ -51,9 +52,6 @@ class StandaloneExperienceHostActivity : AppCompatActivity() {
 
     // probably offer the dynamically set method as an activity argument or something.
 
-    private val authToken
-        get() = this.intent.getStringExtra("SDK_TOKEN") ?: throw RuntimeException("General Rover SDK configuration not yet available; please pass SDK_TOKEN intent argument.")
-
     private val experienceId
         get() = this.intent.getStringExtra("EXPERIENCE_ID") ?: throw RuntimeException("Please pass EXPERIENCE_ID.")
 
@@ -61,60 +59,14 @@ class StandaloneExperienceHostActivity : AppCompatActivity() {
     // private val experiencesView by lazy { ScreenView(this) }
     private val experiencesView by lazy { ExperienceView(this) }
 
-    // TODO: somehow share this properly
-    private val roverSdkNetworkService by lazy {
-        DataPlugin(
-            // "6c546189dc45df1293bddc18c0b54786"
-            object : AuthenticationContext {
-                override val bearerToken: String?
-                    get() = null
-
-                override val sdkToken: String?
-                    get() = this@StandaloneExperienceHostActivity.authToken
-            },
-            URL("https://api.rover.io/graphql"),
-            networkClient,
-            DeviceIdentification(
-                SharedPreferencesLocalStorage(applicationContext)
-            ),
-            WireEncoder(DateFormatting()),
-            null
-        ) as DataPluginInterface
+    private val dataPlugin by lazy {
+        Rover.sharedInstance.dataPlugin
     }
 
-    private val networkClient by lazy {
-        // side-effect: set up global HttpsUrlConnection cache, as required by all Rover SDK
-        // consuming apps.
-        AsyncTaskAndHttpUrlConnectionNetworkClient.installSaneGlobalHttpCacheCache(this)
-
-        AsyncTaskAndHttpUrlConnectionNetworkClient().apply {
-            registerInterceptor(
-                StethoRoverInterceptor()
-            )
-        }
+    private val userExperiencePlugin by lazy {
+        Rover.sharedInstance.userExperiencePlugin
     }
 
-    private val ioExecutor by lazy {
-        ThreadPoolExecutor(
-            10,
-            Runtime.getRuntime().availableProcessors() * 20,
-            2,
-            TimeUnit.SECONDS,
-            LinkedBlockingQueue<Runnable>()
-        )
-    }
-
-    private val blockViewModelFactory by lazy {
-        ViewModelFactory(
-            AndroidMeasurementService(resources.displayMetrics, AndroidRichTextToSpannedTransformer()),
-            AndroidAssetService(
-                networkClient,
-                ioExecutor
-            ),
-            ImageOptimizationService(),
-            roverSdkNetworkService
-        )
-    }
 
     // private var viewExperienceAppBar : ViewExperienceAppBarInterface? = null
 
@@ -193,9 +145,7 @@ class StandaloneExperienceHostActivity : AppCompatActivity() {
 
         // i left off here. options menu?
 
-        experienceViewModel = blockViewModelFactory.viewModelForExperience(
-            experienceId, savedInstanceState?.getParcelable("experienceState")
-        )
+        experienceViewModel = userExperiencePlugin.viewModelForExperience(experienceId, savedInstanceState?.getParcelable("experienceState"))
     }
 
     /**
@@ -220,11 +170,10 @@ class StandaloneExperienceHostActivity : AppCompatActivity() {
 
     companion object {
         @JvmStatic
-        fun makeIntent(packageContext: Context, authToken: String, experienceId: String): Intent {
+        fun makeIntent(packageContext: Context, experienceId: String): Intent {
             // TODO: token will be removed when this starts to depend on a static-context
             // Rover injection tree that user will have set up in their Application.onCreate().
             return Intent(packageContext, StandaloneExperienceHostActivity::class.java).apply {
-                putExtra("SDK_TOKEN", authToken)
                 putExtra("EXPERIENCE_ID", experienceId)
             }
         }

@@ -10,7 +10,7 @@ import java.net.URL
 import java.util.concurrent.Executor
 
 class AndroidAssetService(
-    networkClient: NetworkClient,
+    imageDownloader: ImageDownloader,
     private val ioExecutor: Executor
 ) : AssetService {
     private val mainThreadHandler = Handler(Looper.getMainLooper())
@@ -19,7 +19,7 @@ class AndroidAssetService(
         InMemoryBitmapCacheStage(
             DecodeToBitmapStage(
                 AssetRetrievalStage(
-                    networkClient
+                    imageDownloader
                 )
             )
         )

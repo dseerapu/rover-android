@@ -21,10 +21,13 @@ interface DataPluginComponents {
     val deviceIdentification: DeviceIdentificationInterface
 
     val dateFormatting: DateFormattingInterface
+
+    // TODO: strip out the items from the interface that are not directly exposed to the
+    // LiveDataPlugin itself, or that should not be extendable/replacable by the customer.
 }
 
-interface UserExperiencePlugin {
-    val viewModelFactory: ViewModelFactoryInterface
+interface UserExperiencePluginComponents {
+    val stockViewModelFactory: ViewModelFactoryInterface
 
     val measurementService: MeasurementService
 }

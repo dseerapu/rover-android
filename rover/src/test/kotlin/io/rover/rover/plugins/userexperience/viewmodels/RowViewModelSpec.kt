@@ -6,7 +6,7 @@ import io.rover.rover.plugins.data.domain.Length
 import io.rover.rover.plugins.data.domain.Position
 import io.rover.rover.plugins.data.domain.UnitOfMeasure
 import io.rover.rover.plugins.data.domain.VerticalAlignment
-import io.rover.rover.plugins.userexperience.experience.ViewModelFactory
+import io.rover.rover.plugins.userexperience.experience.StockViewModelFactory
 import io.rover.rover.plugins.userexperience.experience.blocks.rectangle.RectangleBlockViewModelInterface
 import io.rover.rover.plugins.userexperience.experience.layout.row.RowViewModel
 import io.rover.rover.plugins.userexperience.types.RectF
@@ -38,7 +38,7 @@ class RowViewModelSpec : Spek({
                         )
                     )
                 ),
-            ViewModelFactory(mock(), mock(), mock(), mock()),
+            StockViewModelFactory(mock(), mock(), mock(), mock()),
             mock()
         )
 
@@ -121,7 +121,7 @@ class RowViewModelSpec : Spek({
                         )
                     )
                 ),
-            ViewModelFactory(mock(), mock(), mock(), mock()),
+            StockViewModelFactory(mock(), mock(), mock(), mock()),
             mock()
         )
 
@@ -168,7 +168,7 @@ class RowViewModelSpec : Spek({
                         )
                     )
                 ),
-            ViewModelFactory(mock(), mock(), mock(), mock()),
+            StockViewModelFactory(mock(), mock(), mock(), mock()),
             mock()
         )
 
@@ -222,7 +222,7 @@ class RowViewModelSpec : Spek({
                             )
                         )
                     ),
-                ViewModelFactory(mock(), mock(), mock(), mock()),
+                StockViewModelFactory(mock(), mock(), mock(), mock()),
                 mock()
             )
         }

@@ -43,7 +43,12 @@ import io.rover.rover.plugins.userexperience.experience.blocks.concerns.text.Tex
 import io.rover.rover.plugins.userexperience.experience.blocks.web.WebViewBlockViewModel
 import io.rover.rover.plugins.userexperience.experience.blocks.web.WebViewModel
 
-class ViewModelFactory(
+/**
+ * Constructs the standard versions of the view models for all the given Experience blocks.
+ *
+ * If you wish to override the View Model creation behaviour, please see [UserExperiencePlugin].
+ */
+class StockViewModelFactory(
     private val measurementService: MeasurementService,
     private val assetService: AssetService,
     private val imageOptimizationService: ImageOptimizationServiceInterface,
