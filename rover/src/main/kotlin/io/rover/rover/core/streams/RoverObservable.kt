@@ -10,6 +10,7 @@ import android.view.View
 import io.rover.rover.plugins.data.NetworkTask
 import java.util.ArrayDeque
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.CountDownLatch
 
 interface Subscription {
     fun cancel()
@@ -170,7 +171,11 @@ interface Processor<T, R> : Subscriber<T>, Publisher<R>
 
 typealias Observable<T> = Publisher<T>
 
-fun <T> Publisher<T>.subscribe(onNext: (item: T) -> Unit, onError: (throwable: Throwable) -> Unit, subscriptionReceiver: ((Subscription) -> Unit)? = null) {
+fun <T> Publisher<T>.subscribe(
+    onNext: (item: T) -> Unit,
+    onError: (throwable: Throwable) -> Unit,
+    subscriptionReceiver: ((Subscription) -> Unit)? = null
+) {
     this.subscribe(object : Subscriber<T> {
         override fun onComplete() { }
 
@@ -805,3 +810,40 @@ fun <T> (((r: T) -> Unit) -> NetworkTask).asPublisher(): Publisher<T> {
 }
 
 // TODO fun <T> Publisher<T>.observeOn() { }
+
+/**
+ * Block the thread waiting for the given.
+ *
+ *
+ */
+fun <T> Publisher<T>.blockForResult(): List<T> {
+    val latch = CountDownLatch(1)
+    var receivedError: Throwable? = null
+    val results : MutableList<T> = mutableListOf()
+
+    this.subscribe(object : Subscriber<T> {
+        override fun onComplete() {
+
+            latch.countDown()
+        }
+
+        override fun onError(error: Throwable) {
+            receivedError = error
+            latch.countDown()
+        }
+
+        override fun onNext(item: T) {
+            results.add(item)
+        }
+
+        override fun onSubscribe(subscription: Subscription) { /* no-op */ }
+    })
+
+    latch.await()
+
+    if(receivedError != null) {
+        throw Exception("Error while blocking on Publisher.", receivedError)
+    }
+
+    return results
+}

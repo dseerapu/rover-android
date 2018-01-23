@@ -4,8 +4,8 @@ import android.graphics.Bitmap
 import android.util.DisplayMetrics
 import io.rover.rover.plugins.data.domain.Background
 import io.rover.rover.core.logging.log
-import io.rover.rover.plugins.assets.AssetService
-import io.rover.rover.plugins.assets.ImageOptimizationServiceInterface
+import io.rover.rover.plugins.userexperience.assets.AssetService
+import io.rover.rover.plugins.userexperience.assets.ImageOptimizationServiceInterface
 import io.rover.rover.plugins.data.NetworkResult
 import io.rover.rover.plugins.data.NetworkTask
 import io.rover.rover.plugins.userexperience.types.PixelSize

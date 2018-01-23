@@ -12,8 +12,8 @@ import io.rover.rover.plugins.data.domain.Row
 import io.rover.rover.plugins.data.domain.Screen
 import io.rover.rover.plugins.data.domain.TextBlock
 import io.rover.rover.plugins.data.domain.WebViewBlock
-import io.rover.rover.plugins.assets.AssetService
-import io.rover.rover.plugins.assets.ImageOptimizationServiceInterface
+import io.rover.rover.plugins.userexperience.assets.AssetService
+import io.rover.rover.plugins.userexperience.assets.ImageOptimizationServiceInterface
 import io.rover.rover.plugins.data.DataPluginInterface
 import io.rover.rover.plugins.userexperience.MeasurementService
 import io.rover.rover.plugins.userexperience.experience.toolbar.ToolbarConfiguration

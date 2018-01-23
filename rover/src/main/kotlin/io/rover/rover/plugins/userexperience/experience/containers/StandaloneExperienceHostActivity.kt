@@ -15,8 +15,8 @@ import io.rover.rover.platform.DateFormatting
 import io.rover.rover.platform.DeviceIdentification
 import io.rover.rover.platform.SharedPreferencesLocalStorage
 import io.rover.rover.platform.asAndroidUri
-import io.rover.rover.plugins.assets.AndroidAssetService
-import io.rover.rover.plugins.assets.ImageOptimizationService
+import io.rover.rover.plugins.userexperience.assets.AndroidAssetService
+import io.rover.rover.plugins.userexperience.assets.ImageOptimizationService
 import io.rover.rover.plugins.data.AsyncTaskAndHttpUrlConnectionInterception
 import io.rover.rover.plugins.data.AsyncTaskAndHttpUrlConnectionInterceptor
 import io.rover.rover.plugins.data.AsyncTaskAndHttpUrlConnectionNetworkClient

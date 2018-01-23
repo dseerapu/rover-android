@@ -1,4 +1,4 @@
-package io.rover.rover.plugins.assets
+package io.rover.rover.plugins.userexperience.assets
 
 import android.graphics.Shader
 import android.util.DisplayMetrics

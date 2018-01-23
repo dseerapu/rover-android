@@ -58,7 +58,7 @@ class AsyncTaskAndHttpUrlConnectionNetworkClient : NetworkClient {
 
                     // TODO: exception message should refer to a façade method once we have one
                     throw RuntimeException("An HTTPUrlConnection cache is not enabled.\n" +
-                        "Please see the Rover documentation and the Google documentation: https://developer.android.com/reference/android/net/http/HttpResponseCache.html\n" +
+                        "Please see the Rover documentation for the Data Plugin and the Google documentation: https://developer.android.com/reference/android/net/http/HttpResponseCache.html\n" +
                         "As a quick fix you may call io.rover.rover.network.AsyncTaskAndHttpUrlConnectionNetworkClient.installSaneGlobalHttpCacheCache()")
                 }
 
@@ -127,12 +127,16 @@ class AsyncTaskAndHttpUrlConnectionNetworkClient : NetworkClient {
                     else -> {
                         // we don't support handling redirects as anything other than an onError for now.
                         try {
-                            HttpClientResponse.ApplicationError(
+                            val stream = BufferedInputStream(
+                                intercepted?.sniffStream(connection.errorStream) ?: connection.errorStream
+                            ).reader(Charsets.UTF_8)
+                            val result = HttpClientResponse.ApplicationError(
                                 responseCode,
-                                BufferedInputStream(
-                                    intercepted?.sniffStream(connection.errorStream) ?: connection.errorStream
-                                ).reader(Charsets.UTF_8).readText()
+                                stream.readText()
                             )
+                            stream.close()
+                            connection.disconnect()
+                            result
                         } catch (e: IOException) {
                             HttpClientResponse.ConnectionFailure(
                                 e

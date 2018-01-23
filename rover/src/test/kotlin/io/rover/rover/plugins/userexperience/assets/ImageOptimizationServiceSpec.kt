@@ -1,4 +1,4 @@
-package io.rover.rover.plugins.assets
+package io.rover.rover.plugins.userexperience.assets
 
 import android.util.DisplayMetrics
 import io.rover.rover.plugins.data.domain.Background

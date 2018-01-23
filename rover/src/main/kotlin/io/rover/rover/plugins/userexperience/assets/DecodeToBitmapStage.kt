@@ -1,4 +1,4 @@
-package io.rover.rover.plugins.assets
+package io.rover.rover.plugins.userexperience.assets
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -23,7 +23,14 @@ class DecodeToBitmapStage(
         // SynchronousPipelineStage's documentation. If it proves problematic we can offload it to
         // another worker.
         return when (stream) {
-            is PipelineStageResult.Successful -> PipelineStageResult.Successful(BitmapFactory.decodeStream(stream.output))
+            is PipelineStageResult.Successful -> {
+                val result = PipelineStageResult.Successful(BitmapFactory.decodeStream(
+                    stream.output
+                ))
+                // TODO do I need to close the stream myself, or will decodeStream() do it?
+                stream.output.close()
+                result
+            }
             is PipelineStageResult.Failed -> PipelineStageResult.Failed(stream.reason)
         }
     }

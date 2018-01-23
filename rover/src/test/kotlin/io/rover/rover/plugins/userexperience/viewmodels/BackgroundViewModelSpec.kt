@@ -1,6 +1,6 @@
 package io.rover.rover.plugins.userexperience.viewmodels
 
-import io.rover.rover.plugins.assets.AssetService
+import io.rover.rover.plugins.userexperience.assets.AssetService
 import org.amshove.kluent.mock
 import org.jetbrains.spek.api.Spek
 
