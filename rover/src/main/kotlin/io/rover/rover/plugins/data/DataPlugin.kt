@@ -2,7 +2,6 @@ package io.rover.rover.plugins.data
 
 import android.os.Handler
 import android.os.Looper
-import io.rover.rover.DataPluginComponents
 import io.rover.rover.plugins.data.domain.Context
 import io.rover.rover.plugins.data.domain.DeviceState
 import io.rover.rover.plugins.data.domain.Event
@@ -15,13 +14,8 @@ import java.io.IOException
 import java.net.URL
 
 class DataPlugin(
-//    private val authenticationContext: AuthenticationContext,
     private val endpoint: URL,
-//    private val client: NetworkClient,
-//    private val deviceIdentification: DeviceIdentificationInterface,
-//    private val wireEncoder: WireEncoderInterface,
-//    override var profileIdentifier: String?
-    private val components: DataPluginComponents
+    private val components: DataPluginComponentsInterface
 ) : DataPluginInterface {
 
     private val mainThreadHandler = Handler(Looper.getMainLooper())

@@ -2,12 +2,15 @@
 
 package io.rover.rover.plugins.data
 
+import io.rover.rover.platform.DateFormattingInterface
+import io.rover.rover.platform.DeviceIdentificationInterface
 import io.rover.rover.plugins.data.domain.Context
 import io.rover.rover.plugins.data.domain.DeviceState
 import io.rover.rover.plugins.data.domain.Event
 import io.rover.rover.plugins.data.domain.Experience
 import io.rover.rover.plugins.data.domain.ID
 import org.json.JSONObject
+import java.util.concurrent.Executor
 
 /**
  * Rover GraphQL API-flavored network response.
@@ -114,3 +117,20 @@ interface DataPluginInterface {
 class APIException(
     val errors: List<Exception>
 ) : Exception("Rover API reported: ${errors.map { it.message }.joinToString(", ")}")
+
+interface DataPluginComponentsInterface {
+    val authenticationContext: AuthenticationContext
+
+    val networkClient: NetworkClient
+
+    val wireEncoder: WireEncoderInterface
+
+    val ioExecutor: Executor
+
+    val deviceIdentification: DeviceIdentificationInterface
+
+    val dateFormatting: DateFormattingInterface
+
+    // TODO: strip out the items from the interface that are not directly exposed to the
+    // LiveDataPlugin itself, OR that should not be extendable/replacable by the customer.
+}

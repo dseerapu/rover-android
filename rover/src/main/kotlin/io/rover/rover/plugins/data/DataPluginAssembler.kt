@@ -1,19 +1,17 @@
 package io.rover.rover.plugins.data
 
 import android.content.Context
-import io.rover.rover.DataPluginComponents
 import io.rover.rover.core.container.Assembler
 import io.rover.rover.core.container.Container
 import io.rover.rover.platform.DateFormatting
 import io.rover.rover.platform.DateFormattingInterface
 import io.rover.rover.platform.DeviceIdentification
 import io.rover.rover.platform.DeviceIdentificationInterface
+import io.rover.rover.platform.IoMultiplexingExecutor
 import io.rover.rover.platform.LocalStorage
 import io.rover.rover.platform.SharedPreferencesLocalStorage
 import java.net.URL
-import java.util.concurrent.LinkedBlockingQueue
-import java.util.concurrent.ThreadPoolExecutor
-import java.util.concurrent.TimeUnit
+import java.util.concurrent.Executor
 
 /**
  * A version of Authentication Context that works with simply a standard SDK Key, acquired from
@@ -26,16 +24,13 @@ data class ServerKey(
     override val bearerToken: String? = ""
 }
 
-// TODO: should the assembler provide an instance of what is currently called DataPluginComponents (and rename
-// it to DataPluginComponents or similar)?
-
 /**
- * These are all the internal dependencies needed by the [LiveDataPlugin].
+ * These are all the internal dependencies needed by the [DataPlugin].
  */
-class LiveDataPluginComponents(
+class DataPluginComponents(
     override val authenticationContext: AuthenticationContext,
     applicationContext: Context
-): DataPluginComponents {
+): DataPluginComponentsInterface {
 
     override val networkClient: NetworkClient by lazy {
         AsyncTaskAndHttpUrlConnectionNetworkClient()
@@ -51,14 +46,8 @@ class LiveDataPluginComponents(
         DateFormatting()
     }
 
-    override val ioExecutor: ThreadPoolExecutor by lazy {
-        ThreadPoolExecutor(
-            10,
-            Runtime.getRuntime().availableProcessors() * 200,
-            2,
-            TimeUnit.SECONDS,
-            LinkedBlockingQueue<Runnable>()
-        )
+    override val ioExecutor: Executor by lazy {
+        IoMultiplexingExecutor.build("data")
     }
 
     override val deviceIdentification: DeviceIdentificationInterface by lazy {
@@ -71,7 +60,8 @@ class LiveDataPluginComponents(
 }
 
 /**
- *
+ * You must always pass an instance of this to Rover.initialize().  The Data Plugin provides access
+ * to the Rover API and is required for all other Rover functionality.
  */
 open class DataPluginAssembler(
     private val sdkKey: String,
@@ -81,7 +71,7 @@ open class DataPluginAssembler(
         container.register(DataPluginInterface::class.java) { resolver ->
             DataPlugin(
                 URL("https://api.rover.io/graphql"),
-                LiveDataPluginComponents(
+                DataPluginComponents(
                     ServerKey(sdkKey),
                     applicationContext
                 )
