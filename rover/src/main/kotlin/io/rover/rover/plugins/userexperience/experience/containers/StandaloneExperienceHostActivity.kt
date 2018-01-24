@@ -12,33 +12,17 @@ import com.facebook.stetho.urlconnection.StethoURLConnectionManager
 import io.rover.rover.R
 import io.rover.rover.Rover
 import io.rover.rover.core.logging.log
-import io.rover.rover.platform.DateFormatting
-import io.rover.rover.platform.DeviceIdentification
-import io.rover.rover.platform.SharedPreferencesLocalStorage
+import io.rover.rover.core.streams.subscribe
 import io.rover.rover.platform.asAndroidUri
-import io.rover.rover.plugins.userexperience.assets.AndroidAssetService
-import io.rover.rover.plugins.userexperience.assets.ImageOptimizationService
 import io.rover.rover.plugins.data.AsyncTaskAndHttpUrlConnectionInterception
 import io.rover.rover.plugins.data.AsyncTaskAndHttpUrlConnectionInterceptor
 import io.rover.rover.plugins.data.AsyncTaskAndHttpUrlConnectionNetworkClient
-import io.rover.rover.plugins.data.AuthenticationContext
-import io.rover.rover.plugins.data.DataPlugin
-import io.rover.rover.plugins.data.DataPluginInterface
-import io.rover.rover.plugins.data.WireEncoder
-import io.rover.rover.core.streams.subscribe
-import io.rover.rover.plugins.userexperience.AndroidMeasurementService
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.text.AndroidRichTextToSpannedTransformer
-import io.rover.rover.plugins.userexperience.experience.StockViewModelFactory
-import io.rover.rover.plugins.userexperience.experience.navigation.ExperienceExternalNavigationEvent
-import io.rover.rover.plugins.userexperience.experience.ExperienceViewModelInterface
 import io.rover.rover.plugins.userexperience.experience.ExperienceView
+import io.rover.rover.plugins.userexperience.experience.ExperienceViewModelInterface
+import io.rover.rover.plugins.userexperience.experience.navigation.ExperienceExternalNavigationEvent
 import java.io.IOException
 import java.io.InputStream
 import java.net.HttpURLConnection
-import java.net.URL
-import java.util.concurrent.LinkedBlockingQueue
-import java.util.concurrent.ThreadPoolExecutor
-import java.util.concurrent.TimeUnit
 
 /**
  * This can display a Rover experience in an Activity, self-contained.

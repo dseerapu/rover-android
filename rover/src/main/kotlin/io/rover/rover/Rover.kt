@@ -1,11 +1,14 @@
 package io.rover.rover
 
+import android.content.Context
 import io.rover.rover.core.container.Assembler
 import io.rover.rover.core.container.ContainerResolver
 import io.rover.rover.core.container.PluginContainer
 import io.rover.rover.core.logging.log
+import io.rover.rover.plugins.data.AsyncTaskAndHttpUrlConnectionNetworkClient
 import io.rover.rover.plugins.data.DataPlugin
 import io.rover.rover.plugins.userexperience.experience.UserExperiencePluginInterface
+import java.net.HttpURLConnection
 
 /**
  * Entry point for the Rover SDK.
@@ -48,6 +51,37 @@ class Rover(
                 log.w("Rover already initialized.  This is most likely a bug.")
             }
             sharedInstanceBackingField = rover
+        }
+
+        /**
+         * Be sure to always call this after [Rover.initialize] in your Application's onCreate()!
+         *
+         * Rover internally uses the standard HTTP client included with Android, but to work
+         * effectively it needs HTTP caching enabled.  Unfortunately, this can only be done at the
+         * global level, so we ask that you call this method -- [installSaneGlobalHttpCache] -- at
+         * application start time (unless you have already added your own cache to Android's
+         * [HttpURLConnection].
+         */
+        @JvmStatic
+        fun installSaneGlobalHttpCache(applicationContext: Context) {
+            AsyncTaskAndHttpUrlConnectionNetworkClient.installSaneGlobalHttpCache(applicationContext)
+        }
+
+        /**
+         * If you wish to construct your own instance of [Rover], perhaps within your App's own
+         * dependency injection system, then in lieu of calling [Rover.initialize] you may instead
+         * instantiate your own [Rover] instance and register it here with
+         * [registerCustomRoverInstance] so that it will become the globally shared
+         * ([Rover.sharedInstance]) Rover instance.
+         *
+         * This is necessary because the Rover standalone Experience activity needs to be able to
+         * discover its dependencies in the Rover SDK.
+         *
+         * If you're not sure if you need this method, then you probably don't.
+         */
+        @JvmStatic
+        fun registerCustomRoverInstance(userProvidedRover: Rover) {
+            sharedInstanceBackingField = userProvidedRover
         }
     }
 }

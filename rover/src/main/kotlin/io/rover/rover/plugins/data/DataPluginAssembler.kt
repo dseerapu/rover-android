@@ -28,11 +28,14 @@ data class ServerKey(
 
 // TODO: should the assembler provide an instance of what is currently called DataPluginComponents (and rename
 // it to DataPluginComponents or similar)?
+
+/**
+ * These are all the internal dependencies needed by the [LiveDataPlugin].
+ */
 class LiveDataPluginComponents(
-    serverKey: ServerKey,
+    override val authenticationContext: AuthenticationContext,
     applicationContext: Context
 ): DataPluginComponents {
-    override val authenticationContext: AuthenticationContext = serverKey
 
     override val networkClient: NetworkClient by lazy {
         AsyncTaskAndHttpUrlConnectionNetworkClient()
@@ -51,7 +54,7 @@ class LiveDataPluginComponents(
     override val ioExecutor: ThreadPoolExecutor by lazy {
         ThreadPoolExecutor(
             10,
-            Runtime.getRuntime().availableProcessors() * 20,
+            Runtime.getRuntime().availableProcessors() * 200,
             2,
             TimeUnit.SECONDS,
             LinkedBlockingQueue<Runnable>()
@@ -67,6 +70,9 @@ class LiveDataPluginComponents(
     }
 }
 
+/**
+ *
+ */
 open class DataPluginAssembler(
     private val sdkKey: String,
     private val applicationContext: Context

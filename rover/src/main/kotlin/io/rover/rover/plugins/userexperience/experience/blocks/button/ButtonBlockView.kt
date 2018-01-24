@@ -177,7 +177,7 @@ class ButtonBlockView : FrameLayout, LayoutableView<ButtonBlockViewModelInterfac
 
     @SuppressLint("MissingSuperCall")
     override fun requestLayout() {
-        log.v("Tried to invalidate layout.  Inhibited.")
+        // log.v("Tried to invalidate layout.  Inhibited.")
     }
 
     override fun forceLayout() {

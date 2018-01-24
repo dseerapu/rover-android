@@ -7,10 +7,12 @@ import android.arch.lifecycle.Lifecycle
 import android.arch.lifecycle.LifecycleOwner
 import android.os.Looper
 import android.view.View
+import io.rover.rover.core.logging.log
 import io.rover.rover.plugins.data.NetworkTask
 import java.util.ArrayDeque
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 interface Subscription {
     fun cancel()
@@ -839,7 +841,9 @@ fun <T> Publisher<T>.blockForResult(): List<T> {
         override fun onSubscribe(subscription: Subscription) { /* no-op */ }
     })
 
-    latch.await()
+    if(!latch.await(10, TimeUnit.SECONDS)) {
+        log.w("Reached timeout while blocking for publisher!")
+    }
 
     if(receivedError != null) {
         throw Exception("Error while blocking on Publisher.", receivedError)

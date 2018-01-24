@@ -3,6 +3,7 @@ package io.rover.rover.plugins.userexperience.assets
 import android.graphics.Bitmap
 import android.os.Handler
 import android.os.Looper
+import io.rover.rover.core.logging.log
 import io.rover.rover.plugins.data.NetworkClient
 import io.rover.rover.plugins.data.NetworkResult
 import io.rover.rover.plugins.data.NetworkTask
@@ -32,7 +33,19 @@ class AndroidAssetService(
 
         return SynchronousOperationNetworkTask(
             ioExecutor,
-            { synchronousImagePipeline.request(url) },
+            {
+                // this block will be dispatched onto the ioExecutor by
+                // SynchronousOperationNetworkTask.
+
+                // ioExecutor is really only intended for I/O multiplexing only: it spawns many more
+                // threads than CPU cores.  However, I'm bending that rule a bit by having image
+                // decoding occur inband.  Thankfully, the risk of that spamming too many CPU-bound
+                // workloads across many threads is mitigated by the HTTP client library
+                // (HttpURLConnection, itself internally backed by OkHttp inside the Android
+                // standard library) limiting concurrent image downloads from the same origin, which
+                // most of the images in Rover experiences will be.
+                synchronousImagePipeline.request(url)
+            },
             { pipelineResult ->
                 when (pipelineResult) {
                     is PipelineStageResult.Successful -> {

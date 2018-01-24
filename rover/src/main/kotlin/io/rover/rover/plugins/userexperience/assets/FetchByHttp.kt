@@ -7,6 +7,7 @@ import io.rover.rover.core.logging.log
 import io.rover.rover.core.streams.Publisher
 import io.rover.rover.core.streams.Subscriber
 import io.rover.rover.core.streams.Subscription
+import io.rover.rover.plugins.data.AsyncTaskAndHttpUrlConnectionNetworkClient
 import java.io.BufferedInputStream
 import java.io.IOException
 import java.io.InputStream
@@ -52,7 +53,7 @@ class ImageDownloader (
                         // We expect the user to agree to and implement setting up a global
                         // HttpUrlConnection cache. While we would much prefer to maintain our own,
                         // however, the global-side-effect nature of the Android HttpClient API means
-                        // that we won't be able to achieve that without just building our own cache
+                        // that we won't be able to achieve that wsithout just building our own cache
                         // regime rather than using the stock Android cache, so we'll stick with this
                         // approach for now.
                         //
@@ -64,11 +65,7 @@ class ImageDownloader (
                         // them in the same LRU cache pool will mean that rotating through just a few
                         // large photos will cause the small payloads to be evicted even though their
                         // contribution to consumption of the cache is tiny.
-
-                        // TODO: exception message should refer to a façade method once we have one
-                        throw RuntimeException("An HTTPUrlConnection cache is not enabled.\n" +
-                            "Please see the Rover documentation for the Data Plugin and the Google documentation: https://developer.android.com/reference/android/net/http/HttpResponseCache.html\n" +
-                            "As a quick fix you may call io.rover.rover.network.AsyncTaskAndHttpUrlConnectionNetworkClient.installSaneGlobalHttpCacheCache()")
+                        throw AsyncTaskAndHttpUrlConnectionNetworkClient.missingCacheException()
                     }
 
                     connection.apply {

@@ -57,9 +57,9 @@ class AsyncTaskAndHttpUrlConnectionNetworkClient : NetworkClient {
                     // contribution to consumption of the cache is tiny.
 
                     // TODO: exception message should refer to a façade method once we have one
-                    throw RuntimeException("An HTTPUrlConnection cache is not enabled.\n" +
-                        "Please see the Rover documentation for the Data Plugin and the Google documentation: https://developer.android.com/reference/android/net/http/HttpResponseCache.html\n" +
-                        "As a quick fix you may call io.rover.rover.network.AsyncTaskAndHttpUrlConnectionNetworkClient.installSaneGlobalHttpCacheCache()")
+
+
+                    throw missingCacheException()
                 }
 
                 val requestBody = bodyData?.toByteArray(Charsets.UTF_8)
@@ -159,11 +159,18 @@ class AsyncTaskAndHttpUrlConnectionNetworkClient : NetworkClient {
          * including Rover.
          */
         @JvmStatic
-        fun installSaneGlobalHttpCacheCache(context: Context) {
+        internal fun installSaneGlobalHttpCache(context: Context) {
             val httpCacheDir = File(context.cacheDir, "http")
             val httpCacheSize = (50 * 1024 * 1024).toLong() // 50 MiB
             HttpResponseCache.install(httpCacheDir, httpCacheSize)
             log.v("Global HttpUrlConnection cache installed.")
+        }
+
+        @JvmStatic
+        internal fun missingCacheException(): RuntimeException {
+            return RuntimeException("An HTTPUrlConnection cache is not enabled.\n" +
+                "Please see the Rover documentation for the Data Plugin and the Google documentation: https://developer.android.com/reference/android/net/http/HttpResponseCache.html\n" +
+                "Consider calling Rover.installSaneGlobalHttpCache() in your Application.onCreate()")
         }
     }
 }
