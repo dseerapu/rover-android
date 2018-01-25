@@ -27,7 +27,7 @@ data class ServerKey(
 /**
  * These are all the internal dependencies needed by the [DataPlugin].
  */
-class DataPluginComponents(
+open class DataPluginComponents(
     override val authenticationContext: AuthenticationContext,
     applicationContext: Context
 ): DataPluginComponentsInterface {

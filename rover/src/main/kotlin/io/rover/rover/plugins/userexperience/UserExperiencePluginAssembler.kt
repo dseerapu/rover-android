@@ -16,11 +16,11 @@ import io.rover.rover.plugins.userexperience.experience.blocks.concerns.text.And
 import io.rover.rover.plugins.userexperience.experience.blocks.concerns.text.RichTextToSpannedTransformer
 import java.util.concurrent.Executor
 
-class UserExperiencePluginComponents(
+open class UserExperiencePluginComponents(
     private val displayMetrics: DisplayMetrics,
     private val dataPluginInterface: DataPluginInterface
 ) : UserExperiencePluginComponentsInterface {
-    override val stockViewModelFactory: ViewModelFactoryInterface by lazy {
+    override val viewModelFactory: ViewModelFactoryInterface by lazy {
         StockViewModelFactory(
             measurementService,
             assetService,

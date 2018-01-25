@@ -114,7 +114,9 @@ class ExperienceViewModel(
 
     override val events: Observable<ExperienceViewModelInterface.Event> = epic.shareAndReplayTypesOnResubscribe(
         // ExperienceReady should be replayed to any new subscriber to make sure they are brought up to date.
-        ExperienceViewModelInterface.Event.ExperienceReady::class.java
+        ExperienceViewModelInterface.Event.ExperienceReady::class.java,
+        ExperienceViewModelInterface.Event.SetBacklightBoost::class.java,
+        ExperienceViewModelInterface.Event.SetActionBar::class.java
     )
 
     override fun pressBack() {

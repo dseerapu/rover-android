@@ -51,9 +51,6 @@ class StandaloneExperienceHostActivity : AppCompatActivity() {
         Rover.sharedInstance.userExperiencePlugin
     }
 
-
-    // private var viewExperienceAppBar : ViewExperienceAppBarInterface? = null
-
     // TODO: there should be a standalone-experience-host-activity view model.
     private var experienceViewModel: ExperienceViewModelInterface? = null
         set(viewModel) {
@@ -132,18 +129,10 @@ class StandaloneExperienceHostActivity : AppCompatActivity() {
         experienceViewModel = userExperiencePlugin.viewModelForExperience(experienceId, savedInstanceState?.getParcelable("experienceState"))
     }
 
-    /**
-     * Sadly, menu arrives somewhat asynchronously: specifically, after setSupportActionBar() and
-     * the system interrogates the Menu in order to populate things in the toolbar.  In ancient
-     * versions of Android, this would occur even later because it was only done on first press of
-     * the Menu button.
-     */
-    // private var capturedMenu: Menu? = null
-
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         super.onCreateOptionsMenu(menu)
+        // this is so ExperienceView can
         toolbarHost.menu = menu
-        // capturedMenu = menu
         return true
     }
 

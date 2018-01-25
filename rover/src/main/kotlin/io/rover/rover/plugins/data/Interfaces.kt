@@ -130,7 +130,4 @@ interface DataPluginComponentsInterface {
     val deviceIdentification: DeviceIdentificationInterface
 
     val dateFormatting: DateFormattingInterface
-
-    // TODO: strip out the items from the interface that are not directly exposed to the
-    // LiveDataPlugin itself, OR that should not be extendable/replacable by the customer.
 }

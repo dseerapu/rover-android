@@ -55,10 +55,6 @@ class AsyncTaskAndHttpUrlConnectionNetworkClient : NetworkClient {
                     // them in the same LRU cache pool will mean that rotating through just a few
                     // large photos will cause the small payloads to be evicted even though their
                     // contribution to consumption of the cache is tiny.
-
-                    // TODO: exception message should refer to a façade method once we have one
-
-
                     throw missingCacheException()
                 }
 

@@ -10,7 +10,7 @@ interface UserExperiencePluginInterface : ViewModelFactoryInterface {
 }
 
 interface UserExperiencePluginComponentsInterface {
-    val stockViewModelFactory: ViewModelFactoryInterface
+    val viewModelFactory: ViewModelFactoryInterface
 
     val measurementService: MeasurementService
 }
