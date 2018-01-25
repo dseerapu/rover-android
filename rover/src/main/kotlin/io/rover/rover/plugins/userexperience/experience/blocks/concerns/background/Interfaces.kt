@@ -5,7 +5,7 @@ package io.rover.rover.plugins.userexperience.experience.blocks.concerns.backgro
 import android.graphics.Bitmap
 import android.graphics.Shader
 import android.util.DisplayMetrics
-import io.rover.rover.plugins.data.NetworkTask
+import io.rover.rover.plugins.data.http.NetworkTask
 import io.rover.rover.plugins.userexperience.types.Rect
 import io.rover.rover.plugins.userexperience.types.PixelSize
 

@@ -4,7 +4,7 @@ package io.rover.rover.plugins.userexperience.experience.blocks.image
 
 import android.graphics.Bitmap
 import android.util.DisplayMetrics
-import io.rover.rover.plugins.data.NetworkTask
+import io.rover.rover.plugins.data.http.NetworkTask
 import io.rover.rover.plugins.userexperience.experience.blocks.concerns.background.BackgroundViewModelInterface
 import io.rover.rover.plugins.userexperience.experience.blocks.concerns.border.BorderViewModelInterface
 import io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout.BlockViewModelInterface

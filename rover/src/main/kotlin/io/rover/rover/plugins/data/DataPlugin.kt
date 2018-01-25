@@ -7,12 +7,21 @@ import io.rover.rover.plugins.data.domain.DeviceState
 import io.rover.rover.plugins.data.domain.Event
 import io.rover.rover.plugins.data.domain.Experience
 import io.rover.rover.plugins.data.domain.ID
+import io.rover.rover.plugins.data.http.HttpClientResponse
+import io.rover.rover.plugins.data.http.HttpRequest
+import io.rover.rover.plugins.data.http.HttpVerb
+import io.rover.rover.plugins.data.http.NetworkTask
 import io.rover.rover.plugins.data.requests.FetchExperienceRequest
 import io.rover.rover.plugins.data.requests.SendEventsRequest
 import io.rover.rover.plugins.data.requests.data.FetchStateRequest
 import java.io.IOException
 import java.net.URL
 
+/**
+ * This is the Rover Data plugin.  It contains all the subsystems necessary to
+ *
+ * @param components
+ */
 class DataPlugin(
     private val endpoint: URL,
     private val components: DataPluginComponentsInterface

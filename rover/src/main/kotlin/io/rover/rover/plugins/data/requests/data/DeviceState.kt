@@ -3,7 +3,7 @@ package io.rover.rover.plugins.data.requests.data
 import io.rover.rover.plugins.data.domain.DeviceState
 import io.rover.rover.plugins.data.domain.Profile
 import io.rover.rover.plugins.data.domain.Region
-import io.rover.rover.plugins.data.putProp
+import io.rover.rover.plugins.data.graphql.putProp
 import org.json.JSONArray
 import org.json.JSONObject
 

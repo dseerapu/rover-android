@@ -23,6 +23,7 @@ import io.rover.rover.platform.decodeDeviceStateFromJsonStringForTests
 import io.rover.rover.platform.decodeExperienceFromStringForTests
 import io.rover.rover.platform.encodeEventsToStringJsonForTests
 import io.rover.rover.platform.encodeJsonToStringForTests
+import io.rover.rover.plugins.data.graphql.WireEncoder
 import org.amshove.kluent.When
 import org.amshove.kluent.any
 import org.amshove.kluent.calling

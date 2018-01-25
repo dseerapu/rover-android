@@ -1,13 +1,11 @@
 package io.rover.rover.plugins.userexperience.assets
 
 import android.net.http.HttpResponseCache
-import android.os.Handler
-import android.os.Looper
 import io.rover.rover.core.logging.log
 import io.rover.rover.core.streams.Publisher
 import io.rover.rover.core.streams.Subscriber
 import io.rover.rover.core.streams.Subscription
-import io.rover.rover.plugins.data.AsyncTaskAndHttpUrlConnectionNetworkClient
+import io.rover.rover.plugins.data.http.AsyncTaskAndHttpUrlConnectionNetworkClient
 import java.io.BufferedInputStream
 import java.io.IOException
 import java.io.InputStream

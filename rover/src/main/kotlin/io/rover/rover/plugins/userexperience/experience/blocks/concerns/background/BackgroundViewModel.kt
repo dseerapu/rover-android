@@ -7,7 +7,7 @@ import io.rover.rover.core.logging.log
 import io.rover.rover.plugins.userexperience.assets.AssetService
 import io.rover.rover.plugins.userexperience.assets.ImageOptimizationServiceInterface
 import io.rover.rover.plugins.data.NetworkResult
-import io.rover.rover.plugins.data.NetworkTask
+import io.rover.rover.plugins.data.http.NetworkTask
 import io.rover.rover.plugins.userexperience.types.PixelSize
 import io.rover.rover.plugins.userexperience.types.asAndroidColor
 

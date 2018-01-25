@@ -1,7 +1,7 @@
 package io.rover.rover.plugins.data.requests.data
 
 import io.rover.rover.plugins.data.domain.Profile
-import io.rover.rover.plugins.data.putProp
+import io.rover.rover.plugins.data.graphql.putProp
 import org.json.JSONObject
 
 fun Profile.Companion.decodeJson(jsonObject: JSONObject): Profile {

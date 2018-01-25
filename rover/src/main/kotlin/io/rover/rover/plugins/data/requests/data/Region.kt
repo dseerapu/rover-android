@@ -1,8 +1,8 @@
 package io.rover.rover.plugins.data.requests.data
 
 import io.rover.rover.plugins.data.domain.Region
-import io.rover.rover.plugins.data.optIntOrNull
-import io.rover.rover.plugins.data.putProp
+import io.rover.rover.plugins.data.graphql.optIntOrNull
+import io.rover.rover.plugins.data.graphql.putProp
 import org.json.JSONObject
 import java.util.UUID
 

@@ -3,10 +3,8 @@ package io.rover.rover.plugins.userexperience.assets
 import android.graphics.Bitmap
 import android.os.Handler
 import android.os.Looper
-import io.rover.rover.core.logging.log
-import io.rover.rover.plugins.data.NetworkClient
 import io.rover.rover.plugins.data.NetworkResult
-import io.rover.rover.plugins.data.NetworkTask
+import io.rover.rover.plugins.data.http.NetworkTask
 import java.net.URL
 import java.util.concurrent.Executor
 

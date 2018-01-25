@@ -5,7 +5,7 @@ import io.rover.rover.core.container.Assembler
 import io.rover.rover.core.container.ContainerResolver
 import io.rover.rover.core.container.PluginContainer
 import io.rover.rover.core.logging.log
-import io.rover.rover.plugins.data.AsyncTaskAndHttpUrlConnectionNetworkClient
+import io.rover.rover.plugins.data.http.AsyncTaskAndHttpUrlConnectionNetworkClient
 import io.rover.rover.plugins.data.DataPlugin
 import io.rover.rover.plugins.userexperience.UserExperiencePluginInterface
 import java.net.HttpURLConnection

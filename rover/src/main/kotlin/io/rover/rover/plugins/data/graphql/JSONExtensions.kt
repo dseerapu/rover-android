@@ -1,6 +1,6 @@
 @file:JvmName("JsonExtensions")
 
-package io.rover.rover.plugins.data
+package io.rover.rover.plugins.data.graphql
 
 import org.json.JSONObject
 

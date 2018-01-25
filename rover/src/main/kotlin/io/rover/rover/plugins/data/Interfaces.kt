@@ -9,6 +9,9 @@ import io.rover.rover.plugins.data.domain.DeviceState
 import io.rover.rover.plugins.data.domain.Event
 import io.rover.rover.plugins.data.domain.Experience
 import io.rover.rover.plugins.data.domain.ID
+import io.rover.rover.plugins.data.http.NetworkClient
+import io.rover.rover.plugins.data.http.NetworkTask
+import io.rover.rover.plugins.data.http.WireEncoderInterface
 import org.json.JSONObject
 import java.util.concurrent.Executor
 

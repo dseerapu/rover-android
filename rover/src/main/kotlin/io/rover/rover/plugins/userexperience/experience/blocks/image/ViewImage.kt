@@ -5,7 +5,7 @@ import android.view.View
 import android.widget.ImageView
 import io.rover.rover.core.logging.log
 import io.rover.rover.platform.whenNotNull
-import io.rover.rover.plugins.data.NetworkTask
+import io.rover.rover.plugins.data.http.NetworkTask
 import io.rover.rover.plugins.userexperience.types.PixelSize
 
 /**

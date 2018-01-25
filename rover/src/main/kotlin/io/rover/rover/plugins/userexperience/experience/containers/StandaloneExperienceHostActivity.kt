@@ -14,9 +14,9 @@ import io.rover.rover.Rover
 import io.rover.rover.core.logging.log
 import io.rover.rover.core.streams.subscribe
 import io.rover.rover.platform.asAndroidUri
-import io.rover.rover.plugins.data.AsyncTaskAndHttpUrlConnectionInterception
-import io.rover.rover.plugins.data.AsyncTaskAndHttpUrlConnectionInterceptor
-import io.rover.rover.plugins.data.AsyncTaskAndHttpUrlConnectionNetworkClient
+import io.rover.rover.plugins.data.http.AsyncTaskAndHttpUrlConnectionInterception
+import io.rover.rover.plugins.data.http.AsyncTaskAndHttpUrlConnectionInterceptor
+import io.rover.rover.plugins.data.http.AsyncTaskAndHttpUrlConnectionNetworkClient
 import io.rover.rover.plugins.userexperience.experience.ExperienceView
 import io.rover.rover.plugins.userexperience.experience.ExperienceViewModelInterface
 import io.rover.rover.plugins.userexperience.experience.navigation.ExperienceExternalNavigationEvent

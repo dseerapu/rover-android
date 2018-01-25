@@ -5,7 +5,7 @@ import android.util.DisplayMetrics
 import io.rover.rover.plugins.data.domain.Background
 import io.rover.rover.plugins.data.domain.ImageBlock
 import io.rover.rover.plugins.data.NetworkResult
-import io.rover.rover.plugins.data.NetworkTask
+import io.rover.rover.plugins.data.http.NetworkTask
 import io.rover.rover.plugins.userexperience.types.PixelSize
 import io.rover.rover.plugins.userexperience.experience.blocks.concerns.background.BackgroundImageConfiguration
 import java.net.URI

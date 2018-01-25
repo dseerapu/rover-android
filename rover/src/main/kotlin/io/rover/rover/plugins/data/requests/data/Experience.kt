@@ -33,7 +33,7 @@ import io.rover.rover.plugins.data.domain.TitleBarButtons
 import io.rover.rover.plugins.data.domain.UnitOfMeasure
 import io.rover.rover.plugins.data.domain.VerticalAlignment
 import io.rover.rover.plugins.data.domain.WebViewBlock
-import io.rover.rover.plugins.data.putProp
+import io.rover.rover.plugins.data.graphql.putProp
 import org.json.JSONArray
 import org.json.JSONObject
 import java.net.URI

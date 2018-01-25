@@ -10,6 +10,10 @@ import io.rover.rover.platform.DeviceIdentificationInterface
 import io.rover.rover.platform.IoMultiplexingExecutor
 import io.rover.rover.platform.LocalStorage
 import io.rover.rover.platform.SharedPreferencesLocalStorage
+import io.rover.rover.plugins.data.http.AsyncTaskAndHttpUrlConnectionNetworkClient
+import io.rover.rover.plugins.data.http.NetworkClient
+import io.rover.rover.plugins.data.graphql.WireEncoder
+import io.rover.rover.plugins.data.http.WireEncoderInterface
 import java.net.URL
 import java.util.concurrent.Executor
 

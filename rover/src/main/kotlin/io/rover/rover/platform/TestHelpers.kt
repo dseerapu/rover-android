@@ -5,7 +5,7 @@ package io.rover.rover.platform
 import io.rover.rover.plugins.data.domain.DeviceState
 import io.rover.rover.plugins.data.domain.Event
 import io.rover.rover.plugins.data.domain.Experience
-import io.rover.rover.plugins.data.WireEncoder
+import io.rover.rover.plugins.data.graphql.WireEncoder
 import io.rover.rover.plugins.data.requests.data.encodeJson
 import org.json.JSONObject
 

@@ -2,7 +2,7 @@ package io.rover.rover.plugins.data.requests.data
 
 import io.rover.rover.plugins.data.domain.DeviceState
 import io.rover.rover.plugins.data.NetworkRequest
-import io.rover.rover.plugins.data.WireEncoderInterface
+import io.rover.rover.plugins.data.http.WireEncoderInterface
 import org.json.JSONObject
 
 class FetchStateRequest : NetworkRequest<DeviceState> {

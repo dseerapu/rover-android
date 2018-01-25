@@ -1,18 +1,9 @@
 @file:JvmName("NetworkClientInterface")
 
-package io.rover.rover.plugins.data
+package io.rover.rover.plugins.data.http
 
-import android.os.AsyncTask
 import java.io.BufferedInputStream
 import java.net.URL
-
-/**
- * A cancellable concurrent operation.
- */
-interface NetworkTask {
-    fun cancel()
-    fun resume()
-}
 
 enum class HttpVerb(
     val wireFormat: String
@@ -25,33 +16,6 @@ data class HttpRequest(
     val headers: HashMap<String, String>,
     val verb: HttpVerb
 )
-
-interface NetworkClient {
-    /**
-     * Perform the given HttpRequest and then deliver the result to the given [completionHandler].
-     *
-     * Note that [completionHandler] is given an [HttpClientResponse], which includes readable
-     * streams.  Thus, it is called on the background worker thread to allow for client code to
-     * read those streams, safely away from the Android main UI thread.
-     */
-    fun networkTask(
-        request: HttpRequest,
-        bodyData: String?,
-        completionHandler: (HttpClientResponse) -> Unit
-    ): NetworkTask
-}
-
-class AsyncTaskNetworkTask(
-    private val asyncTask: AsyncTask<*, *, *>
-) : NetworkTask {
-    override fun cancel() {
-        asyncTask.cancel(false)
-    }
-
-    override fun resume() {
-        asyncTask.execute()
-    }
-}
 
 sealed class HttpClientResponse {
     class Success(

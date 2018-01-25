@@ -1,6 +1,6 @@
 @file:JvmName("JsonObjectExtensions")
 
-package io.rover.rover.plugins.data
+package io.rover.rover.plugins.data.graphql
 
 import org.json.JSONObject
 import kotlin.reflect.KProperty1

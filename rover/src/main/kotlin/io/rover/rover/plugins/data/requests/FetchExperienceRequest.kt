@@ -3,7 +3,7 @@ package io.rover.rover.plugins.data.requests
 import io.rover.rover.plugins.data.domain.Experience
 import io.rover.rover.plugins.data.domain.ID
 import io.rover.rover.plugins.data.NetworkRequest
-import io.rover.rover.plugins.data.WireEncoderInterface
+import io.rover.rover.plugins.data.http.WireEncoderInterface
 import org.json.JSONObject
 
 class FetchExperienceRequest(
