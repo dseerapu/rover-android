@@ -82,5 +82,5 @@ sealed class ExperienceExternalNavigationEvent {
      * backstack, etc.) external to the internal Rover ExperienceNavigationViewModel, whatever it
      * happens to be in the surrounding app.
      */
-    class Exit() : ExperienceExternalNavigationEvent()
+    class Exit : ExperienceExternalNavigationEvent()
 }

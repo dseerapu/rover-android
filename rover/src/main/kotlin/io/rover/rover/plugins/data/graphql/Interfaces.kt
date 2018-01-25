@@ -28,7 +28,6 @@ interface GraphQlApiServiceInterface {
         completionHandler: ((NetworkResult<DeviceState>) -> Unit)
     ): NetworkTask
 
-
     /**
      * Submit analytics events.
      *

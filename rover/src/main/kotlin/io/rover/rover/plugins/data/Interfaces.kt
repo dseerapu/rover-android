@@ -106,9 +106,7 @@ interface NetworkRequest<out TInput> {
     }
 }
 
-interface DataPluginInterface: GraphQlApiServiceInterface {
-
-}
+interface DataPluginInterface: GraphQlApiServiceInterface
 
 class APIException(
     val errors: List<Exception>

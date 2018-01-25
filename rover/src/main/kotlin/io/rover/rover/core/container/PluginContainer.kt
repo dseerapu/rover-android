@@ -21,7 +21,7 @@ class PluginContainer(
     override fun <T: Any> resolve(type: Class<T>): T? {
 
 
-        val exampleFactory = { resolver: Resolver -> null as T? }
+        val exampleFactory = { resolver: Resolver -> null }
 
         val factoryType = exampleFactory.javaClass
 
@@ -32,7 +32,7 @@ class PluginContainer(
         log.v("All registered plugins are (${registeredPlugins.keys.joinToString(", ")})")
         val entry = (registeredPlugins[key] ?: return null) as ServiceEntry<T>
 
-        val factory = entry.factory as (Resolver) -> T
+        val factory = entry.factory
 
         return entry.instance ?: factory(this).apply {
             // if constructing a new instance, replace the Entry in the list with one that has
