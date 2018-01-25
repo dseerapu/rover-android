@@ -5,10 +5,10 @@ import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.InsetDrawable
-import android.support.v7.graphics.drawable.DrawableWrapper
 import android.view.Gravity
 import android.view.View
 import io.rover.rover.core.logging.log
+import io.rover.rover.platform.DrawableWrapper
 import io.rover.rover.platform.whenNotNull
 import io.rover.rover.plugins.data.http.NetworkTask
 import io.rover.rover.plugins.userexperience.experience.blocks.image.DimensionCallback

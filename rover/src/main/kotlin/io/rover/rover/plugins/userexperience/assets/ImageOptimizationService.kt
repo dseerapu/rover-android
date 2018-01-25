@@ -269,7 +269,7 @@ class ImageOptimizationService : ImageOptimizationServiceInterface {
                 val imageDensityToDeviceDensityRatio = imageDensity.toFloat() / displayMetrics.densityDpi
 
                 Pair(
-                    // so, if we have a hidpi device (xxhdpi or denser) we will only have scaling-up
+                    // so, if we have a HiDpi device (xxhdpi or denser) we will only have scaling-up
                     // going on (taken care of because we set the density on the bitmap). However,
                     // if we have a low-dpi device then we have an opportunity to ask imgix to scale
                     // down the image for us and cut down on the amount of pixels downloaded.

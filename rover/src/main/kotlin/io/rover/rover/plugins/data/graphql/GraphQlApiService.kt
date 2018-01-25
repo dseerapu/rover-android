@@ -46,12 +46,10 @@ class GraphQlApiService(
         hashMapOf<String, String>().apply {
             this["Content-Type"] = "application/json"
 
-            if (authenticationContext.sdkToken != null) {
-                this["x-rover-account-token"] = authenticationContext.sdkToken!!
-            } else if (authenticationContext.bearerToken != null) {
-                this["authorization"] = "Bearer ${authenticationContext.bearerToken}"
-            } else {
-                throw RuntimeException("Attempt to use DataPlugin when authentication is not available.")
+            when {
+                authenticationContext.sdkToken != null -> this["x-rover-account-token"] = authenticationContext.sdkToken!!
+                authenticationContext.bearerToken != null -> this["authorization"] = "Bearer ${authenticationContext.bearerToken}"
+                else -> throw RuntimeException("Attempt to use DataPlugin when authentication is not available.")
             }
 
             this["x-rover-device-identifier"] = deviceIdentification.installationIdentifier
@@ -117,7 +115,7 @@ class GraphQlApiService(
      * Make a request of the Rover cloud API.  Results are delivered into the provided
      * [completionHandler] callback, on the main thread.
      */
-    fun <TEntity> uploadTask(request: NetworkRequest<TEntity>, completionHandler: ((NetworkResult<TEntity>) -> Unit)?): NetworkTask {
+    private fun <TEntity> uploadTask(request: NetworkRequest<TEntity>, completionHandler: ((NetworkResult<TEntity>) -> Unit)?): NetworkTask {
         // TODO: once we change urlRequest() to use query parameters and GET for non-mutation
         // requests, replace true `below` with `request.mutation`.
         val urlRequest = urlRequest(true)

@@ -51,7 +51,7 @@ class ImageDownloader (
                         // We expect the user to agree to and implement setting up a global
                         // HttpUrlConnection cache. While we would much prefer to maintain our own,
                         // however, the global-side-effect nature of the Android HttpClient API means
-                        // that we won't be able to achieve that wsithout just building our own cache
+                        // that we won't be able to achieve that without just building our own cache
                         // regime rather than using the stock Android cache, so we'll stick with this
                         // approach for now.
                         //

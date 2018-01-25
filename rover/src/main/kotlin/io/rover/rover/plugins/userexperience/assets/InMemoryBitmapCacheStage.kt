@@ -18,10 +18,10 @@ class InMemoryBitmapCacheStage(
     // TODO: how do we tune size? Google recommends tuning by creating a formula that uses a static
     // factor (here, 8) suited to your app and then a dynamic factor for the device’s available
     // per-app memory.  For us, surrounding app is also a dynamic factor. Existing SDK just has a
-    // tuneable parameter (but this has poor DX and is still little better than a fudge-factor). Can
+    // tunable parameter (but this has poor DX and is still little better than a fudge-factor). Can
     // we dynamically tune?
 
-    // TODO: at the very least expose the 8-factor as a tuneable.
+    // TODO: at the very least expose the 8-factor as a tunable.
 
     /**
      * Maximum memory available to this process in kilobytes.

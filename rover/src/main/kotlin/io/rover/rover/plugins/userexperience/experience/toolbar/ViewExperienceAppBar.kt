@@ -24,9 +24,9 @@ import io.rover.rover.plugins.userexperience.experience.ExperienceView
  * the Android action bar, then see [?????] instead.
  */
 class ViewExperienceAppBar(
-    val hostView: View,
-    val supportActionBar: ActionBar,
-    val hostWindowForStatusBar: Window
+    private val hostView: View,
+    private val supportActionBar: ActionBar,
+    private val hostWindowForStatusBar: Window
 ) : ViewExperienceAppBarInterface {
     // This is a bit of a bug because the action bar style (by default) indirects to colorPrimary
     // from the theme.  However, if the developer has directly replaced or changed the action bar

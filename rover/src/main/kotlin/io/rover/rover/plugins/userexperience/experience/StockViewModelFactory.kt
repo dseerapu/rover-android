@@ -94,7 +94,7 @@ class StockViewModelFactory(
             }
             is WebViewBlock -> {
                 val blockViewModel = BlockViewModel(block)
-                WebViewBlockViewModel(block,
+                WebViewBlockViewModel(
                     blockViewModel,
                     BackgroundViewModel(block, assetService, imageOptimizationService),
                     BorderViewModel(block), WebViewModel(block)

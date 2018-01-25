@@ -204,7 +204,7 @@ fun StatusBarStyle.Companion.decodeJson(value: String): StatusBarStyle =
     StatusBarStyle.values().firstOrNull { it.wireFormat == value } ?: throw Exception("Unknown StatusBarStyle type '$value'.")
 
 fun TitleBarButtons.Companion.decodeJson(value: String): TitleBarButtons =
-    TitleBarButtons.values().firstOrNull { it.wireFormat == value } ?: throw Exception("Unknown StatusBTitleBarButtonsarStyle type '$value'.")
+    TitleBarButtons.values().firstOrNull { it.wireFormat == value } ?: throw Exception("Unknown StatusBar TitleBarButtonsStyle type '$value'.")
 
 fun ButtonState.Companion.decodeJson(json: JSONObject): ButtonState {
     return ButtonState(

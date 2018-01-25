@@ -3,8 +3,8 @@ package io.rover.rover.core.container
 import io.rover.rover.core.logging.log
 
 /**
- * Implements both [Container] and [Resolver].  Thusly, it hosts a set of live objects for a given
- * set of types, and delegates instantiation of them to a set of [Assembler]s.
+ * Implements both [Container] and [Resolver].  Thus, it hosts a set of live objects for a given set
+ * of types, and delegates instantiation of them to a set of [Assembler]s.
  *
  * Can be thought of as mildly analogous to a Dagger or Koin module.
  */

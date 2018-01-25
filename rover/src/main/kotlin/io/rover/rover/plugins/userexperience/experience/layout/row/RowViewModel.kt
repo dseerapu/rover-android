@@ -112,8 +112,7 @@ class RowViewModel(
         // if blockFrame exceeds the blockBounds, we need clip, and in terms relative to blockBounds
         val clip = if (!rowFrame.contains(blockFrame)) {
             // and find the intersection with blockFrame to find out what should be exposed and then
-            // transform into coord space with origin of blockframe' top left corner:
-
+            // transform into coordinate space with origin of the blockframe in the top left corner:
             val intersection = rowFrame.intersection(blockFrame)
 
             if (intersection == null) {

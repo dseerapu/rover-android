@@ -51,7 +51,7 @@ class ButtonBlockView : FrameLayout, LayoutableView<ButtonBlockViewModelInterfac
     }
 
     @SuppressLint("NewApi")
-    fun setupRippleEffect() {
+    private fun setupRippleEffect() {
         if (fauxRippleEffect) textView.elevation = 0f
 
         // start all the layer views at a low elevation

@@ -75,7 +75,7 @@ class ExperienceView : CoordinatorLayout, BindableView<ExperienceViewModelInterf
             } else 0
         }
 
-    var originalStatusBarColor: Int = 0 // this is set as a side-effect of the attached window
+    private var originalStatusBarColor: Int = 0 // this is set as a side-effect of the attached window
 
     private fun connectToolbar(newToolbar: Toolbar) {
         toolbar.whenNotNull { appBarLayout.removeView(it) }

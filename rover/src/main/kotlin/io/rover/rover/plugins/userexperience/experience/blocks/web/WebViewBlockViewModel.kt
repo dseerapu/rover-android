@@ -7,7 +7,6 @@ import io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout.B
 import io.rover.rover.plugins.userexperience.experience.blocks.concerns.border.BorderViewModelInterface
 
 class WebViewBlockViewModel(
-    private val block: WebViewBlock,
     private val blockViewModel: BlockViewModelInterface,
     private val backgroundViewModel: BackgroundViewModelInterface,
     private val borderViewModel: BorderViewModelInterface,

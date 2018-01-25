@@ -35,8 +35,8 @@ sealed class NetworkError(
     class EmptyResponseData : NetworkError("Empty response data")
     class FailedToDecodeResponseData : NetworkError("Failed to deserialize response data")
     class InvalidResponse : NetworkError("Invalid response")
-    class InvalidResponseData(val serverMessage: String) : NetworkError("Invalid response data: $serverMessage")
-    class InvalidStatusCode(val statusCode: Int, val serverMessage: String) : NetworkError("Invalid status code: $statusCode.  Given reason: '$serverMessage'")
+    class InvalidResponseData(serverMessage: String) : NetworkError("Invalid response data: $serverMessage")
+    class InvalidStatusCode(statusCode: Int, serverMessage: String) : NetworkError("Invalid status code: $statusCode.  Given reason: '$serverMessage'")
     class InvalidURL : NetworkError("Invalid URL")
 }
 

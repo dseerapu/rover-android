@@ -8,17 +8,11 @@ import io.rover.rover.plugins.userexperience.experience.blocks.concerns.border.B
 import io.rover.rover.plugins.userexperience.experience.blocks.concerns.text.TextViewModelInterface
 import io.rover.rover.plugins.userexperience.experience.concerns.BindableViewModel
 
-interface ViewButtonInterface {
-    var buttonViewModel: ButtonViewModelInterface?
-}
-
 /**
  * View Model for block content that contains a clickable button with several different
  * states.
  */
 interface ButtonViewModelInterface {
-//    val text: String
-
     val buttonEvents: Observable<Event>
 
     sealed class Event {

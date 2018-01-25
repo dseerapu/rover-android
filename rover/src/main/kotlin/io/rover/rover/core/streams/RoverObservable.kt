@@ -169,7 +169,7 @@ interface Publisher<out T> {
     }
 }
 
-interface Processor<T, R> : Subscriber<T>, Publisher<R>
+interface Processor<in T, out R> : Subscriber<T>, Publisher<R>
 
 typealias Observable<T> = Publisher<T>
 
@@ -762,11 +762,7 @@ fun View.attachEvents(): Publisher<ViewEvent> {
 fun LifecycleOwner.asPublisher(): Publisher<Lifecycle.Event> {
     return object : Publisher<Lifecycle.Event> {
         override fun subscribe(subscriber: Subscriber<Lifecycle.Event>) {
-            val observer = object : GenericLifecycleObserver {
-                override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
-                    subscriber.onNext(event)
-                }
-            }
+            val observer = GenericLifecycleObserver { _, event -> subscriber.onNext(event) }
             this@asPublisher.lifecycle.addObserver(observer)
             subscriber.onSubscribe(object : Subscription {
                 override fun cancel() {
@@ -813,7 +809,7 @@ typealias CallbackReceiver<T> = (T) -> Unit
  *
  * Note that you do need to use [CallbackReceiver]: Kotlin type inference will lack sufficient
  * information to know what your callback type is, and worse, the Kotlin parser does not seem
- * to like nesting closure definitions a closure literal, so the [CallbackReceiver] typelias
+ * to like nesting closure definitions a closure literal, so the [CallbackReceiver] type-alias
  * becomes necessary.
  *
  * Example usage:

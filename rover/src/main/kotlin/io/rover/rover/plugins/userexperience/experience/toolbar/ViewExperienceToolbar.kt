@@ -45,9 +45,9 @@ class ViewExperienceToolbar(
 
     private var retrievedMenu: Menu? = null
 
-    val toolbar = Toolbar(context)
+    private val toolbar = Toolbar(context)
 
-    val closeButton = AppCompatButton(context, null, borderlessButtonStyle)
+    private val closeButton = AppCompatButton(context, null, borderlessButtonStyle)
 
     init {
         closeButton.text = context.getString(R.string.close)
