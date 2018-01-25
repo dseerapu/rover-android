@@ -1,4 +1,4 @@
-package io.rover.rover.plugins.userexperience.viewmodels
+package io.rover.rover.plugins.userexperience.experience.layout
 
 import io.rover.rover.ModelFactories
 import io.rover.rover.plugins.data.domain.HorizontalAlignment

@@ -1,4 +1,4 @@
-package io.rover.rover.plugins.userexperience.viewmodels
+package io.rover.rover.plugins.userexperience.experience.layout
 
 import io.rover.rover.ModelFactories
 import io.rover.rover.plugins.data.domain.HorizontalAlignment
@@ -11,7 +11,6 @@ import io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout.L
 import io.rover.rover.plugins.userexperience.experience.blocks.rectangle.RectangleBlockViewModel
 import io.rover.rover.plugins.userexperience.experience.layout.row.RowViewModel
 import io.rover.rover.plugins.userexperience.experience.layout.screen.ScreenViewModel
-import io.rover.rover.plugins.userexperience.experience.layout.DisplayItem
 import io.rover.rover.plugins.userexperience.types.RectF
 import org.amshove.kluent.mock
 import org.amshove.kluent.shouldBeInstanceOf

@@ -1,4 +1,4 @@
-package io.rover.rover.plugins.userexperience.viewmodels
+package io.rover.rover.plugins.userexperience.experience.blocks.concerns
 
 import io.rover.rover.plugins.userexperience.assets.AssetService
 import org.amshove.kluent.mock
