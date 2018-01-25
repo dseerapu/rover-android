@@ -1,4 +1,4 @@
-package io.rover.rover.plugins.data.requests
+package io.rover.rover.plugins.data.graphql.operations
 
 import io.rover.rover.plugins.data.domain.Context
 import io.rover.rover.plugins.data.domain.Event

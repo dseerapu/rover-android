@@ -6,8 +6,8 @@ import io.rover.rover.plugins.data.domain.Event
 import io.rover.rover.plugins.data.domain.Experience
 import io.rover.rover.platform.DateFormattingInterface
 import io.rover.rover.plugins.data.http.WireEncoderInterface
-import io.rover.rover.plugins.data.requests.data.asJson
-import io.rover.rover.plugins.data.requests.data.decodeJson
+import io.rover.rover.plugins.data.graphql.operations.data.asJson
+import io.rover.rover.plugins.data.graphql.operations.data.decodeJson
 import org.json.JSONArray
 import org.json.JSONObject
 

@@ -20,9 +20,9 @@ import io.rover.rover.plugins.data.http.HttpVerb
 import io.rover.rover.plugins.data.http.NetworkClient
 import io.rover.rover.plugins.data.http.NetworkTask
 import io.rover.rover.plugins.data.http.WireEncoderInterface
-import io.rover.rover.plugins.data.requests.FetchExperienceRequest
-import io.rover.rover.plugins.data.requests.SendEventsRequest
-import io.rover.rover.plugins.data.requests.data.FetchStateRequest
+import io.rover.rover.plugins.data.graphql.operations.FetchExperienceRequest
+import io.rover.rover.plugins.data.graphql.operations.SendEventsRequest
+import io.rover.rover.plugins.data.graphql.operations.data.FetchStateRequest
 import java.io.IOException
 import java.net.URL
 

@@ -1,6 +1,6 @@
 @file:JvmName("Experience")
 
-package io.rover.rover.plugins.data.requests.data
+package io.rover.rover.plugins.data.graphql.operations.data
 
 import io.rover.rover.plugins.data.domain.Background
 import io.rover.rover.plugins.data.domain.BackgroundContentMode

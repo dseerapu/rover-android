@@ -6,7 +6,7 @@ import io.rover.rover.plugins.data.domain.DeviceState
 import io.rover.rover.plugins.data.domain.Event
 import io.rover.rover.plugins.data.domain.Experience
 import io.rover.rover.plugins.data.graphql.WireEncoder
-import io.rover.rover.plugins.data.requests.data.encodeJson
+import io.rover.rover.plugins.data.graphql.operations.data.encodeJson
 import org.json.JSONObject
 
 // Android's build system (or perhaps the Kotlin compiler) recently changed to apparently not allow
