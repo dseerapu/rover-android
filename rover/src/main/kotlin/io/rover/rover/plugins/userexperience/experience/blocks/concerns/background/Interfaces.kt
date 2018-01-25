@@ -3,6 +3,7 @@ package io.rover.rover.plugins.userexperience.experience.blocks.concerns.backgro
 import android.graphics.Bitmap
 import android.graphics.Shader
 import android.util.DisplayMetrics
+import io.rover.rover.plugins.data.domain.Background
 import io.rover.rover.plugins.data.http.NetworkTask
 import io.rover.rover.plugins.userexperience.types.Rect
 import io.rover.rover.plugins.userexperience.types.PixelSize
@@ -48,6 +49,12 @@ class BackgroundImageConfiguration(
     /**
      * This density value should be set on the bitmap with [Bitmap.setDensity] before drawing it
      * on an Android canvas.
+     *
+     * (Note: While the [BackgroundViewModel] itself could have applied this to the Bitmap, by
+     * definition the view models are to avoid touching Android display API; the only reason that
+     * the view model is dealing with the [Bitmap] type at all is that it's otherwise a pretty
+     * suitable type shuttling the pixel data around, and also ensuring that it is warmed over into
+     * GPU vram).
      */
     val imageNativeDensity: Int
 )
@@ -64,16 +71,13 @@ interface BackgroundViewModelInterface {
         displayMetrics: DisplayMetrics,
         callback: (
             /**
-             * The bitmap to be drawn.  It is recommended that the consumer arrange to have it
-             * scaled to a roughly appropriate amount (need not be exact; that is the purpose of the
-             * view size and the [insets] given above) and also to be uploaded to GPU texture memory
-             * off thread ([Bitmap.prepareToDraw]) before setting it.
-             *
-             * Note: one can set the source density of the bitmap to control its scaling (which is
-             * particularly relevant for tile modes where
+             * The bitmap to be drawn.
              */
             Bitmap,
 
+            /**
+             * This structure defines how the View should render the background.
+             */
             BackgroundImageConfiguration
         ) -> Unit
     ): NetworkTask?

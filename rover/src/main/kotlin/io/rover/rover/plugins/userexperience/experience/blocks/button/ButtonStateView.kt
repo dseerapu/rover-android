@@ -2,17 +2,20 @@ package io.rover.rover.plugins.userexperience.experience.blocks.button
 
 import android.content.Context
 import android.graphics.Canvas
+import android.os.Build
+import android.support.annotation.RequiresApi
 import android.util.AttributeSet
 import android.view.View
-import io.rover.rover.plugins.userexperience.experience.concerns.BindableView
+import io.rover.rover.plugins.userexperience.experience.blocks.concerns.ViewComposition
 import io.rover.rover.plugins.userexperience.experience.blocks.concerns.background.ViewBackground
 import io.rover.rover.plugins.userexperience.experience.blocks.concerns.border.ViewBorder
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.ViewComposition
+import io.rover.rover.plugins.userexperience.experience.concerns.BindableView
 
 class ButtonStateView : View, BindableView<ButtonStateViewModelInterface> {
     constructor(context: Context?) : super(context)
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes)
 
     override var viewModel: ButtonStateViewModelInterface? = null

@@ -2,6 +2,7 @@ package io.rover.rover.plugins.data.requests.data
 
 import io.rover.rover.plugins.data.domain.AttributeValue
 import io.rover.rover.plugins.data.domain.Attributes
+import io.rover.rover.plugins.data.graphql.getIterable
 import org.json.JSONArray
 import org.json.JSONObject
 import java.net.URI

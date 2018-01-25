@@ -16,6 +16,7 @@ import io.rover.rover.plugins.userexperience.assets.AssetService
 import io.rover.rover.plugins.userexperience.assets.ImageOptimizationServiceInterface
 import io.rover.rover.plugins.data.DataPluginInterface
 import io.rover.rover.plugins.userexperience.MeasurementService
+import io.rover.rover.plugins.userexperience.UserExperiencePlugin
 import io.rover.rover.plugins.userexperience.experience.toolbar.ToolbarConfiguration
 import io.rover.rover.plugins.userexperience.experience.blocks.concerns.background.BackgroundViewModel
 import io.rover.rover.plugins.userexperience.experience.blocks.barcode.BarcodeBlockViewModel
@@ -148,7 +149,6 @@ class StockViewModelFactory(
         val borderViewModel = BorderViewModel(buttonState)
 
         return ButtonStateViewModel(
-            buttonState,
             borderViewModel,
             BackgroundViewModel(buttonState, assetService, imageOptimizationService),
             TextViewModel(buttonState, measurementService, true, true)

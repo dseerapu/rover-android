@@ -1,6 +1,8 @@
 package io.rover.rover.plugins.userexperience.experience.navigation
 
+import android.app.Activity
 import android.os.Parcelable
+import android.view.WindowManager
 import io.rover.rover.core.streams.Observable
 import io.rover.rover.plugins.userexperience.experience.concerns.BindableViewModel
 import io.rover.rover.plugins.userexperience.experience.toolbar.ExperienceToolbarViewModelInterface
@@ -17,7 +19,8 @@ interface ExperienceNavigationViewModelInterface : BindableViewModel {
      *
      * Check this before calling [pressBack].  However, it is optional: if you call pressBack()
      * without checking [canGoBack], and there are no remaining back stack entries remaining, you'll
-     * receive an [ExperienceNavigationViewModelInterface.Event.Exit] event.
+     * receive an [ExperienceNavigationViewModelInterface.Event.ViewEvent] containing a
+     * [ExperienceExternalNavigationEvent.Exit] event.
      */
     fun canGoBack(): Boolean
 

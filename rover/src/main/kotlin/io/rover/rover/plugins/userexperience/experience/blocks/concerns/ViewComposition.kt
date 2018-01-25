@@ -54,13 +54,13 @@ class ViewComposition : ViewCompositionInterface {
 
 interface ViewCompositionInterface {
     /**
-     * Execute the given callback against the [Canvas] just before the view's main [draw]
+     * Execute the given callback against the [Canvas] just before the view's main [View.draw]
      * pass would occur.
      */
     fun registerBeforeDraw(stage: (Canvas) -> Unit)
 
     /**
-     * Execute the given callback against the [Canvas] just after the view's main [draw]
+     * Execute the given callback against the [Canvas] just after the view's main [View.draw]
      * pass has occurred.
      */
     fun registerAfterDraw(stage: (Canvas) -> Unit)

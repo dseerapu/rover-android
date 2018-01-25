@@ -115,8 +115,6 @@ class AndroidMeasurementService(
             2.26086956521739f
         } else renderedBitmap.width / renderedBitmap.height.toFloat()
 
-        val neededHeight = width / aspectRatio
-
-        return neededHeight
+        return width / aspectRatio
     }
 }

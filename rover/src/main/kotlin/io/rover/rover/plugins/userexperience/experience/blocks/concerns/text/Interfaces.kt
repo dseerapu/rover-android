@@ -2,6 +2,7 @@ package io.rover.rover.plugins.userexperience.experience.blocks.concerns.text
 
 import android.text.Spanned
 import io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout.Measurable
+import io.rover.rover.plugins.userexperience.experience.blocks.text.TextBlockViewModel
 
 interface ViewTextInterface {
     var textViewModel: TextViewModelInterface?

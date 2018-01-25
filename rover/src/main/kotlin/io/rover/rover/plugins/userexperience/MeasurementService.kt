@@ -25,13 +25,12 @@ interface MeasurementService {
     ): Float
 
     /**
-     * Measure how much height a given bit of Unicode [richText] (with optional HTML tags such as
-     * strong, italic, and underline) will require if soft wrapped to the given [width] and
-     * [fontAppearance] ultimately meant to be displayed using an Android View.
+     * Measure how much height a given bit of Unicode [text] will require if rendered as a barcode
+     * in the given format.
      *
-     * [boldFontAppearance] provides any font size or font-family modifications that should be
-     * applied to bold text ( with no changes to colour or alignment).  This allows for nuanced
-     * control of bold span styling.
+     * [type] specifies what format of barcode should be used, namely
+     * [BarcodeViewModelInterface.BarcodeType]. Note that what length and sort of text is valid
+     * depends on the type.
      *
      * Returns the height needed to accommodate the barcode, at the correct aspect, at the given
      * width, in dps.

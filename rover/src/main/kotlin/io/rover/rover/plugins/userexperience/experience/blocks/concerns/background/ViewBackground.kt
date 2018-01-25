@@ -17,7 +17,7 @@ import io.rover.rover.plugins.userexperience.experience.blocks.concerns.ViewComp
 
 class ViewBackground(
     private val view: View,
-    private val viewComposition: ViewCompositionInterface
+    viewComposition: ViewCompositionInterface
 ) : ViewBackgroundInterface {
     private val shortAnimationDuration = view.resources.getInteger(
         android.R.integer.config_shortAnimTime

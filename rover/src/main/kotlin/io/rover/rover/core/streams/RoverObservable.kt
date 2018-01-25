@@ -676,7 +676,8 @@ fun <T> Publisher<T>.doOnNext(callback: (item: T) -> Unit): Publisher<T> {
     }
 }
 
-@Deprecated("Whenever we set Android Min SDK to at least 24, change to use Optional here instead (on account of the Reactive Streams spec not actually allowing for nulls)")
+// TODO: At such time as we set Android Min SDK to at least 24, change to use Optional here instead
+// (on account of the Reactive Streams spec not actually allowing for nulls).
 fun <T> Publisher<T?>.filterNulls(): Publisher<T> = filter { it != null }.map { it!! }
 
 /**

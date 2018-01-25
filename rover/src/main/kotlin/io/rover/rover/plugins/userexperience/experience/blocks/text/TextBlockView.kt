@@ -3,6 +3,7 @@ package io.rover.rover.plugins.userexperience.experience.blocks.text
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
+import android.support.v7.widget.AppCompatTextView
 import android.util.AttributeSet
 import android.widget.TextView
 import io.rover.rover.core.logging.log
@@ -14,11 +15,10 @@ import io.rover.rover.plugins.userexperience.experience.blocks.concerns.text.And
 import io.rover.rover.plugins.userexperience.experience.blocks.concerns.text.ViewText
 import io.rover.rover.plugins.userexperience.experience.blocks.concerns.ViewComposition
 
-class TextBlockView : TextView, LayoutableView<TextBlockViewModelInterface> {
+class TextBlockView : AppCompatTextView, LayoutableView<TextBlockViewModelInterface> {
     constructor(context: Context?) : super(context)
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
-    constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes)
 
     // mixins (TODO: injections)
     private val viewComposition = ViewComposition()

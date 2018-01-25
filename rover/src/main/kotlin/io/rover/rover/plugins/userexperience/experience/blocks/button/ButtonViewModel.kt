@@ -8,9 +8,9 @@ import io.rover.rover.plugins.userexperience.experience.ViewModelFactoryInterfac
 import io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout.BlockViewModelInterface
 
 class ButtonViewModel(
-    private val block: ButtonBlock,
-    private val blockViewModel: BlockViewModelInterface,
-    private val viewModelFactory: ViewModelFactoryInterface
+    block: ButtonBlock,
+    blockViewModel: BlockViewModelInterface,
+    viewModelFactory: ViewModelFactoryInterface
 ) : ButtonViewModelInterface {
     private val normalStateViewModel = viewModelFactory.viewModelForButtonState(block.normal)
     private val disabledStateViewModel = viewModelFactory.viewModelForButtonState(block.disabled)

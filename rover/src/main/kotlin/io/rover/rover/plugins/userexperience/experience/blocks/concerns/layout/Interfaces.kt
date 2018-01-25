@@ -2,6 +2,7 @@ package io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout
 
 import android.graphics.Rect
 import io.rover.rover.core.streams.Observable
+import io.rover.rover.plugins.userexperience.experience.blocks.concerns.border.BorderViewModel
 import io.rover.rover.plugins.userexperience.types.RectF
 import io.rover.rover.plugins.userexperience.experience.navigation.NavigateTo
 

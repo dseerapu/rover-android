@@ -1,5 +1,6 @@
 package io.rover.rover.plugins.userexperience.experience.blocks.concerns.text
 
+import android.annotation.SuppressLint
 import android.graphics.Paint
 import android.graphics.Typeface
 import android.text.TextPaint
@@ -35,10 +36,15 @@ class TypefaceAndExplicitBoldSpan(
      *
      * Note: this is in a very hot path, so performance matters.
      */
+    @SuppressLint("WrongConstant")
     private fun applyWithStyle(paint: Paint) {
+        // @SuppressLint because we are using the proper style bits, but because we're passing it
+        // through layers of our app just as Int, the static Android Linter is not able to determine
+        // the pedigree of the Int values.
+
         // merge the current paint style italic mode with the requested style of this span.  We
         // don't want the existing BOLD bit to leak through though; we want exclusive control
-        // over the build bit with the provided fontStyle.
+        // over the bold bit with the provided fontStyle.
         val style = (paint.typeface.style and Typeface.ITALIC) or fontStyle
 
         // cache the typefaces.

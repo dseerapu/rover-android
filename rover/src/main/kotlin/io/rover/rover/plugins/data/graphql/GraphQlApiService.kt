@@ -91,7 +91,7 @@ class GraphQlApiService(
                 try {
                     val body = httpResponse.bufferedInputStream.reader(Charsets.UTF_8).readText()
                     when (body) {
-                        "" -> NetworkResult.Error<TEntity>(NetworkError.EmptyResponseData(), false)
+                        "" -> NetworkResult.Error(NetworkError.EmptyResponseData(), false)
                         else -> {
                             try {
                                 NetworkResult.Success(

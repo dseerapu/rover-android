@@ -1,3 +1,5 @@
+@file:JvmName("Experience")
+
 package io.rover.rover.plugins.data.requests.data
 
 import io.rover.rover.plugins.data.domain.Background
@@ -33,6 +35,7 @@ import io.rover.rover.plugins.data.domain.TitleBarButtons
 import io.rover.rover.plugins.data.domain.UnitOfMeasure
 import io.rover.rover.plugins.data.domain.VerticalAlignment
 import io.rover.rover.plugins.data.domain.WebViewBlock
+import io.rover.rover.plugins.data.graphql.getObjectIterable
 import io.rover.rover.plugins.data.graphql.putProp
 import org.json.JSONArray
 import org.json.JSONObject
@@ -595,27 +598,3 @@ fun Screen.encodeJson(experienceId: String): JSONObject {
     }
 }
 
-@Suppress("UNCHECKED_CAST")
-fun <T> JSONArray.getIterable(): Iterable<T> {
-    return object : Iterable<T> {
-        private var counter = 0
-        override fun iterator(): Iterator<T> {
-            return object : Iterator<T> {
-                override fun hasNext(): Boolean = counter < this@getIterable.length()
-
-                override fun next(): T {
-                    if (counter >= this@getIterable.length()) {
-                        throw Exception("Iterator ran past the end!")
-                    }
-                    val jsonObject = this@getIterable.get(counter)
-                    counter++
-                    return jsonObject as T
-                }
-            }
-        }
-    }
-}
-
-fun JSONArray.getObjectIterable(): Iterable<JSONObject> = getIterable()
-
-fun JSONArray.getStringIterable(): Iterable<String> = getIterable()

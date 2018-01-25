@@ -26,8 +26,7 @@ class BlockAndRowRecyclerAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LayoutableBlockHolder {
         val type = ViewType.values()[viewType]
         return LayoutableBlockHolder(
-            viewFactory(parent, type),
-            type
+            viewFactory(parent, type)
         )
     }
 
@@ -52,15 +51,13 @@ class BlockAndRowRecyclerAdapter(
      * This [RecyclerView.ViewHolder] wraps a [LayoutableViewModel].
      */
     class LayoutableBlockHolder(
-        private val layoutableItemView: LayoutableView<in LayoutableViewModel>,
-        private val viewType: ViewType
+        private val layoutableItemView: LayoutableView<in LayoutableViewModel>
     ) : RecyclerView.ViewHolder(
         layoutableItemView.view
     ) {
         var viewModel: LayoutableViewModel? = null
             set(value) {
                 if (value != null) {
-
                     layoutableItemView.viewModel = value
                 }
                 field = value

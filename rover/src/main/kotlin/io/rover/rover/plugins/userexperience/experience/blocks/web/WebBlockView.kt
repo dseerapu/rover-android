@@ -3,6 +3,8 @@ package io.rover.rover.plugins.userexperience.experience.blocks.web
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
+import android.os.Build
+import android.support.annotation.RequiresApi
 import android.util.AttributeSet
 import android.webkit.WebView
 import io.rover.rover.core.logging.log
@@ -17,6 +19,7 @@ class WebBlockView : WebView, LayoutableView<WebViewBlockViewModelInterface> {
     constructor(context: Context?) : super(context)
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes)
 
     // mixins (TODO: injections)
@@ -57,6 +60,14 @@ class WebBlockView : WebView, LayoutableView<WebViewBlockViewModelInterface> {
         log.v("Tried to forcefully invalidate layout.  Inhibited.")
     }
 
+    /**
+     * Overrides [onTouchEvent] in order to (optionally) prevent touch & drag scrolling of the
+     * web view.  We suppress the ClickableViewAccessibility warning because that warning
+     * is intended for usage of onTouchEvent to detect clicks.  There is no click equivalent of
+     * touch & drag for scrolling.  We also disable/enable the scroll bars as part of the same
+     * policy separately in [ViewWeb].
+     */
+    @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
         // TODO: sadly this cannot be delegated readily to ViewWeb because it requires using this
         // override, so we'll ask the view model from here.  While I could teach ViewComposition

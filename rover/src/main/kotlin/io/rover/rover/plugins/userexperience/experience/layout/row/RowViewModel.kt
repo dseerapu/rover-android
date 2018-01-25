@@ -16,6 +16,7 @@ import io.rover.rover.plugins.userexperience.experience.layout.DisplayItem
 import io.rover.rover.plugins.userexperience.experience.navigation.NavigateTo
 import io.rover.rover.plugins.userexperience.types.RectF
 import io.rover.rover.plugins.userexperience.experience.layout.ViewType
+import io.rover.rover.plugins.userexperience.experience.layout.screen.ScreenViewModel
 
 class RowViewModel(
     private val row: Row,

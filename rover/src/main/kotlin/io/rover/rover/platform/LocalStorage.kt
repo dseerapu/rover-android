@@ -2,6 +2,7 @@ package io.rover.rover.platform
 
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
+import android.content.SharedPreferences
 
 /**
  * Very simple hash-like storage of keys and values.
@@ -26,7 +27,7 @@ class SharedPreferencesLocalStorage(
 ) : LocalStorage {
     private val baseContextName = "io.rover.rover.platform.localstorage"
 
-    val prefs = context.getSharedPreferences(baseContextName, MODE_PRIVATE)
+    val prefs : SharedPreferences = context.getSharedPreferences(baseContextName, MODE_PRIVATE)
 
     override fun getKeyValueStorageFor(namedContext: String): KeyValueStorage {
         return object : KeyValueStorage {

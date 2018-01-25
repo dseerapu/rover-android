@@ -15,6 +15,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.Window
+import io.rover.rover.R
 import io.rover.rover.core.logging.log
 import io.rover.rover.core.streams.Subscription
 import io.rover.rover.core.streams.androidLifecycleDispose
@@ -24,7 +25,7 @@ import io.rover.rover.plugins.userexperience.experience.ExperienceView
 
 class ViewExperienceToolbar(
     private val hostView: View,
-    private val hostWindowForStatusBar: Window,
+    hostWindowForStatusBar: Window,
     private val context: Context,
     private val toolbarHost: ExperienceView.ToolbarHost
 ) : ViewExperienceToolbarInterface {
@@ -49,7 +50,7 @@ class ViewExperienceToolbar(
     val closeButton = AppCompatButton(context, null, borderlessButtonStyle)
 
     init {
-        closeButton.text = "Close"
+        closeButton.text = context.getString(R.string.close)
         // TODO: default close button style to whatever is set in toolbar style
         toolbar.addView(closeButton)
         (closeButton.layoutParams as ActionBar.LayoutParams).gravity = Gravity.END

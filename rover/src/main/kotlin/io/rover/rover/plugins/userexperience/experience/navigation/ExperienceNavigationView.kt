@@ -1,6 +1,8 @@
 package io.rover.rover.plugins.userexperience.experience.navigation
 
 import android.content.Context
+import android.os.Build
+import android.support.annotation.RequiresApi
 import android.support.transition.Slide
 import android.support.transition.TransitionManager
 import android.support.transition.TransitionSet
@@ -9,12 +11,12 @@ import android.util.LruCache
 import android.view.Gravity
 import android.view.View
 import android.widget.FrameLayout
-import io.rover.rover.platform.whenNotNull
 import io.rover.rover.core.streams.androidLifecycleDispose
 import io.rover.rover.core.streams.subscribe
-import io.rover.rover.plugins.userexperience.experience.layout.screen.ScreenViewModelInterface
+import io.rover.rover.platform.whenNotNull
 import io.rover.rover.plugins.userexperience.experience.concerns.BindableView
 import io.rover.rover.plugins.userexperience.experience.layout.screen.ScreenView
+import io.rover.rover.plugins.userexperience.experience.layout.screen.ScreenViewModelInterface
 
 /**
  * Navigation behaviour between screens of an Experience.
@@ -23,6 +25,7 @@ class ExperienceNavigationView : FrameLayout, BindableView<ExperienceNavigationV
     constructor(context: Context?) : super(context)
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes)
 
     // TODO: implement an onCreate and if inEditMode() display a "Rover Experience" text view.

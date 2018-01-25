@@ -27,8 +27,7 @@ fun Int.dpAsPx(displayMetrics: DisplayMetrics): Int {
 
 fun Int.dpAsPx(displayDensity: Float): Int {
     // TODO change to: TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, this, metrics)
-    val scale = displayDensity
-    return (this * scale + 0.5f).toInt()
+    return (this * displayDensity + 0.5f).toInt()
 }
 
 fun Int.pxAsDp(displayMetrics: DisplayMetrics): Float {
@@ -36,8 +35,7 @@ fun Int.pxAsDp(displayMetrics: DisplayMetrics): Float {
 }
 
 fun Int.pxAsDp(displayDensity: Float): Float {
-    val scale = displayDensity
-    return this / scale
+    return this / displayDensity
 }
 
 /**

@@ -1,5 +1,6 @@
 package io.rover.rover.plugins.userexperience.experience.blocks.concerns.border
 
+import io.rover.rover.plugins.data.domain.Border
 import io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout.LayoutPaddingDeflection
 
 /**

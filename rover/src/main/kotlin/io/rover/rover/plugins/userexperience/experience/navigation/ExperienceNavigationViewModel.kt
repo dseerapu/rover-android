@@ -57,22 +57,24 @@ class ExperienceNavigationViewModel(
         viewModelFactory.viewModelForScreen(it.value)
     }
 
-    /**
-     * This subscriber listens to all the view models and then dispatches their navigation events
-     * to our actions publisher.
-     */
-    private val screenEventSubscription = screenViewModelsById
-        .values
-        .asPublisher()
-        .flatMap { screen ->
-            screen.events.map { Pair(screen, it) }
-        }
-        .subscribe({ (screen, navigateTo) ->
-            // filter out the the events that are not meant for the currently active screen:
-            if (activeScreen() == screen) {
-                actions.onNext(Action.Navigate(navigateTo))
+    init {
+        /**
+         * This subscriber listens to all the view models and then dispatches their navigation events
+         * to our actions publisher.
+         */
+        screenViewModelsById
+            .values
+            .asPublisher()
+            .flatMap { screen ->
+                screen.events.map { Pair(screen, it) }
             }
-        }, { error -> actions.onError(error) })
+            .subscribe({ (screen, navigateTo) ->
+                // filter out the the events that are not meant for the currently active screen:
+                if (activeScreen() == screen) {
+                    actions.onNext(Action.Navigate(navigateTo))
+                }
+            }, { error -> actions.onError(error) })
+    }
 
     private sealed class Action {
         class PressedBack : Action()
