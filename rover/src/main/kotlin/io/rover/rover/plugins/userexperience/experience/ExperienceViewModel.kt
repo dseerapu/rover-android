@@ -12,6 +12,7 @@ import io.rover.rover.core.streams.Observable
 import io.rover.rover.core.streams.PublishSubject
 import io.rover.rover.core.streams.Publisher
 import io.rover.rover.core.streams.asPublisher
+import io.rover.rover.core.streams.doOnNext
 import io.rover.rover.core.streams.filterNulls
 import io.rover.rover.core.streams.flatMap
 import io.rover.rover.core.streams.map
@@ -96,19 +97,16 @@ class ExperienceViewModel(
                                         is ExperienceNavigationViewModelInterface.Event.GoToScreen -> null /* TODO this event is an internal concern of ExperienceNavigation, it should eventually be hid */
                                     }
                                 }.filterNulls()
-                            ).map {
+                            ).doOnNext {
                                 this@ExperienceViewModel.log.v("Observed navigation View Event: $it")
-                                it
                             }
                         }
                     }
-                }.map { event ->
-                    // side-effects!  Store newly navigationViewModel as state (TODO should be doOnNext)
+                }.doOnNext { event ->
                     if (event is ExperienceViewModelInterface.Event.ExperienceReady) {
-                        log.v("Remembering experience view model.")
+                        log.v("Remembering experience navigation view model.")
                         navigationViewModel = event.experienceNavigationViewModel
                     }
-                    event
                 }
             ).share()
 

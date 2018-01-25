@@ -214,10 +214,6 @@ fun <T, R> Publisher<T>.map(transform: (T) -> R): Publisher<R> {
             prior.subscribe(
                 object : Subscriber<T> {
                     override fun onComplete() {
-                        if (Looper.myLooper() != Looper.getMainLooper()) {
-                            throw RuntimeException("Completion result on bogus thread?!  Running on thread ${Thread.currentThread()}")
-                        }
-
                         subscriber.onComplete()
                     }
 
@@ -640,6 +636,42 @@ fun <T> Collection<T>.asPublisher(): Publisher<T> {
             subscriber.onSubscribe(subscription)
             this@asPublisher.forEach { item -> subscriber.onNext(item) }
             subscriber.onComplete()
+        }
+    }
+}
+
+fun <T> Publisher<T>.doOnNext(callback: (item: T) -> Unit): Publisher<T> {
+    val prior = this
+    return object : Publisher<T> {
+        override fun subscribe(subscriber: Subscriber<T>) {
+            prior.subscribe(
+                object : Subscriber<T> {
+                    override fun onComplete() {
+                        subscriber.onComplete()
+                    }
+
+                    override fun onError(error: Throwable) {
+                        subscriber.onError(error)
+                    }
+
+                    override fun onNext(item: T) {
+                        callback(item)
+                        subscriber.onNext(item)
+                    }
+
+                    override fun onSubscribe(sourceSubscription: Subscription) {
+                        // for clarity, this is called when I (map()) have subscribed
+                        // successfully to the source.  I then want to let the downstream
+                        // consumer know that I have subscribed successfully on their behalf,
+                        // and also allow them to pass cancellation through.
+                        val subscription = object : Subscription {
+                            override fun cancel() { sourceSubscription.cancel() }
+                        }
+
+                        subscriber.onSubscribe(subscription)
+                    }
+                }
+            )
         }
     }
 }

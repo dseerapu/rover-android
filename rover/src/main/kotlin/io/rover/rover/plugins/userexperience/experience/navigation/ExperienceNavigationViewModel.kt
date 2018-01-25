@@ -8,6 +8,7 @@ import io.rover.rover.platform.whenNotNull
 import io.rover.rover.core.streams.Observable
 import io.rover.rover.core.streams.PublishSubject
 import io.rover.rover.core.streams.asPublisher
+import io.rover.rover.core.streams.doOnNext
 import io.rover.rover.core.streams.filterNulls
 import io.rover.rover.core.streams.flatMap
 import io.rover.rover.core.streams.map
@@ -201,13 +202,10 @@ class ExperienceNavigationViewModel(
 
         actions.map { action -> actionBehaviour(action) }
             .filterNulls()
-    ).map { stateChange ->
-        // abuse .map() for doOnNext() side-effects for now to update our state! TODO add doOnNext()
+    ).doOnNext { stateChange ->
         state = State(stateChange.newBackStack)
-        stateChange
     }.flatMap { stateChange -> injectBehaviouralTransientEvents(stateChange.event) }
-    .map { event ->
-        // and subscribe to any new toolbars (TODO doOnNext)
+    .doOnNext { event ->
         if (event is ExperienceNavigationViewModelInterface.Event.SetActionBar) {
             event
                 .experienceToolbarViewModel
@@ -222,11 +220,8 @@ class ExperienceNavigationViewModel(
                     )
                 }
         }
-
-        event
-    }.map {
+    }.doOnNext {
         log.v("Event: $it")
-        it
     }.share()
 
     override val events: Observable<ExperienceNavigationViewModelInterface.Event> = epic.shareAndReplayTypesOnResubscribe(
