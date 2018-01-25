@@ -1,5 +1,3 @@
-@file:JvmName("Experience")
-
 package io.rover.rover.plugins.data.domain
 
 import android.util.DisplayMetrics

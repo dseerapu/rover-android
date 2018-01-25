@@ -1,5 +1,3 @@
-@file:JvmName("Attributes")
-
 package io.rover.rover.plugins.data.domain
 
 /**

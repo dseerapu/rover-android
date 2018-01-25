@@ -1,5 +1,3 @@
-@file:JvmName("Interfaces")
-
 package io.rover.rover.plugins.userexperience.experience.toolbar
 
 import android.support.v7.widget.Toolbar

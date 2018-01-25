@@ -1,5 +1,3 @@
-@file:JvmName("DataPluginInterface")
-
 package io.rover.rover.plugins.data
 
 import io.rover.rover.platform.DateFormattingInterface

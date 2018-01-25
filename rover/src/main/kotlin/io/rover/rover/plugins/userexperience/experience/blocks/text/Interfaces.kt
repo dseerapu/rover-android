@@ -1,5 +1,3 @@
-@file:JvmName("Interfaces")
-
 package io.rover.rover.plugins.userexperience.experience.blocks.text
 
 import io.rover.rover.plugins.userexperience.experience.blocks.concerns.background.BackgroundViewModelInterface

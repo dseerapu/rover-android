@@ -1,5 +1,3 @@
-@file:JvmName("NetworkClientInterface")
-
 package io.rover.rover.plugins.data.http
 
 import java.io.BufferedInputStream

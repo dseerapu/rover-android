@@ -1,5 +1,3 @@
-@file:JvmName("AssetRetrievalStage")
-
 package io.rover.rover.plugins.userexperience.assets
 
 import io.rover.rover.core.streams.blockForResult

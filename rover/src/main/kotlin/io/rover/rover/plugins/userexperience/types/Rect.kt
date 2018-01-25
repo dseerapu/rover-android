@@ -1,5 +1,3 @@
-@file:JvmName("Rect")
-
 package io.rover.rover.plugins.userexperience.types
 
 /*

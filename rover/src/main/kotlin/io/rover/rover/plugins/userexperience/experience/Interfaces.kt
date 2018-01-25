@@ -1,5 +1,3 @@
-@file:JvmName("Interfaces")
-
 package io.rover.rover.plugins.userexperience.experience
 
 import android.os.Parcelable
