@@ -4,29 +4,26 @@ package io.rover.rover.plugins.data
 
 import io.rover.rover.platform.DateFormattingInterface
 import io.rover.rover.platform.DeviceIdentificationInterface
-import io.rover.rover.plugins.data.domain.Context
-import io.rover.rover.plugins.data.domain.DeviceState
-import io.rover.rover.plugins.data.domain.Event
-import io.rover.rover.plugins.data.domain.Experience
-import io.rover.rover.plugins.data.domain.ID
+import io.rover.rover.plugins.data.graphql.GraphQlApiServiceInterface
 import io.rover.rover.plugins.data.http.NetworkClient
-import io.rover.rover.plugins.data.http.NetworkTask
 import io.rover.rover.plugins.data.http.WireEncoderInterface
 import org.json.JSONObject
 import java.util.concurrent.Executor
 
 /**
- * Rover GraphQL API-flavored network response.
+ * Rover GraphQL API-flavored network response.  Optionally either a success (with requested
+ * payload), or a failure (with the reason why, and whether or not the caller ought to attempt to
+ * repeat the request.
  */
 sealed class NetworkResult<T> {
     class Error<T>(
         val throwable: Throwable,
 
         /**
-         * Does the Rover API recommend that the consumer should attempt to retry.  If true,
-         * the error should be considered a "soft failure" for external reasons (network trouble,
-         * temporary outages on the cloud-side Rover API gateway, etc.) and the consumer code
-         * should attempt a retry after a momentary wait.
+         * Indicates if the Rover API recommends that the consumer should attempt to retry.  If
+         * true, the error should be considered a "soft failure" for external reasons (network
+         * trouble, temporary outages on the cloud-side Rover API gateway, etc.) and the consumer
+         * code should attempt a retry after a momentary wait.
          */
         val shouldRetry: Boolean
     ) : NetworkResult<T>()
@@ -109,12 +106,8 @@ interface NetworkRequest<out TInput> {
     }
 }
 
-interface DataPluginInterface {
-    fun fetchExperienceTask(experienceID: ID, completionHandler: ((NetworkResult<Experience>) -> Unit)): NetworkTask
+interface DataPluginInterface: GraphQlApiServiceInterface {
 
-    fun fetchStateTask(completionHandler: ((NetworkResult<DeviceState>) -> Unit)): NetworkTask
-
-    fun sendEventsTask(events: List<Event>, context: Context, completionHandler: ((NetworkResult<String>) -> Unit)): NetworkTask
 }
 
 class APIException(
@@ -133,4 +126,6 @@ interface DataPluginComponentsInterface {
     val deviceIdentification: DeviceIdentificationInterface
 
     val dateFormatting: DateFormattingInterface
+
+    val graphQlApiService: GraphQlApiServiceInterface
 }

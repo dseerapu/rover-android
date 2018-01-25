@@ -10,6 +10,8 @@ import io.rover.rover.platform.DeviceIdentificationInterface
 import io.rover.rover.platform.IoMultiplexingExecutor
 import io.rover.rover.platform.LocalStorage
 import io.rover.rover.platform.SharedPreferencesLocalStorage
+import io.rover.rover.plugins.data.graphql.GraphQlApiService
+import io.rover.rover.plugins.data.graphql.GraphQlApiServiceInterface
 import io.rover.rover.plugins.data.http.AsyncTaskAndHttpUrlConnectionNetworkClient
 import io.rover.rover.plugins.data.http.NetworkClient
 import io.rover.rover.plugins.data.graphql.WireEncoder
@@ -32,6 +34,7 @@ data class ServerKey(
  * These are all the internal dependencies needed by the [DataPlugin].
  */
 open class DataPluginComponents(
+    private val endpoint: URL,
     override val authenticationContext: AuthenticationContext,
     applicationContext: Context
 ): DataPluginComponentsInterface {
@@ -58,6 +61,17 @@ open class DataPluginComponents(
         DeviceIdentification(localStorage)
     }
 
+    override val graphQlApiService: GraphQlApiServiceInterface by lazy {
+        GraphQlApiService(
+            endpoint,
+            authenticationContext,
+            deviceIdentification,
+            wireEncoder,
+            networkClient
+        )
+    }
+
+
     private val localStorage: LocalStorage by lazy {
         SharedPreferencesLocalStorage(applicationContext)
     }
@@ -74,8 +88,8 @@ open class DataPluginAssembler(
     override fun register(container: Container) {
         container.register(DataPluginInterface::class.java) { resolver ->
             DataPlugin(
-                URL("https://api.rover.io/graphql"),
                 DataPluginComponents(
+                    URL("https://api.rover.io/graphql"),
                     ServerKey(sdkKey),
                     applicationContext
                 )
