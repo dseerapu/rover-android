@@ -12,6 +12,7 @@ import com.facebook.stetho.urlconnection.StethoURLConnectionManager
 import io.rover.rover.R
 import io.rover.rover.Rover
 import io.rover.rover.core.logging.log
+import io.rover.rover.core.streams.androidLifecycleDispose
 import io.rover.rover.core.streams.subscribe
 import io.rover.rover.platform.asAndroidUri
 import io.rover.rover.plugins.data.http.AsyncTaskAndHttpUrlConnectionInterception
@@ -26,63 +27,75 @@ import java.net.HttpURLConnection
 
 /**
  * This can display a Rover experience in an Activity, self-contained.
+ *
+ * You may use this either as a subclass for your own Activity, or as a template for embedding
+ * a Rover [ExperienceView] in your own Activities.
  */
-class StandaloneExperienceHostActivity : AppCompatActivity() {
-    // so, a few constraints:
-
-    // may be booted inside any app, so needs to start up our object graph as needed. this story
-    // will need to change as we grow a better DI.
-    // we then need to get it an auth token. this comes from one of two possibilities: dynamically set (usually only by internal Rover apps), or set by a customer using the Rover SDK facade.
-
-    // probably offer the dynamically set method as an activity argument or something.
-
+open class StandaloneExperienceHostActivity : AppCompatActivity() {
     private val experienceId
-        get() = this.intent.getStringExtra("EXPERIENCE_ID") ?: throw RuntimeException("Please pass EXPERIENCE_ID.")
+        get() = this.intent.getStringExtra("EXPERIENCE_ID") ?: throw RuntimeException(
+            "Please pass EXPERIENCE_ID. Consider using StandaloneExperienceHostActivity.makeIntent()"
+        )
+
+    /**
+     * This method is responsible for performing external navigation events: that is, navigation
+     * events emitted by an Experience that "break out" of the Experience's intrinsic navigation
+     * flow (ie., moving back and forth amongst Screens).  The default implementation handles
+     * exiting the Activity and opening up a web browser.
+     *
+     * You may override this in a subclass if you want to handle the
+     * [ExperienceExternalNavigationEvent.Custom] event you may have emitted in view model subclass,
+     * to do some other sort of external behaviour in your app, such as open a native login screen.
+     */
+    protected fun dispatchExternalNavigationEvent(externalNavigationEvent: ExperienceExternalNavigationEvent) {
+        when (externalNavigationEvent) {
+            is ExperienceExternalNavigationEvent.Exit -> {
+                finish()
+            }
+            is ExperienceExternalNavigationEvent.OpenExternalWebBrowser -> {
+                try {
+                    ContextCompat.startActivity(
+                        this,
+                        Intent(
+                            Intent.ACTION_VIEW,
+                            externalNavigationEvent.uri.asAndroidUri()
+                        ),
+                        null
+                    )
+                } catch (e: ActivityNotFoundException) {
+                    log.w("No way to handle URI ${externalNavigationEvent.uri}.  Perhaps app is missing an intent filter for a deep link?")
+                }
+            }
+            is ExperienceExternalNavigationEvent.Custom -> {
+                log.w("You have emitted a Custom event: $externalNavigationEvent, but did not handle it in your subclass implementation of StandaloneExperienceHostActivity.dispatchExternalNavigationEvent()")
+            }
+        }
+    }
 
     // We're actually just showing a single screen for now
     // private val experiencesView by lazy { ScreenView(this) }
     private val experiencesView by lazy { ExperienceView(this) }
 
-    private val dataPlugin by lazy {
-        Rover.sharedInstance.dataPlugin
-    }
 
     private val userExperiencePlugin by lazy {
         Rover.sharedInstance.userExperiencePlugin
     }
 
-    // TODO: there should be a standalone-experience-host-activity view model.
     private var experienceViewModel: ExperienceViewModelInterface? = null
         set(viewModel) {
             field = viewModel
 
             experiencesView.viewModel = viewModel
 
-            // TODO: this subscription must be lifecycle-managed
-            viewModel?.events?.subscribe(
+            viewModel
+                ?.events
+                ?.androidLifecycleDispose(this)
+                ?.subscribe(
                 { event ->
                     when (event) {
                         is ExperienceViewModelInterface.Event.ExternalNavigation -> {
-                            log.v("Received a view event: ${event.event}")
-                            when (event.event) {
-                                is ExperienceExternalNavigationEvent.Exit -> {
-                                    finish()
-                                }
-                                is ExperienceExternalNavigationEvent.OpenExternalWebBrowser -> {
-                                    try {
-                                        ContextCompat.startActivity(
-                                            this,
-                                            Intent(
-                                                Intent.ACTION_VIEW,
-                                                event.event.uri.asAndroidUri()
-                                            ),
-                                            null
-                                        )
-                                    } catch (e: ActivityNotFoundException) {
-                                        log.w("No way to handle URI ${event.event.uri}.  Perhaps app is missing an intent filter for a deep link?")
-                                    }
-                                }
-                            }
+                            log.v("Received an external navigation event: ${event.event}")
+                            dispatchExternalNavigationEvent(event.event)
                         }
                     }
                 }, { error ->
@@ -103,18 +116,17 @@ class StandaloneExperienceHostActivity : AppCompatActivity() {
 
     // The View needs to know about the Activity-level window and several other
     // Activity/Fragment context things in order to temporarily change the backlight.
-    private val toolbarHost = ActivityToolbarHost(this)
+    private val toolbarHost by lazy { ActivityToolbarHost(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
 
         val displayNoCustomThemeWarningMessage = this.theme.obtainStyledAttributes(
             intArrayOf(R.attr.displayNoCustomThemeWarningMessage)
         ).getBoolean(0, false)
 
         if(displayNoCustomThemeWarningMessage) {
-            log.w("You have set no theme for StandaloneExperienceHostActivity in your AndroidManifest.xml.\n" +
+            log.w("You have set no theme for StandaloneExperienceHostActivity (or your optional subclass thereof) in your AndroidManifest.xml.\n" +
                 "In particular, this means the toolbar will not pick up your brand colours.")
         }
 
@@ -122,16 +134,16 @@ class StandaloneExperienceHostActivity : AppCompatActivity() {
             experiencesView
         )
 
+        // wire up the toolbar host to the ExperienceView.
         experiencesView.toolbarHost = toolbarHost
-
-        // i left off here. options menu?
 
         experienceViewModel = userExperiencePlugin.viewModelForExperience(experienceId, savedInstanceState?.getParcelable("experienceState"))
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         super.onCreateOptionsMenu(menu)
-        // this is so ExperienceView can
+        // ExperienceView owns the toolbar, this is so ExperienceView can take your menu and include
+        // it in its internal toolbar.
         toolbarHost.menu = menu
         return true
     }
@@ -144,8 +156,6 @@ class StandaloneExperienceHostActivity : AppCompatActivity() {
     companion object {
         @JvmStatic
         fun makeIntent(packageContext: Context, experienceId: String): Intent {
-            // TODO: token will be removed when this starts to depend on a static-context
-            // Rover injection tree that user will have set up in their Application.onCreate().
             return Intent(packageContext, StandaloneExperienceHostActivity::class.java).apply {
                 putExtra("EXPERIENCE_ID", experienceId)
             }
@@ -158,6 +168,9 @@ class StandaloneExperienceHostActivity : AppCompatActivity() {
      * application and set an instance of it on the [AsyncTaskAndHttpUrlConnectionNetworkClient] with
      * [AsyncTaskAndHttpUrlConnectionNetworkClient.registerInterceptor] (DI instructions for
      * users to follow).
+     *
+     * TODO: this will be deleted, the stetho dependency removed, and just live in the
+     * documentation instead.
      */
     class StethoRoverInterceptor : AsyncTaskAndHttpUrlConnectionInterceptor {
         override fun onOpened(httpUrlConnection: HttpURLConnection, requestPath: String, body: ByteArray): AsyncTaskAndHttpUrlConnectionInterception {

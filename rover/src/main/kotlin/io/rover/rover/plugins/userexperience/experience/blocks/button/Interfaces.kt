@@ -5,19 +5,23 @@ import io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout.B
 import io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout.LayoutableViewModel
 import io.rover.rover.plugins.userexperience.experience.blocks.concerns.background.BackgroundViewModelInterface
 import io.rover.rover.plugins.userexperience.experience.blocks.concerns.border.BorderViewModelInterface
+import io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout.BlockViewModel
 import io.rover.rover.plugins.userexperience.experience.blocks.concerns.text.TextViewModelInterface
 import io.rover.rover.plugins.userexperience.experience.concerns.BindableViewModel
 
 /**
  * View Model for block content that contains a clickable button with several different
  * states.
+ *
+ * Note that if you're looking for the Click event, that is handled more generally in
+ * [BlockViewModel].
  */
 interface ButtonViewModelInterface {
     val buttonEvents: Observable<Event>
 
     sealed class Event {
         /**
-         * Reveal the text for the given.
+         * Reveal the text for the given state.
          */
         data class DisplayState(
             val viewModel: ButtonStateViewModelInterface,

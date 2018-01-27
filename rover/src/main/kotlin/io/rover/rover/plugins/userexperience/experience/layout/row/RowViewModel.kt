@@ -8,6 +8,7 @@ import io.rover.rover.core.streams.flatMap
 import io.rover.rover.core.streams.map
 import io.rover.rover.core.streams.share
 import io.rover.rover.plugins.userexperience.experience.ViewModelFactoryInterface
+import io.rover.rover.plugins.userexperience.experience.blocks.BlockViewModelFactoryInterface
 import io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout.BlockViewModelInterface
 import io.rover.rover.plugins.userexperience.experience.blocks.barcode.BarcodeBlockViewModel
 import io.rover.rover.plugins.userexperience.experience.blocks.concerns.background.BackgroundViewModelInterface
@@ -20,7 +21,7 @@ import io.rover.rover.plugins.userexperience.experience.layout.screen.ScreenView
 
 class RowViewModel(
     private val row: Row,
-    private val viewModelFactory: ViewModelFactoryInterface,
+    private val viewModelFactory: BlockViewModelFactoryInterface,
     private val backgroundViewModel: BackgroundViewModelInterface
 ) : RowViewModelInterface, BackgroundViewModelInterface by backgroundViewModel {
     override val viewType: ViewType = ViewType.Row

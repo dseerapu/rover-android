@@ -40,6 +40,8 @@ design into text in Experience blocks.
 
 ### Use a custom bundled font instead of Roboto
 
+### Forgo the included Activity and Fragment, and use Rover embedded in your single-activity, fragmentless app.
+
 ### Other customisations
 
 Consider reading through the below in order to glean the general pattern of

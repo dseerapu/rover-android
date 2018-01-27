@@ -6,6 +6,7 @@ import io.rover.rover.core.streams.Observable
 import io.rover.rover.core.streams.asPublisher
 import io.rover.rover.core.streams.flatMap
 import io.rover.rover.plugins.userexperience.experience.ViewModelFactoryInterface
+import io.rover.rover.plugins.userexperience.experience.blocks.BlockViewModelFactoryInterface
 import io.rover.rover.plugins.userexperience.experience.blocks.concerns.background.BackgroundViewModelInterface
 import io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout.LayoutableViewModel
 import io.rover.rover.plugins.userexperience.experience.toolbar.ToolbarConfiguration
@@ -19,7 +20,7 @@ import io.rover.rover.plugins.userexperience.experience.layout.row.RowViewModelI
 class ScreenViewModel(
     private val screen: Screen,
     private val backgroundViewModel: BackgroundViewModelInterface,
-    private val viewModelFactory: ViewModelFactoryInterface
+    private val viewModelFactory: BlockViewModelFactoryInterface
 ) : ScreenViewModelInterface,
     BackgroundViewModelInterface by backgroundViewModel {
 

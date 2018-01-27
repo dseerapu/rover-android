@@ -4,7 +4,10 @@ import android.app.Activity
 import android.os.Parcelable
 import android.view.WindowManager
 import io.rover.rover.core.streams.Observable
+import io.rover.rover.plugins.userexperience.experience.blocks.button.ButtonBlockViewModel
+import io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout.BlockViewModel
 import io.rover.rover.plugins.userexperience.experience.concerns.BindableViewModel
+import io.rover.rover.plugins.userexperience.experience.layout.screen.ScreenViewModel
 import io.rover.rover.plugins.userexperience.experience.toolbar.ExperienceToolbarViewModelInterface
 import io.rover.rover.plugins.userexperience.experience.layout.screen.ScreenViewModelInterface
 import java.net.URI
@@ -19,7 +22,7 @@ interface ExperienceNavigationViewModelInterface : BindableViewModel {
      *
      * Check this before calling [pressBack].  However, it is optional: if you call pressBack()
      * without checking [canGoBack], and there are no remaining back stack entries remaining, you'll
-     * receive an [ExperienceNavigationViewModelInterface.Event.ViewEvent] containing a
+     * receive an [ExperienceNavigationViewModelInterface.Event.NavigateAway] containing a
      * [ExperienceExternalNavigationEvent.Exit] event.
      */
     fun canGoBack(): Boolean
@@ -40,7 +43,7 @@ interface ExperienceNavigationViewModelInterface : BindableViewModel {
             val animate: Boolean
         ) : Event()
 
-        data class ViewEvent(
+        data class NavigateAway(
             val event: ExperienceExternalNavigationEvent
         ) : Event()
 
@@ -84,4 +87,17 @@ sealed class ExperienceExternalNavigationEvent {
      * happens to be in the surrounding app.
      */
     class Exit : ExperienceExternalNavigationEvent()
+
+    /**
+     * This is a custom navigation type.  It is not used in typical operation of the Rover SDK's
+     * Experiences plugin, however, to insert custom behaviour developers may override
+     * [ExperienceNavigationViewModel], [ScreenViewModel], or [BlockViewModel] to emit these Custom
+     * events thus handle them in their [ExperienceView] container.  A common use case is to peek at
+     * incoming screens that have some sort of "needs login" meta property within
+     * [ExperienceNavigationViewModel], emit a custom event, and then consuming it within a custom
+     * [ExperienceView] to launch your native, non-Rover, login screen.
+     *
+     * See the documentation for further details.
+     */
+    data class Custom(val uri: URI): ExperienceExternalNavigationEvent()
 }

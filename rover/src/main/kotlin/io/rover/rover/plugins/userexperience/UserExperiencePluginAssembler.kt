@@ -20,7 +20,7 @@ open class UserExperiencePluginComponents(
     private val displayMetrics: DisplayMetrics,
     private val dataPluginInterface: DataPluginInterface
 ) : UserExperiencePluginComponentsInterface {
-    override val viewModelFactory: ViewModelFactoryInterface by lazy {
+    override val stockViewModelFactory: ViewModelFactoryInterface by lazy {
         StockViewModelFactory(
             measurementService,
             assetService,

@@ -1,6 +1,7 @@
 package io.rover.rover.plugins.userexperience
 
 import io.rover.rover.Rover
+import io.rover.rover.plugins.userexperience.experience.StockViewModelFactory
 import io.rover.rover.plugins.userexperience.experience.ViewModelFactoryInterface
 
 /**
@@ -17,4 +18,4 @@ import io.rover.rover.plugins.userexperience.experience.ViewModelFactoryInterfac
  */
 open class UserExperiencePlugin(
     components: UserExperiencePluginComponentsInterface
-) : UserExperiencePluginInterface, ViewModelFactoryInterface by components.viewModelFactory
+) : UserExperiencePluginInterface, ViewModelFactoryInterface by components.stockViewModelFactory

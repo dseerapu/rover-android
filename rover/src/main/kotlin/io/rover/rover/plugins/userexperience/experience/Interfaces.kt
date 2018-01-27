@@ -79,11 +79,5 @@ interface ViewModelFactoryInterface {
 
     fun viewModelForExperienceToolbar(toolbarConfiguration: ToolbarConfiguration): ExperienceToolbarViewModelInterface
 
-    fun viewModelForBlock(block: Block): BlockViewModelInterface
 
-    fun viewModelForRow(row: Row): RowViewModelInterface
-
-    fun viewModelForScreen(screen: Screen): ScreenViewModelInterface
-
-    fun viewModelForButtonState(buttonState: ButtonState): ButtonStateViewModelInterface
 }

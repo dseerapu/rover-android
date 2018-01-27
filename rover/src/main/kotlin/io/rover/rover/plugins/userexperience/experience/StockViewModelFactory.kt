@@ -17,6 +17,8 @@ import io.rover.rover.plugins.userexperience.assets.ImageOptimizationServiceInte
 import io.rover.rover.plugins.data.DataPluginInterface
 import io.rover.rover.plugins.userexperience.MeasurementService
 import io.rover.rover.plugins.userexperience.UserExperiencePlugin
+import io.rover.rover.plugins.userexperience.experience.blocks.BlockViewModelFactory
+import io.rover.rover.plugins.userexperience.experience.blocks.BlockViewModelFactoryInterface
 import io.rover.rover.plugins.userexperience.experience.toolbar.ToolbarConfiguration
 import io.rover.rover.plugins.userexperience.experience.blocks.concerns.background.BackgroundViewModel
 import io.rover.rover.plugins.userexperience.experience.blocks.barcode.BarcodeBlockViewModel
@@ -47,12 +49,11 @@ import io.rover.rover.plugins.userexperience.experience.blocks.web.WebViewModel
 /**
  * Constructs the standard versions of the view models for all the given Experience blocks.
  *
- * If you wish to override the View Model creation behaviour, please see [UserExperiencePlugin].
+ * If you wish to override the View Model creation behaviour, please see [UserExperiencePlugin] and
+ * override the [ViewModelFactoryInterface] methods there.
  */
 class StockViewModelFactory(
-    private val measurementService: MeasurementService,
-    private val assetService: AssetService,
-    private val imageOptimizationService: ImageOptimizationServiceInterface,
+    private val blockViewModelFactory: BlockViewModelFactoryInterface,
     private val dataPlugin: DataPluginInterface
 ) : ViewModelFactoryInterface {
     /**
@@ -61,104 +62,10 @@ class StockViewModelFactory(
      */
     private val cachedExperienceViewModels: MutableMap<String, ExperienceViewModelInterface> = hashMapOf()
 
-    override fun viewModelForBlock(block: Block): BlockViewModelInterface {
-        return when (block) {
-            is RectangleBlock -> {
-                val borderViewModel = BorderViewModel(block)
-                val backgroundViewModel = BackgroundViewModel(block, assetService, imageOptimizationService)
-                RectangleBlockViewModel(BlockViewModel(block), backgroundViewModel, borderViewModel)
-            }
-            is TextBlock -> {
-                val textViewModel = TextViewModel(block, measurementService)
-                val borderViewModel = BorderViewModel(block)
-                TextBlockViewModel(
-                    BlockViewModel(block, setOf(borderViewModel), textViewModel),
-                    textViewModel,
-                    BackgroundViewModel(block, assetService, imageOptimizationService),
-                    borderViewModel
-                )
-            }
-            is ImageBlock -> {
-                val imageViewModel = ImageViewModel(block, assetService, imageOptimizationService)
-                val borderViewModel = BorderViewModel(block)
-                ImageBlockViewModel(
-                    BlockViewModel(block, setOf(borderViewModel), imageViewModel),
-                    BackgroundViewModel(block, assetService, imageOptimizationService),
-                    imageViewModel,
-                    borderViewModel
-                )
-            }
-            is ButtonBlock -> {
-                val blockViewModel = BlockViewModel(block)
-                ButtonBlockViewModel(blockViewModel, ButtonViewModel(block, blockViewModel, this))
-            }
-            is WebViewBlock -> {
-                val blockViewModel = BlockViewModel(block)
-                WebViewBlockViewModel(
-                    blockViewModel,
-                    BackgroundViewModel(block, assetService, imageOptimizationService),
-                    BorderViewModel(block), WebViewModel(block)
-                )
-            }
-            is BarcodeBlock -> {
-                val barcodeViewModel = BarcodeViewModel(
-                    block,
-                    measurementService
-                )
-                val borderViewModel = BorderViewModel(
-                    block
-                )
-                val blockViewModel = BlockViewModel(block, setOf(borderViewModel, borderViewModel), barcodeViewModel)
-                BarcodeBlockViewModel(
-                    blockViewModel,
-                    barcodeViewModel,
-                    BackgroundViewModel(block, assetService, imageOptimizationService),
-                    borderViewModel
-                )
-            }
-
-            else -> throw Exception(
-                "This Rover UI block type is not yet supported by the 2.0 SDK: ${block.javaClass.simpleName}."
-            )
-        }
-    }
-
-    override fun viewModelForRow(row: Row): RowViewModelInterface {
-        return RowViewModel(
-            row,
-            this,
-            BackgroundViewModel(
-                row,
-                assetService,
-                imageOptimizationService
-            )
-        )
-    }
-
-    override fun viewModelForScreen(screen: Screen): ScreenViewModelInterface {
-        return ScreenViewModel(screen,
-            BackgroundViewModel(
-                screen,
-                assetService,
-                imageOptimizationService
-            ),
-            this)
-    }
-
-    override fun viewModelForButtonState(buttonState: ButtonState): ButtonStateViewModelInterface {
-        val borderViewModel = BorderViewModel(buttonState)
-
-        return ButtonStateViewModel(
-            borderViewModel,
-            BackgroundViewModel(buttonState, assetService, imageOptimizationService),
-            TextViewModel(buttonState, measurementService, true, true)
-        )
-    }
-
     override fun viewModelForExperienceNavigation(experience: Experience, icicle: Parcelable?): ExperienceNavigationViewModelInterface {
         return ExperienceNavigationViewModel(
             experience,
-            this,
+            blockViewModelFactory,
             icicle
         )
     }
@@ -170,15 +77,19 @@ class StockViewModelFactory(
             ExperienceViewModel(
                 experienceId,
                 dataPlugin,
+
+                // FACK! the overridden versions of these methods from DataPlugin won't make it
+                // here, and passing it down breaks the DAG.  It needs it for building the
+                // navigation view model, and indeed from there the rest of the view model graph.
+
+
                 this,
+
+
                 icicle
             )
         }
     }
 
-    override fun viewModelForExperienceToolbar(toolbarConfiguration: ToolbarConfiguration): ExperienceToolbarViewModelInterface {
-        return ExperienceToolbarViewModel(
-            toolbarConfiguration
-        )
-    }
+
 }

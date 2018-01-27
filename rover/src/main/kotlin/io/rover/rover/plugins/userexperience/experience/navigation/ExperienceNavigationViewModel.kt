@@ -16,6 +16,7 @@ import io.rover.rover.core.streams.shareAndReplayTypesOnResubscribe
 import io.rover.rover.core.streams.share
 import io.rover.rover.core.streams.subscribe
 import io.rover.rover.plugins.userexperience.experience.ViewModelFactoryInterface
+import io.rover.rover.plugins.userexperience.experience.blocks.BlockViewModelFactoryInterface
 import io.rover.rover.plugins.userexperience.experience.toolbar.ExperienceToolbarViewModelInterface
 import io.rover.rover.plugins.userexperience.experience.layout.screen.ScreenViewModelInterface
 import kotlinx.android.parcel.Parcelize
@@ -26,12 +27,12 @@ import kotlinx.android.parcel.Parcelize
  * Responsible for the following concerns: starting at the home screen, maintaining a backstack,
  * state persistence, WebView-like canGoBack/goBack methods, and exposing an API for customizing
  * flow behaviour.
- *
- * TODO: customization exposure.
  */
-class ExperienceNavigationViewModel(
+open class ExperienceNavigationViewModel(
     private val experience: Experience,
-    private val viewModelFactory: ViewModelFactoryInterface,
+    private val blockViewModelFactory: BlockViewModelFactoryInterface,
+    //private val viewModelFactory: BlockViewModelFactoryInterface,
+    // TODO: consider an optional interface type here called "CustomNavigationBehaviour", which implementers may provide if they want custom nav
     icicle: Parcelable? = null
 ) : ExperienceNavigationViewModelInterface {
 
@@ -54,7 +55,7 @@ class ExperienceNavigationViewModel(
     private val screenViewModelsById: Map<String, ScreenViewModelInterface> = screensById.mapValues {
         // TODO: this should be lazy instead! which means I also need to change how the event
         // subscription below works
-        viewModelFactory.viewModelForScreen(it.value)
+        blockViewModelFactory.viewModelForScreen(it.value)
     }
 
     init {
@@ -76,7 +77,7 @@ class ExperienceNavigationViewModel(
             }, { error -> actions.onError(error) })
     }
 
-    private sealed class Action {
+    protected sealed class Action {
         class PressedBack : Action()
         /**
          * Emitted into the actions stream if the close button is pressed on the toolbar.
@@ -96,21 +97,33 @@ class ExperienceNavigationViewModel(
             listOf(BackStackFrame(experience.homeScreenId.rawValue))
         )
     }
-        private set
+        protected set
 
     private fun activeScreen(): ScreenViewModelInterface {
         val currentScreenId = state.backStack.lastOrNull()?.screenId ?: throw RuntimeException("Backstack unexpectedly empty")
         return screenViewModelsById[currentScreenId] ?: throw RuntimeException("Unexpectedly found a dangling screen id in the back stack.")
     }
 
-    // TODO: this is definitely going to be the custom behaviour injection opportunity
-    private fun actionBehaviour(action: Action): StateChange? {
+    /**
+     * This method is responsible for defining the navigation behaviour that should occur
+     * for all of the [Action]s.
+     *
+     * @return A [EventAndNewState], which includes what the entire new backstack and an event.  The
+     * event describes what the [ExperienceNavigationView] should do: transition to showing a new
+     * ScreenView, open up an external web browser, or quit out completely.
+     *
+     * Override this if you would like to modify navigation behaviour (particularly, to launch an
+     * external screen in your app, such as Login Screen), in response to the incoming Experience
+     * Screen you are about to display having some characteristic, such as a meta-property.  Be sure
+     * to call `super` otherwise.
+     */
+    protected fun actionBehaviour(currentBackStack: List<BackStackFrame>, action: Action): EventAndNewState? {
         val activeScreen = activeScreen()
         val possiblePreviousScreenId = state.backStack.getOrNull(state.backStack.lastIndex - 1)?.screenId
         return when (action) {
             is Action.PressedBack -> {
                 possiblePreviousScreenId.whenNotNull { previousScreenId ->
-                    StateChange(
+                    EventAndNewState(
                         ExperienceNavigationViewModelInterface.Event.GoToScreen(
                             screenViewModelsById[previousScreenId]!!,
                             true,
@@ -119,21 +132,21 @@ class ExperienceNavigationViewModel(
                         // pop backstack:
                         state.backStack.subList(0, state.backStack.lastIndex)
                     )
-                } ?: StateChange(
-                    ExperienceNavigationViewModelInterface.Event.ViewEvent(ExperienceExternalNavigationEvent.Exit()),
+                } ?: EventAndNewState(
+                    ExperienceNavigationViewModelInterface.Event.NavigateAway(ExperienceExternalNavigationEvent.Exit()),
                     state.backStack // no change to backstack: the view is just getting entirely popped
                 )
             }
             is Action.PressedClose -> {
-                StateChange(
-                    ExperienceNavigationViewModelInterface.Event.ViewEvent(ExperienceExternalNavigationEvent.Exit()),
+                EventAndNewState(
+                    ExperienceNavigationViewModelInterface.Event.NavigateAway(ExperienceExternalNavigationEvent.Exit()),
                     state.backStack // no change to backstack: the view is just getting entirely popped
                 )
             }
             is Action.Navigate -> {
                 when (action.navigateTo) {
-                    is NavigateTo.OpenUrlAction -> StateChange(
-                        ExperienceNavigationViewModelInterface.Event.ViewEvent(
+                    is NavigateTo.OpenUrlAction -> EventAndNewState(
+                        ExperienceNavigationViewModelInterface.Event.NavigateAway(
                             ExperienceExternalNavigationEvent.OpenExternalWebBrowser(action.navigateTo.uri)
                         ),
                         state.backStack // no change to backstack: the view is just getting entirely popped
@@ -144,7 +157,7 @@ class ExperienceNavigationViewModel(
                                 log.w("Screen by id ${action.navigateTo.screenId} missing from Experience with id ${experience.id.rawValue}.")
                                 null
                             } else {
-                                StateChange(
+                                EventAndNewState(
                                     ExperienceNavigationViewModelInterface.Event.GoToScreen(
                                         viewModel, false, true
                                     ),
@@ -157,11 +170,15 @@ class ExperienceNavigationViewModel(
         }
     }
 
-    data class StateChange(
+    data class EventAndNewState(
         val event: ExperienceNavigationViewModelInterface.Event,
         val newBackStack: List<BackStackFrame>
     )
 
+    /**
+     * In response to navigating between screens, we may want to inject events for setting the
+     * backlight boost or the toolbar.
+     */
     private fun injectBehaviouralTransientEvents(
         event: ExperienceNavigationViewModelInterface.Event
     ): Observable<ExperienceNavigationViewModelInterface.Event> {
@@ -177,6 +194,11 @@ class ExperienceNavigationViewModel(
             is ExperienceNavigationViewModelInterface.Event.GoToScreen -> event.screenViewModel.appBarConfiguration
             else -> null
         }.whenNotNull {
+            // TODO: start here and make a NavigationViewModelFactory.
+
+            // THEN, Go on to the FACK comment in StockViewModelFactory.
+
+
             val toolbarViewModel = viewModelFactory.viewModelForExperienceToolbar(it)
             ExperienceNavigationViewModelInterface.Event.SetActionBar(
                 toolbarViewModel
@@ -194,7 +216,7 @@ class ExperienceNavigationViewModel(
         Observable.just(
             // just warp right to the current screen in the state (or the home screen in the
             // experience).
-            StateChange(
+            EventAndNewState(
                 ExperienceNavigationViewModelInterface.Event.GoToScreen(
                     activeScreen(), false, false
                 ),
@@ -202,7 +224,7 @@ class ExperienceNavigationViewModel(
             )
         ),
 
-        actions.map { action -> actionBehaviour(action) }
+        actions.map { action -> actionBehaviour(state.backStack, action) }
             .filterNulls()
     ).doOnNext { stateChange ->
         state = State(stateChange.newBackStack)
