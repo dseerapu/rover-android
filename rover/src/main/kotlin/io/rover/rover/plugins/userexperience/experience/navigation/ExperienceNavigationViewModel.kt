@@ -31,7 +31,7 @@ import kotlinx.android.parcel.Parcelize
 open class ExperienceNavigationViewModel(
     private val experience: Experience,
     private val blockViewModelFactory: BlockViewModelFactoryInterface,
-    //private val viewModelFactory: BlockViewModelFactoryInterface,
+    private val viewModelFactory: ViewModelFactoryInterface,
     // TODO: consider an optional interface type here called "CustomNavigationBehaviour", which implementers may provide if they want custom nav
     icicle: Parcelable? = null
 ) : ExperienceNavigationViewModelInterface {
@@ -194,11 +194,6 @@ open class ExperienceNavigationViewModel(
             is ExperienceNavigationViewModelInterface.Event.GoToScreen -> event.screenViewModel.appBarConfiguration
             else -> null
         }.whenNotNull {
-            // TODO: start here and make a NavigationViewModelFactory.
-
-            // THEN, Go on to the FACK comment in StockViewModelFactory.
-
-
             val toolbarViewModel = viewModelFactory.viewModelForExperienceToolbar(it)
             ExperienceNavigationViewModelInterface.Event.SetActionBar(
                 toolbarViewModel

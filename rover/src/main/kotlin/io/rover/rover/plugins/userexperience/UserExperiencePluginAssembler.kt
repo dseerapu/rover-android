@@ -12,6 +12,8 @@ import io.rover.rover.plugins.userexperience.assets.ImageOptimizationService
 import io.rover.rover.plugins.userexperience.assets.ImageOptimizationServiceInterface
 import io.rover.rover.plugins.userexperience.experience.StockViewModelFactory
 import io.rover.rover.plugins.userexperience.experience.ViewModelFactoryInterface
+import io.rover.rover.plugins.userexperience.experience.blocks.BlockViewModelFactory
+import io.rover.rover.plugins.userexperience.experience.blocks.BlockViewModelFactoryInterface
 import io.rover.rover.plugins.userexperience.experience.blocks.concerns.text.AndroidRichTextToSpannedTransformer
 import io.rover.rover.plugins.userexperience.experience.blocks.concerns.text.RichTextToSpannedTransformer
 import java.util.concurrent.Executor
@@ -22,9 +24,7 @@ open class UserExperiencePluginComponents(
 ) : UserExperiencePluginComponentsInterface {
     override val stockViewModelFactory: ViewModelFactoryInterface by lazy {
         StockViewModelFactory(
-            measurementService,
-            assetService,
-            imageOptimizationService,
+            blockViewModelFactory,
             dataPluginInterface
         )
     }
@@ -54,6 +54,14 @@ open class UserExperiencePluginComponents(
 
     private val imageOptimizationService: ImageOptimizationServiceInterface by lazy {
         ImageOptimizationService()
+    }
+
+    private val blockViewModelFactory: BlockViewModelFactoryInterface by lazy {
+        BlockViewModelFactory(
+            measurementService,
+            assetService,
+            imageOptimizationService
+        )
     }
 }
 

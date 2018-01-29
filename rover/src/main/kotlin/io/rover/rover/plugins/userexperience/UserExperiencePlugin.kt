@@ -16,6 +16,6 @@ import io.rover.rover.plugins.userexperience.experience.ViewModelFactoryInterfac
  * and provide either a subclass of the given component you wish to override or even your own
  * implementation of the interface.
  */
-open class UserExperiencePlugin(
+class UserExperiencePlugin(
     components: UserExperiencePluginComponentsInterface
 ) : UserExperiencePluginInterface, ViewModelFactoryInterface by components.stockViewModelFactory
