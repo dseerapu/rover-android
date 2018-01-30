@@ -15,6 +15,7 @@ import io.rover.rover.core.streams.map
 import io.rover.rover.core.streams.shareAndReplayTypesOnResubscribe
 import io.rover.rover.core.streams.share
 import io.rover.rover.core.streams.subscribe
+import io.rover.rover.plugins.data.domain.Screen
 import io.rover.rover.plugins.userexperience.experience.ViewModelFactoryInterface
 import io.rover.rover.plugins.userexperience.experience.blocks.BlockViewModelFactoryInterface
 import io.rover.rover.plugins.userexperience.experience.toolbar.ExperienceToolbarViewModelInterface
@@ -48,7 +49,7 @@ open class ExperienceNavigationViewModel(
 
     private val actions: PublishSubject<Action> = PublishSubject()
 
-    private val screensById = experience.screens.associateBy { it.id.rawValue }
+    protected val screensById = experience.screens.associateBy { it.id.rawValue }
 
     // TODO: right now we bring up viewmodels for the *entire* experience (ie., all the screens at
     // once).  This is unnecessary.
@@ -116,9 +117,11 @@ open class ExperienceNavigationViewModel(
      * external screen in your app, such as Login Screen), in response to the incoming Experience
      * Screen you are about to display having some characteristic, such as a meta-property.  Be sure
      * to call `super` otherwise.
+     *
+     * Note: if you want to override behaviour when the navigation view is about to navigate to a
+     * new Experience Screen, consider overriding [navigateForwardToScreen] instead.
      */
-    protected fun actionBehaviour(currentBackStack: List<BackStackFrame>, action: Action): EventAndNewState? {
-        val activeScreen = activeScreen()
+    protected open fun actionBehaviour(currentBackStack: List<BackStackFrame>, action: Action): EventAndNewState? {
         val possiblePreviousScreenId = state.backStack.getOrNull(state.backStack.lastIndex - 1)?.screenId
         return when (action) {
             is Action.PressedBack -> {
@@ -133,14 +136,15 @@ open class ExperienceNavigationViewModel(
                         state.backStack.subList(0, state.backStack.lastIndex)
                     )
                 } ?: EventAndNewState(
+                    // backstack would be empty; instead emit Exit.
                     ExperienceNavigationViewModelInterface.Event.NavigateAway(ExperienceExternalNavigationEvent.Exit()),
-                    state.backStack // no change to backstack: the view is just getting entirely popped
+                    state.backStack // no point changing the backstack: the view is just getting entirely popped
                 )
             }
             is Action.PressedClose -> {
                 EventAndNewState(
                     ExperienceNavigationViewModelInterface.Event.NavigateAway(ExperienceExternalNavigationEvent.Exit()),
-                    state.backStack // no change to backstack: the view is just getting entirely popped
+                    state.backStack // no point changing the backstack: the view is just getting entirely popped
                 )
             }
             is Action.Navigate -> {
@@ -149,25 +153,47 @@ open class ExperienceNavigationViewModel(
                         ExperienceNavigationViewModelInterface.Event.NavigateAway(
                             ExperienceExternalNavigationEvent.OpenExternalWebBrowser(action.navigateTo.uri)
                         ),
-                        state.backStack // no change to backstack: the view is just getting entirely popped
+                        // no change to backstack: something will instead be pushed onto the
+                        // containing backstack (ie., the Android one or perhaps a custom one used
+                        // by the app) rather than this one.
+                        state.backStack
                     )
                     is NavigateTo.GoToScreenAction -> {
-                        val viewModel = screenViewModelsById[action.navigateTo.screenId]
-                            if (viewModel == null) {
+                        val screenViewModel = screenViewModelsById[action.navigateTo.screenId]
+                        val screen = screensById[action.navigateTo.screenId]
+
+                        return when {
+                            screenViewModel == null || screen == null -> {
                                 log.w("Screen by id ${action.navigateTo.screenId} missing from Experience with id ${experience.id.rawValue}.")
                                 null
-                            } else {
-                                EventAndNewState(
-                                    ExperienceNavigationViewModelInterface.Event.GoToScreen(
-                                        viewModel, false, true
-                                    ),
-                                    state.backStack + listOf(BackStackFrame(action.navigateTo.screenId))
-                                )
                             }
+                            else -> navigateForwardToScreen(screen, screenViewModel)
+                        }
                     }
                 }
             }
         }
+    }
+
+    /**
+     *
+     *
+     * @return an EventAndState which describes the [ExperienceNavigationViewModelInterface.Event]
+     * event that should be emitted.
+     *
+     * If you are intending to override this to launch your own custom app behaviour in response to
+     * Screens having a certain characteristic
+     */
+    open protected fun navigateForwardToScreen(
+        screen: Screen,
+        screenViewModel: ScreenViewModelInterface
+    ): EventAndNewState {
+        return EventAndNewState(
+            ExperienceNavigationViewModelInterface.Event.GoToScreen(
+                screenViewModel, false, true
+            ),
+            state.backStack + listOf(BackStackFrame(screen.id.rawValue))
+        )
     }
 
     data class EventAndNewState(
