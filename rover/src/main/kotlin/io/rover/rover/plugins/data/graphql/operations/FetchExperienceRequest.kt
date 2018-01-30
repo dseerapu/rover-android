@@ -1,5 +1,6 @@
 package io.rover.rover.plugins.data.graphql.operations
 
+import io.rover.rover.core.logging.log
 import io.rover.rover.plugins.data.domain.Experience
 import io.rover.rover.plugins.data.domain.ID
 import io.rover.rover.plugins.data.NetworkRequest
@@ -16,15 +17,17 @@ class FetchExperienceRequest(
             experience(id: ${"\$"}id) {
                 homeScreenId
                 id
+                customKeys
                 screens {
                     ...backgroundFields
-                    autoColorStatusBar
                     experienceId
                     id
                     isStretchyHeaderEnabled
+                    customKeys
                     rows {
                         ...backgroundFields
                         autoHeight
+                        customKeys
                         blocks {
                             __typename
                             action {
@@ -82,6 +85,7 @@ class FetchExperienceRequest(
                             rowId
                             screenId
                             verticalAlignment
+                            customKeys
                             width {
                                 value
                                 unit
@@ -224,6 +228,7 @@ class FetchExperienceRequest(
     }
 
     override fun decodePayload(responseObject: JSONObject, wireEncoder: WireEncoderInterface): Experience {
+        log.w(responseObject.toString(4))
         return wireEncoder.decodeExperience(
             responseObject.getJSONObject("data").getJSONObject("experience")
         )

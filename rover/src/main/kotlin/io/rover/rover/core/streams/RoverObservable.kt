@@ -231,16 +231,16 @@ fun <T, R> Publisher<T>.map(transform: (T) -> R): Publisher<R> {
                         subscriber.onNext(transformed)
                     }
 
-                    override fun onSubscribe(sourceSubscription: Subscription) {
+                    override fun onSubscribe(subscription: Subscription) {
                         // for clarity, this is called when I (map()) have subscribed
                         // successfully to the source.  I then want to let the downstream
                         // consumer know that I have subscribed successfully on their behalf,
                         // and also allow them to pass cancellation through.
-                        val subscription = object : Subscription {
-                            override fun cancel() { sourceSubscription.cancel() }
+                        val consumerSubscription = object : Subscription {
+                            override fun cancel() { subscription.cancel() }
                         }
 
-                        subscriber.onSubscribe(subscription)
+                        subscriber.onSubscribe(consumerSubscription)
                     }
                 }
             )
@@ -324,16 +324,16 @@ fun <T, R> Publisher<T>.flatMap(transform: (T) -> Publisher<R>): Publisher<R> {
                     transformPublisher.subscribe(transformSubscriber)
                 }
 
-                override fun onSubscribe(sourceSubscription: Subscription) {
+                override fun onSubscribe(subscription: Subscription) {
                     // for clarity, this is called when I (flatMap()) have subscribed
                     // successfully to the source.  I then want to let the downstream
                     // consumer know that I have subscribed successfully on their behalf,
                     // and also allow them to pass cancellation through.
-                    val subscription = object : Subscription {
-                        override fun cancel() { sourceSubscription.cancel() }
+                    val subscriberSubscription = object : Subscription {
+                        override fun cancel() { subscription.cancel() }
                     }
 
-                    subscriber.onSubscribe(subscription)
+                    subscriber.onSubscribe(subscriberSubscription)
                 }
             }
 
@@ -659,16 +659,16 @@ fun <T> Publisher<T>.doOnNext(callback: (item: T) -> Unit): Publisher<T> {
                         subscriber.onNext(item)
                     }
 
-                    override fun onSubscribe(sourceSubscription: Subscription) {
+                    override fun onSubscribe(subscription: Subscription) {
                         // for clarity, this is called when I (map()) have subscribed
                         // successfully to the source.  I then want to let the downstream
                         // consumer know that I have subscribed successfully on their behalf,
                         // and also allow them to pass cancellation through.
-                        val subscription = object : Subscription {
-                            override fun cancel() { sourceSubscription.cancel() }
+                        val consumerSubscription = object : Subscription {
+                            override fun cancel() { subscription.cancel() }
                         }
 
-                        subscriber.onSubscribe(subscription)
+                        subscriber.onSubscribe(consumerSubscription)
                     }
                 }
             )

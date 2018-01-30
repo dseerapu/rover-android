@@ -566,7 +566,8 @@ fun Screen.Companion.decodeJson(json: JSONObject): Screen {
         titleBarButtonColor = Color.decodeJson(json.getJSONObject("titleBarButtonColor")),
         titleBarText = json.getString("titleBarText"),
         titleBarTextColor = Color.decodeJson(json.getJSONObject("titleBarTextColor")),
-        useDefaultTitleBarStyle = json.getBoolean("useDefaultTitleBarStyle")
+        useDefaultTitleBarStyle = json.getBoolean("useDefaultTitleBarStyle"),
+        customKeys = json.getJSONObject("customKeys").toFlatAttributesHash()
     )
 }
 

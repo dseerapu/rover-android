@@ -469,7 +469,8 @@ data class Screen(
     val titleBarButtonColor: Color,
     val titleBarText: String,
     val titleBarTextColor: Color,
-    val useDefaultTitleBarStyle: Boolean
+    val useDefaultTitleBarStyle: Boolean,
+    val customKeys: Attributes
 ) : Background {
     companion object
 }
