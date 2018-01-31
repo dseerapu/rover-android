@@ -96,6 +96,8 @@ methods to avoid having a single massive expression.
 
 -> constrast with LiveData:
   -> single Observable exit point rather than multiple
+  -> greater flexibility
+  -> can use functional-reactive style
 
 
 ## State Persistence

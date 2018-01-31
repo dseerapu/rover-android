@@ -19,14 +19,11 @@ class PluginContainer(
     }
 
     override fun <T: Any> resolve(type: Class<T>): T? {
-
-
         val exampleFactory = { resolver: Resolver -> null }
 
         val factoryType = exampleFactory.javaClass
 
         log.v("Attempting to resolve type $factoryType")
-
 
         val key = ServiceKey(type)
         log.v("All registered plugins are (${registeredPlugins.keys.joinToString(", ")})")
@@ -40,6 +37,8 @@ class PluginContainer(
             registeredPlugins[key] = entry.copy(instance = this)
         }
     }
+
+
 
     override fun <T: Any> register(type: Class<T>, factory: (Resolver) -> T) {
         val key = ServiceKey(type)

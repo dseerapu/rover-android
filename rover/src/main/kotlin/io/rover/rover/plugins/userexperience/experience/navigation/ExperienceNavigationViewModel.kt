@@ -18,6 +18,7 @@ import io.rover.rover.core.streams.subscribe
 import io.rover.rover.plugins.data.domain.Screen
 import io.rover.rover.plugins.userexperience.experience.ViewModelFactoryInterface
 import io.rover.rover.plugins.userexperience.experience.blocks.BlockViewModelFactoryInterface
+import io.rover.rover.plugins.userexperience.experience.containers.StandaloneExperienceHostActivity
 import io.rover.rover.plugins.userexperience.experience.toolbar.ExperienceToolbarViewModelInterface
 import io.rover.rover.plugins.userexperience.experience.layout.screen.ScreenViewModelInterface
 import kotlinx.android.parcel.Parcelize
@@ -49,7 +50,7 @@ open class ExperienceNavigationViewModel(
 
     private val actions: PublishSubject<Action> = PublishSubject()
 
-    protected val screensById = experience.screens.associateBy { it.id.rawValue }
+    private val screensById = experience.screens.associateBy { it.id.rawValue }
 
     // TODO: right now we bring up viewmodels for the *entire* experience (ie., all the screens at
     // once).  This is unnecessary.
@@ -72,7 +73,7 @@ open class ExperienceNavigationViewModel(
             }
             .subscribe({ (screen, navigateTo) ->
                 // filter out the the events that are not meant for the currently active screen:
-                if (activeScreen() == screen) {
+                if (activeScreenViewModel() == screen) {
                     actions.onNext(Action.Navigate(navigateTo))
                 }
             }, { error -> actions.onError(error) })
@@ -92,17 +93,22 @@ open class ExperienceNavigationViewModel(
     override var state = if (icicle != null) {
         icicle as State
     } else {
-        // the default starting state.  One stack frame, pointing to the experience screen set as
-        // the "home" screen.
+        // the default starting state.  An empty backstack, which the reactive epic below
+        // will populate with a an initial back stack frame for the home screen.
         State(
-            listOf(BackStackFrame(experience.homeScreenId.rawValue))
+            listOf()
         )
     }
         protected set
 
-    private fun activeScreen(): ScreenViewModelInterface {
+    private fun activeScreenViewModel(): ScreenViewModelInterface {
         val currentScreenId = state.backStack.lastOrNull()?.screenId ?: throw RuntimeException("Backstack unexpectedly empty")
         return screenViewModelsById[currentScreenId] ?: throw RuntimeException("Unexpectedly found a dangling screen id in the back stack.")
+    }
+
+    private fun activeScreen(): Screen {
+        val currentScreenId = state.backStack.lastOrNull()?.screenId ?: throw RuntimeException("Backstack unexpectedly empty")
+        return screensById[currentScreenId] ?: throw RuntimeException("Unexpectedly found a dangling screen id in the back stack.")
     }
 
     /**
@@ -115,7 +121,7 @@ open class ExperienceNavigationViewModel(
      *
      * Override this if you would like to modify navigation behaviour (particularly, to launch an
      * external screen in your app, such as Login Screen), in response to the incoming Experience
-     * Screen you are about to display having some characteristic, such as a meta-property.  Be sure
+     * Screen you are about to display having some characteristic, such as a custom key.  Be sure
      * to call `super` otherwise.
      *
      * Note: if you want to override behaviour when the navigation view is about to navigate to a
@@ -167,7 +173,7 @@ open class ExperienceNavigationViewModel(
                                 log.w("Screen by id ${action.navigateTo.screenId} missing from Experience with id ${experience.id.rawValue}.")
                                 null
                             }
-                            else -> navigateForwardToScreen(screen, screenViewModel)
+                            else -> navigateForwardToScreen(screen, screenViewModel, currentBackStack)
                         }
                     }
                 }
@@ -176,21 +182,25 @@ open class ExperienceNavigationViewModel(
     }
 
     /**
-     *
+     * Emits the needed [ExperienceNavigationViewModelInterface.Event] for navigating forwards.
      *
      * @return an EventAndState which describes the [ExperienceNavigationViewModelInterface.Event]
-     * event that should be emitted.
+     * event that should be emitted along with the new state of the backstack.
      *
      * If you are intending to override this to launch your own custom app behaviour in response to
-     * Screens having a certain characteristic
+     * Screens having a certain characteristic, you can return a
+     * [ExperienceExternalNavigationEvent.Custom] event and respond to it in your container (say, a
+     * subclass of [StandaloneExperienceHostActivity]), and perform your custom behaviour, such as
+     * launching an app login screen.
      */
-    open protected fun navigateForwardToScreen(
+    protected open fun navigateForwardToScreen(
         screen: Screen,
-        screenViewModel: ScreenViewModelInterface
+        screenViewModel: ScreenViewModelInterface,
+        currentBackStack: List<BackStackFrame>
     ): EventAndNewState {
         return EventAndNewState(
             ExperienceNavigationViewModelInterface.Event.GoToScreen(
-                screenViewModel, false, true
+                screenViewModel, false, currentBackStack.isNotEmpty()
             ),
             state.backStack + listOf(BackStackFrame(screen.id.rawValue))
         )
@@ -233,16 +243,29 @@ open class ExperienceNavigationViewModel(
         ).filterNulls()
     }
 
+    // TODO: make this lazy to avoid constructor leakage warnings?
     private val epic = Observable.concat(
         Observable.just(
-            // just warp right to the current screen in the state (or the home screen in the
-            // experience).
-            EventAndNewState(
-                ExperienceNavigationViewModelInterface.Event.GoToScreen(
-                    activeScreen(), false, false
-                ),
-                state.backStack
-            )
+            if(state.backStack.isEmpty()) {
+                // backstack is empty, so we're just starting out.  Navigate forward to the home screen in the experience!
+                val homeScreen = screensById[experience.homeScreenId.rawValue] ?: throw RuntimeException("Home screen id is dangling.")
+                val screenViewModel = screenViewModelsById[experience.homeScreenId.rawValue] ?: throw RuntimeException("Home screen id is dangling.")
+                // so, in the case of nav view model. here are the following consumer points:
+                
+                navigateForwardToScreen(
+                    homeScreen,
+                    screenViewModel,
+                    state.backStack
+                )
+            } else {
+                // just warp right to the current screen in the state
+                EventAndNewState(
+                    ExperienceNavigationViewModelInterface.Event.GoToScreen(
+                        activeScreenViewModel(), false, false
+                    ),
+                    state.backStack
+                )
+            }
         ),
 
         actions.map { action -> actionBehaviour(state.backStack, action) }

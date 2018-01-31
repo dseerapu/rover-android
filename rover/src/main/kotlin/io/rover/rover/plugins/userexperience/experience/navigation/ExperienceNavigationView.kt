@@ -50,9 +50,9 @@ class ExperienceNavigationView : FrameLayout, BindableView<ExperienceNavigationV
     }
 
     override var viewModel: ExperienceNavigationViewModelInterface? = null
-        set(experienceViewModel) {
+        set(navigationViewModel) {
 
-            field = experienceViewModel
+            field = navigationViewModel
 
             field?.events?.androidLifecycleDispose(this)?.subscribe({ event ->
                 when (event) {

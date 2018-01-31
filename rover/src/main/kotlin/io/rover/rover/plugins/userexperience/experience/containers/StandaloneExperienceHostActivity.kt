@@ -91,17 +91,17 @@ open class StandaloneExperienceHostActivity : AppCompatActivity() {
                 ?.events
                 ?.androidLifecycleDispose(this)
                 ?.subscribe(
-                { event ->
-                    when (event) {
-                        is ExperienceViewModelInterface.Event.ExternalNavigation -> {
-                            log.v("Received an external navigation event: ${event.event}")
-                            dispatchExternalNavigationEvent(event.event)
+                    { event ->
+                        when (event) {
+                            is ExperienceViewModelInterface.Event.ExternalNavigation -> {
+                                log.v("Received an external navigation event: ${event.event}")
+                                dispatchExternalNavigationEvent(event.event)
+                            }
                         }
+                    }, { error ->
+                        throw(error)
                     }
-                }, { error ->
-                    throw(error)
-                }
-            )
+                )
         }
 
     override fun onBackPressed() {

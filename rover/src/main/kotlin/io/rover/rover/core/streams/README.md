@@ -5,5 +5,5 @@ the style of Reactive Streams, in order to avoid a big, complicated
 dependency like RxJava.  It leaves out back-pressure support and complex
 operators.
 
-In future, we may be able futher simplify the pattern by using Kotlin
+In future, we may be able further simplify the pattern by using Kotlin
 continuations/coroutines to allow for imperative style stream code.

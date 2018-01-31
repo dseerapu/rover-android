@@ -19,8 +19,8 @@ import io.rover.rover.plugins.userexperience.experience.blocks.concerns.text.Ric
 import java.util.concurrent.Executor
 
 open class UserExperiencePluginComponents(
-    private val displayMetrics: DisplayMetrics,
-    private val dataPluginInterface: DataPluginInterface
+    protected val displayMetrics: DisplayMetrics,
+    protected val dataPluginInterface: DataPluginInterface
 ) : UserExperiencePluginComponentsInterface {
     override val stockViewModelFactory: ViewModelFactoryInterface by lazy {
         StockViewModelFactory(
@@ -40,23 +40,23 @@ open class UserExperiencePluginComponents(
         AndroidRichTextToSpannedTransformer()
     }
 
-    private val assetService: AssetService by lazy {
+    open val assetService: AssetService by lazy {
         AndroidAssetService(imageDownloader, ioExecutor)
     }
 
-    private val imageDownloader: ImageDownloader by lazy {
+    open val imageDownloader: ImageDownloader by lazy {
         ImageDownloader(ioExecutor)
     }
 
-    private val ioExecutor: Executor by lazy {
+    open val ioExecutor: Executor by lazy {
         IoMultiplexingExecutor.build("userexperience")
     }
 
-    private val imageOptimizationService: ImageOptimizationServiceInterface by lazy {
+    open val imageOptimizationService: ImageOptimizationServiceInterface by lazy {
         ImageOptimizationService()
     }
 
-    private val blockViewModelFactory: BlockViewModelFactoryInterface by lazy {
+    open val blockViewModelFactory: BlockViewModelFactoryInterface by lazy {
         BlockViewModelFactory(
             measurementService,
             assetService,

@@ -17,9 +17,9 @@ import io.rover.rover.plugins.userexperience.experience.toolbar.ToolbarConfigura
  * If you wish to override the View Model creation behaviour, please see [UserExperiencePlugin] and
  * override the [ViewModelFactoryInterface] methods there.
  */
-class StockViewModelFactory(
-    private val blockViewModelFactory: BlockViewModelFactoryInterface,
-    private val dataPlugin: DataPluginInterface
+open class StockViewModelFactory(
+    protected val blockViewModelFactory: BlockViewModelFactoryInterface,
+    protected val dataPlugin: DataPluginInterface
 ) : ViewModelFactoryInterface {
 
     /**

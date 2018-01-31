@@ -100,5 +100,5 @@ sealed class ExperienceExternalNavigationEvent {
      *
      * See the documentation for further details.
      */
-    data class Custom(val uri: URI): ExperienceExternalNavigationEvent()
+    data class Custom(val uri: String): ExperienceExternalNavigationEvent()
 }
