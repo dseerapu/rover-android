@@ -29,7 +29,7 @@ internal class IoMultiplexingExecutor {
 
             val useModernThreadPool = Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && !alwaysUseLegacyThreadPool
 
-            log.v("Setting up ioExecutor Thread Pool for $name.  Number of CPUs: $cpuCount. Using ${if(useModernThreadPool) "forkjoin" else "legacy"} executor.")
+            log.v("Setting up ioExecutor Thread Pool for $name.  Number of CPU cores: $cpuCount. Using ${if(useModernThreadPool) "forkjoin" else "legacy"} executor.")
 
             return if (useModernThreadPool) {
                 // The below is equivalent to:

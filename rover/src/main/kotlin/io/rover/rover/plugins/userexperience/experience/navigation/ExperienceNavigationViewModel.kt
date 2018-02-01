@@ -9,6 +9,7 @@ import io.rover.rover.core.streams.Observable
 import io.rover.rover.core.streams.PublishSubject
 import io.rover.rover.core.streams.asPublisher
 import io.rover.rover.core.streams.doOnNext
+import io.rover.rover.core.streams.exactlyOnce
 import io.rover.rover.core.streams.filter
 import io.rover.rover.core.streams.filterNulls
 import io.rover.rover.core.streams.flatMap
@@ -46,10 +47,6 @@ open class ExperienceNavigationViewModel(
     }
 
     override fun canGoBack(): Boolean = state.backStack.size > 1
-
-    // OK, so, I need the following cycle (in no particular start position):
-    // Incoming button events/initial subscribe -> switch screen event for view -> which
-    // events I subscribe to has to change
 
     private val actions: PublishSubject<Action> = PublishSubject()
 
@@ -136,7 +133,6 @@ open class ExperienceNavigationViewModel(
             is Action.PressedBack -> {
                 possiblePreviousScreenId.whenNotNull { previousScreenId ->
                     EmissionAndNewState(
-                        // UPDATE
                         ExperienceNavigationViewModelInterface.Emission.Update.GoToScreen(
                             screenViewModelsById[previousScreenId]!!,
                             true,
@@ -147,21 +143,17 @@ open class ExperienceNavigationViewModel(
                     )
                 } ?: EmissionAndNewState(
                     // backstack would be empty; instead emit Exit.
-                    // EVENT
                     ExperienceNavigationViewModelInterface.Emission.Event.NavigateAway(ExperienceExternalNavigationEvent.Exit()),
                     state.backStack // no point changing the backstack: the view is just getting entirely popped
                 )
             }
             is Action.PressedClose -> {
-                // EVENT
                 EmissionAndNewState(
                     ExperienceNavigationViewModelInterface.Emission.Event.NavigateAway(ExperienceExternalNavigationEvent.Exit()),
                     state.backStack // no point changing the backstack: the view is just getting entirely popped
                 )
             }
             is Action.Navigate -> {
-
-                // EVENT
                 when (action.navigateTo) {
                     is NavigateTo.OpenUrlAction -> EmissionAndNewState(
                         ExperienceNavigationViewModelInterface.Emission.Event.NavigateAway(
@@ -270,8 +262,6 @@ open class ExperienceNavigationViewModel(
     }
 
     // TODO: make this lazy to avoid constructor leakage warnings?
-
-
     private val epic = Observable.concat(
         Observable.just(
             if(state.backStack.isEmpty()) {
@@ -302,17 +292,14 @@ open class ExperienceNavigationViewModel(
         state = State(stateChange.newBackStack)
     }.flatMap { stateChange -> injectBehaviouralTransientEvents(stateChange.emission) }
     .doOnNext { event ->
-        // side effects: we want to dispatch all events arriving from the.
-
-
+        // side effects: we want to dispatch all events arriving from the toolbarviewmodel.
         // TODO: this subscriber may be moved to a separate field just to isolate it and improve clarity.
-
         if (event is ExperienceNavigationViewModelInterface.Emission.Update.SetActionBar) {
             event
                 .experienceToolbarViewModel
                 .toolbarEvents
                 .subscribe { toolbarEvent ->
-                    // subscribe to the events from the toolbar and dispatch them
+                    // subscribe to the events from the toolbar and dispatch them.
                     actions.onNext(
                         when (toolbarEvent) {
                             is ExperienceToolbarViewModelInterface.Event.PressedBack -> Action.PressedBack()
@@ -321,21 +308,25 @@ open class ExperienceNavigationViewModel(
                     )
                 }
         }
-    }.doOnNext {
+    }.shareAndReplay(10) // a count of 10 because only a couple events are emitted synchronously at startup that must be delivered to both events and updates.
+        .doOnNext {
         log.v("Event: $it")
-    }.shareAndReplay(100000) // TODO: just want shareAndReplay to support an infinite buffer
-
+    } // only subscribers are events and updates, which both must see the entire stream.   I may be able to just set a max limit since both will subscribe quickly anyway.
 
     override val events: Observable<ExperienceNavigationViewModelInterface.Emission.Event> = epic
         .filter { emission -> emission is ExperienceNavigationViewModelInterface.Emission.Event }
         .map { it as ExperienceNavigationViewModelInterface.Emission.Event }
-        // TODO: I want to support ONLY ONE subscriber, and when nothing is subscribed, I want to buffer all emissions, and emit them ONLY ONCE.
+        .doOnNext { log.v("Event emitted.  Only should be one of these messages per event.") }
+        .exactlyOnce()
 
+        // TODO: I want to support ONLY ONE subscriber, and when nothing is subscribed, I want to
+        // buffer all emissions, and emit them ONLY ONCE.  Except -- I do want multiple subscribers.
+        //  What about the event service?
 
     override val updates: Observable<ExperienceNavigationViewModelInterface.Emission.Update> = epic
         .filter { emission -> emission is ExperienceNavigationViewModelInterface.Emission.Update }
         .map { it as ExperienceNavigationViewModelInterface.Emission.Update }
-        // TODO: I just need a "replay all unique types" operator!
+        // TODO: now I just need a "replay all unique types" operator!
         .shareAndReplayTypesOnResubscribe(
             // So, GoToScreen will retain its animation values.  it needs to be transformed.  However,
             // because in the event of a re-subscribe it is very likely that the
@@ -345,6 +336,7 @@ open class ExperienceNavigationViewModel(
             ExperienceNavigationViewModelInterface.Emission.Update.SetActionBar::class.java,
             ExperienceNavigationViewModelInterface.Emission.Update.SetBacklightBoost::class.java
         )
+        .doOnNext { log.v("Update emitted.  Only should be one two these messages per event.") }
 
     // @Parcelize Kotlin synthetics are generating the CREATOR method for us.
     @SuppressLint("ParcelCreator")

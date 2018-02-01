@@ -86,10 +86,9 @@ class ExperienceViewModel(
                                             // pass the ViewEvents further up to the surrounding activity.
                                             // Any external navigation events (exit, load web URI, change backlight)
                                             // from the navigation view model need to be passed up.
-                                            // What will unsubscribe this when a new ExperienceNavigationViewModel
-                                            // comes through?  For now not likely to happen because this view model is not re-bound.
-                                            is ExperienceNavigationViewModelInterface.Emission.Event.NavigateAway -> ExperienceViewModelInterface.Event.ExternalNavigation(navigationEvent.event)
-
+                                            is ExperienceNavigationViewModelInterface.Emission.Event.NavigateAway -> {
+                                                ExperienceViewModelInterface.Event.ExternalNavigation(navigationEvent.event)
+                                            }
                                         }
                                     },
                                     navigationViewModel.updates.map { navigationViewUpdate ->

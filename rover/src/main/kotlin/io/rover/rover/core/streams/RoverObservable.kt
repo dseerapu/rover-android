@@ -451,6 +451,9 @@ fun <T> Publisher<T>.shareHotAndReplay(count: Int): Publisher<T> {
  * subscriber.  Similarly to [share], it will not subscribe to the source until it is first
  * subscribed to itself.
  *
+ * @param count the maximum amount of emissions to buffer.  If 0, an infinite number will be
+ * buffered.
+ *
  * This appears somewhat equivalent to Jake Wharton's
  * [RxReplayingShare](https://github.com/JakeWharton/RxReplayingShare).
  *
@@ -461,53 +464,134 @@ fun <T> Publisher<T>.shareAndReplay(count: Int): Publisher<T> {
 
     val multicastTo: MutableSet<Subscriber<T>> = mutableSetOf()
 
-    var subscribed = false
+    var subscribing = false
+    var sourceSubscription : Subscription? = null
 
-    return object : Publisher<T> {
-        override fun subscribe(subscriber: Subscriber<T>) {
-            // subscribe to source on initial subscribe.
-            if (!subscribed) {
-                // note that this is not re-entrant without a race condition.
-                subscribed = true
-                this@shareAndReplay.subscribe(
-                    object : Subscriber<T> {
-                        override fun onComplete() {
-                            multicastTo.forEach { it.onComplete() }
-                            multicastTo.clear()
-                        }
-
-                        override fun onError(error: Throwable) {
-                            multicastTo.forEach { it.onError(error) }
-                        }
-
-                        override fun onNext(item: T) {
-                            multicastTo.forEach { it.onNext(item) }
-                            buffer.addLast(item)
-                            // emulate a ring buffer by removing any older entries than `count`
-                            for (i in 1..buffer.size - count) {
-                                buffer.removeFirst()
-                            }
-                        }
-
-                        override fun onSubscribe(subscription: Subscription) {
-                            // catch up the new subscriber on the `count` number of last events.
-                            multicastTo.forEach { subscriber ->
-                                buffer.forEach { event -> subscriber.onNext(event) }
-                            }
-                        }
-                    }
-                )
-            }
-
-            multicastTo.add(subscriber)
-
-            val subscription = object : Subscription {
+    fun subscribeSubscriber(subscriber : Subscriber<T>) {
+        subscriber.onSubscribe(
+            object : Subscription {
                 override fun cancel() {
                     // he wants out
                     multicastTo.remove(subscriber)
+
+                    if(multicastTo.isEmpty()) {
+                        sourceSubscription?.cancel()
+                        subscribing = false
+                    }
                 }
             }
-            subscriber.onSubscribe(subscription)
+        )
+        buffer.forEach { subscriber.onNext(it) } // bring subscriber up to date with prior items
+    }
+
+    fun subscribeToSource() {
+        subscribing = true
+        this.subscribe(
+            object : Subscriber<T> {
+                override fun onComplete() {
+                    multicastTo.forEach { it.onComplete() }
+                    multicastTo.clear()
+                }
+
+                override fun onError(error: Throwable) {
+                    multicastTo.forEach { it.onError(error) }
+                }
+
+                override fun onNext(item: T) {
+                    multicastTo.forEach { it.onNext(item) }
+                    buffer.addLast(item)
+                    // emulate a ring buffer by removing any older entries than `count`
+                    if(count != 0) {
+                        for (i in 1..buffer.size - count) {
+                            buffer.removeFirst()
+                        }
+                    }
+                }
+
+                override fun onSubscribe(subscription: Subscription) {
+                    sourceSubscription = subscription
+                    subscribing = false
+                    multicastTo.forEach { subscriber ->
+                        subscribeSubscriber(subscriber)
+                    }
+                }
+            }
+        )
+    }
+
+    return object : Publisher<T> {
+        override fun subscribe(subscriber: Subscriber<T>) {
+            multicastTo.add(subscriber)
+            // subscribe to source on initial subscribe.
+            if (sourceSubscription == null && !subscribing) {
+                subscribeToSource()
+            } else {
+                // we can give them their subscription right away
+                subscribeSubscriber(subscriber)
+            }
+        }
+    }
+}
+
+/**
+ * Immediately subscribes and buffers events.  Ensures they are delivered once to a subscriber.
+ * Any subsequent subscriber will not receive them, and only one subscriber is permitted at a time.
+ *
+ * Only one subscriber may be active at a time.
+ */
+fun <T: Any> Publisher<T>.exactlyOnce(): Publisher<T> {
+    val queue = mutableListOf<T>()
+
+    var currentSubscriber: Subscriber<T>? = null
+
+    this.subscribe(
+        object : Subscriber<T> {
+            override fun onComplete() {
+                currentSubscriber = null
+            }
+
+            override fun onError(error: Throwable) {
+                val currentSubscriber = currentSubscriber
+                if(currentSubscriber != null) {
+                    currentSubscriber.onError(error)
+                } else {
+                    // we won't bother queuing errors.
+                }
+            }
+
+            override fun onNext(item: T) {
+                val currentSubscriber = currentSubscriber
+                if(currentSubscriber != null) {
+                    currentSubscriber.onNext(item)
+                } else {
+                    queue.add(item)
+                }
+            }
+
+            override fun onSubscribe(subscription: Subscription) {
+                // we won't bother keeping the subscriber because we will never cancel.
+            }
+        }
+    )
+
+    return object : Publisher<T> {
+        override fun subscribe(subscriber: Subscriber<T>) {
+            if(currentSubscriber != null) {
+                throw RuntimeException("Only one subscriber allowed!")
+            }
+            currentSubscriber = subscriber
+
+            log.v("SUBSCRIBED! delivering all the events")
+            queue.forEach { subscriber.onNext(it) }
+            queue.clear()
+
+            subscriber.onSubscribe(
+                object : Subscription {
+                    override fun cancel() {
+                        currentSubscriber = null
+                    }
+                }
+            )
         }
     }
 }
@@ -542,6 +626,10 @@ fun <T : Any> Publisher<T>.shareAndReplayTypesOnResubscribe(vararg types: Class<
                         subscriber.onNext(item)
                         // TODO this has a problem: it does not check for descendant classes, it
                         // must be an exact match.
+
+                        // this will actually be called for every existing subscriber.  thankfully,
+                        // setting the lastSeen is an idempotent operation, so it's pretty harmless
+                        // to do needless repeats of.
                         if (lastSeen.keys.contains(item.javaClass)) {
                             lastSeen[item.javaClass] = item
                         }
@@ -560,7 +648,7 @@ fun <T : Any> Publisher<T>.shareAndReplayTypesOnResubscribe(vararg types: Class<
 }
 
 /**
- * Execute the given block when the Publisher is either cancelled or co
+ * Execute the given block when the subscription is cancelled.
  */
 fun <T> Publisher<T>.doOnUnsubscribe(behaviour: () -> Unit): Publisher<T> {
     return object : Publisher<T> {

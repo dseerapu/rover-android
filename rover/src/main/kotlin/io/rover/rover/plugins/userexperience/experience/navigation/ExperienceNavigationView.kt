@@ -11,6 +11,7 @@ import android.util.LruCache
 import android.view.Gravity
 import android.view.View
 import android.widget.FrameLayout
+import io.rover.rover.core.logging.log
 import io.rover.rover.core.streams.androidLifecycleDispose
 import io.rover.rover.core.streams.subscribe
 import io.rover.rover.platform.whenNotNull
