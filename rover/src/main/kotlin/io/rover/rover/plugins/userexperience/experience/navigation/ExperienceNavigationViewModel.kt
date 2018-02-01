@@ -9,11 +9,14 @@ import io.rover.rover.core.streams.Observable
 import io.rover.rover.core.streams.PublishSubject
 import io.rover.rover.core.streams.asPublisher
 import io.rover.rover.core.streams.doOnNext
+import io.rover.rover.core.streams.filter
 import io.rover.rover.core.streams.filterNulls
 import io.rover.rover.core.streams.flatMap
 import io.rover.rover.core.streams.map
 import io.rover.rover.core.streams.shareAndReplayTypesOnResubscribe
 import io.rover.rover.core.streams.share
+import io.rover.rover.core.streams.shareAndReplay
+import io.rover.rover.core.streams.shareHotAndReplay
 import io.rover.rover.core.streams.subscribe
 import io.rover.rover.plugins.data.domain.Screen
 import io.rover.rover.plugins.userexperience.experience.ViewModelFactoryInterface
@@ -115,7 +118,7 @@ open class ExperienceNavigationViewModel(
      * This method is responsible for defining the navigation behaviour that should occur
      * for all of the [Action]s.
      *
-     * @return A [EventAndNewState], which includes what the entire new backstack and an event.  The
+     * @return A [EmissionAndNewState], which includes what the entire new backstack and an emission.  The
      * event describes what the [ExperienceNavigationView] should do: transition to showing a new
      * ScreenView, open up an external web browser, or quit out completely.
      *
@@ -127,13 +130,14 @@ open class ExperienceNavigationViewModel(
      * Note: if you want to override behaviour when the navigation view is about to navigate to a
      * new Experience Screen, consider overriding [navigateForwardToScreen] instead.
      */
-    protected open fun actionBehaviour(currentBackStack: List<BackStackFrame>, action: Action): EventAndNewState? {
+    protected open fun actionBehaviour(currentBackStack: List<BackStackFrame>, action: Action): EmissionAndNewState? {
         val possiblePreviousScreenId = state.backStack.getOrNull(state.backStack.lastIndex - 1)?.screenId
         return when (action) {
             is Action.PressedBack -> {
                 possiblePreviousScreenId.whenNotNull { previousScreenId ->
-                    EventAndNewState(
-                        ExperienceNavigationViewModelInterface.Event.GoToScreen(
+                    EmissionAndNewState(
+                        // UPDATE
+                        ExperienceNavigationViewModelInterface.Emission.Update.GoToScreen(
                             screenViewModelsById[previousScreenId]!!,
                             true,
                             true
@@ -141,22 +145,26 @@ open class ExperienceNavigationViewModel(
                         // pop backstack:
                         state.backStack.subList(0, state.backStack.lastIndex)
                     )
-                } ?: EventAndNewState(
+                } ?: EmissionAndNewState(
                     // backstack would be empty; instead emit Exit.
-                    ExperienceNavigationViewModelInterface.Event.NavigateAway(ExperienceExternalNavigationEvent.Exit()),
+                    // EVENT
+                    ExperienceNavigationViewModelInterface.Emission.Event.NavigateAway(ExperienceExternalNavigationEvent.Exit()),
                     state.backStack // no point changing the backstack: the view is just getting entirely popped
                 )
             }
             is Action.PressedClose -> {
-                EventAndNewState(
-                    ExperienceNavigationViewModelInterface.Event.NavigateAway(ExperienceExternalNavigationEvent.Exit()),
+                // EVENT
+                EmissionAndNewState(
+                    ExperienceNavigationViewModelInterface.Emission.Event.NavigateAway(ExperienceExternalNavigationEvent.Exit()),
                     state.backStack // no point changing the backstack: the view is just getting entirely popped
                 )
             }
             is Action.Navigate -> {
+
+                // EVENT
                 when (action.navigateTo) {
-                    is NavigateTo.OpenUrlAction -> EventAndNewState(
-                        ExperienceNavigationViewModelInterface.Event.NavigateAway(
+                    is NavigateTo.OpenUrlAction -> EmissionAndNewState(
+                        ExperienceNavigationViewModelInterface.Emission.Event.NavigateAway(
                             ExperienceExternalNavigationEvent.OpenExternalWebBrowser(action.navigateTo.uri)
                         ),
                         // no change to backstack: something will instead be pushed onto the
@@ -197,17 +205,35 @@ open class ExperienceNavigationViewModel(
         screen: Screen,
         screenViewModel: ScreenViewModelInterface,
         currentBackStack: List<BackStackFrame>
-    ): EventAndNewState {
-        return EventAndNewState(
-            ExperienceNavigationViewModelInterface.Event.GoToScreen(
+    ): EmissionAndNewState {
+        return EmissionAndNewState(
+            ExperienceNavigationViewModelInterface.Emission.Update.GoToScreen(
                 screenViewModel, false, currentBackStack.isNotEmpty()
             ),
             state.backStack + listOf(BackStackFrame(screen.id.rawValue))
         )
     }
 
-    data class EventAndNewState(
-        val event: ExperienceNavigationViewModelInterface.Event,
+    // so, while these in normal operation may emit either an update or event, for the purposes of
+    // expandability they may well need to emit one of the other sort.  This definitely confounds
+    // things.  Either they would need to return some sort of clunky OR type, have multiple versions
+    // for events/updates (yuck), or perhaps use the same sealed class type for both.
+
+    // oh. how about sealed Emission contains sealed Event and Update, which themselves have the
+    // event types it's a bit of clunky OR type, BUT the benefit is that we can only expose
+    // Publisher<Emission.Event> and <Emission.Update> from the two publishers.
+
+
+//    protected open fun navigateBackwardToScreen(): ExperienceNavigationViewModelInterface.Emission
+//
+//    protected open fun closeExperience(): ExperienceNavigationViewModelInterface.Emission
+//
+//    protected open fun navigateTo(): ExperienceNavigationViewModelInterface.Emission
+//
+//    protected open fun navigateToScreen(): ExperienceNavigationViewModelInterface.Emission
+
+    data class EmissionAndNewState(
+        val emission: ExperienceNavigationViewModelInterface.Emission,
         val newBackStack: List<BackStackFrame>
     )
 
@@ -216,22 +242,22 @@ open class ExperienceNavigationViewModel(
      * backlight boost or the toolbar.
      */
     private fun injectBehaviouralTransientEvents(
-        event: ExperienceNavigationViewModelInterface.Event
-    ): Observable<ExperienceNavigationViewModelInterface.Event> {
+        event: ExperienceNavigationViewModelInterface.Emission
+    ): Observable<ExperienceNavigationViewModelInterface.Emission> {
         // now take the event from the state change and inject some behavioural transient events
         // into the stream as needed (backlight and toolbar behaviours).
         // emit app bar update and BacklightBoost events (as needed) and into the stream for screen changes.
         val backlightEvent = when (event) {
-            is ExperienceNavigationViewModelInterface.Event.GoToScreen -> event.screenViewModel.needsBrightBacklight
+            is ExperienceNavigationViewModelInterface.Emission.Update.GoToScreen -> event.screenViewModel.needsBrightBacklight
             else -> null
-        }.whenNotNull { ExperienceNavigationViewModelInterface.Event.SetBacklightBoost(it) }
+        }.whenNotNull { ExperienceNavigationViewModelInterface.Emission.Update.SetBacklightBoost(it) }
 
         val appBarEvent = when (event) {
-            is ExperienceNavigationViewModelInterface.Event.GoToScreen -> event.screenViewModel.appBarConfiguration
+            is ExperienceNavigationViewModelInterface.Emission.Update.GoToScreen -> event.screenViewModel.appBarConfiguration
             else -> null
         }.whenNotNull {
             val toolbarViewModel = viewModelFactory.viewModelForExperienceToolbar(it)
-            ExperienceNavigationViewModelInterface.Event.SetActionBar(
+            ExperienceNavigationViewModelInterface.Emission.Update.SetActionBar(
                 toolbarViewModel
             )
         }
@@ -244,6 +270,8 @@ open class ExperienceNavigationViewModel(
     }
 
     // TODO: make this lazy to avoid constructor leakage warnings?
+
+
     private val epic = Observable.concat(
         Observable.just(
             if(state.backStack.isEmpty()) {
@@ -251,7 +279,7 @@ open class ExperienceNavigationViewModel(
                 val homeScreen = screensById[experience.homeScreenId.rawValue] ?: throw RuntimeException("Home screen id is dangling.")
                 val screenViewModel = screenViewModelsById[experience.homeScreenId.rawValue] ?: throw RuntimeException("Home screen id is dangling.")
                 // so, in the case of nav view model. here are the following consumer points:
-                
+
                 navigateForwardToScreen(
                     homeScreen,
                     screenViewModel,
@@ -259,8 +287,8 @@ open class ExperienceNavigationViewModel(
                 )
             } else {
                 // just warp right to the current screen in the state
-                EventAndNewState(
-                    ExperienceNavigationViewModelInterface.Event.GoToScreen(
+                EmissionAndNewState(
+                    ExperienceNavigationViewModelInterface.Emission.Update.GoToScreen(
                         activeScreenViewModel(), false, false
                     ),
                     state.backStack
@@ -272,9 +300,14 @@ open class ExperienceNavigationViewModel(
             .filterNulls()
     ).doOnNext { stateChange ->
         state = State(stateChange.newBackStack)
-    }.flatMap { stateChange -> injectBehaviouralTransientEvents(stateChange.event) }
+    }.flatMap { stateChange -> injectBehaviouralTransientEvents(stateChange.emission) }
     .doOnNext { event ->
-        if (event is ExperienceNavigationViewModelInterface.Event.SetActionBar) {
+        // side effects: we want to dispatch all events arriving from the.
+
+
+        // TODO: this subscriber may be moved to a separate field just to isolate it and improve clarity.
+
+        if (event is ExperienceNavigationViewModelInterface.Emission.Update.SetActionBar) {
             event
                 .experienceToolbarViewModel
                 .toolbarEvents
@@ -290,17 +323,28 @@ open class ExperienceNavigationViewModel(
         }
     }.doOnNext {
         log.v("Event: $it")
-    }.share()
+    }.shareAndReplay(100000) // TODO: just want shareAndReplay to support an infinite buffer
 
-    override val events: Observable<ExperienceNavigationViewModelInterface.Event> = epic.shareAndReplayTypesOnResubscribe(
-        // So, GoToScreen will retain its animation values.  it needs to be transformed.  However,
-        // because in the event of a re-subscribe it is very likely that the
-        // ExperienceNavigationView is new and has no current screen view, in which case it defaults
-        // to no animation anyway.
-        ExperienceNavigationViewModelInterface.Event.GoToScreen::class.java,
-        ExperienceNavigationViewModelInterface.Event.SetActionBar::class.java,
-        ExperienceNavigationViewModelInterface.Event.SetBacklightBoost::class.java
-    )
+
+    override val events: Observable<ExperienceNavigationViewModelInterface.Emission.Event> = epic
+        .filter { emission -> emission is ExperienceNavigationViewModelInterface.Emission.Event }
+        .map { it as ExperienceNavigationViewModelInterface.Emission.Event }
+        // TODO: I want to support ONLY ONE subscriber, and when nothing is subscribed, I want to buffer all emissions, and emit them ONLY ONCE.
+
+
+    override val updates: Observable<ExperienceNavigationViewModelInterface.Emission.Update> = epic
+        .filter { emission -> emission is ExperienceNavigationViewModelInterface.Emission.Update }
+        .map { it as ExperienceNavigationViewModelInterface.Emission.Update }
+        // TODO: I just need a "replay all unique types" operator!
+        .shareAndReplayTypesOnResubscribe(
+            // So, GoToScreen will retain its animation values.  it needs to be transformed.  However,
+            // because in the event of a re-subscribe it is very likely that the
+            // ExperienceNavigationView is new and has no current screen view, in which case it defaults
+            // to no animation anyway.
+            ExperienceNavigationViewModelInterface.Emission.Update.GoToScreen::class.java,
+            ExperienceNavigationViewModelInterface.Emission.Update.SetActionBar::class.java,
+            ExperienceNavigationViewModelInterface.Emission.Update.SetBacklightBoost::class.java
+        )
 
     // @Parcelize Kotlin synthetics are generating the CREATOR method for us.
     @SuppressLint("ParcelCreator")

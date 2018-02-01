@@ -54,9 +54,9 @@ class ExperienceNavigationView : FrameLayout, BindableView<ExperienceNavigationV
 
             field = navigationViewModel
 
-            field?.events?.androidLifecycleDispose(this)?.subscribe({ event ->
+            field?.updates?.androidLifecycleDispose(this)?.subscribe({ event ->
                 when (event) {
-                    is ExperienceNavigationViewModelInterface.Event.GoToScreen -> {
+                    is ExperienceNavigationViewModelInterface.Emission.Update.GoToScreen -> {
                         if (!event.animate) {
                             val newView = getViewForScreenViewModel(event.screenViewModel)
                             activeView?.visibility = View.GONE

@@ -80,23 +80,30 @@ class ExperienceViewModel(
 
                             Observable.concat(
                                 Observable.just(experienceReadyEvent),
-                                navigationViewModel.events.map { navigationEvent ->
-                                    when (navigationEvent) {
-                                        // pass the ViewEvents further up to the surrounding activity.
-                                        // Any external navigation events (exit, load web URI, change backlight)
-                                        // from the navigation view model need to be passed up.
-                                        // What will unsubscribe this when a new ExperienceNavigationViewModel
-                                        // comes through?  For now not likely to happen because this view model is not re-bound.
-                                        is ExperienceNavigationViewModelInterface.Event.NavigateAway -> ExperienceViewModelInterface.Event.ExternalNavigation(navigationEvent.event)
-                                        is ExperienceNavigationViewModelInterface.Event.SetBacklightBoost -> ExperienceViewModelInterface.Event.SetBacklightBoost(navigationEvent.extraBright)
-                                        is ExperienceNavigationViewModelInterface.Event.SetActionBar -> {
-                                            ExperienceViewModelInterface.Event.SetActionBar(
-                                                navigationEvent.experienceToolbarViewModel
-                                            )
+                                Observable.merge(
+                                    navigationViewModel.events.map { navigationEvent ->
+                                        when (navigationEvent) {
+                                            // pass the ViewEvents further up to the surrounding activity.
+                                            // Any external navigation events (exit, load web URI, change backlight)
+                                            // from the navigation view model need to be passed up.
+                                            // What will unsubscribe this when a new ExperienceNavigationViewModel
+                                            // comes through?  For now not likely to happen because this view model is not re-bound.
+                                            is ExperienceNavigationViewModelInterface.Emission.Event.NavigateAway -> ExperienceViewModelInterface.Event.ExternalNavigation(navigationEvent.event)
+
                                         }
-                                        is ExperienceNavigationViewModelInterface.Event.GoToScreen -> null /* TODO this event is an internal concern of ExperienceNavigation, it should eventually be hid */
+                                    },
+                                    navigationViewModel.updates.map { navigationViewUpdate ->
+                                        when(navigationViewUpdate) {
+                                            is ExperienceNavigationViewModelInterface.Emission.Update.SetBacklightBoost -> ExperienceViewModelInterface.Event.SetBacklightBoost(navigationViewUpdate.extraBright)
+                                            is ExperienceNavigationViewModelInterface.Emission.Update.SetActionBar -> {
+                                                ExperienceViewModelInterface.Event.SetActionBar(
+                                                    navigationViewUpdate.experienceToolbarViewModel
+                                                )
+                                            }
+                                            is ExperienceNavigationViewModelInterface.Emission.Update.GoToScreen -> null // GoToScreen is an internal concern and not needed by us.
+                                        }
                                     }
-                                }.filterNulls()
+                                ).filterNulls()
                             ).doOnNext {
                                 this@ExperienceViewModel.log.v("Observed navigation View Event: $it")
                             }

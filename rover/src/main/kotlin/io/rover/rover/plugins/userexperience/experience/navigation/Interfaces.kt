@@ -14,7 +14,23 @@ import io.rover.rover.plugins.userexperience.experience.layout.screen.ScreenView
 import java.net.URI
 
 interface ExperienceNavigationViewModelInterface : BindableViewModel {
-    val events: Observable<Event>
+    /**
+     * The containing view model can subscribe to be informed of user input that it needs to act on.
+     *
+     * May only have one subscriber.
+     */
+    val events: Observable<Emission.Event>
+
+    /**
+     * The View should subscribe to these and thus be kept up to date.
+     *
+     * In this case events include instructions to navigate to and display an Experience screen and
+     * set the backlight and toolbar.
+     *
+     * When newly subscribed, the view will immediately receive such events as are necessary
+     * to fully populate it.
+     */
+    val updates: Observable<Emission.Update>
 
     fun pressBack()
 
@@ -37,26 +53,47 @@ interface ExperienceNavigationViewModelInterface : BindableViewModel {
      */
     val state: Parcelable
 
-    sealed class Event {
-        data class GoToScreen(
-            val screenViewModel: ScreenViewModelInterface,
-            val backwards: Boolean,
-            val animate: Boolean
-        ) : Event()
-
-        data class NavigateAway(
-            val event: ExperienceExternalNavigationEvent
-        ) : Event()
-
-        data class SetActionBar(
-            val experienceToolbarViewModel: ExperienceToolbarViewModelInterface
-        ) : Event()
+    /**
+     * All items that can be asynchronously emitted to subscribers of this view model.  It is split
+     * into two categories: Event, and Update.
+     *
+     * They both have somewhat different semantics.  Events are only valid in the same "moment" at
+     * which they are emitted, but equally require guranteed, single delivery to their subscriber.
+     *
+     * Updates, on the other hand, are idempotent and may be re-emitted to bring new subscribers up
+     * to date.
+     */
+    sealed class Emission {
+        /**
+         * The subscribing view model will receive these.  See [updates].
+         */
+        sealed class Event: Emission() {
+            data class NavigateAway(
+                val event: ExperienceExternalNavigationEvent
+            ) : Event()
+        }
 
         /**
-         * This event signifies that the LayoutParams of the containing window should either be set
-         * to either 1 or [WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE].
+         * The View should subscribe to these and thus be kept up to date.  See [events].
          */
-        data class SetBacklightBoost(val extraBright: Boolean) : Event()
+        sealed class Update: Emission() {
+            data class GoToScreen(
+                val screenViewModel: ScreenViewModelInterface,
+                val backwards: Boolean,
+                val animate: Boolean
+            ) : Update()
+
+            data class SetActionBar(
+                val experienceToolbarViewModel: ExperienceToolbarViewModelInterface
+            ) : Update()
+
+            /**
+             * This event signifies that the brightness parameter LayoutParams of the containing window
+             * should either be set to either 1 or
+             * [WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE].
+             */
+            data class SetBacklightBoost(val extraBright: Boolean) : Update()
+        }
     }
 }
 
