@@ -224,6 +224,8 @@ open class ExperienceNavigationViewModel(
 //
 //    protected open fun navigateToScreen(): ExperienceNavigationViewModelInterface.Emission
 
+//    protected open fun resumeAtScreen(): ExperienceNavigationViewModelInterface.Emission
+
     data class EmissionAndNewState(
         val emission: ExperienceNavigationViewModelInterface.Emission,
         val newBackStack: List<BackStackFrame>

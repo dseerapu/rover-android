@@ -1,5 +1,6 @@
 package io.rover.rover.plugins.userexperience.experience.containers
 
+import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
@@ -47,7 +48,7 @@ open class StandaloneExperienceHostActivity : AppCompatActivity() {
      * [ExperienceExternalNavigationEvent.Custom] event you may have emitted in view model subclass,
      * to do some other sort of external behaviour in your app, such as open a native login screen.
      */
-    protected fun dispatchExternalNavigationEvent(externalNavigationEvent: ExperienceExternalNavigationEvent) {
+    protected open fun dispatchExternalNavigationEvent(externalNavigationEvent: ExperienceExternalNavigationEvent) {
         when (externalNavigationEvent) {
             is ExperienceExternalNavigationEvent.Exit -> {
                 finish()
@@ -74,7 +75,7 @@ open class StandaloneExperienceHostActivity : AppCompatActivity() {
 
     // We're actually just showing a single screen for now
     // private val experiencesView by lazy { ScreenView(this) }
-    private val experiencesView by lazy { ExperienceView(this) }
+    protected val experiencesView by lazy { ExperienceView(this) }
 
 
     private val userExperiencePlugin by lazy {
@@ -155,8 +156,9 @@ open class StandaloneExperienceHostActivity : AppCompatActivity() {
 
     companion object {
         @JvmStatic
-        fun makeIntent(packageContext: Context, experienceId: String): Intent {
-            return Intent(packageContext, StandaloneExperienceHostActivity::class.java).apply {
+        @JvmOverloads
+        fun makeIntent(packageContext: Context, experienceId: String, activityClass: Class<out Activity> = StandaloneExperienceHostActivity::class.java): Intent {
+            return Intent(packageContext, activityClass).apply {
                 putExtra("EXPERIENCE_ID", experienceId)
             }
         }

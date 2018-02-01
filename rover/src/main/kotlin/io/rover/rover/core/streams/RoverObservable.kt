@@ -581,7 +581,6 @@ fun <T: Any> Publisher<T>.exactlyOnce(): Publisher<T> {
             }
             currentSubscriber = subscriber
 
-            log.v("SUBSCRIBED! delivering all the events")
             queue.forEach { subscriber.onNext(it) }
             queue.clear()
 
