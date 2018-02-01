@@ -15,9 +15,7 @@ import io.rover.rover.core.streams.filterNulls
 import io.rover.rover.core.streams.flatMap
 import io.rover.rover.core.streams.map
 import io.rover.rover.core.streams.shareAndReplayTypesOnResubscribe
-import io.rover.rover.core.streams.share
 import io.rover.rover.core.streams.shareAndReplay
-import io.rover.rover.core.streams.shareHotAndReplay
 import io.rover.rover.core.streams.subscribe
 import io.rover.rover.plugins.data.domain.Screen
 import io.rover.rover.plugins.userexperience.experience.ViewModelFactoryInterface
@@ -106,11 +104,6 @@ open class ExperienceNavigationViewModel(
         return screenViewModelsById[currentScreenId] ?: throw RuntimeException("Unexpectedly found a dangling screen id in the back stack.")
     }
 
-    private fun activeScreen(): Screen {
-        val currentScreenId = state.backStack.lastOrNull()?.screenId ?: throw RuntimeException("Backstack unexpectedly empty")
-        return screensById[currentScreenId] ?: throw RuntimeException("Unexpectedly found a dangling screen id in the back stack.")
-    }
-
     /**
      * This method is responsible for defining the navigation behaviour that should occur
      * for all of the [Action]s.
@@ -125,33 +118,28 @@ open class ExperienceNavigationViewModel(
      * to call `super` otherwise.
      *
      * Note: if you want to override behaviour when the navigation view is about to navigate to a
-     * new Experience Screen, consider overriding [navigateForwardToScreen] instead.
+     * new Experience Screen, consider overriding [navigateToScreen] instead.
      */
     protected open fun actionBehaviour(currentBackStack: List<BackStackFrame>, action: Action): EmissionAndNewState? {
         val possiblePreviousScreenId = state.backStack.getOrNull(state.backStack.lastIndex - 1)?.screenId
         return when (action) {
             is Action.PressedBack -> {
                 possiblePreviousScreenId.whenNotNull { previousScreenId ->
-                    EmissionAndNewState(
-                        ExperienceNavigationViewModelInterface.Emission.Update.GoToScreen(
-                            screenViewModelsById[previousScreenId]!!,
-                            true,
-                            true
-                        ),
-                        // pop backstack:
-                        state.backStack.subList(0, state.backStack.lastIndex)
-                    )
-                } ?: EmissionAndNewState(
-                    // backstack would be empty; instead emit Exit.
-                    ExperienceNavigationViewModelInterface.Emission.Event.NavigateAway(ExperienceExternalNavigationEvent.Exit()),
-                    state.backStack // no point changing the backstack: the view is just getting entirely popped
-                )
+                    val screenViewModel = screenViewModelsById[previousScreenId]
+                    val screen = screensById[previousScreenId]
+
+                    when {
+                        screenViewModel == null || screen == null -> {
+                            log.w("Screen by id ${previousScreenId} missing from Experience with id ${experience.id.rawValue}.")
+                            null
+                        }
+                        else -> navigateToScreen(screen, screenViewModel, currentBackStack, false)
+                    }
+
+                } ?: closeExperience(state.backStack) // can't go any further back: backstack would be empty; instead emit Exit.
             }
             is Action.PressedClose -> {
-                EmissionAndNewState(
-                    ExperienceNavigationViewModelInterface.Emission.Event.NavigateAway(ExperienceExternalNavigationEvent.Exit()),
-                    state.backStack // no point changing the backstack: the view is just getting entirely popped
-                )
+                closeExperience(state.backStack)
             }
             is Action.Navigate -> {
                 when (action.navigateTo) {
@@ -173,7 +161,7 @@ open class ExperienceNavigationViewModel(
                                 log.w("Screen by id ${action.navigateTo.screenId} missing from Experience with id ${experience.id.rawValue}.")
                                 null
                             }
-                            else -> navigateForwardToScreen(screen, screenViewModel, currentBackStack)
+                            else -> navigateToScreen(screen, screenViewModel, currentBackStack, true)
                         }
                     }
                 }
@@ -182,50 +170,75 @@ open class ExperienceNavigationViewModel(
     }
 
     /**
-     * Emits the needed [ExperienceNavigationViewModelInterface.Event] for navigating forwards.
+     * Generates the needed [EmissionAndNewState] for navigating to a screen, backwards or forwards.
+     *
+     * You can override this to return a [ExperienceExternalNavigationEvent.Custom] event and thus
+     * be able respond to it in your container (say, a subclass of
+     * [StandaloneExperienceHostActivity]), and perform your custom behaviour, such as launching an
+     * app login screen.
      *
      * @return an EventAndState which describes the [ExperienceNavigationViewModelInterface.Event]
      * event that should be emitted along with the new state of the backstack.
-     *
-     * If you are intending to override this to launch your own custom app behaviour in response to
-     * Screens having a certain characteristic, you can return a
-     * [ExperienceExternalNavigationEvent.Custom] event and respond to it in your container (say, a
-     * subclass of [StandaloneExperienceHostActivity]), and perform your custom behaviour, such as
-     * launching an app login screen.
      */
-    protected open fun navigateForwardToScreen(
+    protected open fun navigateToScreen(
         screen: Screen,
         screenViewModel: ScreenViewModelInterface,
-        currentBackStack: List<BackStackFrame>
+        currentBackStack: List<BackStackFrame>,
+        forwards: Boolean
     ): EmissionAndNewState {
         return EmissionAndNewState(
             ExperienceNavigationViewModelInterface.Emission.Update.GoToScreen(
-                screenViewModel, false, currentBackStack.isNotEmpty()
+                screenViewModel, !forwards, currentBackStack.isNotEmpty()
             ),
-            state.backStack + listOf(BackStackFrame(screen.id.rawValue))
+            if(forwards) {
+                currentBackStack + listOf(BackStackFrame(screen.id.rawValue))
+            } else {
+                currentBackStack.subList(0, currentBackStack.lastIndex)
+            }
         )
     }
 
-    // so, while these in normal operation may emit either an update or event, for the purposes of
-    // expandability they may well need to emit one of the other sort.  This definitely confounds
-    // things.  Either they would need to return some sort of clunky OR type, have multiple versions
-    // for events/updates (yuck), or perhaps use the same sealed class type for both.
+    /**
+     * Generates the needed [EmissionAndNewState] just for restoring the current Screen view model.
+     *
+     * Most users seeking to override navigation functionality should not need to override this method.
+     */
+    protected open fun restoreScreen(
+        screenViewModel: ScreenViewModelInterface,
+        currentBackStack: List<BackStackFrame>
+    ): EmissionAndNewState {
+        // just warp right to the current screen in the state
+        return EmissionAndNewState(
+            ExperienceNavigationViewModelInterface.Emission.Update.GoToScreen(
+                screenViewModel, false, false
+            ),
+            state.backStack
+        )
+    }
 
-    // oh. how about sealed Emission contains sealed Event and Update, which themselves have the
-    // event types it's a bit of clunky OR type, BUT the benefit is that we can only expose
-    // Publisher<Emission.Event> and <Emission.Update> from the two publishers.
+    /**
+     * Generates the needed [EmissionAndNewState] to exit the Experience.
+     *
+     * You can override this to modify the exit behaviour, perhaps to return a
+     * [ExperienceNavigationViewModelInterface.Emission.Event.NavigateAway] with a
+     * [ExperienceExternalNavigationEvent.Custom] to inform your main Activity to instead perform no
+     * effect at all.
+     */
+    protected open fun closeExperience(
+        currentBackStack: List<BackStackFrame>
+    ): EmissionAndNewState {
+        return EmissionAndNewState(
+            ExperienceNavigationViewModelInterface.Emission.Event.NavigateAway(ExperienceExternalNavigationEvent.Exit()),
+            currentBackStack // no point changing the backstack: the view is just getting entirely popped
+        )
+    }
 
-
-//    protected open fun navigateBackwardToScreen(): ExperienceNavigationViewModelInterface.Emission
-//
-//    protected open fun closeExperience(): ExperienceNavigationViewModelInterface.Emission
-//
-//    protected open fun navigateTo(): ExperienceNavigationViewModelInterface.Emission
-//
-//    protected open fun navigateToScreen(): ExperienceNavigationViewModelInterface.Emission
-
-//    protected open fun resumeAtScreen(): ExperienceNavigationViewModelInterface.Emission
-
+    /**
+     * An [emission], which is an asynchronous event emitted from the view model which can either
+     * update the UI or perhaps inform the containing components to perform an external navigation
+     * operation.  The [newBackStack] is what the new back stack state should be after the event has
+     * completed.
+     */
     data class EmissionAndNewState(
         val emission: ExperienceNavigationViewModelInterface.Emission,
         val newBackStack: List<BackStackFrame>
@@ -272,19 +285,14 @@ open class ExperienceNavigationViewModel(
                 val screenViewModel = screenViewModelsById[experience.homeScreenId.rawValue] ?: throw RuntimeException("Home screen id is dangling.")
                 // so, in the case of nav view model. here are the following consumer points:
 
-                navigateForwardToScreen(
+                navigateToScreen(
                     homeScreen,
                     screenViewModel,
-                    state.backStack
+                    state.backStack,
+                    true
                 )
             } else {
-                // just warp right to the current screen in the state
-                EmissionAndNewState(
-                    ExperienceNavigationViewModelInterface.Emission.Update.GoToScreen(
-                        activeScreenViewModel(), false, false
-                    ),
-                    state.backStack
-                )
+                restoreScreen(activeScreenViewModel(), state.backStack)
             }
         ),
 
