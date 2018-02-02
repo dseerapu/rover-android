@@ -34,7 +34,7 @@ class BackgroundViewModel(
                 ) ?: return null
 
             assetService.getImageByUrl(urlToFetch.toURL()) { result ->
-                val y = when (result) {
+                when (result) {
                     is NetworkResult.Success -> {
                         callback(
                             result.response,

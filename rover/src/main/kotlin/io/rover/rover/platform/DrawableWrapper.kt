@@ -72,7 +72,9 @@ open class DrawableWrapper(drawable: Drawable) : Drawable(), Drawable.Callback {
         return wrappedDrawable!!.changingConfigurations
     }
 
+    @Suppress("OverridingDeprecatedMember")
     override fun setDither(dither: Boolean) {
+        @Suppress("DEPRECATION")
         wrappedDrawable!!.setDither(dither)
     }
 

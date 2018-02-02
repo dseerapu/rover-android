@@ -551,18 +551,18 @@ fun <T: Any> Publisher<T>.exactlyOnce(): Publisher<T> {
             }
 
             override fun onError(error: Throwable) {
-                val currentSubscriber = currentSubscriber
-                if(currentSubscriber != null) {
-                    currentSubscriber.onError(error)
+                val subscriber = currentSubscriber
+                if(subscriber != null) {
+                    subscriber.onError(error)
                 } else {
                     // we won't bother queuing errors.
                 }
             }
 
             override fun onNext(item: T) {
-                val currentSubscriber = currentSubscriber
-                if(currentSubscriber != null) {
-                    currentSubscriber.onNext(item)
+                val subscriber = currentSubscriber
+                if(subscriber != null) {
+                    subscriber.onNext(item)
                 } else {
                     queue.add(item)
                 }

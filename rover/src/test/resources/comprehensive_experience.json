@@ -3,6 +3,7 @@
         "experience": {
             "homeScreenId": "SJOcEZhRe",
             "id": "5873dee6d5bf3e002de4d70e",
+            "customKeys": {},
             "screens": [
                 {
                     "backgroundColor": {
@@ -17,9 +18,11 @@
                     "experienceId": "5873dee6d5bf3e002de4d70e",
                     "id": "BkKeyw-Ux",
                     "isStretchyHeaderEnabled": true,
+                    "customKeys": {"login-required": "true"},
                     "rows": [
                         {
                             "autoHeight": true,
+                            "customKeys": {},
                             "backgroundColor": {
                                 "alpha": 0,
                                 "blue": 129,
@@ -34,6 +37,7 @@
                                     "__typename": "ImageBlock",
                                     "action": null,
                                     "autoHeight": true,
+                                    "customKeys": {},
                                     "backgroundColor": {
                                         "alpha": 0,
                                         "blue": 238,
@@ -111,6 +115,7 @@
                                     "__typename": "TextBlock",
                                     "action": null,
                                     "autoHeight": true,
+                                    "customKeys": {},
                                     "backgroundColor": {
                                         "alpha": 0,
                                         "blue": 238,
@@ -193,6 +198,7 @@
                                     "__typename": "TextBlock",
                                     "action": null,
                                     "autoHeight": true,
+                                    "customKeys": {},
                                     "backgroundColor": {
                                         "alpha": 0,
                                         "blue": 238,
@@ -282,6 +288,7 @@
                         },
                         {
                             "autoHeight": true,
+                            "customKeys": {},
                             "backgroundColor": {
                                 "alpha": 0,
                                 "blue": 129,
@@ -302,6 +309,7 @@
                         },
                         {
                             "autoHeight": true,
+                            "customKeys": {},
                             "backgroundColor": {
                                 "alpha": 0,
                                 "blue": 129,
@@ -316,6 +324,7 @@
                                     "__typename": "RectangleBlock",
                                     "action": null,
                                     "autoHeight": false,
+                                    "customKeys": {},
                                     "backgroundColor": {
                                         "alpha": 1,
                                         "blue": 41,
@@ -386,6 +395,7 @@
                                     "__typename": "ImageBlock",
                                     "action": null,
                                     "autoHeight": true,
+                                    "customKeys": {},
                                     "backgroundColor": {
                                         "alpha": 1,
                                         "blue": 238,
@@ -470,6 +480,7 @@
                         },
                         {
                             "autoHeight": true,
+                            "customKeys": {},
                             "backgroundColor": {
                                 "alpha": 0,
                                 "blue": 129,
@@ -488,6 +499,7 @@
                                         "screenId": "BJvpGYM8g"
                                     },
                                     "autoHeight": false,
+                                    "customKeys": {},
                                     "disabled": {
                                         "backgroundColor": {
                                             "alpha": 1,
@@ -713,9 +725,11 @@
                     "experienceId": "5873dee6d5bf3e002de4d70e",
                     "id": "BJvpGYM8g",
                     "isStretchyHeaderEnabled": true,
+                    "customKeys": {},
                     "rows": [
                         {
                             "autoHeight": true,
+                            "customKeys": {},
                             "backgroundColor": {
                                 "alpha": 0,
                                 "blue": 129,
@@ -733,6 +747,7 @@
                                         "url": "rover://foo/bar"
                                     },
                                     "autoHeight": false,
+                                    "customKeys": {},
                                     "disabled": {
                                         "backgroundColor": {
                                             "alpha": 1,
@@ -917,6 +932,7 @@
                         },
                         {
                             "autoHeight": true,
+                            "customKeys": {},
                             "backgroundColor": {
                                 "alpha": 0,
                                 "blue": 129,
@@ -931,6 +947,7 @@
                                     "__typename": "TextBlock",
                                     "action": null,
                                     "autoHeight": true,
+                                    "customKeys": {},
                                     "backgroundColor": {
                                         "alpha": 0,
                                         "blue": 238,
@@ -1020,6 +1037,7 @@
                         },
                         {
                             "autoHeight": true,
+                            "customKeys": {},
                             "backgroundColor": {
                                 "alpha": 0,
                                 "blue": 129,
@@ -1034,6 +1052,7 @@
                                     "__typename": "TextBlock",
                                     "action": null,
                                     "autoHeight": true,
+                                    "customKeys": {},
                                     "backgroundColor": {
                                         "alpha": 0,
                                         "blue": 238,
@@ -1164,9 +1183,11 @@
                     "experienceId": "5873dee6d5bf3e002de4d70e",
                     "id": "SJOcEZhRe",
                     "isStretchyHeaderEnabled": true,
+                    "customKeys": {},
                     "rows": [
                         {
                             "autoHeight": true,
+                            "customKeys": {},
                             "backgroundColor": {
                                 "alpha": 0,
                                 "blue": 129,
@@ -1181,6 +1202,7 @@
                                     "__typename": "RectangleBlock",
                                     "action": null,
                                     "autoHeight": false,
+                                    "customKeys": {},
                                     "backgroundColor": {
                                         "alpha": 1,
                                         "blue": 238,
@@ -1251,6 +1273,7 @@
                                     "__typename": "RectangleBlock",
                                     "action": null,
                                     "autoHeight": false,
+                                    "customKeys": {},
                                     "backgroundColor": {
                                         "alpha": 1,
                                         "blue": 238,
@@ -1321,6 +1344,7 @@
                                     "__typename": "RectangleBlock",
                                     "action": null,
                                     "autoHeight": false,
+                                    "customKeys": {},
                                     "backgroundColor": {
                                         "alpha": 1,
                                         "blue": 12,
@@ -1398,6 +1422,7 @@
                         },
                         {
                             "autoHeight": true,
+                            "customKeys": {},
                             "backgroundColor": {
                                 "alpha": 0,
                                 "blue": 129,
@@ -1412,6 +1437,7 @@
                                     "__typename": "TextBlock",
                                     "action": null,
                                     "autoHeight": true,
+                                    "customKeys": {},
                                     "backgroundColor": {
                                         "alpha": 0,
                                         "blue": 238,
@@ -1501,6 +1527,7 @@
                         },
                         {
                             "autoHeight": true,
+                            "customKeys": {},
                             "backgroundColor": {
                                 "alpha": 0,
                                 "blue": 129,
@@ -1515,6 +1542,7 @@
                                     "__typename": "ImageBlock",
                                     "action": null,
                                     "autoHeight": true,
+                                    "customKeys": {},
                                     "backgroundColor": {
                                         "alpha": 1,
                                         "blue": 238,
@@ -1599,6 +1627,7 @@
                         },
                         {
                             "autoHeight": true,
+                            "customKeys": {},
                             "backgroundColor": {
                                 "alpha": 0,
                                 "blue": 129,
@@ -1613,6 +1642,7 @@
                                     "__typename": "BarcodeBlock",
                                     "action": null,
                                     "autoHeight": true,
+                                    "customKeys": {},
                                     "backgroundColor": {
                                         "alpha": 0,
                                         "blue": 255,
@@ -1693,6 +1723,7 @@
                         },
                         {
                             "autoHeight": false,
+                            "customKeys": {},
                             "backgroundColor": {
                                 "alpha": 0,
                                 "blue": 129,
@@ -1711,6 +1742,7 @@
                                         "screenId": "BkKeyw-Ux"
                                     },
                                     "autoHeight": false,
+                                    "customKeys": {},
                                     "disabled": {
                                         "backgroundColor": {
                                             "alpha": 1,
@@ -1895,6 +1927,7 @@
                         },
                         {
                             "autoHeight": false,
+                            "customKeys": {},
                             "backgroundColor": {
                                 "alpha": 0,
                                 "blue": 129,
@@ -1909,6 +1942,7 @@
                                     "__typename": "WebViewBlock",
                                     "action": null,
                                     "autoHeight": false,
+                                    "customKeys": {},
                                     "backgroundColor": {
                                         "alpha": 1,
                                         "blue": 41,
@@ -2029,6 +2063,7 @@
                     "experienceId": "5873dee6d5bf3e002de4d70e",
                     "id": "ryo7Zh5mZ",
                     "isStretchyHeaderEnabled": true,
+                    "customKeys": {},
                     "rows": [],
                     "statusBarColor": {
                         "alpha": 1,

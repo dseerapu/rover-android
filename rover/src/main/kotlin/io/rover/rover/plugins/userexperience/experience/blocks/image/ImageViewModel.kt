@@ -36,7 +36,7 @@ class ImageViewModel(
             val url = URL(uriWithParameters.toString())
 
             assetService.getImageByUrl(url) { result ->
-                val y = when (result) {
+                when (result) {
                     is NetworkResult.Success -> callback(result.response)
                     is NetworkResult.Error -> {
                         // TODO perhaps attempt a retry? or should a lower layer attempt retry?

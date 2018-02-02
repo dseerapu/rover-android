@@ -35,7 +35,11 @@ class BlockAndRowRecyclerAdapter(
         return viewModel.viewType.ordinal
     }
 
-    private fun viewFactory(parent: ViewGroup, viewType: ViewType): LayoutableView<in LayoutableViewModel> {
+    private fun viewFactory(parent: ViewGroup, viewType: ViewType): LayoutableView<LayoutableViewModel> {
+        // We are instantiating the row views here, but we cannot emit them with `out` variance
+        // because the recyclerview Holder must be able to set their view models, which are always
+        // subtypes.
+        @Suppress("IMPLICIT_CAST_TO_ANY", "UNCHECKED_CAST")
         return when (viewType) {
             ViewType.Row -> RowView(parent.context)
             ViewType.Rectangle -> RectangleBlockView(parent.context)

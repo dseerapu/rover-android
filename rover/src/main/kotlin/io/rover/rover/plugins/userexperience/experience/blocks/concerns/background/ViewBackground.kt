@@ -40,7 +40,7 @@ class ViewBackground(
         })
 
         // in order to know our realized width and height we need to listen for layout events.
-        viewComposition.registerOnSizeChangedCallback { width, height, oldWidth, oldHeight ->
+        viewComposition.registerOnSizeChangedCallback { width, height, _, _ ->
             dimensionCallbacks.forEach { it.invoke(width, height) }
             dimensionCallbacks.clear()
         }

@@ -53,7 +53,7 @@ class ImageOptimizationServiceSpec : Spek({
         on("optimized to display in exactly the same pixel-size block") {
             val displayMetrics = createDisplayMetrics(480)
 
-            val (uri, optimizedConfiguration) = imageOptimizationService.optimizeImageBackground(
+            val (uri, _) = imageOptimizationService.optimizeImageBackground(
                 background,
                 PixelSize(120, 100),
                 displayMetrics
@@ -70,7 +70,7 @@ class ImageOptimizationServiceSpec : Spek({
         on("optimized to display in a block with smaller pixel-size but the same aspect ratio") {
             val displayMetrics = createDisplayMetrics(480)
 
-            val (uri, optimizedConfiguration) = imageOptimizationService.optimizeImageBackground(
+            val (uri, _) = imageOptimizationService.optimizeImageBackground(
                 background,
                 PixelSize(60, 50),
                 displayMetrics
@@ -87,7 +87,7 @@ class ImageOptimizationServiceSpec : Spek({
         on("optimized to display in smaller but same aspect ratio block") {
             val displayMetrics = createDisplayMetrics(480)
 
-            val (uri, optimizedConfiguration) = imageOptimizationService.optimizeImageBackground(
+            val (uri, _) = imageOptimizationService.optimizeImageBackground(
                 background,
                 PixelSize(34, 29),
                 displayMetrics
@@ -106,7 +106,7 @@ class ImageOptimizationServiceSpec : Spek({
 
             val displayMetrics = createDisplayMetrics(480)
 
-            val (uri, optimizedConfiguration) = imageOptimizationService.optimizeImageBackground(
+            val (uri, _) = imageOptimizationService.optimizeImageBackground(
                 background,
                 PixelSize(140, 90),
                 displayMetrics

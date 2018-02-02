@@ -41,7 +41,7 @@ class ViewImage(
         // getting the wrong density loaded when you fling.
         width = imageView.width
         height = imageView.height
-        imageView.addOnLayoutChangeListener { view, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
+        imageView.addOnLayoutChangeListener { _, left, top, right, bottom, _, _, _, _ ->
             width = right - left
             height = bottom - top
             dimensionCallbacks.forEach { it.invoke(width, height) }

@@ -7,6 +7,8 @@ import io.rover.rover.plugins.data.domain.Offsets
 import io.rover.rover.plugins.data.domain.UnitOfMeasure
 import io.rover.rover.plugins.data.domain.VerticalAlignment
 import io.rover.rover.plugins.userexperience.experience.StockViewModelFactory
+import io.rover.rover.plugins.userexperience.experience.blocks.BlockViewModelFactory
+import io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout.BlockViewModel
 import io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout.LayoutableViewModel
 import io.rover.rover.plugins.userexperience.experience.blocks.rectangle.RectangleBlockViewModel
 import io.rover.rover.plugins.userexperience.experience.layout.row.RowViewModel
@@ -35,7 +37,7 @@ class ScreenViewModelSpec : Spek({
                     )
                 )
             )
-            val screenViewModel = ScreenViewModel(screen, mock(), StockViewModelFactory(mock(), mock(), mock(), mock()))
+            val screenViewModel = ScreenViewModel(screen, mock(), BlockViewModelFactory(mock(), mock(), mock()))
 
             on("rendering") {
                 val rendered = screenViewModel.render(
@@ -73,7 +75,7 @@ class ScreenViewModelSpec : Spek({
                     )
                 )
             )
-            val screenViewModel = ScreenViewModel(screen, mock(), StockViewModelFactory(mock(), mock(), mock(), mock()))
+            val screenViewModel = ScreenViewModel(screen, mock(), BlockViewModelFactory(mock(), mock(), mock()))
 
             on("rendering") {
                 val rendered = screenViewModel.render(
@@ -128,7 +130,7 @@ class ScreenViewModelSpec : Spek({
                     )
                 )
             )
-            val screenViewModel = ScreenViewModel(screen, mock(), StockViewModelFactory(mock(), mock(), mock(), mock()))
+            val screenViewModel = ScreenViewModel(screen, mock(), BlockViewModelFactory(mock(), mock(), mock()))
 
             on("rendering") {
                 val rendered = screenViewModel.render(
@@ -159,7 +161,7 @@ class ScreenViewModelSpec : Spek({
                     )
                 )
             )
-            val screenViewModel = ScreenViewModel(screen, mock(), StockViewModelFactory(mock(), mock(), mock(), mock()))
+            val screenViewModel = ScreenViewModel(screen, mock(), BlockViewModelFactory(mock(), mock(), mock()))
 
             on("rendering") {
                 val rendered = screenViewModel.render(

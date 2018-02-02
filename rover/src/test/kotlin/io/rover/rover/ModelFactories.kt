@@ -1,5 +1,6 @@
 package io.rover.rover
 
+import io.rover.rover.plugins.data.domain.Attributes
 import io.rover.rover.plugins.data.domain.BackgroundContentMode
 import io.rover.rover.plugins.data.domain.BackgroundScale
 import io.rover.rover.plugins.data.domain.Color
@@ -38,7 +39,8 @@ class ModelFactories {
                 titleBarButtonColor = DarkBlue,
                 titleBarText = "Title bar",
                 titleBarTextColor = Color(0xff, 0xff, 0xff, 1.0),
-                useDefaultTitleBarStyle = true
+                useDefaultTitleBarStyle = true,
+                customKeys = emptyMap()
             ).copy()
         }
 
@@ -51,7 +53,8 @@ class ModelFactories {
                 backgroundScale = BackgroundScale.X1,
                 blocks = listOf(),
                 height = Length(UnitOfMeasure.Points, 0.0),
-                id = ID("0")
+                id = ID("0"),
+                customKeys = emptyMap()
             )
         }
 
@@ -81,7 +84,8 @@ class ModelFactories {
                 position = Position.Floating,
                 verticalAlignment = VerticalAlignment.Top,
                 opacity = 1.0,
-                width = Length(UnitOfMeasure.Points, 0.0)
+                width = Length(UnitOfMeasure.Points, 0.0),
+                customKeys = emptyMap()
             )
         }
 

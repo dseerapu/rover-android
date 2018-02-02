@@ -10,7 +10,8 @@ import java.net.URI
 data class Experience(
     val id: ID,
     val homeScreenId: ID,
-    val screens: List<Screen>
+    val screens: List<Screen>,
+    val customKeys: Attributes
 ) {
     companion object
 }
@@ -81,6 +82,7 @@ interface Block {
     val position: Position
     val verticalAlignment: VerticalAlignment
     val width: Length
+    val customKeys: Attributes
 
     companion object
 }
@@ -106,7 +108,8 @@ data class BarcodeBlock(
     override val opacity: Double,
     override val position: Position,
     override val verticalAlignment: VerticalAlignment,
-    override val width: Length
+    override val width: Length,
+    override val customKeys: Attributes
 ) : Block, Background, Border {
     companion object
 }
@@ -126,7 +129,8 @@ data class ButtonBlock(
     override val position: Position,
     val selected: ButtonState,
     override val verticalAlignment: VerticalAlignment,
-    override val width: Length
+    override val width: Length,
+    override val customKeys: Attributes
 ) : Block {
     companion object
 }
@@ -150,7 +154,8 @@ data class ImageBlock(
     override val opacity: Double,
     override val position: Position,
     override val verticalAlignment: VerticalAlignment,
-    override val width: Length
+    override val width: Length,
+    override val customKeys: Attributes
 ) : Block, Background, Border {
     companion object
 }
@@ -173,7 +178,8 @@ data class RectangleBlock(
     override val opacity: Double,
     override val position: Position,
     override val verticalAlignment: VerticalAlignment,
-    override val width: Length
+    override val width: Length,
+    override val customKeys: Attributes
 ) : Block, Background, Border {
     companion object
 }
@@ -200,7 +206,8 @@ data class TextBlock(
     override val textFont: Font,
     override val text: String,
     override val verticalAlignment: VerticalAlignment,
-    override val width: Length
+    override val width: Length,
+    override val customKeys: Attributes
 ) : Block, Background, Border, Text {
     companion object
 }
@@ -225,7 +232,8 @@ data class WebViewBlock(
     override val position: Position,
     val url: URI,
     override val verticalAlignment: VerticalAlignment,
-    override val width: Length
+    override val width: Length,
+    override val customKeys: Attributes
 ) : Block, Background, Border {
     companion object
 }
@@ -447,6 +455,7 @@ data class Row(
     override val backgroundContentMode: BackgroundContentMode,
     override val backgroundImage: Image?,
     override val backgroundScale: BackgroundScale,
+    val customKeys: Attributes,
     val blocks: List<Block>,
     val height: Length,
     val id: ID

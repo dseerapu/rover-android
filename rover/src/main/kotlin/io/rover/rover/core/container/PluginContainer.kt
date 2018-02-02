@@ -19,7 +19,7 @@ class PluginContainer(
     }
 
     override fun <T: Any> resolve(type: Class<T>): T? {
-        val exampleFactory = { resolver: Resolver -> null }
+        val exampleFactory = { _: Resolver -> null }
 
         val factoryType = exampleFactory.javaClass
 
@@ -27,6 +27,11 @@ class PluginContainer(
 
         val key = ServiceKey(type)
         log.v("All registered plugins are (${registeredPlugins.keys.joinToString(", ")})")
+
+        // retrieve the item of type from the registered plugins hash.  However, because I have a
+        // generic type for the entry, good ol' Java type erasure rears its head.  However, I know
+        // that the entry is consistent with the key, so the unchecked cast is safe.
+        @Suppress("UNCHECKED_CAST")
         val entry = (registeredPlugins[key] ?: return null) as ServiceEntry<T>
 
         val factory = entry.factory
@@ -37,7 +42,6 @@ class PluginContainer(
             registeredPlugins[key] = entry.copy(instance = this)
         }
     }
-
 
 
     override fun <T: Any> register(type: Class<T>, factory: (Resolver) -> T) {

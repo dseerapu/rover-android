@@ -89,7 +89,8 @@ class WireEncoderSpec : Spek({
 
         on("decoding an experience") {
             val expectedJson = this.javaClass.classLoader.getResourceAsStream("comprehensive_experience.json").bufferedReader(Charsets.UTF_8).readText()
-            val decoded = wireEncoder.decodeExperienceFromStringForTests(JSONObject(expectedJson).getJSONObject("data").getJSONObject("experience").toString(4))
+            val reEncoded = JSONObject(expectedJson).getJSONObject("data").getJSONObject("experience").toString(4)
+            val decoded = wireEncoder.decodeExperienceFromStringForTests(reEncoded)
 
             it("reads correct values from the payload") {
                 junit4ReportingWorkaround {

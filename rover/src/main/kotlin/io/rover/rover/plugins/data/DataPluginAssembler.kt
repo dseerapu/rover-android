@@ -86,7 +86,7 @@ open class DataPluginAssembler(
     private val applicationContext: Context
 ) : Assembler {
     override fun register(container: Container) {
-        container.register(DataPluginInterface::class.java) { resolver ->
+        container.register(DataPluginInterface::class.java) { _ ->
             DataPlugin(
                 DataPluginComponents(
                     URL("https://api.rover.io/graphql"),

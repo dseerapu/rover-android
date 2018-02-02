@@ -8,6 +8,7 @@ import android.text.SpannableStringBuilder
 
 fun String.roverTextHtmlAsSpanned(): SpannableStringBuilder {
     return if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+        @Suppress("DEPRECATION")
         val spannedBuilder = Html.fromHtml(this) as SpannableStringBuilder
         // the legacy version of android.text.Html (ie without
         // Html.FROM_HTML_SEPARATOR_LINE_BREAK_PARAGRAPH), Html.fromHtml() returns one additional

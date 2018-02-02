@@ -159,7 +159,7 @@ class BlockAndRowLayoutManager(
         // TODO: naturally this is a very slow method.  once we have a better data structure in use
         // in fill() to query for items based on vertical position, then we'll start using it here,
         // too.
-        layout.coordinatesAndViewModels.forEachIndexed { index, (viewPosition, clipBounds, _) ->
+        layout.coordinatesAndViewModels.forEachIndexed { index, (viewPosition, _, _) ->
             val displayPosition = viewPosition.dpAsPx(displayMetrics)
             val warmOver = displayPosition.bottom > (verticalTopBound - prefetchPx) && displayPosition.top < (verticalBottomBound + prefetchPx)
             if (warmOver) {

@@ -47,7 +47,8 @@ fun Experience.Companion.decodeJson(json: JSONObject): Experience {
         homeScreenId = ID(json.getString("homeScreenId")),
         screens = json.getJSONArray("screens").getObjectIterable().map {
             Screen.decodeJson(it)
-        }
+        },
+        customKeys = json.getJSONObject("customKeys").toFlatAttributesHash()
     )
 }
 
@@ -56,6 +57,7 @@ fun Experience.encodeJson(): JSONObject {
         putProp(this@encodeJson, Experience::id) { it.rawValue }
         putProp(this@encodeJson, Experience::homeScreenId) { it.rawValue }
         putProp(this@encodeJson, Experience::screens) { JSONArray(it.map { it.encodeJson(this@encodeJson.id.rawValue) }) }
+        putProp(this@encodeJson, Experience::customKeys) { it.encodeJson() }
     }
 }
 
@@ -252,7 +254,8 @@ fun BarcodeBlock.Companion.decodeJson(json: JSONObject): BarcodeBlock {
         opacity = json.getDouble("opacity"),
         position = Position.decodeJson(json.getString("position")),
         verticalAlignment = VerticalAlignment.decodeJson(json.getString("verticalAlignment")),
-        width = Length.decodeJson(json.getJSONObject("width"))
+        width = Length.decodeJson(json.getJSONObject("width")),
+        customKeys = json.getJSONObject("customKeys").toFlatAttributesHash()
     )
 }
 
@@ -293,6 +296,7 @@ fun Block.encodeJson(experienceId: String, screenId: String, rowId: String): JSO
         putProp(this@encodeJson, Block::position) { it.wireFormat }
         putProp(this@encodeJson, Block::verticalAlignment) { it.wireFormat }
         putProp(this@encodeJson, Block::width) { it.encodeJson() }
+        putProp(this@encodeJson, Block::customKeys) { it.encodeJson() }
         put("__typename", when (this@encodeJson) {
             is BarcodeBlock -> {
                 putProp(this@encodeJson, BarcodeBlock::barcodeScale)
@@ -354,7 +358,8 @@ fun ButtonBlock.Companion.decodeJson(json: JSONObject): ButtonBlock {
         disabled = ButtonState.decodeJson(json.getJSONObject("disabled")),
         highlighted = ButtonState.decodeJson(json.getJSONObject("highlighted")),
         normal = ButtonState.decodeJson(json.getJSONObject("normal")),
-        selected = ButtonState.decodeJson(json.getJSONObject("selected"))
+        selected = ButtonState.decodeJson(json.getJSONObject("selected")),
+        customKeys = json.getJSONObject("customKeys").toFlatAttributesHash()
     )
 }
 
@@ -377,7 +382,8 @@ fun RectangleBlock.Companion.decodeJson(json: JSONObject): RectangleBlock {
         opacity = json.getDouble("opacity"),
         position = Position.decodeJson(json.getString("position")),
         verticalAlignment = VerticalAlignment.decodeJson(json.getString("verticalAlignment")),
-        width = Length.decodeJson(json.getJSONObject("width"))
+        width = Length.decodeJson(json.getJSONObject("width")),
+        customKeys = json.getJSONObject("customKeys").toFlatAttributesHash()
     )
 }
 
@@ -402,7 +408,8 @@ fun WebViewBlock.Companion.decodeJson(json: JSONObject): WebViewBlock {
         verticalAlignment = VerticalAlignment.decodeJson(json.getString("verticalAlignment")),
         width = Length.decodeJson(json.getJSONObject("width")),
         isScrollingEnabled = json.getBoolean("isScrollingEnabled"),
-        url = URI.create(json.getString("url"))
+        url = URI.create(json.getString("url")),
+        customKeys = json.getJSONObject("customKeys").toFlatAttributesHash()
     )
 }
 
@@ -429,7 +436,8 @@ fun TextBlock.Companion.decodeJson(json: JSONObject): TextBlock {
         textAlignment = TextAlignment.decodeJson(json.getString("textAlignment")),
         textColor = Color.decodeJson(json.getJSONObject("textColor")),
         textFont = Font.decodeJson(json.getJSONObject("textFont")),
-        text = json.getString("text")
+        text = json.getString("text"),
+        customKeys = json.getJSONObject("customKeys").toFlatAttributesHash()
     )
 }
 
@@ -453,7 +461,8 @@ fun ImageBlock.Companion.decodeJson(json: JSONObject): ImageBlock {
         position = Position.decodeJson(json.getString("position")),
         verticalAlignment = VerticalAlignment.decodeJson(json.getString("verticalAlignment")),
         width = Length.decodeJson(json.getJSONObject("width")),
-        image = Image.optDecodeJSON(json.optJSONObject("image"))
+        image = Image.optDecodeJSON(json.optJSONObject("image")),
+        customKeys = json.getJSONObject("customKeys").toFlatAttributesHash()
     )
 }
 
@@ -520,7 +529,7 @@ fun Block.Companion.decodeJson(json: JSONObject): Block {
     }
 }
 
-fun Row.Companion.decodeJSON(json: JSONObject, namedField: String? = null): Row {
+fun Row.Companion.decodeJSON(json: JSONObject): Row {
     return Row(
         autoHeight = json.getBoolean("autoHeight"),
         backgroundColor = Color.decodeJson(json.getJSONObject("backgroundColor")),
@@ -529,7 +538,8 @@ fun Row.Companion.decodeJSON(json: JSONObject, namedField: String? = null): Row 
         backgroundScale = BackgroundScale.decodeJson(json.getString("backgroundScale")),
         blocks = json.getJSONArray("blocks").getObjectIterable().map { Block.decodeJson(it) },
         height = Length.decodeJson(json.getJSONObject("height")),
-        id = ID(json.getString("id"))
+        id = ID(json.getString("id")),
+        customKeys = json.getJSONObject("customKeys").toFlatAttributesHash()
     )
 }
 
@@ -545,6 +555,7 @@ fun Row.encodeJson(experienceId: String, screenId: String): JSONObject {
         putProp(this@encodeJson, Row::blocks) { JSONArray(it.map { it.encodeJson(experienceId, screenId, this@encodeJson.id.rawValue) }) }
         putProp(this@encodeJson, Row::height) { it.encodeJson() }
         putProp(this@encodeJson, Row::id) { it.rawValue }
+        putProp(this@encodeJson, Row::customKeys) { it.encodeJson() }
     }
 }
 
@@ -596,6 +607,7 @@ fun Screen.encodeJson(experienceId: String): JSONObject {
         putProp(this@encodeJson, Screen::titleBarTextColor) { it.encodeJson() }
         putProp(this@encodeJson, Screen::titleBarBackgroundColor) { it.encodeJson() }
         putProp(this@encodeJson, Screen::useDefaultTitleBarStyle)
+        putProp(this@encodeJson, Screen::customKeys) { it.encodeJson() }
     }
 }
 
