@@ -8,7 +8,7 @@ import io.rover.rover.plugins.data.http.NetworkTask
 import java.net.URL
 import java.util.concurrent.Executor
 
-class AndroidAssetService(
+internal class AndroidAssetService(
     imageDownloader: ImageDownloader,
     private val ioExecutor: Executor
 ) : AssetService {

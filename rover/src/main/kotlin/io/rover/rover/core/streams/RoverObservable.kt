@@ -53,7 +53,7 @@ interface Publisher<out T> {
          *
          * [concat()](http://reactivex.io/documentation/operators/concat.html).
          */
-        fun <T> concat(vararg sources: Publisher<T>): Publisher<T> {
+        internal fun <T> concat(vararg sources: Publisher<T>): Publisher<T> {
             return object : Publisher<T> {
                 override fun subscribe(subscriber: Subscriber<T>) {
                     var cancelled = false
@@ -106,7 +106,7 @@ interface Publisher<out T> {
          *
          * [merge()](http://reactivex.io/documentation/operators/merge.html).
          */
-        fun <T> merge(vararg sources: Publisher<T>): Publisher<T> {
+        internal fun <T> merge(vararg sources: Publisher<T>): Publisher<T> {
             return object : Publisher<T> {
                 override fun subscribe(subscriber: Subscriber<T>) {
                     var cancelled = false
@@ -161,7 +161,7 @@ interface Publisher<out T> {
          * When subscribed to, evaluate the given [builder] block that will yield an Observable
          * that is then subscribed to.
          */
-        fun <T> defer(builder: () -> Observable<T>): Observable<T> {
+        internal fun <T> defer(builder: () -> Observable<T>): Observable<T> {
             return object : Observable<T> {
                 override fun subscribe(subscriber: Subscriber<T>) = builder().subscribe(subscriber)
             }
@@ -207,7 +207,7 @@ fun <T> Publisher<T>.subscribe(onNext: (item: T) -> Unit) {
     })
 }
 
-fun <T, R> Publisher<T>.map(transform: (T) -> R): Publisher<R> {
+internal fun <T, R> Publisher<T>.map(transform: (T) -> R): Publisher<R> {
     val prior = this
     return object : Publisher<R> {
         override fun subscribe(subscriber: Subscriber<R>) {
@@ -248,7 +248,7 @@ fun <T, R> Publisher<T>.map(transform: (T) -> R): Publisher<R> {
     }
 }
 
-fun <T> Publisher<T>.filter(predicate: (T) -> Boolean): Publisher<T> {
+internal fun <T> Publisher<T>.filter(predicate: (T) -> Boolean): Publisher<T> {
     return object : Publisher<T> {
         override fun subscribe(subscriber: Subscriber<T>) {
             this@filter.subscribe(object : Subscriber<T> {
@@ -272,7 +272,7 @@ fun <T> Publisher<T>.filter(predicate: (T) -> Boolean): Publisher<T> {
     }
 }
 
-fun <T, R> Publisher<T>.flatMap(transform: (T) -> Publisher<R>): Publisher<R> {
+internal fun <T, R> Publisher<T>.flatMap(transform: (T) -> Publisher<R>): Publisher<R> {
     val prior = this
     return object : Publisher<R> {
         override fun subscribe(subscriber: Subscriber<R>) {
@@ -351,7 +351,7 @@ fun <T, R> Publisher<T>.flatMap(transform: (T) -> Publisher<R>): Publisher<R> {
  *
  * Note that [share] will subscribe to the source once the first consumer subscribes to it.
  */
-fun <T> Publisher<T>.share(): Publisher<T> {
+internal fun <T> Publisher<T>.share(): Publisher<T> {
     val multicastTo: MutableSet<Subscriber<T>> = mutableSetOf()
 
     var subscribed = false
@@ -399,7 +399,7 @@ fun <T> Publisher<T>.share(): Publisher<T> {
  * events to any new subscriber, it will also immediately subscribe to the source and begin
  * buffering.  This is suitable for use with hot observables.
  */
-fun <T> Publisher<T>.shareHotAndReplay(count: Int): Publisher<T> {
+internal fun <T> Publisher<T>.shareHotAndReplay(count: Int): Publisher<T> {
     val buffer = ArrayDeque<T>(count)
 
     val multicastTo: MutableSet<Subscriber<T>> = mutableSetOf()
@@ -459,7 +459,7 @@ fun <T> Publisher<T>.shareHotAndReplay(count: Int): Publisher<T> {
  *
  * Not thread safe.
  */
-fun <T> Publisher<T>.shareAndReplay(count: Int): Publisher<T> {
+internal fun <T> Publisher<T>.shareAndReplay(count: Int): Publisher<T> {
     val buffer = ArrayDeque<T>(count)
 
     val multicastTo: MutableSet<Subscriber<T>> = mutableSetOf()
@@ -539,7 +539,7 @@ fun <T> Publisher<T>.shareAndReplay(count: Int): Publisher<T> {
  *
  * Only one subscriber may be active at a time.
  */
-fun <T: Any> Publisher<T>.exactlyOnce(): Publisher<T> {
+internal fun <T: Any> Publisher<T>.exactlyOnce(): Publisher<T> {
     val queue = mutableListOf<T>()
 
     var currentSubscriber: Subscriber<T>? = null
@@ -604,7 +604,7 @@ fun <T: Any> Publisher<T>.exactlyOnce(): Publisher<T> {
  *
  * Not thread safe.
  */
-fun <T : Any> Publisher<T>.shareAndReplayTypesOnResubscribe(vararg types: Class<out T>): Publisher<T> {
+internal fun <T : Any> Publisher<T>.shareAndReplayTypesOnResubscribe(vararg types: Class<out T>): Publisher<T> {
     val lastSeen: MutableMap<Class<out T>, T?> = types.associate { Pair(it, null) }.toMutableMap()
 
     val shared = this.share()
@@ -649,7 +649,7 @@ fun <T : Any> Publisher<T>.shareAndReplayTypesOnResubscribe(vararg types: Class<
 /**
  * Execute the given block when the subscription is cancelled.
  */
-fun <T> Publisher<T>.doOnUnsubscribe(behaviour: () -> Unit): Publisher<T> {
+internal fun <T> Publisher<T>.doOnUnsubscribe(behaviour: () -> Unit): Publisher<T> {
     return object : Publisher<T> {
         override fun subscribe(subscriber: Subscriber<T>) {
 
@@ -714,7 +714,7 @@ class PublishSubject<T> : Subject<T> {
     }
 }
 
-fun <T> Collection<T>.asPublisher(): Publisher<T> {
+internal fun <T> Collection<T>.asPublisher(): Publisher<T> {
     return object : Publisher<T> {
         override fun subscribe(subscriber: Subscriber<T>) {
             val subscription = object : Subscription {
@@ -727,7 +727,7 @@ fun <T> Collection<T>.asPublisher(): Publisher<T> {
     }
 }
 
-fun <T> Publisher<T>.doOnNext(callback: (item: T) -> Unit): Publisher<T> {
+internal fun <T> Publisher<T>.doOnNext(callback: (item: T) -> Unit): Publisher<T> {
     val prior = this
     return object : Publisher<T> {
         override fun subscribe(subscriber: Subscriber<T>) {
@@ -765,13 +765,13 @@ fun <T> Publisher<T>.doOnNext(callback: (item: T) -> Unit): Publisher<T> {
 
 // TODO: At such time as we set Android Min SDK to at least 24, change to use Optional here instead
 // (on account of the Reactive Streams spec not actually allowing for nulls).
-fun <T> Publisher<T?>.filterNulls(): Publisher<T> = filter { it != null }.map { it!! }
+internal fun <T> Publisher<T?>.filterNulls(): Publisher<T> = filter { it != null }.map { it!! }
 
 /**
  * Republish emissions from the Publisher until such time as the provider [Publisher] [stopper]
  * emits completion, error, or an emission.
  */
-fun <T, S> Publisher<T>.takeUntil(stopper: Publisher<S>): Publisher<T> {
+internal fun <T, S> Publisher<T>.takeUntil(stopper: Publisher<S>): Publisher<T> {
     return object : Publisher<T> {
         override fun subscribe(subscriber: Subscriber<T>) {
             this@takeUntil.subscribe(object : Subscriber<T> {
@@ -846,7 +846,7 @@ fun View.attachEvents(): Publisher<ViewEvent> {
     }
 }
 
-fun LifecycleOwner.asPublisher(): Publisher<Lifecycle.Event> {
+internal fun LifecycleOwner.asPublisher(): Publisher<Lifecycle.Event> {
     return object : Publisher<Lifecycle.Event> {
         override fun subscribe(subscriber: Subscriber<Lifecycle.Event>) {
             val observer = GenericLifecycleObserver { _, event -> subscriber.onNext(event) }
@@ -863,7 +863,7 @@ fun LifecycleOwner.asPublisher(): Publisher<Lifecycle.Event> {
 /**
  * Returns a [Publisher] that is unsubscribed from [this] when the given [View] is detached.
  */
-fun <T> Publisher<T>.androidLifecycleDispose(view: View): Publisher<T> {
+internal fun <T> Publisher<T>.androidLifecycleDispose(view: View): Publisher<T> {
     return this.takeUntil(
         view.attachEvents().filter { it is ViewEvent.Detach }
     )
@@ -873,7 +873,7 @@ fun <T> Publisher<T>.androidLifecycleDispose(view: View): Publisher<T> {
  * Returns a [Publisher] that is unsubscribed from [this] when the given [LifecycleOwner] (Fragment
  * or Activity) goes out-of-lifecycle.
  */
-fun <T> Publisher<T>.androidLifecycleDispose(lifecycleOwner: LifecycleOwner): Publisher<T> {
+internal fun <T> Publisher<T>.androidLifecycleDispose(lifecycleOwner: LifecycleOwner): Publisher<T> {
     return this.takeUntil(
         lifecycleOwner.asPublisher().filter { it == Lifecycle.Event.ON_STOP || it == Lifecycle.Event.ON_DESTROY }
     )
@@ -903,12 +903,12 @@ typealias CallbackReceiver<T> = (T) -> Unit
  *
  * `{ callback: CallbackReceiver<MY_RESULT_TYPE> -> roverNetworkService.someMethodThatReturnsANetworkTask(callback) }.asPublisher()`
  */
-fun <T> (((r: T) -> Unit) -> NetworkTask).asPublisher(): Publisher<T> {
+internal fun <T> (((r: T) -> Unit) -> NetworkTask).asPublisher(): Publisher<T> {
     return object : Publisher<T> {
         override fun subscribe(subscriber: Subscriber<T>) {
             val networkTask = this@asPublisher.invoke { result: T ->
                 if (Looper.myLooper() != Looper.getMainLooper()) {
-                    throw RuntimeException("DataPlugin did not dispatch result handler to main thread correctly.  Running on thread ${Thread.currentThread()}")
+                    throw RuntimeException("NetworkTask emitter did not dispatch result handler to main thread correctly.  Running on thread ${Thread.currentThread()}")
                 }
                 subscriber.onNext(result)
                 subscriber.onComplete()
@@ -916,7 +916,7 @@ fun <T> (((r: T) -> Unit) -> NetworkTask).asPublisher(): Publisher<T> {
             val subscription = object : Subscription {
                 override fun cancel() {
                     if (Looper.myLooper() != Looper.getMainLooper()) {
-                        throw RuntimeException("DataPlugin did not dispatch cancel handler to main thread correctly.  Running on thread ${Thread.currentThread()}")
+                        throw RuntimeException("NetworkTask emitter did not dispatch cancel handler to main thread correctly.  Running on thread ${Thread.currentThread()}")
                     }
                     networkTask.cancel()
                 }
@@ -934,7 +934,7 @@ fun <T> (((r: T) -> Unit) -> NetworkTask).asPublisher(): Publisher<T> {
  *
  *
  */
-fun <T> Publisher<T>.blockForResult(): List<T> {
+internal fun <T> Publisher<T>.blockForResult(): List<T> {
     val latch = CountDownLatch(1)
     var receivedError: Throwable? = null
     val results : MutableList<T> = mutableListOf()
