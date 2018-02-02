@@ -3,6 +3,10 @@ package io.rover.rover.plugins.userexperience.assets
 import android.graphics.Bitmap
 import android.os.Handler
 import android.os.Looper
+import io.rover.rover.core.logging.log
+import io.rover.rover.core.streams.CallbackReceiver
+import io.rover.rover.core.streams.Publisher
+import io.rover.rover.core.streams.asPublisher
 import io.rover.rover.plugins.data.NetworkResult
 import io.rover.rover.plugins.data.http.NetworkTask
 import java.net.URL
@@ -24,12 +28,20 @@ internal class AndroidAssetService(
         )
     )
 
-    override fun getImageByUrl(
+    /**
+     * Fetch and process images using the pipeline.  We'll use [SynchronousOperationNetworkTask] to
+     * do the CPU-bound processing.
+     */
+    private fun synchronousNetworkTaskForImageDownload(
         url: URL,
         completionHandler: ((NetworkResult<Bitmap>) -> Unit)
     ): NetworkTask {
+        // TODO: we're doing Publisher based I/O and Publisher-based delivery, but we're using
+        // NetworkTask for CPU processing. implement what's needed to do executor-based CPU
+        // processing with Publisher and switch to that.
 
         return SynchronousOperationNetworkTask(
+            // TODO: use a separate executor for this CPU-bound processing.
             ioExecutor,
             {
                 // this block will be dispatched onto the ioExecutor by
@@ -70,6 +82,13 @@ internal class AndroidAssetService(
                 }
             }
         )
+    }
+
+    override fun getImageByUrl(
+        url: URL
+    ): Publisher<NetworkResult<Bitmap>> {
+        // adapt the SynchronousOperationNetworkTask to Publisher:
+        return { callback: CallbackReceiver<NetworkResult<Bitmap>> -> synchronousNetworkTaskForImageDownload(url, callback) }.asPublisher()
     }
 
     /**

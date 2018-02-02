@@ -4,8 +4,11 @@ import android.support.v7.widget.AppCompatImageView
 import android.view.View
 import android.widget.ImageView
 import io.rover.rover.core.logging.log
+import io.rover.rover.core.streams.androidLifecycleDispose
+import io.rover.rover.core.streams.subscribe
 import io.rover.rover.platform.whenNotNull
 import io.rover.rover.plugins.data.http.NetworkTask
+import io.rover.rover.plugins.userexperience.experience.ViewModelBinding
 import io.rover.rover.plugins.userexperience.types.PixelSize
 
 /**
@@ -19,20 +22,11 @@ class ViewImage(
     )
 
     // State:
-    private var runningTask: NetworkTask? = null
-
     private val dimensionCallbacks: MutableSet<DimensionCallback> = mutableSetOf()
     private var width: Int = 0
     private var height: Int = 0
 
     init {
-        imageView.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
-            override fun onViewDetachedFromWindow(v: View?) {
-                runningTask?.cancel()
-            }
-
-            override fun onViewAttachedToWindow(v: View?) {}
-        })
         imageView.scaleType = ImageView.ScaleType.FIT_XY
 
         // in order to know our realized width and height we need to listen for layout events.
@@ -55,19 +49,16 @@ class ViewImage(
     private fun whenDimensionsReady(callback: DimensionCallback) {
         if (width == 0 && height == 0) {
             // dimensions aren't ready. wait.
-            log.v("Dimensions aren't ready.  Waiting.")
+            // log.v("Dimensions aren't ready.  Waiting.")
             dimensionCallbacks.add(callback)
         } else {
-            log.v("Dimensions are already ready.  Firing immediately.")
+            // log.v("Dimensions are already ready.  Firing immediately.")
             callback(width, height)
         }
     }
 
-    override var imageBlockViewModel: ImageBlockViewModelInterface? = null
-        set(viewModel) {
+    override var imageBlockViewModel: ImageBlockViewModelInterface? by ViewModelBinding() { viewModel, subscriptionCallback ->
             if (viewModel != null) {
-                // if there's already a running image fetch, cancel it before starting another.
-                runningTask?.cancel()
                 // and also clear any waiting layout callbacks
                 dimensionCallbacks.clear()
 
@@ -76,16 +67,18 @@ class ViewImage(
                 // we need to know the laid out dimensions of the view in order to ask the view
                 // model for an optimized version of the image suited to the view's size.
                 whenDimensionsReady { width, height ->
-                    runningTask = viewModel.requestImage(
+                    viewModel.requestImage(
                         PixelSize(width, height),
                         imageView.resources.displayMetrics
-                    ) { bitmap ->
+                    ).androidLifecycleDispose(imageView)
+                        .subscribe({ bitmap ->
                         imageView.setImageBitmap(bitmap)
                         imageView.animate()
                             .alpha(viewModel.opacity)
                             .setDuration(shortAnimationDuration.toLong())
                             .start()
-                    }.apply { this.whenNotNull { it.resume() } }
+                    }, { error -> throw(error) }, { subscriptionCallback(it) }
+                    )
                 }
             }
         }

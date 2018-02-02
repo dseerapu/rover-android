@@ -2,6 +2,7 @@ package io.rover.rover.plugins.userexperience.experience.blocks.image
 
 import android.graphics.Bitmap
 import android.util.DisplayMetrics
+import io.rover.rover.core.streams.Publisher
 import io.rover.rover.plugins.data.http.NetworkTask
 import io.rover.rover.plugins.userexperience.experience.blocks.concerns.background.BackgroundViewModelInterface
 import io.rover.rover.plugins.userexperience.experience.blocks.concerns.border.BorderViewModelInterface
@@ -28,9 +29,8 @@ interface ImageViewModelInterface : Measurable {
      */
     fun requestImage(
         targetViewPixelSize: PixelSize,
-        displayMetrics: DisplayMetrics,
-        callback: (Bitmap) -> Unit
-    ): NetworkTask?
+        displayMetrics: DisplayMetrics
+    ): Publisher<Bitmap>
 }
 
 interface ImageBlockViewModelInterface :

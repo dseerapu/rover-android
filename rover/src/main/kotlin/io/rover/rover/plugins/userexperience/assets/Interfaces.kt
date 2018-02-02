@@ -2,10 +2,10 @@ package io.rover.rover.plugins.userexperience.assets
 
 import android.graphics.Bitmap
 import android.util.DisplayMetrics
+import io.rover.rover.core.streams.Publisher
 import io.rover.rover.plugins.data.domain.Background
 import io.rover.rover.plugins.data.domain.ImageBlock
 import io.rover.rover.plugins.data.NetworkResult
-import io.rover.rover.plugins.data.http.NetworkTask
 import io.rover.rover.plugins.userexperience.types.PixelSize
 import io.rover.rover.plugins.userexperience.experience.blocks.concerns.background.BackgroundImageConfiguration
 import java.net.URI
@@ -38,9 +38,8 @@ interface AssetService {
      * NetworkResult, another result<->error optional type should be used instead.
      */
     fun getImageByUrl(
-        url: URL,
-        completionHandler: ((NetworkResult<Bitmap>) -> Unit)
-    ): NetworkTask
+        url: URL
+    ): Publisher<NetworkResult<Bitmap>>
 }
 
 interface ImageOptimizationServiceInterface {
@@ -50,6 +49,9 @@ interface ImageOptimizationServiceInterface {
      * cut down retrieving and decoding an unnecessary larger image than needed for the context.
      *
      * Note that this does not actually perform any sort optimization operation locally.
+     *
+     * @return The optimized image configuration, which includes the URI with optimization
+     * parameters.  May be null if the background in question has no image.
      */
     fun optimizeImageBackground(
         background: Background,
@@ -58,9 +60,10 @@ interface ImageOptimizationServiceInterface {
     ): OptimizedImage?
 
     /**
-     * Take a given image block and return the URI.
+     * Take a given image block and return the URI with optimization parameters needed to display
+     * it.
      *
-     * (No configuration is given here because
+     * @return optimized URI.  May be null if the image block in question has no image set.
      */
     fun optimizeImageBlock(
         block: ImageBlock,

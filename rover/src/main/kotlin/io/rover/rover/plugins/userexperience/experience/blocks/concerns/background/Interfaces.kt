@@ -3,6 +3,7 @@ package io.rover.rover.plugins.userexperience.experience.blocks.concerns.backgro
 import android.graphics.Bitmap
 import android.graphics.Shader
 import android.util.DisplayMetrics
+import io.rover.rover.core.streams.Publisher
 import io.rover.rover.plugins.data.domain.Background
 import io.rover.rover.plugins.data.http.NetworkTask
 import io.rover.rover.plugins.userexperience.types.Rect
@@ -68,17 +69,6 @@ interface BackgroundViewModelInterface {
 
     fun requestBackgroundImage(
         targetViewPixelSize: PixelSize,
-        displayMetrics: DisplayMetrics,
-        callback: (
-            /**
-             * The bitmap to be drawn.
-             */
-            Bitmap,
-
-            /**
-             * This structure defines how the View should render the background.
-             */
-            BackgroundImageConfiguration
-        ) -> Unit
-    ): NetworkTask?
+        displayMetrics: DisplayMetrics
+    ): Publisher<Pair<Bitmap, BackgroundImageConfiguration>>
 }

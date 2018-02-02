@@ -32,7 +32,7 @@ interface Publisher<out T> {
     fun subscribe(subscriber: Subscriber<T>)
 
     companion object {
-        fun <T> just(item: T): Publisher<T> {
+        internal fun <T> just(item: T): Publisher<T> {
             return object : Publisher<T> {
                 override fun subscribe(subscriber: Subscriber<T>) {
                     subscriber.onSubscribe(
@@ -41,6 +41,17 @@ interface Publisher<out T> {
                         }
                     )
                     subscriber.onNext(item)
+                    subscriber.onComplete()
+                }
+            }
+        }
+
+        internal fun <T> empty(): Publisher<T> {
+            return object : Publisher<T> {
+                override fun subscribe(subscriber: Subscriber<T>) {
+                    subscriber.onSubscribe(object : Subscription {
+                        override fun cancel() { /* this yields immediately, cancel can have no effect */ }
+                    })
                     subscriber.onComplete()
                 }
             }

@@ -4,6 +4,9 @@ import android.graphics.Bitmap
 import android.util.DisplayMetrics
 import io.rover.rover.plugins.data.domain.ImageBlock
 import io.rover.rover.core.logging.log
+import io.rover.rover.core.streams.Observable
+import io.rover.rover.core.streams.Publisher
+import io.rover.rover.core.streams.flatMap
 import io.rover.rover.plugins.userexperience.assets.AssetService
 import io.rover.rover.plugins.userexperience.assets.ImageOptimizationServiceInterface
 import io.rover.rover.plugins.data.NetworkResult
@@ -17,11 +20,11 @@ class ImageViewModel(
     private val assetService: AssetService,
     private val imageOptimizationService: ImageOptimizationServiceInterface
 ) : ImageViewModelInterface {
+
     override fun requestImage(
         targetViewPixelSize: PixelSize,
-        displayMetrics: DisplayMetrics,
-        callback: (Bitmap) -> Unit
-    ): NetworkTask? {
+        displayMetrics: DisplayMetrics
+    ): Publisher<Bitmap> {
         val uri = block.image?.url
 
         return if (uri != null) {
@@ -35,20 +38,21 @@ class ImageViewModel(
 
             val url = URL(uriWithParameters.toString())
 
-            assetService.getImageByUrl(url) { result ->
+            assetService.getImageByUrl(url).flatMap { result ->
                 when (result) {
-                    is NetworkResult.Success -> callback(result.response)
+                    is NetworkResult.Success -> Observable.just(result.response)
                     is NetworkResult.Error -> {
                         // TODO perhaps attempt a retry? or should a lower layer attempt retry?
                         // concern should remain here if the experience UI should react or indicate
                         // an error somehow.
                         log.e("Problem retrieving image: ${result.throwable}")
+                        Observable.empty()
                     }
                 }
             }
         } else {
             // log.v("Null URI.  No image set.")
-            null
+            Observable.empty()
         }
     }
 

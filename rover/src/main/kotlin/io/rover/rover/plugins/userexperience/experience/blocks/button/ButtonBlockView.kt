@@ -12,6 +12,7 @@ import android.view.ViewAnimationUtils
 import android.widget.FrameLayout
 import android.widget.TextView
 import io.rover.rover.core.logging.log
+import io.rover.rover.core.streams.androidLifecycleDispose
 import io.rover.rover.core.streams.subscribe
 import io.rover.rover.plugins.userexperience.experience.ViewModelBinding
 import io.rover.rover.plugins.userexperience.experience.blocks.concerns.text.AndroidRichTextToSpannedTransformer
@@ -78,7 +79,9 @@ class ButtonBlockView : FrameLayout, LayoutableView<ButtonBlockViewModelInterfac
         highlightedView.viewModel = viewModel?.viewModelForState(StateOfButton.Highlighted)
         selectedView.viewModel = viewModel?.viewModelForState(StateOfButton.Selected)
 
-        viewModel?.buttonEvents?.subscribe({ event ->
+        viewModel?.buttonEvents
+            ?.androidLifecycleDispose(this)
+            ?.subscribe({ event ->
                 when (event) {
                     is ButtonViewModelInterface.Event.DisplayState -> {
                         viewText.textViewModel = event.viewModel

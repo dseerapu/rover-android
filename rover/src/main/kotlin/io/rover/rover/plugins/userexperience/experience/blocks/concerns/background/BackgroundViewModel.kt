@@ -4,6 +4,11 @@ import android.graphics.Bitmap
 import android.util.DisplayMetrics
 import io.rover.rover.plugins.data.domain.Background
 import io.rover.rover.core.logging.log
+import io.rover.rover.core.streams.Observable
+import io.rover.rover.core.streams.Publisher
+import io.rover.rover.core.streams.asPublisher
+import io.rover.rover.core.streams.flatMap
+import io.rover.rover.core.streams.map
 import io.rover.rover.plugins.userexperience.assets.AssetService
 import io.rover.rover.plugins.userexperience.assets.ImageOptimizationServiceInterface
 import io.rover.rover.plugins.data.NetworkResult
@@ -21,9 +26,8 @@ class BackgroundViewModel(
 
     override fun requestBackgroundImage(
         targetViewPixelSize: PixelSize,
-        displayMetrics: DisplayMetrics,
-        callback: (Bitmap, BackgroundImageConfiguration) -> Unit
-    ): NetworkTask? {
+        displayMetrics: DisplayMetrics
+    ): Publisher<Pair<Bitmap, BackgroundImageConfiguration>> {
         val uri = background.backgroundImage?.url
         return if (uri != null) {
             val (urlToFetch, imageConfiguration) =
@@ -31,14 +35,16 @@ class BackgroundViewModel(
                     background,
                     targetViewPixelSize,
                     displayMetrics
-                ) ?: return null
+                ) ?: return Observable.empty()
 
-            assetService.getImageByUrl(urlToFetch.toURL()) { result ->
+            assetService.getImageByUrl(urlToFetch.toURL()).flatMap { result ->
                 when (result) {
                     is NetworkResult.Success -> {
-                        callback(
-                            result.response,
-                            imageConfiguration
+                        Observable.just(
+                            Pair(
+                                result.response,
+                                imageConfiguration
+                            )
                         )
                     }
                     is NetworkResult.Error -> {
@@ -46,12 +52,13 @@ class BackgroundViewModel(
                         // concern should remain here if the experience UI should react or indicate
                         // an error somehow.
                         log.e("Problem retrieving image: ${result.throwable}")
+                        Observable.empty()
                     }
                 }
             }
         } else {
             // log.v("Null URI.  No image set.")
-            null
+           Observable.empty()
         }
     }
 }

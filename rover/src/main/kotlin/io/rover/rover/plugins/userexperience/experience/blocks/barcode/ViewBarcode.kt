@@ -27,8 +27,6 @@ class ViewBarcode(
         barcodeView.scaleType = ImageView.ScaleType.FIT_XY
     }
 
-
-
     override var barcodeViewModel: BarcodeViewModelInterface? by ViewModelBinding { viewModel, _ ->
             // TODO: render off-thread (although generation seems fast so it may not matter too
             // much).
