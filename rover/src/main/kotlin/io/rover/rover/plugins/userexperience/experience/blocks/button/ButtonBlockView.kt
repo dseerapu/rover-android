@@ -3,6 +3,7 @@ package io.rover.rover.plugins.userexperience.experience.blocks.button
 import android.animation.Animator
 import android.animation.AnimatorSet
 import android.annotation.SuppressLint
+import android.annotation.TargetApi
 import android.content.Context
 import android.os.Build
 import android.util.AttributeSet
@@ -12,11 +13,16 @@ import android.widget.FrameLayout
 import android.widget.TextView
 import io.rover.rover.core.logging.log
 import io.rover.rover.core.streams.subscribe
+import io.rover.rover.plugins.userexperience.experience.ViewModelBinding
 import io.rover.rover.plugins.userexperience.experience.blocks.concerns.text.AndroidRichTextToSpannedTransformer
 import io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout.LayoutableView
 import io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout.ViewBlock
 import io.rover.rover.plugins.userexperience.experience.blocks.concerns.text.ViewText
 
+// API compatibility is managed at runtime in a way that Android lint's static analysis is not able
+// to pick up.
+@TargetApi(Build.VERSION_CODES.LOLLIPOP)
+@SuppressLint("NewApi")
 class ButtonBlockView : FrameLayout, LayoutableView<ButtonBlockViewModelInterface> {
     constructor(context: Context?) : super(context)
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
@@ -63,19 +69,16 @@ class ButtonBlockView : FrameLayout, LayoutableView<ButtonBlockViewModelInterfac
 
     private var activeAnimator: Animator? = null
 
-    override var viewModel: ButtonBlockViewModelInterface? = null
-        @SuppressLint("NewApi")
-        set(buttonBlockViewModel) {
-            field = buttonBlockViewModel
 
-            viewBlock.blockViewModel = buttonBlockViewModel
+    override var viewModel: ButtonBlockViewModelInterface? by ViewModelBinding { viewModel, subscriptionCallback ->
+        viewBlock.blockViewModel = viewModel
 
-            disabledView.viewModel = buttonBlockViewModel?.viewModelForState(StateOfButton.Disabled)
-            normalView.viewModel = buttonBlockViewModel?.viewModelForState(StateOfButton.Normal)
-            highlightedView.viewModel = buttonBlockViewModel?.viewModelForState(StateOfButton.Highlighted)
-            selectedView.viewModel = buttonBlockViewModel?.viewModelForState(StateOfButton.Selected)
+        disabledView.viewModel = viewModel?.viewModelForState(StateOfButton.Disabled)
+        normalView.viewModel = viewModel?.viewModelForState(StateOfButton.Normal)
+        highlightedView.viewModel = viewModel?.viewModelForState(StateOfButton.Highlighted)
+        selectedView.viewModel = viewModel?.viewModelForState(StateOfButton.Selected)
 
-            buttonBlockViewModel?.buttonEvents?.subscribe({ event ->
+        viewModel?.buttonEvents?.subscribe({ event ->
                 when (event) {
                     is ButtonViewModelInterface.Event.DisplayState -> {
                         viewText.textViewModel = event.viewModel
@@ -171,7 +174,7 @@ class ButtonBlockView : FrameLayout, LayoutableView<ButtonBlockViewModelInterfac
                     }
                 }
             },
-                { error -> throw(RuntimeException("Button block view subscription to view model error", error)) }
+                { error -> throw(RuntimeException("Button block view subscription to view model error", error)) }, { subscription -> subscriptionCallback(subscription) }
             )
         }
 

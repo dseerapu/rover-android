@@ -15,6 +15,7 @@ import io.rover.rover.core.logging.log
 import io.rover.rover.core.streams.androidLifecycleDispose
 import io.rover.rover.core.streams.subscribe
 import io.rover.rover.platform.whenNotNull
+import io.rover.rover.plugins.userexperience.experience.ViewModelBinding
 import io.rover.rover.plugins.userexperience.experience.concerns.BindableView
 import io.rover.rover.plugins.userexperience.experience.layout.screen.ScreenView
 import io.rover.rover.plugins.userexperience.experience.layout.screen.ScreenViewModelInterface
@@ -50,77 +51,73 @@ class ExperienceNavigationView : FrameLayout, BindableView<ExperienceNavigationV
         }
     }
 
-    override var viewModel: ExperienceNavigationViewModelInterface? = null
-        set(navigationViewModel) {
-
-            field = navigationViewModel
-
-            field?.updates?.androidLifecycleDispose(this)?.subscribe({ event ->
-                when (event) {
-                    is ExperienceNavigationViewModelInterface.Emission.Update.GoToScreen -> {
-                        if (!event.animate) {
+    override var viewModel: ExperienceNavigationViewModelInterface? by ViewModelBinding { viewModel, subscriptionCallback ->
+        viewModel?.updates?.androidLifecycleDispose(this)?.subscribe({ event ->
+            when (event) {
+                is ExperienceNavigationViewModelInterface.Emission.Update.GoToScreen -> {
+                    if (!event.animate) {
+                        val newView = getViewForScreenViewModel(event.screenViewModel)
+                        activeView?.visibility = View.GONE
+                        newView.visibility = View.VISIBLE
+                        activeView = newView
+                    } else {
+                        if (event.backwards) {
                             val newView = getViewForScreenViewModel(event.screenViewModel)
-                            activeView?.visibility = View.GONE
-                            newView.visibility = View.VISIBLE
-                            activeView = newView
-                        } else {
-                            if (event.backwards) {
-                                val newView = getViewForScreenViewModel(event.screenViewModel)
-                                newView.bringToFront()
-                                newView.visibility = View.GONE
+                            newView.bringToFront()
+                            newView.visibility = View.GONE
 
-                                val set = TransitionSet().apply {
-                                    addTransition(
-                                        Slide(
-                                            Gravity.START
-                                        ).addTarget(newView)
-                                    )
-                                    activeView.whenNotNull { activeView ->
-                                        addTransition(
-                                            Slide(
-                                                Gravity.END
-                                            ).addTarget(activeView)
-                                        )
-                                    }
-                                }
-
-                                TransitionManager.beginDelayedTransition(this, set)
-                                activeView.whenNotNull {
-                                    it.visibility = View.GONE
-                                }
-                                newView.visibility = View.VISIBLE
-
-                                activeView = newView
-                            } else {
-                                // forwards
-                                val newView = getViewForScreenViewModel(event.screenViewModel)
-                                newView.bringToFront()
-                                newView.visibility = View.GONE
-
-                                val set = TransitionSet().apply {
-                                    activeView.whenNotNull { activeView ->
-                                        addTransition(
-                                            Slide(
-                                                Gravity.START
-                                            ).addTarget(activeView)
-                                        )
-                                    }
+                            val set = TransitionSet().apply {
+                                addTransition(
+                                    Slide(
+                                        Gravity.START
+                                    ).addTarget(newView)
+                                )
+                                activeView.whenNotNull { activeView ->
                                     addTransition(
                                         Slide(
                                             Gravity.END
-                                        ).addTarget(newView)
+                                        ).addTarget(activeView)
                                     )
                                 }
-
-                                TransitionManager.beginDelayedTransition(this, set)
-                                newView.visibility = View.VISIBLE
-                                activeView.whenNotNull { it.visibility = View.GONE }
-
-                                activeView = newView
                             }
+
+                            TransitionManager.beginDelayedTransition(this, set)
+                            activeView.whenNotNull {
+                                it.visibility = View.GONE
+                            }
+                            newView.visibility = View.VISIBLE
+
+                            activeView = newView
+                        } else {
+                            // forwards
+                            val newView = getViewForScreenViewModel(event.screenViewModel)
+                            newView.bringToFront()
+                            newView.visibility = View.GONE
+
+                            val set = TransitionSet().apply {
+                                activeView.whenNotNull { activeView ->
+                                    addTransition(
+                                        Slide(
+                                            Gravity.START
+                                        ).addTarget(activeView)
+                                    )
+                                }
+                                addTransition(
+                                    Slide(
+                                        Gravity.END
+                                    ).addTarget(newView)
+                                )
+                            }
+
+                            TransitionManager.beginDelayedTransition(this, set)
+                            newView.visibility = View.VISIBLE
+                            activeView.whenNotNull { it.visibility = View.GONE }
+
+                            activeView = newView
                         }
                     }
                 }
-            }, { error -> throw error })
-        }
+            }
+        }, { error -> throw error }, { subscription -> subscriptionCallback(subscription) })
+    }
 }

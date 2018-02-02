@@ -5,6 +5,7 @@ import android.graphics.drawable.BitmapDrawable
 import android.support.v7.widget.AppCompatImageView
 import android.widget.ImageView
 import io.rover.rover.platform.toAndroidBitmap
+import io.rover.rover.plugins.userexperience.experience.ViewModelBinding
 import io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout.PaddingContributor
 import io.rover.shaded.zxing.com.google.zxing.BarcodeFormat
 import io.rover.shaded.zxing.com.google.zxing.EncodeHintType
@@ -26,9 +27,9 @@ class ViewBarcode(
         barcodeView.scaleType = ImageView.ScaleType.FIT_XY
     }
 
-    override var barcodeViewModel: BarcodeViewModelInterface? = null
-        set(viewModel) {
-            field = viewModel
+
+
+    override var barcodeViewModel: BarcodeViewModelInterface? by ViewModelBinding { viewModel, _ ->
             // TODO: render off-thread (although generation seems fast so it may not matter too
             // much).
             if (viewModel != null) {

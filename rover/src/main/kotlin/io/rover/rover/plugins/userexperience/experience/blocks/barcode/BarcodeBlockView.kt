@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Canvas
 import android.support.v7.widget.AppCompatImageView
 import android.util.AttributeSet
+import io.rover.rover.plugins.userexperience.experience.ViewModelBinding
 import io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout.LayoutableView
 import io.rover.rover.plugins.userexperience.experience.blocks.concerns.background.ViewBackground
 import io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout.ViewBlock
@@ -21,15 +22,12 @@ class BarcodeBlockView : AppCompatImageView, LayoutableView<BarcodeBlockViewMode
     private val viewBarcode = ViewBarcode(this)
     private val viewBlock = ViewBlock(this, setOf(viewBorder, viewBarcode))
 
-    override var viewModel: BarcodeBlockViewModelInterface? = null
-        set(barcodeBlockViewModel) {
-            field = barcodeBlockViewModel
-
-            viewBorder.borderViewModel = barcodeBlockViewModel
-            viewBarcode.barcodeViewModel = barcodeBlockViewModel
-            viewBlock.blockViewModel = barcodeBlockViewModel
-            viewBackground.backgroundViewModel = barcodeBlockViewModel
-        }
+    override var viewModel: BarcodeBlockViewModelInterface? by ViewModelBinding { viewModel, _ ->
+        viewBorder.borderViewModel = viewModel
+        viewBarcode.barcodeViewModel = viewModel
+        viewBlock.blockViewModel = viewModel
+        viewBackground.backgroundViewModel = viewModel
+    }
 
     override fun onDraw(canvas: Canvas) {
         viewComposition.beforeOnDraw(canvas)

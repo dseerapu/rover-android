@@ -98,51 +98,51 @@ class ExperienceView : CoordinatorLayout, BindableView<ExperienceViewModelInterf
         )
     }
 
-    override var viewModel: ExperienceViewModelInterface? = null
-        set(experienceViewModel) {
-            if (viewModel != null) {
-                // sadly have to add this invariant because of complexity dealing with the toolbar.
-                // May fix it later as required.
-                throw RuntimeException("ExperienceView does not support being re-bound to a new ExperienceViewModel.")
-            }
-            field = experienceViewModel
-            val toolbarHost = toolbarHost
-                ?: throw RuntimeException("You must set the ToolbarHost up on ExperienceView before binding the view to a view model.")
+    override var viewModel: ExperienceViewModelInterface? by ViewModelBinding { viewModel, subscriptionCallback ->
+        if (this.viewModel != null) {
+            // sadly have to add this invariant because of complexity dealing with the toolbar.
+            // May fix it later as required. TODO: put a note here about note why this is?
+            throw RuntimeException("ExperienceView does not support being re-bound to a new ExperienceViewModel.")
+        }
 
-            experienceNavigationView.viewModel = null
+        val toolbarHost = toolbarHost
+            ?: throw RuntimeException("You must set the ToolbarHost up on ExperienceView before binding the view to a view model.")
 
-            if (experienceViewModel != null) {
-                experienceViewModel.events.androidLifecycleDispose(this).subscribe({ event ->
-                    when (event) {
-                        is ExperienceViewModelInterface.Event.ExperienceReady -> {
-                            experienceNavigationView.viewModel = event.experienceNavigationViewModel
-                        }
-                        is ExperienceViewModelInterface.Event.SetActionBar -> {
-                            // regenerate and replace the toolbar
+        experienceNavigationView.viewModel = null
 
-                            val newToolbar = viewExperienceToolbar.setViewModelAndReturnToolbar(
-                                event.toolbarViewModel
-                            )
-                            connectToolbar(newToolbar)
-                        }
-                        is ExperienceViewModelInterface.Event.DisplayError -> {
-                            Snackbar.make(this, "Problem: ${event.message}", Snackbar.LENGTH_LONG).show()
-                            log.w("Unable to retrieve experience: ${event.message}")
-                        }
-                        is ExperienceViewModelInterface.Event.SetBacklightBoost -> {
-                            toolbarHost.provideWindow().attributes = (toolbarHost.provideWindow().attributes ?: WindowManager.LayoutParams()).apply {
-                                screenBrightness = when (event.extraBright) {
-                                    true -> WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_FULL
-                                    false -> WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
-                                }
+        if (viewModel != null) {
+            viewModel.events.androidLifecycleDispose(this).subscribe({ event ->
+                when (event) {
+                    is ExperienceViewModelInterface.Event.ExperienceReady -> {
+                        experienceNavigationView.viewModel = event.experienceNavigationViewModel
+                    }
+                    is ExperienceViewModelInterface.Event.SetActionBar -> {
+                        // regenerate and replace the toolbar
+
+                        val newToolbar = viewExperienceToolbar.setViewModelAndReturnToolbar(
+                            event.toolbarViewModel
+                        )
+                        connectToolbar(newToolbar)
+                    }
+                    is ExperienceViewModelInterface.Event.DisplayError -> {
+                        Snackbar.make(this, "Problem: ${event.message}", Snackbar.LENGTH_LONG).show()
+                        log.w("Unable to retrieve experience: ${event.message}")
+                    }
+                    is ExperienceViewModelInterface.Event.SetBacklightBoost -> {
+                        toolbarHost.provideWindow().attributes = (toolbarHost.provideWindow().attributes
+                            ?: WindowManager.LayoutParams()).apply {
+                            screenBrightness = when (event.extraBright) {
+                                true -> WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_FULL
+                                false -> WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
                             }
                         }
                     }
-                }, { error ->
-                    throw error
-                })
-            }
+                }
+            }, { error ->
+                throw error
+            }, { subscription -> subscriptionCallback(subscription) })
         }
+    }
 
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
