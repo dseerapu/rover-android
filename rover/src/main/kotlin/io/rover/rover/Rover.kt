@@ -7,6 +7,7 @@ import io.rover.rover.core.container.PluginContainer
 import io.rover.rover.core.logging.log
 import io.rover.rover.plugins.data.http.AsyncTaskAndHttpUrlConnectionNetworkClient
 import io.rover.rover.plugins.data.DataPlugin
+import io.rover.rover.plugins.events.EventsPluginInterface
 import io.rover.rover.plugins.userexperience.UserExperiencePluginInterface
 import java.net.HttpURLConnection
 
@@ -31,6 +32,9 @@ class Rover(
     val userExperiencePlugin: UserExperiencePluginInterface
         get() = this.resolve(UserExperiencePluginInterface::class.java) ?: throw missingPluginError("UserExperiencePlugin")
 
+    val eventsPlugin: EventsPluginInterface
+        get() = this.resolve(EventsPluginInterface::class.java) ?: throw missingPluginError(("EventsPluginInterface"))
+
     private fun missingPluginError(name: String): Throwable {
         throw RuntimeException("Data Plugin not registered.  Did you include $name() in the assembler list?")
     }
@@ -48,7 +52,7 @@ class Rover(
         fun initialize(vararg assemblers: Assembler) {
             val rover = Rover(assemblers.asList())
             if(sharedInstanceBackingField != null) {
-                log.w("Rover already initialized.  This is most likely a bug.")
+                throw RuntimeException("Rover already initialized.  This is most likely a bug.")
             }
             sharedInstanceBackingField = rover
         }
@@ -81,6 +85,9 @@ class Rover(
          */
         @JvmStatic
         fun registerCustomRoverInstance(userProvidedRover: Rover) {
+            if(sharedInstanceBackingField != null) {
+                throw RuntimeException("Rover already initialized.  This is most likely a bug.")
+            }
             sharedInstanceBackingField = userProvidedRover
         }
     }

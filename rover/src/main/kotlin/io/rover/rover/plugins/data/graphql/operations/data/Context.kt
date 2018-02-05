@@ -7,7 +7,7 @@ import org.json.JSONObject
 /**
  * Outgoing JSON DTO transformation for [Context]s, as submitted to the Rover GraphQL API.
  */
-fun Context.asJson(): JSONObject {
+internal fun Context.asJson(): JSONObject {
     return JSONObject().apply {
         val props = listOf(
             Context::appBuild,
@@ -43,7 +43,7 @@ fun Context.asJson(): JSONObject {
 /**
  * Incoming JSON DTO transformation for [Context]s, as received from the Rover GraphQL API.
  */
-fun Context.Companion.decodeJson(json: JSONObject): Context {
+internal fun Context.Companion.decodeJson(json: JSONObject): Context {
     return Context(
         appBuild = json.getString("appBuild"),
         appName = json.getString("appName"),

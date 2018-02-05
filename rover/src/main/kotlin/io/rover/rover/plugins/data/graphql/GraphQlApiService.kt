@@ -11,7 +11,7 @@ import io.rover.rover.plugins.data.NetworkRequest
 import io.rover.rover.plugins.data.NetworkResult
 import io.rover.rover.plugins.data.domain.Context
 import io.rover.rover.plugins.data.domain.DeviceState
-import io.rover.rover.plugins.data.domain.Event
+import io.rover.rover.plugins.data.domain.EventSnapshot
 import io.rover.rover.plugins.data.domain.Experience
 import io.rover.rover.plugins.data.domain.ID
 import io.rover.rover.plugins.data.http.HttpClientResponse
@@ -137,13 +137,11 @@ class GraphQlApiService(
     }
 
     override fun sendEventsTask(
-        events: List<Event>,
-        context: Context,
+        events: List<EventSnapshot>,
         completionHandler: ((NetworkResult<String>) -> Unit)
     ): NetworkTask {
         val request = SendEventsRequest(
             events,
-            context,
             wireEncoder
         )
         return uploadTask(request) { uploadResult ->

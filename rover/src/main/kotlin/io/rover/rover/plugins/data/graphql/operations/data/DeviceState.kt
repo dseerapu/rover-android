@@ -8,7 +8,7 @@ import io.rover.rover.plugins.data.graphql.putProp
 import org.json.JSONArray
 import org.json.JSONObject
 
-fun DeviceState.Companion.decodeJson(jsonObject: JSONObject): DeviceState {
+internal fun DeviceState.Companion.decodeJson(jsonObject: JSONObject): DeviceState {
     return DeviceState(
         profile = Profile.decodeJson(jsonObject.getJSONObject("profile")),
         regions = jsonObject.getJSONArray("regions").getObjectIterable().map {
@@ -17,7 +17,7 @@ fun DeviceState.Companion.decodeJson(jsonObject: JSONObject): DeviceState {
     )
 }
 
-fun DeviceState.encodeJson(): JSONObject {
+internal fun DeviceState.encodeJson(): JSONObject {
     return JSONObject().apply {
         putProp(this@encodeJson, DeviceState::profile) { it.encodeJson() }
         putProp(this@encodeJson, DeviceState::regions) { JSONArray(it.map { it.encodeJson() }) }

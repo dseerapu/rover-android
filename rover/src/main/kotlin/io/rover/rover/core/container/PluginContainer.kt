@@ -23,11 +23,9 @@ class PluginContainer(
 
         val factoryType = exampleFactory.javaClass
 
-        log.v("Attempting to resolve type $factoryType")
+        log.v("Attempting to resolve Plugin of type: $factoryType")
 
         val key = ServiceKey(type)
-        log.v("All registered plugins are (${registeredPlugins.keys.joinToString(", ")})")
-
         // retrieve the item of type from the registered plugins hash.  However, because I have a
         // generic type for the entry, good ol' Java type erasure rears its head.  However, I know
         // that the entry is consistent with the key, so the unchecked cast is safe.
@@ -39,6 +37,7 @@ class PluginContainer(
         return entry.instance ?: factory(this).apply {
             // if constructing a new instance, replace the Entry in the list with one that has
             // the memoized/cached instance.
+            log.v("Registering instance of ${this.javaClass.name} for type $key as singleton")
             registeredPlugins[key] = entry.copy(instance = this)
         }
     }

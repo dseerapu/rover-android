@@ -9,7 +9,7 @@ import java.util.UUID
 val Region.BeaconRegion.Companion.resourceName get() = "BeaconRegion"
 val Region.GeofenceRegion.Companion.resourceName get() = "GeofenceRegion"
 
-fun Region.Companion.decodeJson(json: JSONObject): Region {
+internal fun Region.Companion.decodeJson(json: JSONObject): Region {
     val typeName = json.getString("__typename")
 
     return when (typeName) {
@@ -27,7 +27,7 @@ fun Region.Companion.decodeJson(json: JSONObject): Region {
     }
 }
 
-fun Region.encodeJson(): JSONObject {
+internal fun Region.encodeJson(): JSONObject {
     return JSONObject().apply {
         put("__typename", when (this@encodeJson) {
             is Region.BeaconRegion -> {

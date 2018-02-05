@@ -3,7 +3,7 @@
 package io.rover.rover.platform
 
 import io.rover.rover.plugins.data.domain.DeviceState
-import io.rover.rover.plugins.data.domain.Event
+import io.rover.rover.plugins.data.domain.EventSnapshot
 import io.rover.rover.plugins.data.domain.Experience
 import io.rover.rover.plugins.data.graphql.WireEncoder
 import io.rover.rover.plugins.data.graphql.operations.data.encodeJson
@@ -16,7 +16,7 @@ import org.json.JSONObject
 // Thus we here expose a bit of functionality to allow Kotlin test code to get the useful bits out
 // of a few types.
 
-fun WireEncoder.encodeEventsToStringJsonForTests(events: List<Event>): String =
+fun WireEncoder.encodeEventsToStringJsonForTests(events: List<EventSnapshot>): String =
     this.encodeEventsForSending(events).toString(4)
 
 fun WireEncoder.decodeDeviceStateFromJsonStringForTests(json: String): DeviceState =

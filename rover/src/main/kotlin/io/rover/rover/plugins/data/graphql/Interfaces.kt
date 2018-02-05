@@ -3,7 +3,7 @@ package io.rover.rover.plugins.data.graphql
 import io.rover.rover.plugins.data.NetworkResult
 import io.rover.rover.plugins.data.domain.Context
 import io.rover.rover.plugins.data.domain.DeviceState
-import io.rover.rover.plugins.data.domain.Event
+import io.rover.rover.plugins.data.domain.EventSnapshot
 import io.rover.rover.plugins.data.domain.Experience
 import io.rover.rover.plugins.data.domain.ID
 import io.rover.rover.plugins.data.http.NetworkTask
@@ -34,8 +34,7 @@ interface GraphQlApiServiceInterface {
      * @param completionHandler callback will be called with a result.
      */
     fun sendEventsTask(
-        events: List<Event>,
-        context: Context,
+        events: List<EventSnapshot>,
         completionHandler: ((NetworkResult<String>) -> Unit)
     ): NetworkTask
 }

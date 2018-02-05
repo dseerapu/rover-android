@@ -24,6 +24,6 @@ class DeviceIdentification(
             UUID.randomUUID().toString().apply {
                 storage.set(identifierKey, this)
             }
-            )
+        )
     }
 }

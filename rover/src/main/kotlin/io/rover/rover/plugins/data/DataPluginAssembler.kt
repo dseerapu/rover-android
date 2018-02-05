@@ -71,7 +71,6 @@ open class DataPluginComponents(
         )
     }
 
-
     private val localStorage: LocalStorage by lazy {
         SharedPreferencesLocalStorage(applicationContext)
     }

@@ -29,5 +29,14 @@ data class Context(
     val sdkVersion: String?,
     val timeZone: String?
 ) {
-    companion object
+    companion object {
+        internal fun blank(): Context {
+            return Context(
+                null, null, null, null, null, null,
+                null, null, null, null, null, null,
+                null, null, null, null, null, null,
+                null, null, null, null, null, null
+            )
+        }
+    }
 }

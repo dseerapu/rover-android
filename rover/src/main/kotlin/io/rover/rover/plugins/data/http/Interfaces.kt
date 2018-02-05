@@ -2,7 +2,7 @@ package io.rover.rover.plugins.data.http
 
 import io.rover.rover.plugins.data.domain.Context
 import io.rover.rover.plugins.data.domain.DeviceState
-import io.rover.rover.plugins.data.domain.Event
+import io.rover.rover.plugins.data.domain.EventSnapshot
 import io.rover.rover.plugins.data.domain.Experience
 import org.json.JSONArray
 import org.json.JSONObject
@@ -16,7 +16,7 @@ interface WireEncoderInterface {
 
     fun decodeDeviceState(data: JSONObject): DeviceState
 
-    fun encodeEventsForSending(events: List<Event>): JSONArray
+    fun encodeEventsForSending(events: List<EventSnapshot>): JSONArray
 
     fun encodeContextForSending(context: Context): JSONObject
 

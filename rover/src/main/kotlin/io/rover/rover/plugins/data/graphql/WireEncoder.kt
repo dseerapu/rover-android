@@ -2,9 +2,9 @@ package io.rover.rover.plugins.data.graphql
 
 import io.rover.rover.plugins.data.domain.Context
 import io.rover.rover.plugins.data.domain.DeviceState
-import io.rover.rover.plugins.data.domain.Event
 import io.rover.rover.plugins.data.domain.Experience
 import io.rover.rover.platform.DateFormattingInterface
+import io.rover.rover.plugins.data.domain.EventSnapshot
 import io.rover.rover.plugins.data.http.WireEncoderInterface
 import io.rover.rover.plugins.data.graphql.operations.data.asJson
 import io.rover.rover.plugins.data.graphql.operations.data.decodeJson
@@ -31,7 +31,7 @@ class WireEncoder(
     /**
      * Encode a list of events for submission to the cloud-side API.
      */
-    override fun encodeEventsForSending(events: List<Event>): JSONArray =
+    override fun encodeEventsForSending(events: List<EventSnapshot>): JSONArray =
         JSONArray(
             events.map { it.asJson(dateFormatting) }
         )
