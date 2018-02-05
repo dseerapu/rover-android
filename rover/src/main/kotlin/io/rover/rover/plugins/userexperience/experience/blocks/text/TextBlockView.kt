@@ -19,9 +19,8 @@ class TextBlockView : AppCompatTextView, LayoutableView<TextBlockViewModelInterf
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
-    // mixins (TODO: injections)
+    // mixins
     private val viewComposition = ViewComposition()
-
     private val viewBackground = ViewBackground(this, viewComposition)
     private val viewBorder = ViewBorder(this, viewComposition)
     private val viewBlock = ViewBlock(this, setOf(viewBorder))

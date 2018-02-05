@@ -101,10 +101,13 @@ internal class AndroidAssetService(
         private val emitResult: (T) -> Unit,
         private val emitError: (Throwable) -> Unit
     ) : NetworkTask {
+        @field:Volatile
         private var cancelled = false
 
         override fun cancel() {
-            cancelled = true
+            synchronized(cancelled) {
+                cancelled = true
+            }
         }
 
         private fun execute() {
@@ -115,8 +118,13 @@ internal class AndroidAssetService(
                 return
             }
 
-            if (!cancelled) {
+            val cancelledValue = synchronized(cancelled) {
+                cancelled
+            }
+            if (!cancelledValue) {
                 emitResult(result)
+            } else {
+                log.v("Inhibited result delivery because synchronous operation network task cancelled.")
             }
         }
 
