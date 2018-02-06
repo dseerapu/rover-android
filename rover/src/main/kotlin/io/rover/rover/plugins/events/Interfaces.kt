@@ -19,7 +19,7 @@ interface EventsPluginComponentsInterface {
  *
  * Not to be confused with an Android context.
  */
-interface ContextProviderInterface {
+interface ContextProvider {
     /**
      * Returns a new [Context] with the fields from the provided original ([context]) and the relevant
      * fields that this context provider can set.
@@ -30,7 +30,7 @@ interface ContextProviderInterface {
  * The events plugin is responsible for delivering [Event]s to the Rover cloud API.
  */
 interface EventsPluginInterface {
-    fun addContextProvider(contextProvider: ContextProviderInterface)
+    fun addContextProvider(contextProvider: ContextProvider)
     fun trackEvent(event: Event)
     fun flushNow()
 }

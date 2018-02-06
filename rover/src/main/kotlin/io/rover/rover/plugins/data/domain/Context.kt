@@ -18,7 +18,10 @@ data class Context(
     val localeLanguage: String?,
     val localeRegion: String?,
     val localeScript: String?,
+
+    // TODO: enum type
     val notificationAuthorization: String?,
+
     val operatingSystemName: String?,
     val operatingSystemVersion: String?,
     val pushEnvironment: String?,

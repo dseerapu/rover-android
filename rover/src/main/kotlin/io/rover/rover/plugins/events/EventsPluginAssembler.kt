@@ -8,6 +8,10 @@ import io.rover.rover.platform.DateFormattingInterface
 import io.rover.rover.platform.LocalStorage
 import io.rover.rover.platform.SharedPreferencesLocalStorage
 import io.rover.rover.plugins.data.DataPluginInterface
+import io.rover.rover.plugins.events.contextproviders.DeviceContextProvider
+import io.rover.rover.plugins.events.contextproviders.LocaleContextProvider
+import io.rover.rover.plugins.events.contextproviders.ReachabilityContextProvider
+import io.rover.rover.plugins.events.contextproviders.RoverSdkContextProvider
 
 open class EventsPluginComponents(
     override val dataPlugin: DataPluginInterface,
@@ -25,6 +29,13 @@ open class EventsPluginComponents(
 open class EventsPluginAssembler(
     private val applicationContext: Context
 ): Assembler {
+    open val contextProviders: List<ContextProvider> = listOf(
+        DeviceContextProvider(),
+        LocaleContextProvider(applicationContext.resources),
+        ReachabilityContextProvider(applicationContext),
+        RoverSdkContextProvider()
+    )
+
     override fun register(container: Container) {
         container.register(EventsPluginInterface::class.java) { resolver ->
             EventsPlugin(
@@ -36,7 +47,9 @@ open class EventsPluginAssembler(
                 30.0,
                 100,
                 1000
-            )
+            ).apply {
+                contextProviders.forEach { this.addContextProvider(it) }
+            }
         }
     }
 }

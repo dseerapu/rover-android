@@ -26,7 +26,7 @@ class EventsPlugin(
     private val storageContextIdentifier = "io.rover.rover.events-queue"
     private val QUEUE_KEY = "queue"
     private val serialQueueExecutor = Executors.newSingleThreadExecutor()
-    private val contextProviders: MutableList<ContextProviderInterface> = mutableListOf()
+    private val contextProviders: MutableList<ContextProvider> = mutableListOf()
     private val keyValueStorage = eventsPluginComponents.localStorage.getKeyValueStorageFor(storageContextIdentifier)
 
     // state:
@@ -34,7 +34,7 @@ class EventsPlugin(
     private var context: Context? = null
     private var isFlushingEvents: Boolean = false
 
-    override fun addContextProvider(contextProvider: ContextProviderInterface) {
+    override fun addContextProvider(contextProvider: ContextProvider) {
         contextProviders.add(contextProvider)
     }
 
@@ -137,7 +137,7 @@ class EventsPlugin(
                     }
                 }
                 isFlushingEvents = false
-            }
+            }.resume()
         }
     }
 
@@ -150,7 +150,7 @@ class EventsPlugin(
                     !idsToRemove.containsKey(existingEvent.id)
                 }
             )
-            log.v("Removed ${eventsToRemove.count()} event(s) from the queue -- it now contains ${eventsToRemove.count()} event(s).")
+            log.v("Removed ${eventsToRemove.count()} event(s) from the queue -- it now contains ${eventQueue.count()} event(s).")
             persistEvents()
         }
     }
@@ -179,5 +179,7 @@ class EventsPlugin(
             }, flushIntervalSeconds.toLong() * 1000)
         }
         scheduleFlushPoll()
+
+        // TODO: wire up Application-level activity callbacks after all to flush queue whenever an activity pauses.
     }
 }
