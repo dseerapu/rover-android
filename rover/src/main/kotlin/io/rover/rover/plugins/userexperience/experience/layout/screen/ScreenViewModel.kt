@@ -28,7 +28,11 @@ class ScreenViewModel(
 
     // TODO: remember (State) scroll position
 
-    private val rowsById : Map<String, Row> = screen.rows.associateBy { it.id.rawValue }
+    private val rowsById : Map<String, Row> = screen.rows.associateBy { it.id.rawValue }.apply {
+        if(this.size != screen.rows.size) {
+            throw RuntimeException("Duplicate screen IDs appeared in screen $screenId.")
+        }
+    }
 
     /**
      * Map of Row View models and the Row ids they own.  Map entry order is their order in the

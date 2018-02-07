@@ -1,5 +1,6 @@
 package io.rover.rover.plugins.events
 
+import android.app.Application
 import android.content.Context
 import io.rover.rover.core.container.Assembler
 import io.rover.rover.core.container.Container
@@ -18,10 +19,10 @@ import io.rover.rover.plugins.events.contextproviders.TimeZoneContextProvider
 
 open class EventsPluginComponents(
     override val dataPlugin: DataPluginInterface,
-    applicationContext: Context
+    override val application: Application
 ): EventsPluginComponentsInterface {
     override val localStorage: LocalStorage by lazy {
-        SharedPreferencesLocalStorage(applicationContext)
+        SharedPreferencesLocalStorage(application.applicationContext)
     }
 
     override val dateFormatting: DateFormattingInterface by lazy {
@@ -30,8 +31,10 @@ open class EventsPluginComponents(
 }
 
 open class EventsPluginAssembler(
-    private val applicationContext: Context
+    private val application: Application
 ): Assembler {
+    private val applicationContext = application.applicationContext
+
     open val contextProviders: List<ContextProvider> = listOf(
         DeviceContextProvider(),
         LocaleContextProvider(applicationContext.resources),
@@ -47,7 +50,7 @@ open class EventsPluginAssembler(
             EventsPlugin(
                 EventsPluginComponents(
                     resolver.resolveOrFail(DataPluginInterface::class.java),
-                    applicationContext
+                    application
                 ),
                 20,
                 30.0,

@@ -10,8 +10,8 @@ import java.util.UUID
  * Exactly equivalent to [Event] but also includes the [Context].
  */
 data class EventSnapshot(
-    val attributes: Attributes,
     val name: String,
+    val attributes: Attributes,
     val timestamp: Date,
     val id: UUID,
     val context: Context
@@ -19,8 +19,8 @@ data class EventSnapshot(
     companion object {
         fun fromEvent(event: Event, context: Context): EventSnapshot {
             return EventSnapshot(
-                event.attributes,
                 event.name,
+                event.attributes,
                 event.timestamp,
                 event.id,
                 context

@@ -1,5 +1,8 @@
 package io.rover.rover.plugins.events
 
+import android.app.Activity
+import android.app.Application
+import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import io.rover.rover.core.logging.log
@@ -182,5 +185,25 @@ class EventsPlugin(
         scheduleFlushPoll()
 
         // TODO: wire up Application-level activity callbacks after all to flush queue whenever an activity pauses.
+        eventsPluginComponents.application.registerActivityLifecycleCallbacks(
+            object : Application.ActivityLifecycleCallbacks {
+                override fun onActivityPaused(activity: Activity?) {
+                    log.d("An Activity is pausing, flushing Rover events queue.")
+                    flushNow()
+                }
+
+                override fun onActivityResumed(activity: Activity?) { }
+
+                override fun onActivityStarted(activity: Activity?) {  }
+
+                override fun onActivityDestroyed(activity: Activity?) { }
+
+                override fun onActivitySaveInstanceState(activity: Activity?, outState: Bundle?) { }
+
+                override fun onActivityStopped(activity: Activity?) { }
+
+                override fun onActivityCreated(activity: Activity?, savedInstanceState: Bundle?) { }
+            }
+        )
     }
 }

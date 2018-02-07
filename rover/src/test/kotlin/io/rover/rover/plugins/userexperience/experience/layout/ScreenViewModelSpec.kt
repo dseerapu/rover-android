@@ -2,6 +2,7 @@ package io.rover.rover.plugins.userexperience.experience.layout
 
 import io.rover.rover.ModelFactories
 import io.rover.rover.plugins.data.domain.HorizontalAlignment
+import io.rover.rover.plugins.data.domain.ID
 import io.rover.rover.plugins.data.domain.Length
 import io.rover.rover.plugins.data.domain.Offsets
 import io.rover.rover.plugins.data.domain.UnitOfMeasure
@@ -63,6 +64,7 @@ class ScreenViewModelSpec : Spek({
             val screen = ModelFactories.emptyScreen().copy(
                 rows = listOf(
                     ModelFactories.emptyRow().copy(
+                        id = ID("1"),
                         height = Length(UnitOfMeasure.Points, 10.0),
                         blocks = listOf(
                             ModelFactories.emptyRectangleBlock().copy(
@@ -71,6 +73,7 @@ class ScreenViewModelSpec : Spek({
                         )
                     ),
                     ModelFactories.emptyRow().copy(
+                        id = ID("2"),
                         height = Length(UnitOfMeasure.Points, 42.0)
                     )
                 )
@@ -107,6 +110,7 @@ class ScreenViewModelSpec : Spek({
             val screen = ModelFactories.emptyScreen().copy(
                 rows = listOf(
                     ModelFactories.emptyRow().copy(
+                        id = ID("1"),
                         height = Length(UnitOfMeasure.Points, 100.0),
                         blocks = listOf(
                             ModelFactories.emptyRectangleBlock().copy(
@@ -126,6 +130,7 @@ class ScreenViewModelSpec : Spek({
                         )
                     ),
                     ModelFactories.emptyRow().copy(
+                        id = ID("2"),
                         height = Length(UnitOfMeasure.Points, 42.0)
                     )
                 )

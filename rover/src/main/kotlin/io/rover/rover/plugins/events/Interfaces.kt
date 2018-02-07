@@ -1,5 +1,6 @@
 package io.rover.rover.plugins.events
 
+import android.app.Application
 import io.rover.rover.platform.DateFormattingInterface
 import io.rover.rover.platform.LocalStorage
 import io.rover.rover.plugins.data.DataPluginInterface
@@ -12,6 +13,8 @@ interface EventsPluginComponentsInterface {
     val localStorage: LocalStorage
 
     val dateFormatting: DateFormattingInterface
+
+    val application: Application
 }
 
 /**

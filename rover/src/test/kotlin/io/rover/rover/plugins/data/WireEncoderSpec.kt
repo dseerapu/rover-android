@@ -4,7 +4,6 @@ import io.rover.rover.plugins.data.domain.AttributeValue
 import io.rover.rover.plugins.data.domain.BackgroundContentMode
 import io.rover.rover.plugins.data.domain.BackgroundScale
 import io.rover.rover.plugins.data.domain.Color
-import io.rover.rover.plugins.data.domain.Event
 import io.rover.rover.plugins.data.domain.HorizontalAlignment
 import io.rover.rover.plugins.data.domain.ID
 import io.rover.rover.plugins.data.domain.Image
@@ -23,7 +22,10 @@ import io.rover.rover.platform.decodeDeviceStateFromJsonStringForTests
 import io.rover.rover.platform.decodeExperienceFromStringForTests
 import io.rover.rover.platform.encodeEventsToStringJsonForTests
 import io.rover.rover.platform.encodeJsonToStringForTests
+import io.rover.rover.plugins.data.domain.Context
+import io.rover.rover.plugins.data.domain.EventSnapshot
 import io.rover.rover.plugins.data.graphql.WireEncoder
+import io.rover.rover.plugins.events.domain.Event
 import org.amshove.kluent.When
 import org.amshove.kluent.any
 import org.amshove.kluent.calling
@@ -48,17 +50,19 @@ class WireEncoderSpec : Spek({
         val wireEncoder = WireEncoder(dateFormatting)
 
         on("encoding some events") {
-            val events = listOf(
-                Event(
+            val eventSnapshots = listOf(
+                EventSnapshot(
+                    "I am event",
                     hashMapOf(
                         Pair("a key", AttributeValue.String("a value"))
-                    ), "I am event", SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'", Locale.US).parse("2017-10-04T16:56Z"), UUID.fromString("55c5ae35-a8e2-4049-a883-fedc55d22ba9")
+                    ), SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'", Locale.US).parse("2017-10-04T16:56Z"), UUID.fromString("55c5ae35-a8e2-4049-a883-fedc55d22ba9"),
+                    Context.blank()
                 )
             )
 
             it("should match some pre-rendered JSON") {
                 val expectedJson = this.javaClass.classLoader.getResourceAsStream("outbound_events.json").bufferedReader(Charsets.UTF_8).readText()
-                val json = wireEncoder.encodeEventsToStringJsonForTests(events)
+                val json = wireEncoder.encodeEventsToStringJsonForTests(eventSnapshots)
                 junit4ReportingWorkaround {
                     JSONAssert.assertEquals(expectedJson, json, true)
                 }
