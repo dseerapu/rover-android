@@ -1,19 +1,19 @@
 package io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout
 
+import io.rover.rover.core.logging.log
+import io.rover.rover.core.streams.PublishSubject
+import io.rover.rover.core.streams.share
+import io.rover.rover.platform.whenNotNull
 import io.rover.rover.plugins.data.domain.Block
 import io.rover.rover.plugins.data.domain.BlockAction
 import io.rover.rover.plugins.data.domain.HorizontalAlignment
 import io.rover.rover.plugins.data.domain.Position
 import io.rover.rover.plugins.data.domain.VerticalAlignment
-import io.rover.rover.core.logging.log
-import io.rover.rover.platform.whenNotNull
-import io.rover.rover.core.streams.PublishSubject
-import io.rover.rover.core.streams.share
+import io.rover.rover.plugins.userexperience.experience.layout.ViewType
 import io.rover.rover.plugins.userexperience.experience.layout.measuredAgainst
+import io.rover.rover.plugins.userexperience.experience.layout.screen.ScreenViewModel
 import io.rover.rover.plugins.userexperience.experience.navigation.NavigateTo
 import io.rover.rover.plugins.userexperience.types.RectF
-import io.rover.rover.plugins.userexperience.experience.layout.ViewType
-import io.rover.rover.plugins.userexperience.experience.layout.screen.ScreenViewModel
 
 /**
  * A mixin used by all blocks that contains the block layout and positioning concerns.
@@ -151,20 +151,20 @@ class BlockViewModel(
 
         navigateTo.whenNotNull {
             eventSource.onNext(
-                BlockViewModelInterface.Event.Clicked(it)
+                BlockViewModelInterface.Event.Clicked(it, block.id.rawValue)
             )
         }
     }
 
     override fun touched() {
         eventSource.onNext(
-            BlockViewModelInterface.Event.Touched()
+            BlockViewModelInterface.Event.Touched(block.id.rawValue)
         )
     }
 
     override fun released() {
         eventSource.onNext(
-            BlockViewModelInterface.Event.Released()
+            BlockViewModelInterface.Event.Released(block.id.rawValue)
         )
     }
 

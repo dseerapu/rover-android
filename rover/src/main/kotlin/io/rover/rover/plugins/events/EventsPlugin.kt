@@ -39,6 +39,7 @@ class EventsPlugin(
     }
 
     override fun trackEvent(event: Event) {
+        log.v("Tracking event: $event")
         captureContext()
         enqueueEvent(event)
         flushEvents(flushAt)

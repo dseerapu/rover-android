@@ -105,25 +105,32 @@ interface BlockViewModelInterface : LayoutableViewModel {
      */
     fun released()
 
-    sealed class Event {
+    sealed class Event(
+        open val blockId: String
+    ) {
         /**
          * Block has been clicked, requesting that we [navigateTo] something.
          */
         data class Clicked(
-            val navigateTo: NavigateTo
-        ) : Event()
+            val navigateTo: NavigateTo,
+            override val blockId: String
+        ) : Event(blockId)
 
         /**
          * Block has been touched, but not clicked.
          *
          * TODO: may not be appropriate to use MotionEvent.
          */
-        class Touched : Event()
+        class Touched(
+            override val blockId: String
+        ) : Event(blockId)
 
         /**
          * Block has been released, but not necessarily clicked.
          */
-        class Released : Event()
+        class Released(
+            override val blockId: String
+        ) : Event(blockId)
     }
 
     val events: Observable<Event>

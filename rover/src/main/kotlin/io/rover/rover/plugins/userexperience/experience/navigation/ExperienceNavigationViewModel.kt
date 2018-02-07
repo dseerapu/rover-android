@@ -14,10 +14,15 @@ import io.rover.rover.core.streams.filter
 import io.rover.rover.core.streams.filterNulls
 import io.rover.rover.core.streams.flatMap
 import io.rover.rover.core.streams.map
+import io.rover.rover.core.streams.share
 import io.rover.rover.core.streams.shareAndReplayTypesOnResubscribe
 import io.rover.rover.core.streams.shareAndReplay
 import io.rover.rover.core.streams.subscribe
+import io.rover.rover.plugins.data.domain.AttributeValue
 import io.rover.rover.plugins.data.domain.Screen
+import io.rover.rover.plugins.events.EventsPlugin
+import io.rover.rover.plugins.events.EventsPluginInterface
+import io.rover.rover.plugins.events.domain.Event
 import io.rover.rover.plugins.userexperience.experience.ViewModelFactoryInterface
 import io.rover.rover.plugins.userexperience.experience.blocks.BlockViewModelFactoryInterface
 import io.rover.rover.plugins.userexperience.experience.containers.StandaloneExperienceHostActivity
@@ -36,25 +41,26 @@ open class ExperienceNavigationViewModel(
     private val experience: Experience,
     private val blockViewModelFactory: BlockViewModelFactoryInterface,
     private val viewModelFactory: ViewModelFactoryInterface,
+    private val eventsPlugin: EventsPluginInterface,
     // TODO: consider an optional interface type here called "CustomNavigationBehaviour", which implementers may provide if they want custom nav
     icicle: Parcelable? = null
 ) : ExperienceNavigationViewModelInterface {
 
     override fun pressBack() {
-        actions.onNext(Action.PressedBack())
+        actionSource.onNext(Action.PressedBack())
     }
 
     override fun canGoBack(): Boolean = state.backStack.size > 1
 
-    private val actions: PublishSubject<Action> = PublishSubject()
+
+    private val actionSource: PublishSubject<Action> = PublishSubject()
+    private val actions = actionSource.share()
 
     private val screensById = experience.screens.associateBy { it.id.rawValue }
 
     // TODO: right now we bring up viewmodels for the *entire* experience (ie., all the screens at
-    // once).  This is unnecessary.
+    // once).  This is unnecessary.  It should be lazy instead.
     private val screenViewModelsById: Map<String, ScreenViewModelInterface> = screensById.mapValues {
-        // TODO: this should be lazy instead! which means I also need to change how the event
-        // subscription below works
         blockViewModelFactory.viewModelForScreen(it.value)
     }
 
@@ -64,17 +70,24 @@ open class ExperienceNavigationViewModel(
          * to our actions publisher.
          */
         screenViewModelsById
-            .values
+            .entries
             .asPublisher()
-            .flatMap { screen ->
-                screen.events.map { Pair(screen, it) }
+            .flatMap { (id, screen) ->
+                screen.events.map { Triple(id, screen, it) }
             }
-            .subscribe({ (screen, navigateTo) ->
+            .subscribe({ (screenId, screen, screenEvent) ->
                 // filter out the the events that are not meant for the currently active screen:
                 if (activeScreenViewModel() == screen) {
-                    actions.onNext(Action.Navigate(navigateTo))
+                    actionSource.onNext(Action.Navigate(screenEvent.navigateTo, screenId, screenEvent.rowId, screenEvent.blockId))
                 }
-            }, { error -> actions.onError(error) })
+            }, { error -> actionSource.onError(error) })
+
+        eventsPlugin.trackEvent(
+            Event(
+                "Experience Viewed",
+                hashMapOf(Pair("experienceID", AttributeValue.String(experience.id.rawValue)))
+            )
+        )
     }
 
     protected sealed class Action {
@@ -84,7 +97,10 @@ open class ExperienceNavigationViewModel(
          */
         class PressedClose : Action()
         class Navigate(
-            val navigateTo: NavigateTo
+            val navigateTo: NavigateTo,
+            val sourceScreenId: String,
+            val sourceRowId: String,
+            val sourceBlockId: String
         ) : Action()
     }
 
@@ -118,7 +134,7 @@ open class ExperienceNavigationViewModel(
      * to call `super` otherwise.
      *
      * Note: if you want to override behaviour when the navigation view is about to navigate to a
-     * new Experience Screen, consider overriding [navigateToScreen] instead.
+     * new Experience Screen, consider overriding [emissionForNavigatingToScreen] instead.
      */
     protected open fun actionBehaviour(currentBackStack: List<BackStackFrame>, action: Action): EmissionAndNewState? {
         val possiblePreviousScreenId = state.backStack.getOrNull(state.backStack.lastIndex - 1)?.screenId
@@ -133,13 +149,13 @@ open class ExperienceNavigationViewModel(
                             log.w("Screen by id ${previousScreenId} missing from Experience with id ${experience.id.rawValue}.")
                             null
                         }
-                        else -> navigateToScreen(screen, screenViewModel, currentBackStack, false)
+                        else -> emissionForNavigatingToScreen(screen, screenViewModel, currentBackStack, false)
                     }
 
-                } ?: closeExperience(state.backStack) // can't go any further back: backstack would be empty; instead emit Exit.
+                } ?: emissionForClosingExperience(state.backStack) // can't go any further back: backstack would be empty; instead emit Exit.
             }
             is Action.PressedClose -> {
-                closeExperience(state.backStack)
+                emissionForClosingExperience(state.backStack)
             }
             is Action.Navigate -> {
                 when (action.navigateTo) {
@@ -161,7 +177,7 @@ open class ExperienceNavigationViewModel(
                                 log.w("Screen by id ${action.navigateTo.screenId} missing from Experience with id ${experience.id.rawValue}.")
                                 null
                             }
-                            else -> navigateToScreen(screen, screenViewModel, currentBackStack, true)
+                            else -> emissionForNavigatingToScreen(screen, screenViewModel, currentBackStack, true)
                         }
                     }
                 }
@@ -180,7 +196,7 @@ open class ExperienceNavigationViewModel(
      * @return an EventAndState which describes the [ExperienceNavigationViewModelInterface.Event]
      * event that should be emitted along with the new state of the backstack.
      */
-    protected open fun navigateToScreen(
+    protected open fun emissionForNavigatingToScreen(
         screen: Screen,
         screenViewModel: ScreenViewModelInterface,
         currentBackStack: List<BackStackFrame>,
@@ -203,7 +219,7 @@ open class ExperienceNavigationViewModel(
      *
      * Most users seeking to override navigation functionality should not need to override this method.
      */
-    protected open fun restoreScreen(
+    protected open fun emissionForRestoringToScreen(
         screenViewModel: ScreenViewModelInterface,
         currentBackStack: List<BackStackFrame>
     ): EmissionAndNewState {
@@ -224,7 +240,7 @@ open class ExperienceNavigationViewModel(
      * [ExperienceExternalNavigationEvent.Custom] to inform your main Activity to instead perform no
      * effect at all.
      */
-    protected open fun closeExperience(
+    protected open fun emissionForClosingExperience(
         currentBackStack: List<BackStackFrame>
     ): EmissionAndNewState {
         return EmissionAndNewState(
@@ -285,14 +301,14 @@ open class ExperienceNavigationViewModel(
                 val screenViewModel = screenViewModelsById[experience.homeScreenId.rawValue] ?: throw RuntimeException("Home screen id is dangling.")
                 // so, in the case of nav view model. here are the following consumer points:
 
-                navigateToScreen(
+                emissionForNavigatingToScreen(
                     homeScreen,
                     screenViewModel,
                     state.backStack,
                     true
                 )
             } else {
-                restoreScreen(activeScreenViewModel(), state.backStack)
+                emissionForRestoringToScreen(activeScreenViewModel(), state.backStack)
             }
         ),
 
@@ -310,7 +326,7 @@ open class ExperienceNavigationViewModel(
                 .toolbarEvents
                 .subscribe { toolbarEvent ->
                     // subscribe to the events from the toolbar and dispatch them.
-                    actions.onNext(
+                    actionSource.onNext(
                         when (toolbarEvent) {
                             is ExperienceToolbarViewModelInterface.Event.PressedBack -> Action.PressedBack()
                             is ExperienceToolbarViewModelInterface.Event.PressedClose -> Action.PressedClose()
@@ -318,21 +334,74 @@ open class ExperienceNavigationViewModel(
                     )
                 }
         }
-    }.shareAndReplay(10) // a count of 10 because only a couple events are emitted synchronously at startup that must be delivered to both events and updates.
-        .doOnNext {
-        log.v("Event: $it")
-    } // only subscribers are events and updates, which both must see the entire stream.   I may be able to just set a max limit since both will subscribe quickly anyway.
+    }.doOnNext {
+        log.v("Nav event: $it")
+    }.shareAndReplay(10) // a count of 10 because only a couple events are emitted
+    // synchronously at startup that must be delivered to both events and updates. only subscribers
+    // are events and updates, which both must see the entire stream.   I just set a max limit since
+    // both will subscribe quickly anyway.
+
+    /**
+     * Monitors actions and issues analytics events to the [EventsPlugin].
+     */
+    private val actionEventSubscription = actions.subscribe { action ->
+        when(action) {
+            is Action.Navigate -> {
+                val attributes = when(action.navigateTo) {
+                    is NavigateTo.GoToScreenAction -> {
+                        hashMapOf(
+                            Pair("action", AttributeValue.String("goToScreen")),
+                            Pair("destinationScreenID", AttributeValue.String(action.navigateTo.screenId)),
+                            // not possible to navigate to a screen in another experience as of yet:
+                            Pair("destinationExperienceID", AttributeValue.String(experience.id.rawValue))
+                        )
+                    }
+                    is NavigateTo.OpenUrlAction -> {
+                        hashMapOf(
+                            Pair("action", AttributeValue.String("openURL")),
+                            Pair("url", AttributeValue.String(action.navigateTo.uri.toString()))
+                        )
+                    }
+                }
+
+                val event = Event(
+                    name = "Block Tapped",
+                    attributes = hashMapOf(
+                        Pair("experienceID", AttributeValue.String(experience.id.rawValue)),
+                        Pair("screenID", AttributeValue.String(action.sourceScreenId)),
+                        Pair("blockID", AttributeValue.String(action.sourceBlockId))
+                    ).apply { putAll(attributes) }
+                )
+
+                eventsPlugin.trackEvent(event)
+            }
+        }
+    }
+
+    private val emissionEventSubscription = epic.subscribe { emission ->
+        // Screen View Model should be emitting this, since it is technically a bit more correct about knowing when a view has occurred.
+        // unfortunately, it does not know about the Experience ID.
+        when(emission) {
+            is ExperienceNavigationViewModelInterface.Emission.Update.GoToScreen -> {
+                eventsPlugin.trackEvent(
+                    Event(
+                        "Screen Viewed",
+                        hashMapOf(
+                            Pair("experienceID", AttributeValue.String(experience.id.rawValue)),
+                            Pair("screenID", AttributeValue.String(emission.screenViewModel.screenId))
+                        )
+                    )
+                )
+            }
+        }
+    }
 
     override val events: Observable<ExperienceNavigationViewModelInterface.Emission.Event> = epic
         .filter { emission -> emission is ExperienceNavigationViewModelInterface.Emission.Event }
         .map { it as ExperienceNavigationViewModelInterface.Emission.Event }
-        .doOnNext { log.v("Event emitted.  Only should be one of these messages per event.") }
+        .doOnNext { log.v("Event emitted: $it.  Only should be one of these messages per event.") }
         .exactlyOnce()
-
-        // TODO: I want to support ONLY ONE subscriber, and when nothing is subscribed, I want to
-        // buffer all emissions, and emit them ONLY ONCE.  Except -- I do want multiple subscribers.
-        //  What about the event service?
-
+        
     override val updates: Observable<ExperienceNavigationViewModelInterface.Emission.Update> = epic
         .filter { emission -> emission is ExperienceNavigationViewModelInterface.Emission.Update }
         .map { it as ExperienceNavigationViewModelInterface.Emission.Update }
@@ -346,7 +415,7 @@ open class ExperienceNavigationViewModel(
             ExperienceNavigationViewModelInterface.Emission.Update.SetActionBar::class.java,
             ExperienceNavigationViewModelInterface.Emission.Update.SetBacklightBoost::class.java
         )
-        .doOnNext { log.v("Update emitted.  Only should be one two these messages per event.") }
+        .doOnNext { log.v("Update emitted: $it.  Only should be one two these messages per event.") }
 
     // @Parcelize Kotlin synthetics are generating the CREATOR method for us.
     @SuppressLint("ParcelCreator")

@@ -48,9 +48,17 @@ interface ScreenViewModelInterface : BindableViewModel, BackgroundViewModelInter
      *
      * In particular it aggregates all the navigation events from the contained rows.
      */
-    val events: Observable<NavigateTo>
+    val events: Observable<Event>
 
     val needsBrightBacklight: Boolean
 
     val appBarConfiguration: ToolbarConfiguration
+
+    val screenId: String
+
+    data class Event(
+        val rowId: String,
+        val blockId: String,
+        val navigateTo: NavigateTo
+    )
 }

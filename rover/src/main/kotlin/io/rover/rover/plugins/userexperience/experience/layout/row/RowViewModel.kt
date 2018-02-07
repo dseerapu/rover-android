@@ -30,10 +30,12 @@ class RowViewModel(
         row.blocks.map { viewModelFactory.viewModelForBlock(it) }
     }
 
-    override val eventSource: Observable<NavigateTo> = blockViewModels.map { blockViewModel ->
+    override val eventSource: Observable<RowViewModelInterface.Event> = blockViewModels.map { blockViewModel ->
         blockViewModel.events.map {
             when (it) {
-                is BlockViewModelInterface.Event.Clicked -> it.navigateTo
+                is BlockViewModelInterface.Event.Clicked -> RowViewModelInterface.Event(
+                    it.blockId, it.navigateTo
+                )
                 is BlockViewModelInterface.Event.Touched, is BlockViewModelInterface.Event.Released -> null
             }
         }.filterNulls()

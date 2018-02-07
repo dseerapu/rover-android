@@ -25,11 +25,16 @@ interface RowViewModelInterface : LayoutableViewModel, BackgroundViewModelInterf
     /**
      * Rows may emit navigation events.
      */
-    val eventSource: Observable<NavigateTo>
+    val eventSource: Observable<Event>
 
     /**
      * Does this row contain anything that calls for the backlight to be set temporarily extra
      * bright?
      */
     val needsBrightBacklight: Boolean
+
+    data class Event(
+        val blockId: String,
+        val navigateTo: NavigateTo
+    )
 }

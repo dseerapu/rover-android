@@ -3,6 +3,7 @@ package io.rover.rover.plugins.userexperience.experience
 import android.os.Parcelable
 import io.rover.rover.plugins.data.DataPluginInterface
 import io.rover.rover.plugins.data.domain.Experience
+import io.rover.rover.plugins.events.EventsPluginInterface
 import io.rover.rover.plugins.userexperience.UserExperiencePlugin
 import io.rover.rover.plugins.userexperience.experience.blocks.BlockViewModelFactoryInterface
 import io.rover.rover.plugins.userexperience.experience.navigation.ExperienceNavigationViewModel
@@ -19,7 +20,8 @@ import io.rover.rover.plugins.userexperience.experience.toolbar.ToolbarConfigura
  */
 open class StockViewModelFactory(
     protected val blockViewModelFactory: BlockViewModelFactoryInterface,
-    protected val dataPlugin: DataPluginInterface
+    protected val dataPlugin: DataPluginInterface,
+    protected val eventsPlugin: EventsPluginInterface
 ) : ViewModelFactoryInterface {
 
     /**
@@ -33,6 +35,7 @@ open class StockViewModelFactory(
             experience,
             blockViewModelFactory,
             this,
+            eventsPlugin,
             icicle
         )
     }
