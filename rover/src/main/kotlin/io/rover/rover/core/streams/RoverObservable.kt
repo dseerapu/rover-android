@@ -886,7 +886,7 @@ internal fun <T> Publisher<T>.androidLifecycleDispose(view: View): Publisher<T> 
  */
 internal fun <T> Publisher<T>.androidLifecycleDispose(lifecycleOwner: LifecycleOwner): Publisher<T> {
     return this.takeUntil(
-        lifecycleOwner.asPublisher().filter { it == Lifecycle.Event.ON_STOP || it == Lifecycle.Event.ON_DESTROY }
+        lifecycleOwner.asPublisher().filter { it == Lifecycle.Event.ON_DESTROY }
     )
 }
 
