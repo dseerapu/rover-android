@@ -12,9 +12,8 @@ import io.rover.rover.plugins.events.ContextProvider
  * NB.  Not to be confused with "Reachability", an iOS screen-ducking feature for thumb access.
  */
 class ReachabilityContextProvider(
-    private val applicationContext: android.content.Context
+    applicationContext: android.content.Context
 ): ContextProvider {
-    // private val wifiService = applicationContext.applicationContext.getSystemService(android.content.Context.WIFI_SERVICE) as WifiManager
     private val connectionManager = applicationContext.applicationContext.getSystemService(android.content.Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
     private fun getNetworkInfoForType(networkType: Int): List<NetworkInfo> {

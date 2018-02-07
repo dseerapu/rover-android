@@ -12,6 +12,9 @@ import io.rover.rover.plugins.events.contextproviders.DeviceContextProvider
 import io.rover.rover.plugins.events.contextproviders.LocaleContextProvider
 import io.rover.rover.plugins.events.contextproviders.ReachabilityContextProvider
 import io.rover.rover.plugins.events.contextproviders.RoverSdkContextProvider
+import io.rover.rover.plugins.events.contextproviders.ScreenContextProvider
+import io.rover.rover.plugins.events.contextproviders.TelephonyContextProvider
+import io.rover.rover.plugins.events.contextproviders.TimeZoneContextProvider
 
 open class EventsPluginComponents(
     override val dataPlugin: DataPluginInterface,
@@ -33,7 +36,10 @@ open class EventsPluginAssembler(
         DeviceContextProvider(),
         LocaleContextProvider(applicationContext.resources),
         ReachabilityContextProvider(applicationContext),
-        RoverSdkContextProvider()
+        RoverSdkContextProvider(),
+        ScreenContextProvider(applicationContext.resources),
+        TelephonyContextProvider(applicationContext),
+        TimeZoneContextProvider()
     )
 
     override fun register(container: Container) {

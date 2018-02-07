@@ -27,8 +27,17 @@ data class Context(
     val pushEnvironment: String?,
     val pushToken: String?,
     val radio: String?,
+
+    /**
+     * Screen width, in dp.
+     */
     val screenWidth: Int?,
+
+    /**
+     * Screen height, in dp.
+     */
     val screenHeight: Int?,
+
     val sdkVersion: String?,
     val timeZone: String?
 ) {
