@@ -8,6 +8,7 @@ import io.rover.rover.core.logging.log
 import io.rover.rover.plugins.data.http.AsyncTaskAndHttpUrlConnectionNetworkClient
 import io.rover.rover.plugins.data.DataPlugin
 import io.rover.rover.plugins.events.EventsPluginInterface
+import io.rover.rover.plugins.push.PushPluginInterface
 import io.rover.rover.plugins.userexperience.UserExperiencePluginInterface
 import java.net.HttpURLConnection
 
@@ -33,7 +34,10 @@ class Rover(
         get() = this.resolve(UserExperiencePluginInterface::class.java) ?: throw missingPluginError("UserExperiencePlugin")
 
     val eventsPlugin: EventsPluginInterface
-        get() = this.resolve(EventsPluginInterface::class.java) ?: throw missingPluginError(("EventsPluginInterface"))
+        get() = this.resolve(EventsPluginInterface::class.java) ?: throw missingPluginError(("EventsPlugin"))
+
+    val pushPlugin: PushPluginInterface
+        get() = this.resolve(PushPluginInterface::class.java) ?: throw missingPluginError(("PushPlugin"))
 
     private fun missingPluginError(name: String): Throwable {
         throw RuntimeException("Data Plugin not registered.  Did you include $name() in the assembler list?")
