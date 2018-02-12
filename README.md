@@ -12,8 +12,9 @@ The in-development README for 2.x follows.
 
 1. Data Plugin
 2. Location Plugin
-3. User Experience Plugin
-4. Events Plugin
+3. Push Plugin
+4. User Experience Plugin
+5. Events Plugin
 
 ## Requirements
 
@@ -21,30 +22,76 @@ The in-development README for 2.x follows.
 
 ## Setup and Usage
 
-1. add to build
-2. configure your Firebase account for push
-3. add firebase to your android app
+1. adding to build
+2. intro Rover.initialize/assemblers
 
-Google uses their firebase platform for their Android push offering, Firebase
+### Data Plugin
+
+### User Experience Plugin
+
+### Push Plugin
+
+The Rover push plugin allows you to receive the push notifications.  It has
+several dependencies, namely the Google Firebase Cloud Messaging push
+notifications platform and also a Notification-appropriate design asset from
+your app.
+
+* discuss android notification icon design guidelines (multilayered drawable, etc.)
+* discuss channels
+
+
+
+Add the assembler for it to Rover.initialize().  You will need to specify your
+small icon drawable resource id (which itself should be a LayeredDrawable as per
+the Material Design guidelines).
+
+```kotlin
+PushPluginAssembler(
+    applicationContext: this,
+    smallIconResId: R.drawable.ic_icon,
+    smallIconDrawableLevel: 1,
+    defaultChannelId: 0
+)
+```
+
+#### Add Firebase and Firebase Cloud Messaging to your App
+
+Google uses their Firebase platform for their Android push offering, Firebase
 Cloud Messaging.
 
 Follow the directions at [Firebase -> Get Started ->
 Android](https://firebase.google.com/docs/android/setup) to add the base
 Firebase platform to your app and set up your account tokens.
 
-4. wire up push receivers & auth token
+#### Receive a Push Token from Firebase Cloud Messaging
 
 You need to follow all of the standard setup for receiving FCM push messages in
-your app.  You need to follow the usual guidance from Google on integrating
+your app.  You will need to follow the usual guidance from Google on integrating
 Firebase into your Android client app at [Firebase -> Cloud Messaging -> Android
 -> Set Up](https://firebase.google.com/docs/cloud-messaging/android/client).
 Rover has purposefully does none of these steps for you; the goal is to allow
 you to integrate push as you see fit.
 
+Examples are provided below, in Kotlin (although may be trivially adapted to
+Java).
+
+Those instructions will direct you to create your own implementation of
+`MyFirebaseInstanceIDService` receive the registered FCM push tokens.  You'll
+indeed want to do so, and then pass the received push token along to Rover:
+
+```kotlin
+class MyAppFirebaseMessagingService: MyFirebaseInstanceIDService() {
+    override fun onTokenRefresh() {
+        Rover.sharedInstance.pushPlugin.onTokenRefresh(
+            FirebaseInstanceId.getInstance().token
+        )
+    }
+}
+```
+
 One that is done, you will then need to implement a receiver for push messages
-(although note this may not be used for all kinds of push notifications issued
-from Rover Campaigns).  Follow the guidance at [Firebase -> Cloud Messaging ->
-Android -> Receive
+themselves.  Follow the guidance at [Firebase -> Cloud Messaging -> Android ->
+Receive
 Messages](https://firebase.google.com/docs/cloud-messaging/android/receive) to
 create your implementation of `FirebaseMessagingService` and add the
 `onMessageReceived` template callback method to it.
@@ -52,9 +99,7 @@ create your implementation of `FirebaseMessagingService` and add the
 Once you have your empty `onMessageReceived` method ready to go, this is the
 part where you delegate to the Rover SDK to create the notification in the
 user's Android notification area by calling `onMessageReceivedData` on the Rover
-push plugin.
-
-In Kotlin, it may look something like this:
+push plugin:
 
 ```kotlin
 class MyAppCustomFirebaseReceiver: FirebaseMessagingService() {
@@ -65,10 +110,23 @@ class MyAppCustomFirebaseReceiver: FirebaseMessagingService() {
 }
 ```
 
+Note that the `Receive Messages` Firebase documentation section you are looking
+at has a section that discusses notification appearance customization in the app
+manifest (eg. setting the icon and color with `<meta-data>` tags).  However,
+that only applies to so-called "Display Messages", where the notification is put
+in the Android tray for you by Firebase Cloud Messaging.  Rover push
+notifications never use this method, and instead the above `onMessageReceived()`
+regime is responsible for always creating the notifications by node, and as such
+the `<meta-data>` tags would not be used.  You will still need to pass your
+small icon drawable to `PushPluginAssembler` at `Rover.initialize()` time as
+discussed above.
+
 4. wire up location and beacons
 5. set up styles & brand colours
 6. explore avenues for customization
 7. 
+
+### Events Plugin
 
 ## Reference Documentation
 

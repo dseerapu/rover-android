@@ -4,7 +4,7 @@ interface PushPluginInterface {
     /**
      * You need to implement a
      * [FirebaseMessagingService](https://firebase.google.com/docs/reference/android/com/google/firebase/messaging/FirebaseMessagingService)
-     * in your application, and then override it's `onMessageReceived` method.
+     * in your application, and then override its `onMessageReceived` method.
      *
      * Then, retrieve `data` from the `RemoteMessage` object it received and pass it here.
      *
@@ -26,4 +26,17 @@ interface PushPluginInterface {
      * ```
      */
     fun onMessageReceivedData(parameters: Map<String, String>)
+
+    /**
+     * You need to implement a
+     * [FirebaseInstanceIdService](https://firebase.google.com/docs/reference/android/com/google/firebase/iid/FirebaseInstanceIdService)
+     * in your application, and then override its `onTokenRefresh` method.
+     *
+     * Then, pass the token it received here.
+     *
+     * Then the Rover SDK will be able to register that push token to receive Rover pushes.  If this
+     * step is omitted, then the application will never receive any Rover-powered push
+     * notifications.
+     */
+    fun onTokenRefresh(token: String?)
 }
