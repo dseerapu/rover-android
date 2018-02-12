@@ -4,7 +4,7 @@ import android.content.Context
 import android.support.annotation.DrawableRes
 import io.rover.rover.core.container.Assembler
 import io.rover.rover.core.container.Container
-
+import io.rover.rover.plugins.events.EventsPluginInterface
 
 class PushPluginAssembler(
     private val applicationContext: Context,
@@ -27,9 +27,13 @@ class PushPluginAssembler(
     private val defaultChannelId: String? = null
 ) : Assembler {
     override fun register(container: Container) {
-        container.register(PushPluginInterface::class.java) { _ ->
+        container.register(PushPluginInterface::class.java) { resolver ->
             PushPlugin(
                 applicationContext,
+                // we need the Events Plugin because push notifications cannot work until the Events
+                // plugin reports an event containing our Firebase Push Token to the Rover API.
+                // TODO: once we expose internals to the DI layer directly inject FirebasePushTokenContextProvider here.
+                resolver.resolveOrFail(EventsPluginInterface::class.java),
                 smallIconResId,
                 smallIconDrawableLevel,
                 defaultChannelId

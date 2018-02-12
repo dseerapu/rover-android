@@ -8,8 +8,15 @@ import android.content.SharedPreferences
  * Very simple hash-like storage of keys and values.
  */
 interface KeyValueStorage {
-    fun get(key: String): String?
-    fun set(key: String, value: String)
+    /**
+     * Get the current value of the given key, or null if unset.
+     */
+    operator fun get(key: String): String?
+
+    /**
+     * Set the value of the given key.  If [value] is null, unsets the key.
+     */
+    operator fun set(key: String, value: String?)
 }
 
 /**
@@ -20,7 +27,7 @@ interface LocalStorage {
 }
 
 /**
- * Implementation of [LocalStorage] using Android's SharedPreferences.
+ * Implementation of [LocalStorage] using Android's [SharedPreferences].
  */
 class SharedPreferencesLocalStorage(
     val context: Context
@@ -33,7 +40,7 @@ class SharedPreferencesLocalStorage(
         return object : KeyValueStorage {
             override fun get(key: String): String? = prefs.getString("$namedContext.$key", null)
 
-            override fun set(key: String, value: String) {
+            override fun set(key: String, value: String?) {
                 prefs.edit().putString("$namedContext.$key", value).apply()
             }
         }

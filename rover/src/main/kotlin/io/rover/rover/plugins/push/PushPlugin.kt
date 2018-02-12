@@ -8,6 +8,7 @@ import android.support.v4.app.NotificationCompat
 import android.support.v4.app.NotificationManagerCompat
 import io.rover.rover.core.logging.log
 import io.rover.rover.plugins.data.graphql.putProp
+import io.rover.rover.plugins.events.EventsPluginInterface
 import io.rover.rover.plugins.push.domain.DeepLinkPushNotification
 import io.rover.rover.plugins.push.domain.ExperiencePushNotification
 import io.rover.rover.plugins.push.domain.RoverPushNotification
@@ -19,6 +20,9 @@ import java.net.URL
 
 class PushPlugin(
     private val applicationContext: Context,
+
+    // TODO change to private val pushTokenTransmissionChannel: PushTokenTransmissionChannel,
+    private val eventsPlugin: EventsPluginInterface,
 
     /**
      * A small icon is necessary for Android push notifications.  Pass a resid.
@@ -45,6 +49,7 @@ class PushPlugin(
 
     override fun onTokenRefresh(token: String?) {
         // so, we need the token to be consumable from a FirebasePushTokenContextProvider
+        eventsPlugin.setPushToken(token)
     }
 
     override fun onMessageReceivedData(parameters: Map<String, String>) {

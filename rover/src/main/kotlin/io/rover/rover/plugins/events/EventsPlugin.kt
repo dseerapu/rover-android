@@ -12,6 +12,7 @@ import io.rover.rover.plugins.data.domain.EventSnapshot
 import io.rover.rover.plugins.data.graphql.getObjectIterable
 import io.rover.rover.plugins.data.graphql.operations.data.asJson
 import io.rover.rover.plugins.data.graphql.operations.data.decodeJson
+import io.rover.rover.plugins.events.contextproviders.FirebasePushTokenContextProvider
 import io.rover.rover.plugins.events.domain.Event
 import org.json.JSONArray
 import java.util.Deque
@@ -26,11 +27,9 @@ class EventsPlugin(
     private val maxBatchSize: Int,
     private val maxQueueSize: Int
 ) : EventsPluginInterface {
-    private val storageContextIdentifier = "io.rover.rover.events-queue"
-    private val QUEUE_KEY = "queue"
     private val serialQueueExecutor = Executors.newSingleThreadExecutor()
     private val contextProviders: MutableList<ContextProvider> = mutableListOf()
-    private val keyValueStorage = eventsPluginComponents.localStorage.getKeyValueStorageFor(storageContextIdentifier)
+    private val keyValueStorage = eventsPluginComponents.localStorage.getKeyValueStorageFor(Companion.STORAGE_CONTEXT_IDENTIFIER)
 
     // state:
     private val eventQueue: Deque<EventSnapshot> = LinkedList()
@@ -71,7 +70,7 @@ class EventsPlugin(
     private fun persistEvents() {
         serialQueueExecutor.execute {
             val json = JSONArray(eventQueue.map { event -> event.asJson(eventsPluginComponents.dateFormatting) }).toString(4)
-            keyValueStorage.set(QUEUE_KEY, json)
+            keyValueStorage.set(Companion.QUEUE_KEY, json)
         }
     }
 
@@ -82,7 +81,7 @@ class EventsPlugin(
         // optimal, but it will do for now.
         eventQueue.clear()
 
-        val storedJson = keyValueStorage.get(QUEUE_KEY)
+        val storedJson = keyValueStorage.get(Companion.QUEUE_KEY)
 
         if(storedJson != null) {
             val decoded = try {
@@ -169,6 +168,10 @@ class EventsPlugin(
         }
     }
 
+    override fun setPushToken(token: String?) {
+        (contextProviders.first { it is PushTokenTransmissionChannel } as PushTokenTransmissionChannel).setPushToken(token)
+    }
+
     init {
         restoreEvents()
 
@@ -205,5 +208,10 @@ class EventsPlugin(
                 override fun onActivityCreated(activity: Activity?, savedInstanceState: Bundle?) { }
             }
         )
+    }
+
+    companion object {
+        private const val STORAGE_CONTEXT_IDENTIFIER = "io.rover.rover.events-queue"
+        private const val QUEUE_KEY = "queue"
     }
 }
