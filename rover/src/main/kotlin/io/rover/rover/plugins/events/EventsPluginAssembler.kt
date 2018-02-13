@@ -20,7 +20,7 @@ import io.rover.rover.plugins.events.contextproviders.TimeZoneContextProvider
 open class EventsPluginComponents(
     override val dataPlugin: DataPluginInterface,
     override val application: Application,
-    private val synchronousResetAndAcquirePushToken: () -> String?
+    private val resetPushToken: () -> Unit
 ): EventsPluginComponentsInterface {
     private val applicationContext = application.applicationContext
 
@@ -42,7 +42,7 @@ open class EventsPluginComponents(
             ScreenContextProvider(applicationContext.resources),
             TelephonyContextProvider(applicationContext),
             TimeZoneContextProvider(),
-            FirebasePushTokenContextProvider(localStorage, synchronousResetAndAcquirePushToken)
+            FirebasePushTokenContextProvider(localStorage, resetPushToken)
         )
     }
 }
@@ -64,7 +64,7 @@ open class EventsPluginAssembler(
      * FirebaseInstanceId.getInstance().token
      * ```
      */
-    private val synchronousResetAndAcquirePushToken: () -> String?
+    private val resetPushToken: () -> Unit
 ): Assembler {
 
     override fun register(container: Container) {
@@ -72,7 +72,7 @@ open class EventsPluginAssembler(
             val components = EventsPluginComponents(
                 resolver.resolveOrFail(DataPluginInterface::class.java),
                 application,
-                synchronousResetAndAcquirePushToken
+                resetPushToken
             )
 
             EventsPlugin(
@@ -82,7 +82,10 @@ open class EventsPluginAssembler(
                 100,
                 1000
             ).apply {
-                components.contextProviders.forEach { this.addContextProvider(it) }
+                components.contextProviders.forEach { contextProvider ->
+                    contextProvider.registeredWithEventsPlugin(this)
+                    this.addContextProvider(contextProvider)
+                }
             }
         }
     }

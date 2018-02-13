@@ -33,6 +33,12 @@ interface ContextProvider {
      * required it will block while doing some IO.  As such, do not use on the main thread.
      */
     fun captureContext(context: Context): Context
+
+    /**
+     * Called when this Context Provider is registered with the events plugin.  Useful for wiring
+     * up
+     */
+    fun registeredWithEventsPlugin(eventsPlugin: EventsPluginInterface) { }
 }
 
 /**
