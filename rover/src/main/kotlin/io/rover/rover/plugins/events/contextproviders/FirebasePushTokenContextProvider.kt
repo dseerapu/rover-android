@@ -20,18 +20,11 @@ class FirebasePushTokenContextProvider(
     private val resetPushToken: () -> Unit
 ): ContextProvider, PushTokenTransmissionChannel {
 
-    private var eventsPlugin: EventsPluginInterface? = null
     override fun registeredWithEventsPlugin(eventsPlugin: EventsPluginInterface) {
         this.eventsPlugin = eventsPlugin
     }
 
     override fun captureContext(context: Context): Context {
-
-        // problems:
-        // - we only receive the callback when the key changes, and only after some delay.
-        // - if FCM registration has already occurred before adding Rover 2.0, then we'll "never" get it.
-        // - manually blocking until key is available does not work either; best you can do is at least trigger a refresh, but then wait for the callback.
-
         return context.copy(
             pushToken = token
         )
@@ -39,23 +32,24 @@ class FirebasePushTokenContextProvider(
 
     override fun setPushToken(token: String?) {
         if(this.token != token) {
-            // if the new token is different, set it and emit Push Token Changed.
+            val event = Event(
+                when {
+                    this.token == null -> "Push Token Added"
+                    token == null -> "Push Token Removed"
+                    else -> "Push Token Changed"
+                },
+                hashMapOf()
+            )
             this.token = token
             val eventsPlugin = eventsPlugin ?: throw RuntimeException("registeredWithEventsPlugin() not called on FirebasePushTokenContextProvider during setup.")
-            eventsPlugin.trackEvent(
-                Event(
-                    "Push Token Changed",
-                    hashMapOf()
-                )
-            )
+            eventsPlugin.trackEvent(event)
             val elapsed = (Date().time - launchTime.time) / 1000
             log.v("Push token set after $elapsed seconds.")
         }
-
-        this.token = token
     }
 
     private val launchTime = Date()
+    private var eventsPlugin: EventsPluginInterface? = null
     private val keyValueStorage = localStorage.getKeyValueStorageFor(Companion.STORAGE_CONTEXT_IDENTIFIER)
 
     private var token: String?
@@ -72,7 +66,7 @@ class FirebasePushTokenContextProvider(
                     // that FCM believes that the app knows what the push token is, but at least the
                     // Rover SDK itself does not.
 
-                    log.w("Token is still not set.  Perhaps token was received before Rover SDK integrated.  Forcing reset.")
+                    log.w("Token is still not set. Perhaps token was received before Rover SDK was integrated. Forcing reset.")
                     Executors.newSingleThreadExecutor().execute {
                         resetPushToken()
                     }
