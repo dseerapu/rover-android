@@ -1,10 +1,14 @@
 package io.rover.rover.plugins.push
 
+import android.os.Bundle
+
 interface PushPluginInterface {
     /**
      * You need to implement a
      * [FirebaseMessagingService](https://firebase.google.com/docs/reference/android/com/google/firebase/messaging/FirebaseMessagingService)
      * in your application, and then override its `onMessageReceived` method.
+     *
+     * If you are using GCM instead of FCM, then look at [onMessageReceivedDataAsBundle] instead.
      *
      * Then, retrieve `data` from the `RemoteMessage` object it received and pass it here.
      *
@@ -26,6 +30,14 @@ interface PushPluginInterface {
      * ```
      */
     fun onMessageReceivedData(parameters: Map<String, String>)
+
+    /**
+     * Equivalent to [onMessageReceivedData], but accepts a Bundle instead of a Map.
+     *
+     * This version is appropriate for use with GCM in lieu of FCM.  See `README.legacy-gcm.md` for
+     * details.
+     */
+    fun onMessageReceivedDataAsBundle(parameters: Bundle)
 
     /**
      * You need to implement a

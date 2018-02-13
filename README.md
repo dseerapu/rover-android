@@ -31,15 +31,16 @@ The in-development README for 2.x follows.
 
 ### Push Plugin
 
-The Rover push plugin allows you to receive the push notifications.  It has
-several dependencies, namely the Google Firebase Cloud Messaging push
-notifications platform and also a Notification-appropriate design asset from
-your app.
+The Rover Push Plugin allows you to receive push notifications.  It has several
+dependencies, namely the Google Firebase Cloud Messaging push notifications
+platform and also a Notification-appropriate design asset from your app.
+
+If you need to integrate with the legacy GCM offering from Google in lieu of
+Firebase Cloud Messaging, please refer to
+[README.legacy-gcm.md](README.legacy-gcm.md).
 
 * discuss android notification icon design guidelines (multilayered drawable, etc.)
 * discuss channels
-
-
 
 Add the assembler for it to Rover.initialize().  You will need to specify your
 small icon drawable resource id (which itself should be a LayeredDrawable as per

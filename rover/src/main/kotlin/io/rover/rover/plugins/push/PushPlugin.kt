@@ -3,6 +3,7 @@ package io.rover.rover.plugins.push
 import android.app.NotificationChannel
 import android.content.Context
 import android.os.Build
+import android.os.Bundle
 import android.support.annotation.DrawableRes
 import android.support.v4.app.NotificationCompat
 import android.support.v4.app.NotificationManagerCompat
@@ -62,7 +63,17 @@ class PushPlugin(
         }
 
         val message = parameters["message"] ?: return
+        handleDataMessage(message)
+    }
 
+    override fun onMessageReceivedDataAsBundle(parameters: Bundle) {
+        val message = parameters.getString("message") ?: return
+        handleDataMessage(message)
+    }
+
+    private val notificationManager: NotificationManagerCompat = NotificationManagerCompat.from(applicationContext)
+
+    private fun handleDataMessage(message: String) {
         val (pushNotification, id) = try {
             val messageObject = JSONObject(message)
             val attributes = messageObject.getJSONObject("attributes")
@@ -88,8 +99,6 @@ class PushPlugin(
 
         notificationManager.notify(id, builder.build())
     }
-
-    private val notificationManager: NotificationManagerCompat = NotificationManagerCompat.from(applicationContext)
 }
 
 internal fun RoverPushNotification.asJson(): JSONObject {

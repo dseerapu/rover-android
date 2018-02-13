@@ -42,7 +42,7 @@ interface ContextProvider {
 }
 
 /**
- * This listens for push tokens and ensures it is transmitted up to the Rover API.
+ * This listens for a push token and ensures that it is transmitted up to the Rover API.
  */
 interface PushTokenTransmissionChannel {
     /**
