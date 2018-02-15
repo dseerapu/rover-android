@@ -217,9 +217,7 @@ internal fun RoverPushNotification.encodeJson(): JSONObject {
     }
 }
 
-internal fun PushNotificationAction.Companion.decodeJson(json: JSONObject): PushNotificationAction {
-    val contentType = json.getString("content-type")
-
+internal fun PushNotificationAction.Companion.decodeJson(contentType: String, json: JSONObject): PushNotificationAction {
     return when(contentType) {
         "website" -> PushNotificationAction.Website(
             websiteUrl = URL(json.getString("website-url"))
@@ -258,6 +256,6 @@ internal fun RoverPushNotification.Companion.decodeJson(json: JSONObject): Rover
         contentType = json.getString("content-type"),
         read = json.getBoolean("read"),
         isNotificationCenterEnabled = json.getBoolean("isNotificationCenterEnabled"),
-        action = PushNotificationAction.Companion.decodeJson(json)
+        action = PushNotificationAction.Companion.decodeJson(json.getString("content-type"), json.getJSONObject("action"))
     )
 }
