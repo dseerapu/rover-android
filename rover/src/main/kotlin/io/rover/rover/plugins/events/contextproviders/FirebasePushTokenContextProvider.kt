@@ -66,7 +66,7 @@ class FirebasePushTokenContextProvider(
                     // that FCM believes that the app knows what the push token is, but at least the
                     // Rover SDK itself does not.
 
-                    log.w("Token is still not set. Perhaps token was received before Rover SDK was integrated. Forcing reset.")
+                    log.w("Push token is still not set. Perhaps token was received before Rover SDK was integrated. Forcing reset.")
                     Executors.newSingleThreadExecutor().execute {
                         resetPushToken()
                     }

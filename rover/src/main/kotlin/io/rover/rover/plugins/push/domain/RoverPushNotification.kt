@@ -1,6 +1,7 @@
 package io.rover.rover.plugins.push.domain
 
 import io.rover.rover.plugins.push.PushPluginAssembler
+import java.net.URI
 import java.net.URL
 
 /**
@@ -10,49 +11,35 @@ import java.net.URL
  * on the Firebase `RemoteMessage`.
  *
  */
-interface RoverPushNotification {
+data class RoverPushNotification(
     /**
      * An Android channel ID.  If not set, Rover will use the default channel id set for the whole
      * Push Plugin (see [PushPluginAssembler]).
      */
-    val channelId: String?
-    val title: String
-    val text: String
-    val read: Boolean
-    val contentType: String
+    val channelId: String?,
+    val title: String,
+    val text: String,
+    val read: Boolean,
+    val contentType: String,
+    val isNotificationCenterEnabled: Boolean,
+    val action: PushNotificationAction
+) {
 
     companion object
 }
 
-data class WebsitePushNotification(
-    override val channelId: String?,
-    override val title: String,
-    override val text: String,
-    override val read: Boolean,
-    override val contentType: String,
-    val websiteUrl: URL
-): RoverPushNotification {
-    companion object
-}
+sealed class PushNotificationAction {
+    data class Website(
+        val websiteUrl: URL
+    ): PushNotificationAction()
 
-data class DeepLinkPushNotification(
-    override val channelId: String?,
-    override val title: String,
-    override val text: String,
-    override val read: Boolean,
-    override val contentType: String,
-    val deepLinkUrl: URL
-): RoverPushNotification {
-    companion object
-}
+    data class DeepLink(
+        val deepLinkUrl: URI
+    ): PushNotificationAction()
 
-data class ExperiencePushNotification(
-    override val channelId: String?,
-    override val title: String,
-    override val text: String,
-    override val read: Boolean,
-    override val contentType: String,
-    val experienceId: String
-): RoverPushNotification {
+    data class Experience(
+        val experienceId: String
+    ): PushNotificationAction()
+
     companion object
 }

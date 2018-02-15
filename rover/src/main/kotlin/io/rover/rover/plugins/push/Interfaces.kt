@@ -44,7 +44,8 @@ interface PushPluginInterface {
      * [FirebaseInstanceIdService](https://firebase.google.com/docs/reference/android/com/google/firebase/iid/FirebaseInstanceIdService)
      * in your application, and then override its `onTokenRefresh` method.
      *
-     * Then, pass the token it received here.
+     * Then, pass the token it received here.  Thread safe; you may call this from whatever thread
+     * you like.
      *
      * Then the Rover SDK will be able to register that push token to receive Rover pushes.  If this
      * step is omitted, then the application will never receive any Rover-powered push
