@@ -1,5 +1,6 @@
 package io.rover.rover.plugins.push
 
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.PendingIntent
 import android.content.Context
@@ -141,9 +142,6 @@ open class PushPlugin(
 
         // so, we need to inject a synthesized backstack.
 
-        // .... actually, may not need the trampoline!  Can use build my whole synthesized backstack
-        // and use that itself as a pending intent. nice.
-
         // https://developer.android.com/training/implementing-navigation/temporal.html#SynthesizeBackStack
 
         // we can also allow the developer to specify behaviour they want with a meta-data tag added
@@ -197,7 +195,9 @@ open class PushPlugin(
 
         builder.setContentIntent(pendingIntent)
 
-        notificationManager.notify(id, builder.build())
+
+
+        notificationManager.notify(id, builder.build().apply { this.flags = this.flags or Notification.FLAG_AUTO_CANCEL })
     }
 }
 
