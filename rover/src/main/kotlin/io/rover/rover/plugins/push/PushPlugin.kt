@@ -16,16 +16,14 @@ import android.support.v4.app.NotificationCompat
 import android.support.v4.app.NotificationManagerCompat
 import android.support.v4.app.TaskStackBuilder
 import io.rover.rover.core.logging.log
-import io.rover.rover.plugins.data.graphql.putProp
+import io.rover.rover.plugins.data.domain.PushNotificationAction
 import io.rover.rover.plugins.events.EventsPluginInterface
-import io.rover.rover.plugins.push.domain.PushNotificationAction
-import io.rover.rover.plugins.push.domain.RoverPushNotification
+import io.rover.rover.plugins.data.domain.PushNotification
+import io.rover.rover.plugins.data.graphql.operations.data.decodeJson
 import io.rover.rover.plugins.userexperience.experience.containers.StandaloneExperienceHostActivity
 import org.json.JSONException
 import org.json.JSONObject
 import java.net.MalformedURLException
-import java.net.URI
-import java.net.URL
 
 open class PushPlugin(
     private val applicationContext: Context,
@@ -96,6 +94,7 @@ open class PushPlugin(
      * Intent.
      */
     open fun notificationCenterIntent(): Intent {
+        // TODO: maybe we'll have a defaulty built-in Notification Center activity. we'll see.
         return Intent(Intent.ACTION_VIEW, Uri.parse("about:blank"))
     }
 
@@ -121,7 +120,7 @@ open class PushPlugin(
             val messageObject = JSONObject(message)
             val attributes = messageObject.getJSONObject("attributes")
             val id = messageObject.getInt("id")
-            Pair(RoverPushNotification.Companion.decodeJson(attributes), id)
+            Pair(PushNotification.Companion.decodeJson(attributes), id)
         } catch (e: JSONException) {
             log.w("Invalid push notification received: `$message`, resulting in '${e.message}'. Ignoring.")
             return
@@ -192,70 +191,10 @@ open class PushPlugin(
             // this problem.
             addNextIntent(targetIntent)
         }.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT)
-
         builder.setContentIntent(pendingIntent)
 
-
+        // TODO: set large icon and possibly a big picture style as needed by Rich Media values. Protocol to be determined.
 
         notificationManager.notify(id, builder.build().apply { this.flags = this.flags or Notification.FLAG_AUTO_CANCEL })
     }
-}
-
-internal fun RoverPushNotification.encodeJson(): JSONObject {
-    return JSONObject().apply {
-        listOf(
-            RoverPushNotification::title,
-            RoverPushNotification::text,
-            RoverPushNotification::channelId,
-            RoverPushNotification::contentType,
-            RoverPushNotification::read
-        ).forEach { putProp(this@encodeJson, it) }
-
-        putProp(this@encodeJson, RoverPushNotification::action) {
-            it.encodeJson()
-        }
-    }
-}
-
-internal fun PushNotificationAction.Companion.decodeJson(contentType: String, json: JSONObject): PushNotificationAction {
-    return when(contentType) {
-        "website" -> PushNotificationAction.Website(
-            websiteUrl = URL(json.getString("website-url"))
-        )
-        "deep-link" -> PushNotificationAction.DeepLink(
-            deepLinkUrl = URI(json.getString("deep-link-url"))
-        )
-        "experience" -> PushNotificationAction.Experience(
-            experienceId = json.getString("experience-id")
-        )
-        else -> throw JSONException("Unsupported Rover notification content-type.")
-    }
-}
-
-internal fun PushNotificationAction.encodeJson(): JSONObject {
-    return JSONObject().apply {
-        when(this@encodeJson) {
-            is PushNotificationAction.Experience -> {
-                putProp(this@encodeJson, PushNotificationAction.Experience::experienceId)
-            }
-            is PushNotificationAction.DeepLink -> {
-                putProp(this@encodeJson, PushNotificationAction.DeepLink::deepLinkUrl)
-            }
-            is PushNotificationAction.Website -> {
-                putProp(this@encodeJson, PushNotificationAction.Website::websiteUrl)
-            }
-        }
-    }
-}
-
-internal fun RoverPushNotification.Companion.decodeJson(json: JSONObject): RoverPushNotification {
-    return RoverPushNotification(
-        title = json.getString("android-title"),
-        text = json.getString("notification-text"),
-        channelId = json.optString("channel-id"),
-        contentType = json.getString("content-type"),
-        read = json.getBoolean("read"),
-        isNotificationCenterEnabled = json.getBoolean("isNotificationCenterEnabled"),
-        action = PushNotificationAction.Companion.decodeJson(json.getString("content-type"), json.getJSONObject("action"))
-    )
 }

@@ -28,9 +28,17 @@ internal fun JSONObject.optIntOrNull(name: String): Int? {
     }
 }
 
+@Deprecated("This method uses reflection to obtain the property name, which is not appropriate use in case of customer use of Proguard.", ReplaceWith("putProp(obj, prop, name, transform)"))
 internal fun <T, R> JSONObject.putProp(obj: T, prop: KProperty1<T, R>, transform: ((R) -> Any)? = null) {
     put(
         prop.name,
+        if (transform != null) transform(prop.get(obj)) else prop.get(obj)
+    )
+}
+
+internal fun <T, R> JSONObject.putProp(obj: T, prop: KProperty1<T, R>, name: String, transform: ((R) -> Any)? = null) {
+    put(
+        name,
         if (transform != null) transform(prop.get(obj)) else prop.get(obj)
     )
 }

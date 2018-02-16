@@ -85,9 +85,7 @@ class WireEncoderSpec : Spek({
                 }
 
                 val rejsonned = reWrapped.toString(4)
-                junit4ReportingWorkaround {
-                    JSONAssert.assertEquals(expectedJson, rejsonned, true)
-                }
+                JSONAssert.assertEquals(expectedJson, rejsonned, true)
             }
         }
 

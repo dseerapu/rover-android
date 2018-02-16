@@ -133,6 +133,19 @@
                     "minor": null,
                     "uuid": "B9407F30-F5F8-466E-AFF9-25556B57FE6D"
                 }
+            ],
+            "notifications": [
+                {
+                    "id": "39049A97-1A17-46CF-8979-54B5A6C20FF6",
+                    "android-title": "I am a push!",
+                    "notification-text": "lorem ipsum",
+                    "read": false,
+                    "content-type": "experience",
+                    "is-notification-center-enabled": true,
+                    "action": {
+                        "experience-id": "5436635463"
+                    }
+                }
             ]
         }
     }
