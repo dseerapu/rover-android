@@ -12,6 +12,7 @@ import io.rover.rover.plugins.data.http.NetworkTask
 import java.util.ArrayDeque
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CountDownLatch
+import java.util.concurrent.Executor
 import java.util.concurrent.TimeUnit
 
 interface Subscription {
@@ -657,6 +658,20 @@ internal fun <T : Any> Publisher<T>.shareAndReplayTypesOnResubscribe(vararg type
     }
 }
 
+internal fun <T> Publisher<T>.doOnSubscribe(behaviour: () -> Unit): Publisher<T> {
+    return object : Publisher<T> {
+        override fun subscribe(subscriber: Subscriber<T>) {
+            val wrappedSubscriber = object : Subscriber<T> by subscriber {
+                override fun onSubscribe(subscription: Subscription) {
+                    behaviour()
+                    subscriber.onSubscribe(subscription)
+                }
+            }
+            this@doOnSubscribe.subscribe(wrappedSubscriber)
+        }
+    }
+}
+
 /**
  * Execute the given block when the subscription is cancelled.
  */
@@ -938,7 +953,58 @@ internal fun <T> (((r: T) -> Unit) -> NetworkTask).asPublisher(): Publisher<T> {
     }
 }
 
-// TODO fun <T> Publisher<T>.observeOn() { }
+/**
+ * This will subscribe to Publisher `this` when it is subscribed to itself.  It will execute
+ * subscription on the given executor.
+ */
+fun <T> Publisher<T>.subscribeOn(executor: Executor): Publisher<T> {
+    return object : Publisher<T> {
+        override fun subscribe(subscriber: Subscriber<T>) {
+            executor.execute {
+                this@subscribeOn.subscribe(subscriber)
+            }
+        }
+    }
+}
+
+/**
+ * This will subscribe to Publisher `this` when it is subscribed to itself.  It will deliver all
+ * callbacks to the subscribing Publisher on the given [executor].
+ *
+ * Note that the thread you call .subscribe() on remains important: be sure all subscriptions to set
+ * up a given Publisher chain are all on a single thread.  Use
+ */
+fun <T> Publisher<T>.observeOn(executor: Executor): Publisher<T> {
+    return object : Publisher<T> {
+        override fun subscribe(subscriber: Subscriber<T>) {
+            this@observeOn.subscribe(object: Subscriber<T> {
+                override fun onComplete() {
+                    executor.execute {
+                        subscriber.onComplete()
+                    }
+                }
+
+                override fun onError(error: Throwable) {
+                    executor.execute {
+                        subscriber.onError(error)
+                    }
+                }
+
+                override fun onNext(item: T) {
+                    executor.execute {
+                        subscriber.onNext(item)
+                    }
+                }
+
+                override fun onSubscribe(subscription: Subscription) {
+                    executor.execute {
+                        subscriber.onSubscribe(subscription)
+                    }
+                }
+            })
+        }
+    }
+}
 
 /**
  * Block the thread waiting for the given.

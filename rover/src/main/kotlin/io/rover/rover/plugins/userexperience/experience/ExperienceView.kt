@@ -19,7 +19,26 @@ import io.rover.rover.core.streams.subscribe
 import io.rover.rover.plugins.userexperience.experience.navigation.ExperienceNavigationView
 import io.rover.rover.plugins.userexperience.experience.toolbar.ViewExperienceToolbar
 import io.rover.rover.plugins.userexperience.experience.concerns.BindableView
+import io.rover.rover.plugins.userexperience.experience.containers.StandaloneExperienceHostActivity
 
+/**
+ * Embed this view to include a Rover Experience in a layout.
+ *
+ * Most applications will likely want to use [StandaloneExperienceHostActivity] and
+ * [ExperienceFragment] to display an Experience, but for more custom setups (say, tablet-enabled
+ * single-activity apps that avoid fragments), you can embed [ExperienceView] directly.
+ *
+ * In order to display an Experience, use the implementation of
+ * [ViewModelFactoryInterface.viewModelForExperience] to create an instance of the needed Experience
+ * view model, and then bind it to the view model with setViewModel.
+ *
+ * Note about Android state restoration: Rover SDK views handle state saving & restoration through
+ * their view models, so you will need store a Parcelable on behalf of ExperienceView and
+ * [ExperienceViewModel] (grabbing the state Parcelable from the view model at save time and
+ * restoring it by passing it to the view model factory at restart time).
+ *
+ * See [StandaloneExperienceHostActivity] for an example of how to integrate.
+ */
 class ExperienceView : CoordinatorLayout, BindableView<ExperienceViewModelInterface> {
     constructor(context: Context?) : super(context)
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)

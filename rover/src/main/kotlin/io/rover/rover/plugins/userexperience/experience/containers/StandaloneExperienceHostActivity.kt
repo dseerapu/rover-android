@@ -75,8 +75,7 @@ open class StandaloneExperienceHostActivity : AppCompatActivity() {
 
     // We're actually just showing a single screen for now
     // private val experiencesView by lazy { ScreenView(this) }
-    protected val experiencesView by lazy { ExperienceView(this) }
-
+    protected open val experiencesView by lazy { ExperienceView(this) }
 
     private val userExperiencePlugin by lazy {
         Rover.sharedInstance.userExperiencePlugin
@@ -138,7 +137,12 @@ open class StandaloneExperienceHostActivity : AppCompatActivity() {
         // wire up the toolbar host to the ExperienceView.
         experiencesView.toolbarHost = toolbarHost
 
-        experienceViewModel = userExperiencePlugin.viewModelForExperience(experienceId, savedInstanceState?.getParcelable("experienceState"))
+        experienceViewModel = userExperiencePlugin.viewModelForExperience(
+            experienceId,
+            // obtain any possibly saved state for the experience view model.  See
+            // onSaveInstanceState.
+            savedInstanceState?.getParcelable("experienceState")
+        )
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -151,6 +155,8 @@ open class StandaloneExperienceHostActivity : AppCompatActivity() {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
+        // grab the state for the Experience view out of its view model and store it in the
+        // activity's own bundle.
         outState.putParcelable("experienceState", experienceViewModel?.state)
     }
 
@@ -171,7 +177,7 @@ open class StandaloneExperienceHostActivity : AppCompatActivity() {
      * [AsyncTaskAndHttpUrlConnectionNetworkClient.registerInterceptor] (DI instructions for
      * users to follow).
      *
-     * TODO: this will be deleted, the stetho dependency removed, and just live in the
+     * TODO: this will be deleted, the Stetho dependency removed, and just live in the
      * documentation instead.
      */
     class StethoRoverInterceptor : AsyncTaskAndHttpUrlConnectionInterceptor {
