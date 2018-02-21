@@ -1,6 +1,8 @@
 package io.rover.rover.plugins.push
 
+import android.content.Intent
 import android.os.Bundle
+import io.rover.rover.plugins.data.domain.PushNotificationAction
 
 interface PushPluginInterface {
     /**
@@ -52,4 +54,11 @@ interface PushPluginInterface {
      * notifications.
      */
     fun onTokenRefresh(token: String?)
+}
+
+interface NotificationActionRoutingBehaviourInterface {
+    /**
+     * Should return an Intent for the given push notification action.
+     */
+    fun notificationActionToIntent(action: PushNotificationAction): Intent
 }

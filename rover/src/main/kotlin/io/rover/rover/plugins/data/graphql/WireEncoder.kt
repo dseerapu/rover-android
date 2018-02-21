@@ -5,7 +5,7 @@ import io.rover.rover.plugins.data.domain.DeviceState
 import io.rover.rover.plugins.data.domain.Experience
 import io.rover.rover.platform.DateFormattingInterface
 import io.rover.rover.plugins.data.domain.EventSnapshot
-import io.rover.rover.plugins.data.domain.PushNotification
+import io.rover.rover.plugins.data.domain.Notification
 import io.rover.rover.plugins.data.http.WireEncoderInterface
 import io.rover.rover.plugins.data.graphql.operations.data.asJson
 import io.rover.rover.plugins.data.graphql.operations.data.decodeJson
@@ -29,8 +29,8 @@ class WireEncoder(
         return Context.Companion.decodeJson(json)
     }
 
-    override fun decodeNotification(data: JSONObject): PushNotification {
-        return PushNotification.Companion.decodeJson(data, dateFormatting)
+    override fun decodeNotification(data: JSONObject): Notification {
+        return Notification.Companion.decodeJson(data, dateFormatting)
     }
 
     /**

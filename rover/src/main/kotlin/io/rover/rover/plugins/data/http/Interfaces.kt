@@ -4,7 +4,7 @@ import io.rover.rover.plugins.data.domain.Context
 import io.rover.rover.plugins.data.domain.DeviceState
 import io.rover.rover.plugins.data.domain.EventSnapshot
 import io.rover.rover.plugins.data.domain.Experience
-import io.rover.rover.plugins.data.domain.PushNotification
+import io.rover.rover.plugins.data.domain.Notification
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -17,7 +17,7 @@ interface WireEncoderInterface {
 
     fun decodeDeviceState(data: JSONObject): DeviceState
 
-    fun decodeNotification(data: JSONObject): PushNotification
+    fun decodeNotification(data: JSONObject): Notification
 
     fun encodeEventsForSending(events: List<EventSnapshot>): JSONArray
 

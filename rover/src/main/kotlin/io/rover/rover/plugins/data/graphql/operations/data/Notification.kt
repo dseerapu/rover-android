@@ -2,25 +2,25 @@ package io.rover.rover.plugins.data.graphql.operations.data
 
 import io.rover.rover.platform.DateFormattingInterface
 import io.rover.rover.plugins.data.domain.PushNotificationAction
-import io.rover.rover.plugins.data.domain.PushNotification
+import io.rover.rover.plugins.data.domain.Notification
 import io.rover.rover.plugins.data.graphql.putProp
 import org.json.JSONException
 import org.json.JSONObject
 import java.net.URI
 import java.net.URL
 
-internal fun PushNotification.encodeJson(dateFormatting: DateFormattingInterface): JSONObject {
+internal fun Notification.encodeJson(dateFormatting: DateFormattingInterface): JSONObject {
     return JSONObject().apply {
-        putProp(this@encodeJson, PushNotification::id, "id")
-        putProp(this@encodeJson, PushNotification::title, "title")
-        putProp(this@encodeJson, PushNotification::body, "body")
-        putProp(this@encodeJson, PushNotification::channelId, "channelId")
-        putProp(this@encodeJson, PushNotification::isNotificationCenterEnabled, "isNotificationCenterEnabled")
-        putProp(this@encodeJson, PushNotification::read, "isRead")
-        putProp(this@encodeJson, PushNotification::deleted, "isDeleted")
-        putProp(this@encodeJson, PushNotification::deliveredAt, "deliveredAt") { dateFormatting.dateAsIso8601(it )}
-        putProp(this@encodeJson, PushNotification::expiresAt, "expiresAt") { dateFormatting.dateAsIso8601(it )}
-        putProp(this@encodeJson, PushNotification::action, "action" ) {
+        putProp(this@encodeJson, Notification::id, "id")
+        putProp(this@encodeJson, Notification::title, "title")
+        putProp(this@encodeJson, Notification::body, "body")
+        putProp(this@encodeJson, Notification::channelId, "channelId")
+        putProp(this@encodeJson, Notification::isNotificationCenterEnabled, "isNotificationCenterEnabled")
+        putProp(this@encodeJson, Notification::read, "isRead")
+        putProp(this@encodeJson, Notification::deleted, "isDeleted")
+        putProp(this@encodeJson, Notification::deliveredAt, "deliveredAt") { dateFormatting.dateAsIso8601(it )}
+        putProp(this@encodeJson, Notification::expiresAt, "expiresAt") { dateFormatting.dateAsIso8601(it )}
+        putProp(this@encodeJson, Notification::action, "action" ) {
             it.encodeJson()
         }
     }
@@ -64,8 +64,8 @@ internal fun PushNotificationAction.encodeJson(): JSONObject {
     }
 }
 
-internal fun PushNotification.Companion.decodeJson(json: JSONObject, dateFormatting: DateFormattingInterface): PushNotification {
-    return PushNotification(
+internal fun Notification.Companion.decodeJson(json: JSONObject, dateFormatting: DateFormattingInterface): Notification {
+    return Notification(
         id = json.getString("id"),
         title = json.getString("title"),
         body = json.getString("body"),

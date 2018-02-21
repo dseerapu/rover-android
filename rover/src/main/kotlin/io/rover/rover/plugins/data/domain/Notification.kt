@@ -14,7 +14,7 @@ import java.util.Date
  * on the Firebase `RemoteMessage`.
  *
  */
-data class PushNotification(
+data class Notification(
     val id: String,
 
     /**

@@ -16,11 +16,9 @@ import android.support.v4.app.NotificationCompat
 import android.support.v4.app.NotificationManagerCompat
 import android.support.v4.app.TaskStackBuilder
 import io.rover.rover.core.logging.log
-import io.rover.rover.plugins.data.domain.PushNotificationAction
 import io.rover.rover.plugins.events.EventsPluginInterface
-import io.rover.rover.plugins.data.domain.PushNotification
-import io.rover.rover.plugins.data.graphql.operations.data.decodeJson
 import io.rover.rover.plugins.data.http.WireEncoderInterface
+import io.rover.rover.plugins.userexperience.TopLevelNavigation
 import io.rover.rover.plugins.userexperience.experience.containers.StandaloneExperienceHostActivity
 import org.json.JSONException
 import org.json.JSONObject
@@ -33,6 +31,10 @@ open class PushPlugin(
     private val eventsPlugin: EventsPluginInterface,
 
     private val wireEncoder: WireEncoderInterface,
+
+    private val topLevelNavigation: TopLevelNavigation,
+
+    private val notificationActionRoutingBehaviour: NotificationActionRoutingBehaviourInterface,
 
     /**
      * A small icon is necessary for Android push notifications.  Pass a resid.
@@ -85,21 +87,6 @@ open class PushPlugin(
         handleDataMessage(message)
     }
 
-    /**
-     * Generates an intent for displaying the Notification Centre.  Used to insert a back stack
-     * entry in new Android Tasks created by the user tapping on a push notification from Rover with
-     * Notification Centre enabled.
-     *
-     * While for most use cases you should specify a meta property in your Manifest on the Activity
-     * entry that will display your Notification Centre (see Rover documentation), however if you
-     * are building a single-Activity app or using some other sort of custom routing arrangement
-     * (say, Fragments or Conductor), you may want to override this behaviour to build a custom
-     * Intent.
-     */
-    open fun notificationCenterIntent(): Intent {
-        // TODO: maybe we'll have a defaulty built-in Notification Center activity. we'll see.
-        return Intent(Intent.ACTION_VIEW, Uri.parse("about:blank"))
-    }
 
     /**
      * Generates an intent for displaying main screen of your activity.  Used to insert a back stack
@@ -162,27 +149,21 @@ open class PushPlugin(
         // https://developer.android.com/guide/components/activities/tasks-and-back-stack.html.
         // yeah, i think this is the case.
 
-        val targetIntent = when(pushNotification.action) {
-            is PushNotificationAction.PresentExperience ->
-                StandaloneExperienceHostActivity.makeIntent(applicationContext, pushNotification.action.experienceId)
-            is PushNotificationAction.PresentWebsite ->
-                // Note: PresentWebsite URIs come from a trusted source, that is, the app's owner
-                // commanding a pushNotification through Rover.  Non-web URI schemes are filtered
-                // out, as well.
-                Intent(Intent.ACTION_VIEW, Uri.parse(pushNotification.action.url.toString()))
-            is PushNotificationAction.OpenUrl ->
-                // Like above, but non-web URI schemes are not being filtered.
-                Intent(Intent.ACTION_VIEW, Uri.parse(pushNotification.action.url.toString()))
-        }
 
+        // TODO: I have to move this dispatch-to-Intent behaviour somewhere where the
+        // NotificationListViewModel can make use of it.  just the targetIntent part, I think.
+
+        val targetIntent = notificationActionRoutingBehaviour.notificationActionToIntent(pushNotification.action)
+
+        // now to synthesize the backstack.
         val pendingIntent = TaskStackBuilder.create(applicationContext).apply {
             if(pushNotification.isNotificationCenterEnabled) {
                 // inject the Notification Centre for the user's app. TODO: allow user to *configure*
                 // what their notification centre is, either with a custom URI template method OR
-                // just with a meta-property in their Manifest.
+                // just with a meta-property in their Manifest. but by default we can bundle an Activity that hosts NotificationCentreView, I think.
 
                 // for now, we'll just put some sort of
-                addNextIntent(notificationCenterIntent())
+                addNextIntent(topLevelNavigation.displayNotificationCenterIntent())
             } else {
                 // Instead of displaying the notification centre, display the parent activity the user set
                 addNextIntent(activityMainScreenIntent())

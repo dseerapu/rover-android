@@ -3,7 +3,7 @@ package io.rover.rover.plugins.data.graphql.operations.data
 import io.rover.rover.platform.DateFormattingInterface
 import io.rover.rover.plugins.data.domain.DeviceState
 import io.rover.rover.plugins.data.domain.Profile
-import io.rover.rover.plugins.data.domain.PushNotification
+import io.rover.rover.plugins.data.domain.Notification
 import io.rover.rover.plugins.data.domain.Region
 import io.rover.rover.plugins.data.graphql.getObjectIterable
 import io.rover.rover.plugins.data.graphql.putProp
@@ -18,7 +18,7 @@ internal fun DeviceState.Companion.decodeJson(jsonObject: JSONObject, dateFormat
             Region.decodeJson(regionsJson)
         }.toSet(),
         notifications = jsonObject.getJSONArray("notifications").getObjectIterable().map { notificationsJson ->
-            PushNotification.decodeJson(notificationsJson, dateFormatting)
+            Notification.decodeJson(notificationsJson, dateFormatting)
         }
     )
 }

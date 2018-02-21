@@ -12,35 +12,32 @@ import io.rover.rover.core.streams.filterNulls
 import io.rover.rover.core.streams.flatMap
 import io.rover.rover.core.streams.map
 import io.rover.rover.core.streams.share
-import io.rover.rover.platform.DateFormatting
 import io.rover.rover.platform.DateFormattingInterface
 import io.rover.rover.platform.LocalStorage
 import io.rover.rover.platform.whenNotNull
 import io.rover.rover.plugins.data.DataPluginInterface
 import io.rover.rover.plugins.data.NetworkResult
 import io.rover.rover.plugins.data.domain.DeviceState
-import io.rover.rover.plugins.data.domain.PushNotification
+import io.rover.rover.plugins.data.domain.Notification
 import io.rover.rover.plugins.data.graphql.getObjectIterable
 import io.rover.rover.plugins.data.graphql.operations.data.decodeJson
 import io.rover.rover.plugins.data.graphql.operations.data.encodeJson
 import org.json.JSONArray
 import org.json.JSONException
 
-class PushNotificationStorageService(
+class NotificationCenterStore(
     private val dataPlugin: DataPluginInterface,
     private val dateFormatting: DateFormattingInterface,
     localStorage: LocalStorage
-): PushNotificationStorageServiceInterface {
-
-    // TODO: rename to NotificationCenterStore
+): NotificationCenterStoreInterface {
 
     // TODO: subscribe to pushes and file them into local cache
 
     // TODO: add methods for markAsRead and markAsDeleted.
 
-    // TODO: change merge behaviour
+    // TODO: change merge behaviour to handle both of those fields
 
-    override fun getNotifications(): Publisher<List<PushNotification>> = Observable.merge(
+    override fun getNotifications(): Publisher<List<Notification>> = Observable.merge(
         Observable.just(currentNotificationsOnDisk()).filterNulls(),
         epic.share()
     ).map { notifications ->
@@ -60,7 +57,7 @@ class PushNotificationStorageService(
 
     private val actions = PublishSubject<Action>()
 
-    private fun latestNotificationsFromCloud(): Publisher<List<PushNotification>> {
+    private fun latestNotificationsFromCloud(): Publisher<List<Notification>> {
         return { callback: CallbackReceiver<NetworkResult<DeviceState>> ->  dataPlugin.fetchStateTask(callback) }.asPublisher().flatMap { networkResult ->
             when(networkResult) {
                 is NetworkResult.Error -> throw(Exception("Unable to load notifications from DeviceState from the Rover API.", networkResult.throwable))
@@ -69,11 +66,11 @@ class PushNotificationStorageService(
         }
     }
 
-    private fun currentNotificationsOnDisk(): List<PushNotification>? {
+    private fun currentNotificationsOnDisk(): List<Notification>? {
         return try {
             keyValueStorage[STORE_KEY].whenNotNull { jsonString ->
                 JSONArray(jsonString).getObjectIterable().map { notificationJson ->
-                    PushNotification.decodeJson(notificationJson, dateFormatting)
+                    Notification.decodeJson(notificationJson, dateFormatting)
                 }
             }
         } catch (e: JSONException) {
@@ -82,7 +79,7 @@ class PushNotificationStorageService(
         }
     }
 
-    private fun mergeLocalStorageWith(notifications: List<PushNotification>) {
+    private fun mergeLocalStorageWith(notifications: List<Notification>) {
         // TODO: rather than replacing, instead merge into local storage, enforcing the count limit
         // and respecting the existing Read bit (ie., maybe just don't replace existing items)
 
