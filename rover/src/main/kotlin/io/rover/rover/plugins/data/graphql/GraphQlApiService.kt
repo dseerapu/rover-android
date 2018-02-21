@@ -9,7 +9,6 @@ import io.rover.rover.plugins.data.DataPlugin
 import io.rover.rover.plugins.data.NetworkError
 import io.rover.rover.plugins.data.NetworkRequest
 import io.rover.rover.plugins.data.NetworkResult
-import io.rover.rover.plugins.data.domain.Context
 import io.rover.rover.plugins.data.domain.DeviceState
 import io.rover.rover.plugins.data.domain.EventSnapshot
 import io.rover.rover.plugins.data.domain.Experience
@@ -22,7 +21,7 @@ import io.rover.rover.plugins.data.http.NetworkTask
 import io.rover.rover.plugins.data.http.WireEncoderInterface
 import io.rover.rover.plugins.data.graphql.operations.FetchExperienceRequest
 import io.rover.rover.plugins.data.graphql.operations.SendEventsRequest
-import io.rover.rover.plugins.data.graphql.operations.data.FetchStateRequest
+import io.rover.rover.plugins.data.graphql.operations.FetchStateRequest
 import java.io.IOException
 import java.net.URL
 

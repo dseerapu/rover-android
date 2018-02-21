@@ -5,6 +5,7 @@ import io.rover.rover.plugins.data.domain.DeviceState
 import io.rover.rover.plugins.data.domain.Experience
 import io.rover.rover.platform.DateFormattingInterface
 import io.rover.rover.plugins.data.domain.EventSnapshot
+import io.rover.rover.plugins.data.domain.PushNotification
 import io.rover.rover.plugins.data.http.WireEncoderInterface
 import io.rover.rover.plugins.data.graphql.operations.data.asJson
 import io.rover.rover.plugins.data.graphql.operations.data.decodeJson
@@ -28,6 +29,10 @@ class WireEncoder(
         return Context.Companion.decodeJson(json)
     }
 
+    override fun decodeNotification(data: JSONObject): PushNotification {
+        return PushNotification.Companion.decodeJson(data, dateFormatting)
+    }
+
     /**
      * Encode a list of events for submission to the cloud-side API.
      */
@@ -38,7 +43,7 @@ class WireEncoder(
 
     override fun decodeExperience(data: JSONObject): Experience = Experience.decodeJson(data)
 
-    override fun decodeDeviceState(data: JSONObject): DeviceState = DeviceState.decodeJson(data)
+    override fun decodeDeviceState(data: JSONObject): DeviceState = DeviceState.decodeJson(data, dateFormatting)
 
     override fun decodeErrors(errors: JSONArray): List<Exception> {
         return errors.getObjectIterable().map {

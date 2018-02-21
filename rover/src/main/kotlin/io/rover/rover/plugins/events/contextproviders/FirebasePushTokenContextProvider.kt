@@ -14,6 +14,9 @@ import java.util.concurrent.Executors
 /**
  * Captures and adds the Firebase push token to [Context].  As a [PushTokenTransmissionChannel], it
  * expects to be informed of any changes to the push token.
+ *
+ * TODO: the requirement of the push token reset closure is very awkward; it's technically a push
+ * concern, not an Events concern.  Perhaps the push plugin should contribute this provider.
  */
 class FirebasePushTokenContextProvider(
     localStorage: LocalStorage,

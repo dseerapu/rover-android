@@ -4,6 +4,8 @@ import android.content.Context
 import android.support.annotation.DrawableRes
 import io.rover.rover.core.container.Assembler
 import io.rover.rover.core.container.Container
+import io.rover.rover.platform.DateFormatting
+import io.rover.rover.plugins.data.graphql.WireEncoder
 import io.rover.rover.plugins.events.EventsPluginInterface
 
 class PushPluginAssembler(
@@ -34,6 +36,7 @@ class PushPluginAssembler(
                 // plugin reports an event containing our Firebase Push Token to the Rover API.
                 // TODO: once we expose internals to the DI layer directly inject FirebasePushTokenContextProvider here.
                 resolver.resolveOrFail(EventsPluginInterface::class.java),
+                WireEncoder(DateFormatting()), // TODO: borrowed from data plugin, will be OK after transitioning to Sean's new layout
                 smallIconResId,
                 smallIconDrawableLevel,
                 defaultChannelId

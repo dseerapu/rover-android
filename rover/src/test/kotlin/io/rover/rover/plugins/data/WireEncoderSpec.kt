@@ -1,5 +1,6 @@
 package io.rover.rover.plugins.data
 
+import com.nhaarman.mockito_kotlin.eq
 import io.rover.rover.plugins.data.domain.AttributeValue
 import io.rover.rover.plugins.data.domain.BackgroundContentMode
 import io.rover.rover.plugins.data.domain.BackgroundScale
@@ -17,6 +18,7 @@ import io.rover.rover.plugins.data.domain.TitleBarButtons
 import io.rover.rover.plugins.data.domain.UnitOfMeasure
 import io.rover.rover.plugins.data.domain.VerticalAlignment
 import io.rover.rover.junit4ReportingWorkaround
+import io.rover.rover.platform.DateFormatting
 import io.rover.rover.platform.DateFormattingInterface
 import io.rover.rover.platform.decodeDeviceStateFromJsonStringForTests
 import io.rover.rover.platform.decodeExperienceFromStringForTests
@@ -39,14 +41,15 @@ import org.json.JSONObject
 import org.skyscreamer.jsonassert.JSONAssert
 import java.net.URI
 import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
+import java.util.TimeZone
 import java.util.UUID
 
 class WireEncoderSpec : Spek({
     given("a wire encoder") {
-
-        val dateFormatting = mock<DateFormattingInterface>()
-        When.calling(dateFormatting.dateAsIso8601(any())).thenReturn("2017-10-04T16:56Z")
+        // we're using a real instance of DateFormatting because these tests are end-to-end.
+        val dateFormatting = DateFormatting()
         val wireEncoder = WireEncoder(dateFormatting)
 
         on("encoding some events") {
@@ -55,9 +58,13 @@ class WireEncoderSpec : Spek({
                     "I am event",
                     hashMapOf(
                         Pair("a key", AttributeValue.String("a value"))
-                    ), SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'", Locale.US).parse("2017-10-04T16:56Z"), UUID.fromString("55c5ae35-a8e2-4049-a883-fedc55d22ba9"),
-                    Context.blank()
-                )
+                    ), SimpleDateFormat(
+                            "yyyy-MM-dd'T'HH:mmXXX",
+                            Locale.US
+                        ).parse("2017-10-04T16:56-04:00"),
+                        UUID.fromString("55c5ae35-a8e2-4049-a883-fedc55d22ba9"),
+                        Context.blank()
+                    )
             )
 
             it("should match some pre-rendered JSON") {
@@ -80,7 +87,7 @@ class WireEncoderSpec : Spek({
 
                 val reWrapped = JSONObject().apply {
                     put("data", JSONObject().apply {
-                        put("device", JSONObject(decoded.encodeJsonToStringForTests()))
+                        put("device", JSONObject(decoded.encodeJsonToStringForTests(dateFormatting)))
                     })
                 }
 

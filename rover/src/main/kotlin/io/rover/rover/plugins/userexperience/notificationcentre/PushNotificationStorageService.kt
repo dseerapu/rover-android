@@ -12,7 +12,10 @@ import io.rover.rover.core.streams.filterNulls
 import io.rover.rover.core.streams.flatMap
 import io.rover.rover.core.streams.map
 import io.rover.rover.core.streams.share
+import io.rover.rover.platform.DateFormatting
+import io.rover.rover.platform.DateFormattingInterface
 import io.rover.rover.platform.LocalStorage
+import io.rover.rover.platform.whenNotNull
 import io.rover.rover.plugins.data.DataPluginInterface
 import io.rover.rover.plugins.data.NetworkResult
 import io.rover.rover.plugins.data.domain.DeviceState
@@ -25,13 +28,27 @@ import org.json.JSONException
 
 class PushNotificationStorageService(
     private val dataPlugin: DataPluginInterface,
+    private val dateFormatting: DateFormattingInterface,
     localStorage: LocalStorage
 ): PushNotificationStorageServiceInterface {
+
+    // TODO: rename to NotificationCenterStore
+
+    // TODO: subscribe to pushes and file them into local cache
+
+    // TODO: add methods for markAsRead and markAsDeleted.
+
+    // TODO: change merge behaviour
 
     override fun getNotifications(): Publisher<List<PushNotification>> = Observable.merge(
         Observable.just(currentNotificationsOnDisk()).filterNulls(),
         epic.share()
-    ).doOnSubscribe {
+    ).map { notifications ->
+        notifications
+            .filter { !it.deleted }
+            .sortedBy { it.deliveredAt }
+    }.doOnSubscribe {
+        // trigger a refresh whenever a consumer subscribes.
         actions.onNext(Action.Refresh())
     }
 
@@ -54,8 +71,10 @@ class PushNotificationStorageService(
 
     private fun currentNotificationsOnDisk(): List<PushNotification>? {
         return try {
-            JSONArray(keyValueStorage[STORE_KEY]).getObjectIterable().map { notificationJson ->
-                PushNotification.decodeJson(notificationJson)
+            keyValueStorage[STORE_KEY].whenNotNull { jsonString ->
+                JSONArray(jsonString).getObjectIterable().map { notificationJson ->
+                    PushNotification.decodeJson(notificationJson, dateFormatting)
+                }
             }
         } catch (e: JSONException) {
             log.e("Invalid JSON appeared in Notifications cache: ${e.message}")
@@ -63,28 +82,32 @@ class PushNotificationStorageService(
         }
     }
 
-    private fun updateLocalStorageWith(notifications: List<PushNotification>) {
-        keyValueStorage[STORE_KEY] = JSONArray(notifications.map { it.encodeJson() }).toString()
+    private fun mergeLocalStorageWith(notifications: List<PushNotification>) {
+        // TODO: rather than replacing, instead merge into local storage, enforcing the count limit
+        // and respecting the existing Read bit (ie., maybe just don't replace existing items)
+
+        // TODO For both `read` and `deleted` merge by ORing the two values together.  Otherwise
+        // keep server versions of the notifications' contents.
+
+        keyValueStorage[STORE_KEY] = JSONArray(notifications.map { it.encodeJson(dateFormatting) }).toString()
     }
 
     private val epic = actions.flatMap { action ->
         when(action) {
             is Action.Refresh -> {
+                // TODO: instead of just calling mergeLocalStorageWith(), make it pure, use map, and
+                // instead have a separate updateLocalStorage function.
                 latestNotificationsFromCloud().doOnNext { newNotifications ->
                     // update local storage!
-                    updateLocalStorageWith(newNotifications)
+                    mergeLocalStorageWith(newNotifications)
                 }
             }
         }
     }.share()
 
-
-
     // observe notifications coming in from events and notifications arriving from cloud.  how do we
     // trigger cloud updates? subscriptions! however, same problem all over again: difficult to do
     // singleton side-effects of a chain that involves an on-subscription side-effect.
-
-    //
 
     companion object {
         private const val STORAGE_CONTEXT_IDENTIFIER = "io.rover.rover.notification-storage"

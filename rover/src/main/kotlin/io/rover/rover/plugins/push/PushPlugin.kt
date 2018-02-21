@@ -20,6 +20,7 @@ import io.rover.rover.plugins.data.domain.PushNotificationAction
 import io.rover.rover.plugins.events.EventsPluginInterface
 import io.rover.rover.plugins.data.domain.PushNotification
 import io.rover.rover.plugins.data.graphql.operations.data.decodeJson
+import io.rover.rover.plugins.data.http.WireEncoderInterface
 import io.rover.rover.plugins.userexperience.experience.containers.StandaloneExperienceHostActivity
 import org.json.JSONException
 import org.json.JSONObject
@@ -30,6 +31,8 @@ open class PushPlugin(
 
     // TODO change to private val pushTokenTransmissionChannel: PushTokenTransmissionChannel,
     private val eventsPlugin: EventsPluginInterface,
+
+    private val wireEncoder: WireEncoderInterface,
 
     /**
      * A small icon is necessary for Android push notifications.  Pass a resid.
@@ -120,7 +123,7 @@ open class PushPlugin(
             val messageObject = JSONObject(message)
             val attributes = messageObject.getJSONObject("attributes")
             val id = messageObject.getInt("id")
-            Pair(PushNotification.Companion.decodeJson(attributes), id)
+            Pair(wireEncoder.decodeNotification(attributes), id)
         } catch (e: JSONException) {
             log.w("Invalid push notification received: `$message`, resulting in '${e.message}'. Ignoring.")
             return
@@ -136,7 +139,7 @@ open class PushPlugin(
         }
 
         builder.setContentTitle(pushNotification.title)
-        builder.setContentText(pushNotification.text)
+        builder.setContentText(pushNotification.body)
         builder.setSmallIcon(smallIconResId, smallIconDrawableLevel)
 
         // so, we need to inject a synthesized backstack.
@@ -160,16 +163,16 @@ open class PushPlugin(
         // yeah, i think this is the case.
 
         val targetIntent = when(pushNotification.action) {
-            is PushNotificationAction.Experience ->
+            is PushNotificationAction.PresentExperience ->
                 StandaloneExperienceHostActivity.makeIntent(applicationContext, pushNotification.action.experienceId)
-            is PushNotificationAction.Website ->
-                // Note: Website URIs come from a trusted source, that is, the app's owner
+            is PushNotificationAction.PresentWebsite ->
+                // Note: PresentWebsite URIs come from a trusted source, that is, the app's owner
                 // commanding a pushNotification through Rover.  Non-web URI schemes are filtered
                 // out, as well.
-                Intent(Intent.ACTION_VIEW, Uri.parse(pushNotification.action.websiteUrl.toString()))
-            is PushNotificationAction.DeepLink ->
+                Intent(Intent.ACTION_VIEW, Uri.parse(pushNotification.action.url.toString()))
+            is PushNotificationAction.OpenUrl ->
                 // Like above, but non-web URI schemes are not being filtered.
-                Intent(Intent.ACTION_VIEW, Uri.parse(pushNotification.action.deepLinkUrl.toString()))
+                Intent(Intent.ACTION_VIEW, Uri.parse(pushNotification.action.url.toString()))
         }
 
         val pendingIntent = TaskStackBuilder.create(applicationContext).apply {

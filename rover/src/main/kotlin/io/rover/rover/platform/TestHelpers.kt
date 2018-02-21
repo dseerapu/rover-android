@@ -16,15 +16,15 @@ import org.json.JSONObject
 // Thus we here expose a bit of functionality to allow Kotlin test code to get the useful bits out
 // of a few types.
 
-fun WireEncoder.encodeEventsToStringJsonForTests(events: List<EventSnapshot>): String =
+internal fun WireEncoder.encodeEventsToStringJsonForTests(events: List<EventSnapshot>): String =
     this.encodeEventsForSending(events).toString(4)
 
-fun WireEncoder.decodeDeviceStateFromJsonStringForTests(json: String): DeviceState =
+internal fun WireEncoder.decodeDeviceStateFromJsonStringForTests(json: String): DeviceState =
     this.decodeDeviceState(JSONObject(json))
 
-fun DeviceState.encodeJsonToStringForTests(): String = this.encodeJson().toString(4)
+internal fun DeviceState.encodeJsonToStringForTests(dateFormatting: DateFormattingInterface): String = this.encodeJson(dateFormatting).toString(4)
 
-fun Experience.encodeJsonToStringForTests(): String = this.encodeJson().toString(4)
+internal fun Experience.encodeJsonToStringForTests(): String = this.encodeJson().toString(4)
 
-fun WireEncoder.decodeExperienceFromStringForTests(json: String): Experience =
+internal fun WireEncoder.decodeExperienceFromStringForTests(json: String): Experience =
     this.decodeExperience(JSONObject(json))

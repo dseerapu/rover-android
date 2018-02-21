@@ -137,13 +137,16 @@
             "notifications": [
                 {
                     "id": "39049A97-1A17-46CF-8979-54B5A6C20FF6",
-                    "android-title": "I am a push!",
-                    "notification-text": "lorem ipsum",
-                    "read": false,
-                    "content-type": "experience",
-                    "is-notification-center-enabled": true,
+                    "title": "I am a push!",
+                    "body": "lorem ipsum",
+                    "isRead": false,
+                    "isDeleted": false,
+                    "isNotificationCenterEnabled": true,
+                    "expiresAt": "2019-02-21T19:14:38Z",
+                    "deliveredAt": "2018-02-21T19:14:38Z",
                     "action": {
-                        "experience-id": "5436635463"
+                        "__typename": "PresentExperienceNotificationAction",
+                        "experienceId": "5436635463"
                     }
                 }
             ]

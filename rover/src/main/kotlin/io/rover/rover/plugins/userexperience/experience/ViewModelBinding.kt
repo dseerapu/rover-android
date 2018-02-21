@@ -4,7 +4,7 @@ import io.rover.rover.core.streams.Subscription
 import kotlin.reflect.KProperty
 
 /**
- * Use this delegated property to manage binding of a view model to a View.
+ * Use this Kotlin delegated property to manage binding of a view model to a View.
  *
  * When rebinding to a new view model, it will unsubscribe/cancel any existing subscriptions
  * to asynchronous events.

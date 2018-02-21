@@ -12,6 +12,9 @@ import io.rover.rover.plugins.userexperience.experience.layout.row.RowView
 import io.rover.rover.plugins.userexperience.experience.blocks.text.TextBlockView
 import io.rover.rover.plugins.userexperience.experience.blocks.web.WebBlockView
 
+/**
+ * The RecyclerView adapter for Experience layouts.
+ */
 class BlockAndRowRecyclerAdapter(
     private val viewModelSequence: List<LayoutableViewModel>
 ) : RecyclerView.Adapter<BlockAndRowRecyclerAdapter.LayoutableBlockHolder>() {

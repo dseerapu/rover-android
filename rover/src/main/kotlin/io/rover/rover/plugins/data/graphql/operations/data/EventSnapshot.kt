@@ -20,7 +20,7 @@ internal fun EventSnapshot.asJson(
             EventSnapshot::id
         )
 
-        putProp(this@asJson, EventSnapshot::timestamp, { dateFormatting.dateAsIso8601(it) })
+        putProp(this@asJson, EventSnapshot::timestamp, { dateFormatting.dateAsIso8601(it, true) })
 
         props.forEach { putProp(this@asJson, it) }
 
@@ -34,7 +34,7 @@ internal fun EventSnapshot.Companion.decodeJson(json: JSONObject, dateFormatting
     return EventSnapshot(
         attributes = json.getJSONObject("attributes").toFlatAttributesHash(),
         name = json.getString("name"),
-        timestamp = dateFormatting.iso8601AsDate(json.getString("timestamp")),
+        timestamp = dateFormatting.iso8601AsDate(json.getString("timestamp"), true),
         id = UUID.fromString(json.getString("id")),
         context = Context.decodeJson(json.getJSONObject("context"))
     )

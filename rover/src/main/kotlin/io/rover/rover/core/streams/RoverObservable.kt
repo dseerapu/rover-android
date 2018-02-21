@@ -961,6 +961,7 @@ fun <T> Publisher<T>.subscribeOn(executor: Executor): Publisher<T> {
     return object : Publisher<T> {
         override fun subscribe(subscriber: Subscriber<T>) {
             executor.execute {
+                // TODO: should we run unsubsriptions on the executor as well?
                 this@subscribeOn.subscribe(subscriber)
             }
         }

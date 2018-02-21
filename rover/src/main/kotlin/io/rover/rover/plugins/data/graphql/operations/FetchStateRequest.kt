@@ -1,4 +1,4 @@
-package io.rover.rover.plugins.data.graphql.operations.data
+package io.rover.rover.plugins.data.graphql.operations
 
 import io.rover.rover.plugins.data.domain.DeviceState
 import io.rover.rover.plugins.data.NetworkRequest
@@ -35,5 +35,5 @@ class FetchStateRequest : NetworkRequest<DeviceState> {
         get() = JSONObject()
 
     override fun decodePayload(responseObject: JSONObject, wireEncoder: WireEncoderInterface): DeviceState =
-        DeviceState.decodeJson(responseObject.getJSONObject("data").getJSONObject("device"))
+        wireEncoder.decodeDeviceState(responseObject.getJSONObject("data").getJSONObject("device"))
 }
