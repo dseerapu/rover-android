@@ -22,7 +22,7 @@ interface ExperienceNavigationViewModelInterface : BindableViewModel {
     val events: Observable<Emission.Event>
 
     /**
-     * The View should subscribe to these and thus be kept up to date.
+     * The View should subscribe to this stream and thus be kept up to date.
      *
      * In this case events include instructions to navigate to and display an Experience screen and
      * set the backlight and toolbar.

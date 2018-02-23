@@ -43,7 +43,5 @@ interface TopLevelNavigation {
      */
     fun displayNotificationCenterIntent(): Intent
 
-    fun mainScreenIntent
-
-        // TODO ANDREW START HERE
+    // TODO ANDREW START HERE
 }
