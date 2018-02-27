@@ -4,11 +4,13 @@ import android.content.Context
 import android.support.design.widget.CoordinatorLayout
 import android.support.design.widget.Snackbar
 import android.support.v4.widget.SwipeRefreshLayout
+import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.util.AttributeSet
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.widget.FrameLayout
 import android.widget.TextView
 import io.rover.rover.R
@@ -58,7 +60,9 @@ open class NotificationCenterListView : CoordinatorLayout, BindableView<Notifica
      * override this method.
      */
     open fun makeNotificationRowView(): View {
-        return TextView(context)
+        return TextView(context).apply {
+            layoutParams = RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT, RecyclerView.LayoutParams.WRAP_CONTENT)
+        }
     }
 
     /**
@@ -80,6 +84,9 @@ open class NotificationCenterListView : CoordinatorLayout, BindableView<Notifica
                 when(event) {
                     is NotificationCenterListViewModelInterface.Event.ListUpdated -> {
                         // update the adapter
+                        log.v("List replaced with ${event.notifications.size} notifications")
+                        itemsView.visibility = if(event.notifications.isNotEmpty()) View.VISIBLE else View.GONE
+                        emptyLayout.visibility = if(event.notifications.isEmpty()) View.VISIBLE else View.GONE
                         currentNotificationsList = event.notifications
                         adapter.notifyDataSetChanged()
                     }
@@ -144,6 +151,7 @@ open class NotificationCenterListView : CoordinatorLayout, BindableView<Notifica
             // actually the HOlder is kind of like a viewmodel. it might do here.
 
             val notification = currentNotificationsList?.get(position)
+            log.v("getting notification from $position from list ${currentNotificationsList?.size}, it came up as $notification")
             notification.whenNotNull { holder.notification = it }
         }
     }
@@ -165,6 +173,9 @@ open class NotificationCenterListView : CoordinatorLayout, BindableView<Notifica
 
         this.addView(swipeRefreshLayout)
 
+        itemsView.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
+        itemsView.adapter = adapter
+
         // TODO: in design mode, put a description!
 
         // TODO: and will create the gesture observation stuff needed for swipe-to-delete
@@ -184,9 +195,10 @@ open class NotificationCenterListView : CoordinatorLayout, BindableView<Notifica
 
         var notification: Notification? = null
             set(value) {
-                field = notification
+                field = value
 
                 // delegate to the possibly-overridden binding method.
+                log.v("BINDING ROW WITH TITLE: ${notification}")
                 notification.whenNotNull { listView.bindNotificationToRow(view, it) }
             }
 

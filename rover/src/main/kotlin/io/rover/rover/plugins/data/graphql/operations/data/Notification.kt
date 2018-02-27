@@ -1,9 +1,11 @@
 package io.rover.rover.plugins.data.graphql.operations.data
 
 import io.rover.rover.platform.DateFormattingInterface
+import io.rover.rover.platform.whenNotNull
 import io.rover.rover.plugins.data.domain.PushNotificationAction
 import io.rover.rover.plugins.data.domain.Notification
 import io.rover.rover.plugins.data.graphql.putProp
+import io.rover.rover.plugins.data.graphql.safeOptString
 import org.json.JSONException
 import org.json.JSONObject
 import java.net.URI
@@ -12,14 +14,14 @@ import java.net.URL
 internal fun Notification.encodeJson(dateFormatting: DateFormattingInterface): JSONObject {
     return JSONObject().apply {
         putProp(this@encodeJson, Notification::id, "id")
-        putProp(this@encodeJson, Notification::title, "title")
+        putProp(this@encodeJson, Notification::title, "title" )
         putProp(this@encodeJson, Notification::body, "body")
         putProp(this@encodeJson, Notification::channelId, "channelId")
         putProp(this@encodeJson, Notification::isNotificationCenterEnabled, "isNotificationCenterEnabled")
-        putProp(this@encodeJson, Notification::read, "isRead")
+        putProp(this@encodeJson, Notification::isRead, "isRead")
         putProp(this@encodeJson, Notification::deleted, "isDeleted")
         putProp(this@encodeJson, Notification::deliveredAt, "deliveredAt") { dateFormatting.dateAsIso8601(it )}
-        putProp(this@encodeJson, Notification::expiresAt, "expiresAt") { dateFormatting.dateAsIso8601(it )}
+        putProp(this@encodeJson, Notification::expiresAt, "expiresAt") { it.whenNotNull { dateFormatting.dateAsIso8601(it) } }
         putProp(this@encodeJson, Notification::action, "action" ) {
             it.encodeJson()
         }
@@ -67,12 +69,12 @@ internal fun PushNotificationAction.encodeJson(): JSONObject {
 internal fun Notification.Companion.decodeJson(json: JSONObject, dateFormatting: DateFormattingInterface): Notification {
     return Notification(
         id = json.getString("id"),
-        title = json.getString("title"),
+        title = json.safeOptString("title"),
         body = json.getString("body"),
-        channelId = json.optString("channelId", null),
-        read = json.getBoolean("isRead"),
-        deleted = json.getBoolean("isDeleted"),
-        expiresAt = dateFormatting.iso8601AsDate(json.getString("expiresAt")),
+        channelId = json.safeOptString("channelId"),
+        isRead = json.getBoolean("isRead"),
+        deleted = false,
+        expiresAt = json.safeOptString("expiresAt").whenNotNull { dateFormatting.iso8601AsDate(it) },
         deliveredAt = dateFormatting.iso8601AsDate(json.getString("deliveredAt")),
         isNotificationCenterEnabled = json.getBoolean("isNotificationCenterEnabled"),
         action = PushNotificationAction.decodeJson(json.getJSONObject("action"))

@@ -28,18 +28,31 @@ internal fun JSONObject.optIntOrNull(name: String): Int? {
     }
 }
 
-@Deprecated("This method uses reflection to obtain the property name, which is not appropriate use in case of customer use of Proguard.", ReplaceWith("putProp(obj, prop, name, transform)"))
-internal fun <T, R> JSONObject.putProp(obj: T, prop: KProperty1<T, R>, transform: ((R) -> Any)? = null) {
+/**
+ * The stock [JSONObject.optString] method has a nasty known bug for which the behaviour is kept
+ * for backwards bug compatibility: if a `null` literal appears as the value for the string, you'll
+ * get the string "null" back.
+ *
+ * This version of the method solves that problem.
+ *
+ * See [Android Bug #36924550](https://issuetracker.google.com/issues/36924550).
+ */
+internal fun JSONObject.safeOptString(name: String): String? {
+    return if(isNull(name)) null else optString(name, null)
+}
+
+@Deprecated("This method uses reflection to obtain the property name, which is not appropriate in case of customer use of Proguard.", ReplaceWith("putProp(obj, prop, name, transform)"))
+internal fun <T, R> JSONObject.putProp(obj: T, prop: KProperty1<T, R>, transform: ((R) -> Any?)? = null) {
     put(
         prop.name,
-        if (transform != null) transform(prop.get(obj)) else prop.get(obj)
+        (if (transform != null) transform(prop.get(obj)) else prop.get(obj)) ?: JSONObject.NULL
     )
 }
 
-internal fun <T, R> JSONObject.putProp(obj: T, prop: KProperty1<T, R>, name: String, transform: ((R) -> Any)? = null) {
+internal fun <T, R> JSONObject.putProp(obj: T, prop: KProperty1<T, R>, name: String, transform: ((R) -> Any?)? = null) {
     put(
         name,
-        if (transform != null) transform(prop.get(obj)) else prop.get(obj)
+        (if (transform != null) transform(prop.get(obj)) else prop.get(obj)) ?: JSONObject.NULL
     )
 }
 

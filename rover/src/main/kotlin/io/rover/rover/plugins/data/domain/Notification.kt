@@ -23,7 +23,7 @@ data class Notification(
      */
     val channelId: String?,
 
-    val title: String,
+    val title: String?,
     val body: String,
 
     /**
@@ -31,7 +31,7 @@ data class Notification(
      *
      * (when received over push this will always be false)
      */
-    val read: Boolean,
+    val isRead: Boolean,
 
     /**
      * Has this notification been deleted?
@@ -46,7 +46,7 @@ data class Notification(
 
     val isNotificationCenterEnabled: Boolean,
 
-    val expiresAt: Date,
+    val expiresAt: Date?,
 
     val deliveredAt: Date,
 
