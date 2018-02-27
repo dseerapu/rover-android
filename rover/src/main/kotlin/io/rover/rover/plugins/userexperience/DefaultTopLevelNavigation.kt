@@ -9,7 +9,7 @@ import io.rover.rover.plugins.userexperience.experience.containers.StandaloneExp
  * A default version of [TopLevelNavigation] that will use the two Activities bundled with the Rover
  * SDK for displaying Experiences and the Notification Center.
  */
-class DefaultTopLevelNavigation(
+open class DefaultTopLevelNavigation(
     private val applicationContext: Context
 ): TopLevelNavigation {
     override fun displayExperienceIntent(experienceId: String): Intent {

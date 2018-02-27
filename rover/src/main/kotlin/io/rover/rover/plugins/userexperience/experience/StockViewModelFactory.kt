@@ -1,6 +1,10 @@
 package io.rover.rover.plugins.userexperience.experience
 
+import android.content.Context
 import android.os.Parcelable
+import io.rover.rover.platform.DateFormatting
+import io.rover.rover.platform.LocalStorage
+import io.rover.rover.platform.SharedPreferencesLocalStorage
 import io.rover.rover.plugins.data.DataPluginInterface
 import io.rover.rover.plugins.data.domain.Experience
 import io.rover.rover.plugins.events.EventsPluginInterface
@@ -11,6 +15,9 @@ import io.rover.rover.plugins.userexperience.experience.navigation.ExperienceNav
 import io.rover.rover.plugins.userexperience.experience.toolbar.ExperienceToolbarViewModel
 import io.rover.rover.plugins.userexperience.experience.toolbar.ExperienceToolbarViewModelInterface
 import io.rover.rover.plugins.userexperience.experience.toolbar.ToolbarConfiguration
+import io.rover.rover.plugins.userexperience.notificationcentre.NotificationCenterListViewModel
+import io.rover.rover.plugins.userexperience.notificationcentre.NotificationCenterListViewModelInterface
+import io.rover.rover.plugins.userexperience.notificationcentre.NotificationsRepository
 
 /**
  * Constructs the standard versions of the view models for all the given Experience blocks.
@@ -56,6 +63,13 @@ open class StockViewModelFactory(
     override fun viewModelForExperienceToolbar(toolbarConfiguration: ToolbarConfiguration): ExperienceToolbarViewModelInterface {
         return ExperienceToolbarViewModel(
             toolbarConfiguration
+        )
+    }
+
+    override fun viewModelForNotificationCenter(context: Context): NotificationCenterListViewModelInterface {
+        return NotificationCenterListViewModel(
+            // TODO: redo this for DI reboot
+            NotificationsRepository(dataPlugin, DateFormatting(), SharedPreferencesLocalStorage(context))
         )
     }
 }

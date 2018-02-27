@@ -1,5 +1,6 @@
 package io.rover.rover.plugins.userexperience.experience
 
+import android.content.Context
 import android.os.Parcelable
 import android.view.WindowManager
 import io.rover.rover.plugins.data.domain.Block
@@ -17,6 +18,7 @@ import io.rover.rover.plugins.userexperience.experience.navigation.ExperienceExt
 import io.rover.rover.plugins.userexperience.experience.navigation.ExperienceNavigationViewModelInterface
 import io.rover.rover.plugins.userexperience.experience.toolbar.ExperienceToolbarViewModelInterface
 import io.rover.rover.plugins.userexperience.experience.toolbar.ToolbarConfiguration
+import io.rover.rover.plugins.userexperience.notificationcentre.NotificationCenterListViewModelInterface
 
 /**
  * Responsible for fetching and displaying an Experience, with the appropriate Android toolbar along
@@ -79,5 +81,5 @@ interface ViewModelFactoryInterface {
 
     fun viewModelForExperienceToolbar(toolbarConfiguration: ToolbarConfiguration): ExperienceToolbarViewModelInterface
 
-
+    fun viewModelForNotificationCenter(context: Context): NotificationCenterListViewModelInterface
 }

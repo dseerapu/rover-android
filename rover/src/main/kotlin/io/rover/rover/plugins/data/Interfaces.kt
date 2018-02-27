@@ -14,7 +14,7 @@ import java.util.concurrent.Executor
  * repeat the request.
  */
 sealed class NetworkResult<T> {
-    class Error<T>(
+    data class Error<T>(
         val throwable: Throwable,
 
         /**
@@ -26,11 +26,11 @@ sealed class NetworkResult<T> {
         val shouldRetry: Boolean
     ) : NetworkResult<T>()
 
-    class Success<T>(val response: T) : NetworkResult<T>()
+    data class Success<T>(val response: T) : NetworkResult<T>()
 }
 
 sealed class NetworkError(
-    description: String
+    private val description: String
 ) : Exception(description) {
     class EmptyResponseData : NetworkError("Empty response data")
     class FailedToDecodeResponseData : NetworkError("Failed to deserialize response data")
@@ -38,6 +38,10 @@ sealed class NetworkError(
     class InvalidResponseData(serverMessage: String) : NetworkError("Invalid response data: $serverMessage")
     class InvalidStatusCode(statusCode: Int, serverMessage: String) : NetworkError("Invalid status code: $statusCode.  Given reason: '$serverMessage'")
     class InvalidURL : NetworkError("Invalid URL")
+
+    override fun toString(): String {
+        return "NetworkError(description=$description)"
+    }
 }
 
 /**

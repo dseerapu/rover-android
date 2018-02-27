@@ -27,6 +27,28 @@ class FetchStateRequest : NetworkRequest<DeviceState> {
                             radius
                         }
                     }
+                    notifications {
+                        id
+                        campaignId
+                        title
+                        body
+                        deliveredAt
+                        expiresAt
+                        isRead
+                        isNotificationCenterEnabled
+                        action {
+                            __typename
+                            ... on OpenURLNotificationAction {
+                              url
+                            }
+                            ... on PresentExperienceNotificationAction {
+                              experienceId
+                            }
+                            ... on PresentWebsiteNotificationAction {
+                              url
+                            }
+                        }
+                    }
                 }
             }
             """

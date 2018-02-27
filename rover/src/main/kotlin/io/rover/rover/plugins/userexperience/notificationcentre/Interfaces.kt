@@ -10,14 +10,40 @@ import io.rover.rover.plugins.userexperience.experience.concerns.BindableViewMod
  * Responsible for keeping a local cache of received push notifications, in addition to refreshing
  * them from [DeviceState] in the Data plugin from time to time.
  */
-interface NotificationCenterStoreInterface {
+interface NotificationsRepositoryInterface {
     /**
      * Obtain the list of push notifications received by this device (and that were marked for
      * storage in the Notification Center).
      *
+     * A refresh is triggered when subscribed.
+     *
      * TODO: should this just be a callback version?
      */
-    fun getNotifications(): Publisher<List<Notification>>
+    fun updates(): Publisher<Emission.Update>
+
+    /**
+     * Be informed of changes occurring to the Repository itself; for instance, if a refresh cycle
+     * currently running.
+     */
+    fun events(): Publisher<Emission.Event>
+
+    /**
+     * Manually trigger a refresh.
+     */
+    fun refresh()
+
+    fun markRead(notification: Notification)
+
+    fun delete(notification: Notification)
+
+    sealed class Emission {
+        sealed class Event: Emission() {
+            data class Refreshing(val refreshing: Boolean): Event()
+            data class FetchFailure(val reason: String): Event()
+        }
+
+        data class Update(val notifications: List<Notification>): Emission()
+    }
 }
 
 //interface NotificationCenterViewModelInterface: BindableViewModel {
@@ -117,13 +143,9 @@ interface NotificationCenterListViewModelInterface: BindableViewModel {
      */
     fun events(): Observable<Event>
 
-    /**
-     * The View matching this view model ([NotificationCenterListView]) should subscribe to this
-     * stream to be kept up to date.
-     */
-    fun updates(): Observable<Update>
+    // TODO: don't forget to merge Update/Event into same type graph under "Emission"
 
-    sealed class Update {
+    sealed class Event {
         /**
          * The list has changed.
          *
@@ -131,16 +153,25 @@ interface NotificationCenterListViewModelInterface: BindableViewModel {
          * be used to perform a differential update (which RecyclerView supports).
          *
          * If the list is empty, display the empty view.
-         */
-        data class ListUpdated(val notifications: List<Notification>): Update()
-    }
+         *
+         * Note: unusually for an MVVM UI pattern, this is exposing the [Notification] domain model
+         * object directly.
+         *
+         * This is to better suit View implementations that may display any arbitrary detail of the
+         * Notification.  Notification itself is a value object.
+        */
+        data class ListUpdated(val notifications: List<Notification>): Event()
 
-    sealed class Event {
         sealed class Navigate {
             class OpenUrl: Navigate()
 
             class OpenExperience: Navigate()
         }
+
+        /**
+         * Th
+         */
+        data class Refreshing(val refreshing: Boolean): Event()
 
         class DisplayProblemMessage: Event()
     }
@@ -155,4 +186,9 @@ interface NotificationCenterListViewModelInterface: BindableViewModel {
      * mark it as deleted in the local store.
      */
     fun deleteNotification(notification: Notification)
+
+    /**
+     * User did the pull down gesture to ask for a refresh.
+     */
+    fun requestRefresh()
 }

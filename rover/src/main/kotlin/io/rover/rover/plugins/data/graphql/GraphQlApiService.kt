@@ -2,6 +2,7 @@ package io.rover.rover.plugins.data.graphql
 
 import android.os.Handler
 import android.os.Looper
+import io.rover.rover.core.logging.log
 import io.rover.rover.platform.DeviceIdentificationInterface
 import io.rover.rover.plugins.data.APIException
 import io.rover.rover.plugins.data.AuthenticationContext
@@ -22,6 +23,7 @@ import io.rover.rover.plugins.data.http.WireEncoderInterface
 import io.rover.rover.plugins.data.graphql.operations.FetchExperienceRequest
 import io.rover.rover.plugins.data.graphql.operations.SendEventsRequest
 import io.rover.rover.plugins.data.graphql.operations.FetchStateRequest
+import org.json.JSONException
 import java.io.IOException
 import java.net.URL
 
@@ -87,14 +89,29 @@ class GraphQlApiService(
             is HttpClientResponse.Success -> {
                 try {
                     val body = httpResponse.bufferedInputStream.reader(Charsets.UTF_8).readText()
+
+                    log.v("RESPONSE BODY: $body")
                     when (body) {
                         "" -> NetworkResult.Error(NetworkError.EmptyResponseData(), false)
                         else -> {
                             try {
                                 NetworkResult.Success(
+                                    // TODO This could emit, say, a JSON decode exception!  Need a story.
                                     httpRequest.decode(body, wireEncoder)
                                 )
                             } catch (e: APIException) {
+                                NetworkResult.Error<TEntity>(
+                                    NetworkError.InvalidResponseData(e.message ?: "API returned unknown error."),
+                                    // retry is not appropriate when we're getting a domain-level
+                                    // error from the GraphQL API.
+                                    false
+                                )
+                            } catch (e: JSONException) {
+                                // because the traceback information has some utility for diagnosing
+                                // JSON decode errors, even though we're treating them as soft
+                                // errors, throw the traceback onto the console:
+                                log.w("JSON decode problem details: $e, ${e.stackTrace.joinToString("\n")}")
+
                                 NetworkResult.Error<TEntity>(
                                     NetworkError.InvalidResponseData(e.message ?: "API returned unknown error."),
                                     // retry is not appropriate when we're getting a domain-level

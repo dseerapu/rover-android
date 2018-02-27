@@ -52,7 +52,6 @@ open class ExperienceNavigationViewModel(
 
     override fun canGoBack(): Boolean = state.backStack.size > 1
 
-
     private val actionSource: PublishSubject<Action> = PublishSubject()
     private val actions = actionSource.share()
 
@@ -339,7 +338,7 @@ open class ExperienceNavigationViewModel(
     }.shareAndReplay(10) // a count of 10 because only a couple events are emitted
     // synchronously at startup that must be delivered to both events and updates. only subscribers
     // are events and updates, which both must see the entire stream.   I just set a max limit since
-    // both will subscribe quickly anyway.
+    // both will subscribe synchronously anyway.
 
     /**
      * Monitors actions and issues analytics events to the [EventsPlugin].

@@ -2,6 +2,7 @@ package io.rover.rover.plugins.userexperience.notificationcentre
 
 import android.content.Context
 import android.support.design.widget.CoordinatorLayout
+import android.support.design.widget.Snackbar
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.widget.RecyclerView
 import android.util.AttributeSet
@@ -10,6 +11,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.TextView
+import io.rover.rover.R
+import io.rover.rover.core.logging.log
+import io.rover.rover.core.streams.doOnError
 import io.rover.rover.core.streams.subscribe
 import io.rover.rover.platform.whenNotNull
 import io.rover.rover.plugins.data.domain.Notification
@@ -66,19 +70,36 @@ open class NotificationCenterListView : CoordinatorLayout, BindableView<Notifica
     }
 
     override var viewModel: NotificationCenterListViewModelInterface? by ViewModelBinding { viewModel, subscriptionCallback ->
+        swipeRefreshLayout.isRefreshing = false
+
         if(viewModel == null) {
-            emptyLayout.visibility = View.GONE
-            emptyLayout.visibility = View.GONE
+            setUpUnboundState()
         } else {
-            viewModel.updates().subscribe({ update ->
-                when(update) {
-                    is NotificationCenterListViewModelInterface.Update.ListUpdated -> {
+            viewModel.events()
+                .subscribe({ event ->
+                when(event) {
+                    is NotificationCenterListViewModelInterface.Event.ListUpdated -> {
                         // update the adapter
-                        currentNotficationsList = update.notifications
+                        currentNotificationsList = event.notifications
                         adapter.notifyDataSetChanged()
+                    }
+                    is NotificationCenterListViewModelInterface.Event.Refreshing -> {
+                        log.v("REFRESHING STATE CHANGED: ${event.refreshing}")
+                        swipeRefreshLayout.isRefreshing = event.refreshing
+                    }
+                    is NotificationCenterListViewModelInterface.Event.DisplayProblemMessage -> {
+                        // TODO: make error resource overridable.
+                        Snackbar.make(this, R.string.generic_problem, Snackbar.LENGTH_LONG).show()
+                    }
+                    is NotificationCenterListViewModelInterface.Event.Navigate -> {
+                        log.w("NAV NOT SUPPORTED YET")
                     }
                 }
             }, { throw(it) }, { subscription -> subscriptionCallback(subscription) })
+
+            swipeRefreshLayout.setOnRefreshListener {
+                viewModel.requestRefresh()
+            }
 
             // won't need to subscribe to any events I don't think.  *possibly* may need to be
             // informed of the deletes from the list.
@@ -91,7 +112,7 @@ open class NotificationCenterListView : CoordinatorLayout, BindableView<Notifica
 
     private val emptySwitcherLayout = FrameLayout(
         context
-    ).apply { swipeRefreshLayout.addView(swipeRefreshLayout) }
+    ).apply { swipeRefreshLayout.addView(this) }
 
     private val emptyLayout = TextView(context).apply {
         text = "No notifications yet, lol"
@@ -105,7 +126,7 @@ open class NotificationCenterListView : CoordinatorLayout, BindableView<Notifica
     ).apply { emptySwitcherLayout.addView(this) }
 
     // State:
-    private var currentNotficationsList: List<Notification>? = null
+    private var currentNotificationsList: List<Notification>? = null
 
     private val adapter = object : RecyclerView.Adapter<NotificationViewHolder>() {
         override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): NotificationViewHolder {
@@ -113,7 +134,7 @@ open class NotificationCenterListView : CoordinatorLayout, BindableView<Notifica
         }
 
         override fun getItemCount(): Int {
-            return currentNotficationsList?.size ?: 0
+            return currentNotificationsList?.size ?: 0
         }
 
         override fun onBindViewHolder(holder: NotificationViewHolder, position: Int) {
@@ -122,24 +143,31 @@ open class NotificationCenterListView : CoordinatorLayout, BindableView<Notifica
             // do I bloody well need a viewmodel for this?!  Where would I handle the clicks? Just the ItemHolder.
             // actually the HOlder is kind of like a viewmodel. it might do here.
 
-            val notification = currentNotficationsList?.get(position)
+            val notification = currentNotificationsList?.get(position)
             notification.whenNotNull { holder.notification = it }
         }
     }
 
-    init {
+    private fun setUpUnboundState() {
         emptyLayout.visibility = View.GONE
         itemsView.visibility = View.GONE
-        this.addView(emptySwitcherLayout)
+
+        swipeRefreshLayout.isRefreshing = false
+
+        swipeRefreshLayout.setOnRefreshListener {
+            log.e("Swipe refresh gesture happened before view model bound.")
+            swipeRefreshLayout.isRefreshing = false
+        }
+    }
+
+    init {
+        setUpUnboundState()
+
+        this.addView(swipeRefreshLayout)
 
         // TODO: in design mode, put a description!
 
-        // TODO: create adapter, view holders, all that gaunch
-
-
-
         // TODO: and will create the gesture observation stuff needed for swipe-to-delete
-
     }
 
     private fun notificationClicked(notification: Notification) {

@@ -284,6 +284,18 @@ internal fun <T> Publisher<T>.filter(predicate: (T) -> Boolean): Publisher<T> {
     }
 }
 
+/**
+ * Use this transformation if you have a Publisher of a given type, and you wish to filter it down
+ * to only elements of a given subtype.
+ *
+ * TODO: warn if T is Any, because that probably means consumer is using this transform on a
+ * stream with a badly inferred type and thus all of their events could be an unexpected type
+ * that will be ignored.
+ */
+internal inline fun <reified TSub: T, reified T: Any> Publisher<T>.filterForSubtype(): Publisher<TSub> {
+    return this.filter { TSub::class.java.isAssignableFrom(it::class.java) } as Publisher<TSub>
+}
+
 internal fun <T, R> Publisher<T>.flatMap(transform: (T) -> Publisher<R>): Publisher<R> {
     val prior = this
     return object : Publisher<R> {
@@ -376,6 +388,9 @@ internal fun <T> Publisher<T>.share(): Publisher<T> {
                 override fun cancel() {
                     // he wants out
                     multicastTo.remove(subscriber)
+
+                    // TODO: once the last subscriber has departed we should unsubscribe the source.
+                    // see comments in onSubscribe below.
                 }
             }
             subscriber.onSubscribe(subscription)
@@ -398,7 +413,10 @@ internal fun <T> Publisher<T>.share(): Publisher<T> {
                             multicastTo.forEach { it.onNext(item) }
                         }
 
-                        override fun onSubscribe(subscription: Subscription) { /* no-op */ }
+                        override fun onSubscribe(subscription: Subscription) {
+                            // TODO: once last subscriber has departed we need to unsubscribe
+                            // subscription.
+                        }
                     }
                 )
             }
@@ -709,7 +727,7 @@ interface Subject<T> : Processor<T, T>
  *
  */
 class PublishSubject<T> : Subject<T> {
-    var subscriber: Subscriber<T>? = null
+    private var subscriber: Subscriber<T>? = null
 
     override fun subscribe(subscriber: Subscriber<T>) {
         if (this.subscriber != null) {
@@ -753,20 +771,15 @@ internal fun <T> Collection<T>.asPublisher(): Publisher<T> {
     }
 }
 
+/**
+ * Execute a side-effect whenever an item is emitted by the Publisher.
+ */
 internal fun <T> Publisher<T>.doOnNext(callback: (item: T) -> Unit): Publisher<T> {
     val prior = this
     return object : Publisher<T> {
         override fun subscribe(subscriber: Subscriber<T>) {
             prior.subscribe(
-                object : Subscriber<T> {
-                    override fun onComplete() {
-                        subscriber.onComplete()
-                    }
-
-                    override fun onError(error: Throwable) {
-                        subscriber.onError(error)
-                    }
-
+                object : Subscriber<T> by subscriber {
                     override fun onNext(item: T) {
                         callback(item)
                         subscriber.onNext(item)
@@ -789,8 +802,89 @@ internal fun <T> Publisher<T>.doOnNext(callback: (item: T) -> Unit): Publisher<T
     }
 }
 
-// TODO: At such time as we set Android Min SDK to at least 24, change to use Optional here instead
-// (on account of the Reactive Streams spec not actually allowing for nulls).
+/**
+ * Execute a side-effect whenever an error is emitted by the Publisher.
+ */
+internal fun <T> Publisher<T>.doOnError(callback: (error: Throwable) -> Unit): Publisher<T> {
+    val prior = this
+    return object : Publisher<T> {
+        override fun subscribe(subscriber: Subscriber<T>) {
+            prior.subscribe(
+                object : Subscriber<T> by subscriber {
+
+                    override fun onError(error: Throwable) {
+                        callback(error)
+                        subscriber.onError(error)
+                    }
+
+
+                    override fun onSubscribe(subscription: Subscription) {
+                        // for clarity, this is called when I (map()) have subscribed
+                        // successfully to the source.  I then want to let the downstream
+                        // consumer know that I have subscribed successfully on their behalf,
+                        // and also allow them to pass cancellation through.
+                        val consumerSubscription = object : Subscription {
+                            override fun cancel() { subscription.cancel() }
+                        }
+
+                        subscriber.onSubscribe(consumerSubscription)
+                    }
+                }
+            )
+        }
+    }
+}
+
+/**
+ * Execute a side-effect whenever when the Publisher completes.
+ */
+internal fun <T> Publisher<T>.doOnComplete(callback: () -> Unit): Publisher<T> {
+    val prior = this
+    return object : Publisher<T> {
+        override fun subscribe(subscriber: Subscriber<T>) {
+            prior.subscribe(
+                object : Subscriber<T> by subscriber {
+                    override fun onSubscribe(subscription: Subscription) {
+                        // for clarity, this is called when I (map()) have subscribed
+                        // successfully to the source.  I then want to let the downstream
+                        // consumer know that I have subscribed successfully on their behalf,
+                        // and also allow them to pass cancellation through.
+                        val consumerSubscription = object : Subscription {
+                            override fun cancel() { subscription.cancel() }
+                        }
+
+                        subscriber.onSubscribe(consumerSubscription)
+                    }
+
+                    override fun onComplete() {
+                        callback()
+                        subscriber.onComplete()
+                    }
+                }
+            )
+        }
+    }
+}
+
+/**
+ * Transform any emitted errors into in-band values.
+ */
+internal fun <T> Publisher<T>.onErrorReturn(callback: (throwable: Throwable) -> T): Publisher<T> {
+    val prior = this
+    return object : Publisher<T> {
+        override fun subscribe(subscriber: Subscriber<T>) {
+            prior.subscribe(object : Subscriber<T> by subscriber {
+                override fun onError(error: Throwable) {
+                    subscriber.onNext(callback(error))
+                }
+            })
+        }
+    }
+}
+
+// TODO: At such time as we set Android Min SDK to at least 24, change to use Optional here and at
+// the usage sites instead (on account of the Reactive Streams spec not actually allowing for
+// nulls).
 internal fun <T> Publisher<T?>.filterNulls(): Publisher<T> = filter { it != null }.map { it!! }
 
 /**
@@ -957,7 +1051,7 @@ internal fun <T> (((r: T) -> Unit) -> NetworkTask).asPublisher(): Publisher<T> {
  * This will subscribe to Publisher `this` when it is subscribed to itself.  It will execute
  * subscription on the given executor.
  */
-fun <T> Publisher<T>.subscribeOn(executor: Executor): Publisher<T> {
+internal fun <T> Publisher<T>.subscribeOn(executor: Executor): Publisher<T> {
     return object : Publisher<T> {
         override fun subscribe(subscriber: Subscriber<T>) {
             executor.execute {
@@ -975,7 +1069,7 @@ fun <T> Publisher<T>.subscribeOn(executor: Executor): Publisher<T> {
  * Note that the thread you call .subscribe() on remains important: be sure all subscriptions to set
  * up a given Publisher chain are all on a single thread.  Use
  */
-fun <T> Publisher<T>.observeOn(executor: Executor): Publisher<T> {
+internal fun <T> Publisher<T>.observeOn(executor: Executor): Publisher<T> {
     return object : Publisher<T> {
         override fun subscribe(subscriber: Subscriber<T>) {
             this@observeOn.subscribe(object: Subscriber<T> {
@@ -1008,9 +1102,9 @@ fun <T> Publisher<T>.observeOn(executor: Executor): Publisher<T> {
 }
 
 /**
- * Block the thread waiting for the given.
+ * Block the thread waiting for the publisher to complete.
  *
- *
+ * All emitted items are buffered into a list that is then returned.
  */
 internal fun <T> Publisher<T>.blockForResult(): List<T> {
     val latch = CountDownLatch(1)

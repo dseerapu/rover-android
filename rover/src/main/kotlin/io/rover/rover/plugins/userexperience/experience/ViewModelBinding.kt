@@ -28,6 +28,8 @@ internal class ViewModelBinding<VM: Any>(
         outstandingSubscriptions.forEach { subscription -> subscription.cancel() }
         outstandingSubscriptions = emptyList()
 
+        activeViewModel = value
+
         binding(value) { subscription ->
             if(activeViewModel == value) {
                 // subscription has come alive for currently active view model.
@@ -37,8 +39,6 @@ internal class ViewModelBinding<VM: Any>(
                 subscription.cancel()
             }
         }
-
-        activeViewModel = value
     }
 }
 

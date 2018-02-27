@@ -7,6 +7,8 @@ import io.rover.rover.core.container.Container
 import io.rover.rover.platform.DateFormatting
 import io.rover.rover.plugins.data.graphql.WireEncoder
 import io.rover.rover.plugins.events.EventsPluginInterface
+import io.rover.rover.plugins.userexperience.DefaultTopLevelNavigation
+import io.rover.rover.plugins.userexperience.TopLevelNavigation
 
 class PushPluginAssembler(
     private val applicationContext: Context,
@@ -37,6 +39,8 @@ class PushPluginAssembler(
                 // TODO: once we expose internals to the DI layer directly inject FirebasePushTokenContextProvider here.
                 resolver.resolveOrFail(EventsPluginInterface::class.java),
                 WireEncoder(DateFormatting()), // TODO: borrowed from data plugin, will be OK after transitioning to Sean's new layout
+                DefaultTopLevelNavigation(applicationContext), // TODO: borrowed from User Experience plugin, will be OK after...
+                NotificationActionRoutingBehaviour(applicationContext), // more likely to be overridden by user.
                 smallIconResId,
                 smallIconDrawableLevel,
                 defaultChannelId
