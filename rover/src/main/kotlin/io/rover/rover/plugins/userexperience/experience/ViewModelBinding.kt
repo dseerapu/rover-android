@@ -14,6 +14,7 @@ import kotlin.reflect.KProperty
  * created becomes ready.
  */
 internal class ViewModelBinding<VM: Any>(
+    private val rebindingAllowed: Boolean = true,
     private val binding: (viewModel: VM?, subscriptionCallback: (Subscription) -> Unit) -> Unit
 ) {
     private var activeViewModel: VM? = null
@@ -27,6 +28,10 @@ internal class ViewModelBinding<VM: Any>(
         // cancel any existing async subscriptions.
         outstandingSubscriptions.forEach { subscription -> subscription.cancel() }
         outstandingSubscriptions = emptyList()
+
+        if(activeViewModel != null && !rebindingAllowed) {
+            throw RuntimeException("This view does not support being re-bound to a new view model.")
+        }
 
         activeViewModel = value
 

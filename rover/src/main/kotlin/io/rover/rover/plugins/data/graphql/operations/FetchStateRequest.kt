@@ -35,6 +35,7 @@ class FetchStateRequest : NetworkRequest<DeviceState> {
                         deliveredAt
                         expiresAt
                         isRead
+                        isDeleted
                         isNotificationCenterEnabled
                         action {
                             __typename

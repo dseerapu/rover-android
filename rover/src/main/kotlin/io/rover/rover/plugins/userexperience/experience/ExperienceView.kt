@@ -117,12 +117,9 @@ class ExperienceView : CoordinatorLayout, BindableView<ExperienceViewModelInterf
         )
     }
 
-    override var viewModel: ExperienceViewModelInterface? by ViewModelBinding { viewModel, subscriptionCallback ->
-        if (this.viewModel != null) {
-            // sadly have to add this invariant because of complexity dealing with the toolbar.
-            // May fix it later as required. TODO: put a note here about note why this is?
-            throw RuntimeException("ExperienceView does not support being re-bound to a new ExperienceViewModel.")
-        }
+    override var viewModel: ExperienceViewModelInterface? by ViewModelBinding(false) { viewModel, subscriptionCallback ->
+        // sadly have to set rebindingAllowed to be false because of complexity dealing with the
+        // toolbar. May fix it later as required. TODO: put a note here about note why this is?
 
         val toolbarHost = toolbarHost
             ?: throw RuntimeException("You must set the ToolbarHost up on ExperienceView before binding the view to a view model.")

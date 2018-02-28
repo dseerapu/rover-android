@@ -6,9 +6,8 @@ import io.rover.rover.core.streams.Observable
 import io.rover.rover.core.streams.PublishSubject
 import io.rover.rover.core.streams.Publisher
 import io.rover.rover.core.streams.asPublisher
-import io.rover.rover.core.streams.doOnError
 import io.rover.rover.core.streams.doOnNext
-import io.rover.rover.core.streams.filter
+import io.rover.rover.core.streams.doOnSubscribe
 import io.rover.rover.core.streams.filterForSubtype
 import io.rover.rover.core.streams.filterNulls
 import io.rover.rover.core.streams.flatMap
@@ -75,7 +74,10 @@ class NotificationsRepository(
         data class Succeeded(val notifications: List<Notification>): CloudFetchResult()
     }
     private fun latestNotificationsFromCloud(): Publisher<CloudFetchResult> {
-        return { callback: CallbackReceiver<NetworkResult<DeviceState>> ->  dataPlugin.fetchStateTask(callback) }.asPublisher().map { networkResult ->
+        return { callback: CallbackReceiver<NetworkResult<DeviceState>> ->  dataPlugin.fetchStateTask(callback) }
+            .asPublisher()
+            .doOnSubscribe { log.v("Refreshing device state to obtain notifications list.") }
+            .map { networkResult ->
             when(networkResult) {
                 is NetworkResult.Error -> CloudFetchResult.CouldNotFetch(networkResult.throwable.message ?: "Unknown")
                 is NetworkResult.Success -> CloudFetchResult.Succeeded(networkResult.response.notifications)
@@ -96,13 +98,21 @@ class NotificationsRepository(
         }
     }
 
-    private fun mergeLocalStorageWith(notifications: List<Notification>) {
-        // TODO: rather than replacing, instead merge into local storage, enforcing the count limit
-        // and respecting the existing Read bit (ie., maybe just don't replace existing items)
+    private fun mergeWithLocalStorage(notificationsFromDeviceState: List<Notification>): List<Notification> {
+        val notificationsOnDiskById = currentNotificationsOnDisk()?.associateBy { it.id } ?: hashMapOf()
+        // return the new notifications list, but OR with any existing records' isRead/isDeleted
+        // state.
+        return notificationsFromDeviceState.map { newNotification ->
+            notificationsOnDiskById[newNotification.id].whenNotNull {
+                newNotification.copy(
+                    isRead = newNotification.isRead || it.isRead,
+                    isDeleted = newNotification.isDeleted || it.isDeleted
+                )
+            } ?: newNotification
+        }.orderNotifications().take(MAX_NOTIFICATIONS_LIMIT)
+    }
 
-        // TODO For both `read` and `deleted` merge by ORing the two values together.  Otherwise
-        // keep server versions of the notifications' contents.
-
+    private fun replaceLocalStorage(notifications: List<Notification>) {
         log.v("Updating local storage with ${notifications.size} notifications.")
         keyValueStorage[STORE_KEY] = JSONArray(notifications.map { it.encodeJson(dateFormatting) }).toString()
     }
@@ -117,14 +127,11 @@ class NotificationsRepository(
                             when(fetchResult) {
                                 is CloudFetchResult.CouldNotFetch -> Observable.just(NotificationsRepositoryInterface.Emission.Event.FetchFailure(fetchResult.reason))
                                 is CloudFetchResult.Succeeded -> Observable.just(
-                                    fetchResult.notifications
-                                ).doOnNext {
-                                    // TODO: instead of just calling mergeLocalStorageWith(), make it pure, use map, and
-                                    // instead have a separate updateLocalStorage function.]
-
-                                    // update local storage!
-                                    mergeLocalStorageWith(it)
-                                }.map { NotificationsRepositoryInterface.Emission.Update(it) }
+                                    mergeWithLocalStorage(fetchResult.notifications)
+                                ).doOnNext { notifications ->
+                                    // side-effect: update local storage!
+                                    replaceLocalStorage(notifications)
+                                }.map { NotificationsRepositoryInterface.Emission.Update(it.filter { !it.isDeleted }) }
                             }
                         },
                     Observable.just(NotificationsRepositoryInterface.Emission.Event.Refreshing(false))
@@ -133,10 +140,9 @@ class NotificationsRepository(
         }
     }.share()
 
-    private fun orderNotifications(notifications: List<Notification>): List<Notification> {
-        return notifications
-            .filter { !it.deleted }
-            .sortedBy { it.deliveredAt }
+    private fun List<Notification>.orderNotifications(): List<Notification> {
+        return this
+            .sortedByDescending { it.deliveredAt }
     }
 
     // observe notifications coming in from events and notifications arriving from cloud.  how do we
@@ -146,6 +152,8 @@ class NotificationsRepository(
     companion object {
         private const val STORAGE_CONTEXT_IDENTIFIER = "io.rover.rover.notification-storage"
         private const val STORE_KEY = "local-notifications-cache"
+
+        private const val MAX_NOTIFICATIONS_LIMIT = 100
     }
 
     sealed class Action {

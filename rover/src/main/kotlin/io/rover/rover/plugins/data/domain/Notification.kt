@@ -42,7 +42,7 @@ data class Notification(
      * state GraphQL API as well, although the API reserves the possibility of setting it to be
      * true in the future.
      */
-    val deleted: Boolean,
+    val isDeleted: Boolean,
 
     val isNotificationCenterEnabled: Boolean,
 

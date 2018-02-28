@@ -19,7 +19,7 @@ internal fun Notification.encodeJson(dateFormatting: DateFormattingInterface): J
         putProp(this@encodeJson, Notification::channelId, "channelId")
         putProp(this@encodeJson, Notification::isNotificationCenterEnabled, "isNotificationCenterEnabled")
         putProp(this@encodeJson, Notification::isRead, "isRead")
-        putProp(this@encodeJson, Notification::deleted, "isDeleted")
+        putProp(this@encodeJson, Notification::isDeleted, "isDeleted")
         putProp(this@encodeJson, Notification::deliveredAt, "deliveredAt") { dateFormatting.dateAsIso8601(it )}
         putProp(this@encodeJson, Notification::expiresAt, "expiresAt") { it.whenNotNull { dateFormatting.dateAsIso8601(it) } }
         putProp(this@encodeJson, Notification::action, "action" ) {
@@ -73,7 +73,7 @@ internal fun Notification.Companion.decodeJson(json: JSONObject, dateFormatting:
         body = json.getString("body"),
         channelId = json.safeOptString("channelId"),
         isRead = json.getBoolean("isRead"),
-        deleted = false,
+        isDeleted = json.getBoolean("isDeleted"),
         expiresAt = json.safeOptString("expiresAt").whenNotNull { dateFormatting.iso8601AsDate(it) },
         deliveredAt = dateFormatting.iso8601AsDate(json.getString("deliveredAt")),
         isNotificationCenterEnabled = json.getBoolean("isNotificationCenterEnabled"),
