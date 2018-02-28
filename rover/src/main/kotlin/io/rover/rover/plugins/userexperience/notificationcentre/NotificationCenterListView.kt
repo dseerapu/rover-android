@@ -91,7 +91,6 @@ open class NotificationCenterListView : CoordinatorLayout, BindableView<Notifica
                         adapter.notifyDataSetChanged()
                     }
                     is NotificationCenterListViewModelInterface.Event.Refreshing -> {
-                        log.v("REFRESHING STATE CHANGED: ${event.refreshing}")
                         swipeRefreshLayout.isRefreshing = event.refreshing
                     }
                     is NotificationCenterListViewModelInterface.Event.DisplayProblemMessage -> {
@@ -151,7 +150,6 @@ open class NotificationCenterListView : CoordinatorLayout, BindableView<Notifica
             // actually the HOlder is kind of like a viewmodel. it might do here.
 
             val notification = currentNotificationsList?.get(position)
-            log.v("getting notification from $position from list ${currentNotificationsList?.size}, it came up as $notification")
             notification.whenNotNull { holder.notification = it }
         }
     }
@@ -198,7 +196,6 @@ open class NotificationCenterListView : CoordinatorLayout, BindableView<Notifica
                 field = value
 
                 // delegate to the possibly-overridden binding method.
-                log.v("BINDING ROW WITH TITLE: ${notification}")
                 notification.whenNotNull { listView.bindNotificationToRow(view, it) }
             }
 

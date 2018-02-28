@@ -14,7 +14,7 @@ import java.net.URL
 internal fun Notification.encodeJson(dateFormatting: DateFormattingInterface): JSONObject {
     return JSONObject().apply {
         putProp(this@encodeJson, Notification::id, "id")
-        putProp(this@encodeJson, Notification::title, "title" )
+        putProp(this@encodeJson, Notification::title, "title")
         putProp(this@encodeJson, Notification::body, "body")
         putProp(this@encodeJson, Notification::channelId, "channelId")
         putProp(this@encodeJson, Notification::isNotificationCenterEnabled, "isNotificationCenterEnabled")

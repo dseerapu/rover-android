@@ -45,14 +45,14 @@ internal fun JSONObject.safeOptString(name: String): String? {
 internal fun <T, R> JSONObject.putProp(obj: T, prop: KProperty1<T, R>, transform: ((R) -> Any?)? = null) {
     put(
         prop.name,
-        (if (transform != null) transform(prop.get(obj)) else prop.get(obj)) ?: JSONObject.NULL
+        if (transform != null) transform(prop.get(obj)) else prop.get(obj)
     )
 }
 
 internal fun <T, R> JSONObject.putProp(obj: T, prop: KProperty1<T, R>, name: String, transform: ((R) -> Any?)? = null) {
     put(
         name,
-        (if (transform != null) transform(prop.get(obj)) else prop.get(obj)) ?: JSONObject.NULL
+        if (transform != null) transform(prop.get(obj)) else prop.get(obj)
     )
 }
 
