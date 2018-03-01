@@ -1,7 +1,5 @@
 package io.rover.rover.plugins.userexperience.notificationcentre
 
-import android.content.Intent
-import android.os.Parcelable
 import io.rover.rover.core.streams.Observable
 import io.rover.rover.core.streams.Publisher
 import io.rover.rover.plugins.data.domain.Notification
@@ -9,8 +7,18 @@ import io.rover.rover.plugins.data.domain.PushNotificationAction
 import io.rover.rover.plugins.userexperience.experience.concerns.BindableViewModel
 
 /**
- * Responsible for keeping a local cache of received push notifications, in addition to refreshing
- * them from [DeviceState] in the Data plugin from time to time.
+ * This repository syncs and stores the Push Notifications.
+ *
+ * A per-device list of received push notifications is kept on the Rover Cloud API (although note
+ * this is device-bound, and not bound to any sort of per-user account).  We just use SharedPreferences
+ * to store a JSON-encoded blob of all of the current notifications.  This is sufficient because we
+ * never anticipate storing more than 100.
+ *
+ * The arrangement is rather CQRS-like; the notifications list coming from the cloud API is
+ * read-only, any items in it can only be marked as read or deleted (the only possible mutations)
+ * not through the GraphQL API but instead only by asynchronously emitted events that may be applied
+ * any arbitrary amount of time in the future.  This Repository is responsible for maintaining its
+ * own state for read and deleted.
  */
 interface NotificationsRepositoryInterface {
     /**
@@ -18,8 +26,6 @@ interface NotificationsRepositoryInterface {
      * storage in the Notification Center).
      *
      * A refresh is triggered when subscribed.
-     *
-     * TODO: should this just be a callback version?
      */
     fun updates(): Publisher<Emission.Update>
 
@@ -34,8 +40,18 @@ interface NotificationsRepositoryInterface {
      */
     fun refresh()
 
+    /**
+     * Request that the notification be as marked as read.  This method will return immediately.
+     * The consumer will see the changes by a new [Emission.Update] being updated on the [updates]
+     * publisher.
+     */
     fun markRead(notification: Notification)
 
+    /**
+     * Request that the notification be marked as deleted.  This method will return immediately.
+     * The consumer will see the changes by a new [Emission.Update] being updated on the [updates]
+     * publisher.
+     */
     fun delete(notification: Notification)
 
     sealed class Emission {
@@ -48,104 +64,13 @@ interface NotificationsRepositoryInterface {
     }
 }
 
-//interface NotificationCenterViewModelInterface: BindableViewModel {
-//    // TODO only event here is a notification list update, at least for now!
-//
-//    // what about an error event? snackbar time?
-//
-//    // customization of error behaviour?
-//
-//    // generation of "notification row" view models?
-//
-//    // recycler behaviour? in this case we'll just be using the standard linear recycler manager
-//
-//    // a little bit different from ScreenViewModel; the list will appear asynchronously.
-//    fun events(): Observable<Event>
-//
-//    sealed class Event {
-//        /**
-//         *
-//         */
-//        class ListReady(
-//            // val listViewModel: NotificationCenterListViewModelInterface
-//
-//        ): Event()
-//
-//        class DisplayProblemMessage(
-//            // TODO this will need to be configurable by the customer.
-//            reason: String
-//        ): Event()
-//    }
-//}
 
 interface NotificationCenterListViewModelInterface: BindableViewModel {
-    // so we gotta support basically arbitrary views.  Probably bend MVVM best-practice and just
-    // pass the Notification model object through.
-
-
-//    /**
-//     * The notifications the view should show.  When the list is empty, the view may display an
-//     * empty list.
-//     *
-//     * Note: unusually for an MVVM UI pattern, this is exposing the [Notification] domain model
-//     * object.
-//     *
-//     * This is to better suit View implementations that may display any arbitrary detail of the
-//     * Notification.
-//     */
-//    val listOfNotifications: List<Notification>
-
-    // deletions
-    // marking as read
-    // opens
-
-    // issue events, and then the NotificationCenterViewModelInterface issues events to the store?
-    // if this is the case, which makes sense, then there's one problem:
-    // NotificationCenterListViewModelInterface loses its utility as a view model class that the
-    // developer can use directly in order to opt out of the empty view/refresh. perhaps that wasn't
-    // useful to begin with.
-
-    // also, if all that is the case, then its not even worth it necessarily to have two view
-    // models?  however, a single view model now would have the following concerns:
-
-    // - fetching through NotificationStore
-    // - async indication
-    // - empty display
-    // - switching to list view
-    // - issuing delete/read messages in response to listview behaviours.
-
-    // I think a separate list view model is appropriate (and what I've done elsewhere in the SDK),
-    // just to manage complexity, but not to expand customization opportunities for the customer.
-
-    // However, that does mean that I will need to emit deletion/mark-as-read events from here.
-    // not the end of the world though.
-
-    // ... although gone thought does occur to me: the approach of having updates being only for the
-    // whole list. technically, recyclerview allows for updating the list granularly. so, replacing
-    // and rebinding the list isn't strictly necessary.  I *could* have the containing view model
-    // call the list-view with any changes? that allows to keep the separation, but jeeze, now
-    // there's even more effing complication.
-
-    // fuck it I'm going monolithic.
-
-    // - swipe to left is delete
-
-    // solutions all involve ItemTouchHelper (from recyclerview support lib)
-
-    // which method am I going to use for rendering the red swipe-to-delete panel?
-    // either just draw red and icon behind in swipe handler:
-    //   - https://medium.com/@kitek/recyclerview-swipe-to-delete-easier-than-you-thought-cff67ff5e5f6
-    //   - http://nemanjakovacevic.net/blog/english/2016/01/12/recyclerview-swipe-to-delete-no-3rd-party-lib-necessary/
-    // OR another layout underneath each row item:
-    //   -
-
     /**
      * Subscribe to this event stream to be informed of when a user performs an action that needs
      * to be handled.
      */
     fun events(): Observable<Event>
-
-    // TODO: don't forget to merge Update/Event into same type graph under "Emission"
 
     sealed class Event {
         /**
@@ -167,7 +92,8 @@ interface NotificationCenterListViewModelInterface: BindableViewModel {
         data class Navigate(val action: PushNotificationAction): Event()
 
         /**
-         * Th
+         * The backing data store is in the process of starting or stopping a refresh operation. The
+         * consumer may use this event to indicate that a refresh is running.
          */
         data class Refreshing(val refreshing: Boolean): Event()
 

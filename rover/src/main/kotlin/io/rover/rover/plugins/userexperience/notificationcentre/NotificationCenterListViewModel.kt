@@ -14,6 +14,7 @@ import io.rover.rover.plugins.data.domain.Notification
 import io.rover.rover.plugins.events.EventsPluginInterface
 import io.rover.rover.plugins.events.domain.Event
 import io.rover.rover.plugins.push.NotificationActionRoutingBehaviourInterface
+import java.util.Date
 
 class NotificationCenterListViewModel(
     private val notificationsRepository: NotificationsRepositoryInterface,
@@ -66,7 +67,12 @@ class NotificationCenterListViewModel(
                 }
             }.filterNulls(),
             notificationsRepository.updates().map { update ->
-                NotificationCenterListViewModelInterface.Event.ListUpdated(update.notifications)
+                NotificationCenterListViewModelInterface.Event.ListUpdated(
+                    update
+                        .notifications
+                        .filter { !it.isDeleted }
+                        .filter { it.expiresAt?.after(Date()) ?: true }
+                )
             },
             notificationsRepository.events().map { repositoryEvent ->
                 when(repositoryEvent) {

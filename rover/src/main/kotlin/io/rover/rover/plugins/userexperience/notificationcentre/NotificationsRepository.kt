@@ -32,9 +32,6 @@ import org.json.JSONArray
 import org.json.JSONException
 import java.util.concurrent.Executor
 
-/**
- * This repository syncs and stores the Push Notifications
- */
 class NotificationsRepository(
     private val dataPlugin: DataPluginInterface,
     private val dateFormatting: DateFormattingInterface,
@@ -149,7 +146,7 @@ class NotificationsRepository(
                                     .doOnNext { notifications ->
                                         // side-effect: update local storage!
                                         replaceLocalStorage(notifications)
-                                    }.map { NotificationsRepositoryInterface.Emission.Update(it.filter { !it.isDeleted }) } // TODO: move is deleted (and upcoming isexpired) filter over to view model instead to allow for more customization
+                                    }.map { NotificationsRepositoryInterface.Emission.Update(it) }
                             }
                         },
                     Observable.just(NotificationsRepositoryInterface.Emission.Event.Refreshing(false))
