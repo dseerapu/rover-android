@@ -1,9 +1,11 @@
 package io.rover.rover.plugins.userexperience.notificationcentre
 
+import android.content.Intent
 import android.os.Parcelable
 import io.rover.rover.core.streams.Observable
 import io.rover.rover.core.streams.Publisher
 import io.rover.rover.plugins.data.domain.Notification
+import io.rover.rover.plugins.data.domain.PushNotificationAction
 import io.rover.rover.plugins.userexperience.experience.concerns.BindableViewModel
 
 /**
@@ -162,11 +164,7 @@ interface NotificationCenterListViewModelInterface: BindableViewModel {
         */
         data class ListUpdated(val notifications: List<Notification>): Event()
 
-        sealed class Navigate {
-            class OpenUrl: Navigate()
-
-            class OpenExperience: Navigate()
-        }
+        data class Navigate(val action: PushNotificationAction): Event()
 
         /**
          * Th

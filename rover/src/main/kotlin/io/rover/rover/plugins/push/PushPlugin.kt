@@ -87,7 +87,6 @@ open class PushPlugin(
         handleDataMessage(message)
     }
 
-
     /**
      * Generates an intent for displaying main screen of your activity.  Used to insert a back stack
      * entry in new Android Tasks created by the user tapping on a push notification from Rover with

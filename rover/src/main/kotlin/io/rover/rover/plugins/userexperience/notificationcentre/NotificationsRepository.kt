@@ -24,6 +24,8 @@ import io.rover.rover.plugins.data.domain.Notification
 import io.rover.rover.plugins.data.graphql.getObjectIterable
 import io.rover.rover.plugins.data.graphql.operations.data.decodeJson
 import io.rover.rover.plugins.data.graphql.operations.data.encodeJson
+import io.rover.rover.plugins.events.EventsPluginInterface
+import io.rover.rover.plugins.events.domain.Event
 import org.json.JSONArray
 import org.json.JSONException
 import java.util.concurrent.Executor
@@ -32,6 +34,7 @@ class NotificationsRepository(
     private val dataPlugin: DataPluginInterface,
     private val dateFormatting: DateFormattingInterface,
     private val ioExecutor: Executor,
+    private val eventsPlugin: EventsPluginInterface,
     localStorage: LocalStorage
 ): NotificationsRepositoryInterface {
 
@@ -56,37 +59,11 @@ class NotificationsRepository(
     }
 
     override fun markRead(notification: Notification) {
-        // TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-
-        // set read locally
-
-        val onDisk = currentNotificationsOnDisk() ?: return
-
         actions.onNext(Action.MarkRead(notification))
-
-        replaceLocalStorage(
-            onDisk.map {
-                if(it.id == notification.id) {
-                    notification.copy(isRead = true)
-                } else notification
-            }
-        )
-
-        // we will not implement the special event here, because our merge algorithm below means
-        // server awareness of Notifications being read is optional, and such server marking of read
-        // is done as a side-effect of the Notification Opened event emitted elsewhere.
     }
 
     override fun delete(notification: Notification) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-
-        // set delete locally
-
-        // emit the special event
-
         actions.onNext(Action.MarkDeleted(notification))
-
-
     }
 
     private val keyValueStorage = localStorage.getKeyValueStorageFor(STORAGE_CONTEXT_IDENTIFIER)
@@ -158,7 +135,7 @@ class NotificationsRepository(
                                 ).doOnNext { notifications ->
                                     // side-effect: update local storage!
                                     replaceLocalStorage(notifications)
-                                }.map { NotificationsRepositoryInterface.Emission.Update(it.filter { !it.isDeleted }) }
+                                }.map { NotificationsRepositoryInterface.Emission.Update(it.filter { !it.isDeleted }) } // TODO: move is deleted (and upcoming isexpired) filter over to view model instead to allow for more customization
                             }
                         },
                     Observable.just(NotificationsRepositoryInterface.Emission.Event.Refreshing(false))
@@ -186,15 +163,31 @@ class NotificationsRepository(
      */
     private fun doMarkAsDeleted(notification: Notification): Publisher<NotificationsRepositoryInterface.Emission> {
         return Observable.defer {
-            val onDisk = currentNotificationsOnDisk() ?: return@defer(Observable.empty<NotificationsRepositoryInterface.Emission>())
+            val onDisk = currentNotificationsOnDisk()
+
+            if(onDisk == null) {
+                log.w("No notifications currently stored on disk.  Cannot mark notification as deleted.")
+                return@defer Observable.empty<NotificationsRepositoryInterface.Emission>()
+            }
+
+            val alreadyDeleted = onDisk.find { it.id == notification.id }?.isDeleted ?: false
 
             replaceLocalStorage(
-                onDisk.map {
-                    if(it.id == notification.id) {
-                        notification.copy(isDeleted = true)
-                    } else notification
+                onDisk.map { onDiskNotification ->
+                    if(onDiskNotification.id == notification.id) {
+                        onDiskNotification.copy(isDeleted = true)
+                    } else onDiskNotification
                 }
             )
+
+            if(!alreadyDeleted) {
+                eventsPlugin.trackEvent(
+                    Event(
+                        "Notification Marked Deleted",
+                        hashMapOf()
+                    )
+                )
+            }
 
             Observable.empty<NotificationsRepositoryInterface.Emission>()
         }.subscribeOn(ioExecutor)
@@ -206,15 +199,36 @@ class NotificationsRepository(
      */
     private fun doMarkAsRead(notification: Notification): Publisher<NotificationsRepositoryInterface.Emission> {
         return Observable.defer {
-            val onDisk = currentNotificationsOnDisk() ?: return@defer(Observable.empty<NotificationsRepositoryInterface.Emission>())
+            val onDisk = currentNotificationsOnDisk()
+
+            if(onDisk == null) {
+                log.w("No notifications currently stored on disk.  Cannot mark notification as read.")
+                return@defer Observable.empty<NotificationsRepositoryInterface.Emission>()
+            }
+
+            val existingNotification = onDisk.find { it.id == notification.id }
+
+            if(existingNotification == null) {
+                log.w("Attempt to mark a notification (id ${notification.id}) as read when it does not exist in the local repository (local repo contains ${onDisk.size} with ids ${onDisk.map { it.id }.joinToString(", ")}).")
+                return@defer Observable.empty<NotificationsRepositoryInterface.Emission>()
+            }
 
             replaceLocalStorage(
-                onDisk.map {
-                    if(it.id == notification.id) {
-                        notification.copy(isRead = true)
-                    } else notification
+                onDisk.map { onDiskNotification ->
+                    if(onDiskNotification.id == notification.id) {
+                        onDiskNotification.copy(isRead = true)
+                    } else onDiskNotification
                 }
             )
+
+            if(!existingNotification.isRead) {
+                eventsPlugin.trackEvent(
+                    Event(
+                        "Notification Marked Read",
+                        hashMapOf()
+                    )
+                )
+            }
 
             Observable.empty<NotificationsRepositoryInterface.Emission>()
         }.subscribeOn(ioExecutor)

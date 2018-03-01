@@ -18,6 +18,8 @@ import io.rover.rover.plugins.userexperience.experience.toolbar.ToolbarConfigura
 import io.rover.rover.plugins.userexperience.notificationcentre.NotificationCenterListViewModel
 import io.rover.rover.plugins.userexperience.notificationcentre.NotificationCenterListViewModelInterface
 import io.rover.rover.plugins.userexperience.notificationcentre.NotificationsRepository
+import java.util.concurrent.Executor
+import java.util.concurrent.Executors
 
 /**
  * Constructs the standard versions of the view models for all the given Experience blocks.
@@ -28,7 +30,9 @@ import io.rover.rover.plugins.userexperience.notificationcentre.NotificationsRep
 open class StockViewModelFactory(
     protected val blockViewModelFactory: BlockViewModelFactoryInterface,
     protected val dataPlugin: DataPluginInterface,
-    protected val eventsPlugin: EventsPluginInterface
+    protected val eventsPlugin: EventsPluginInterface,
+    protected val ioExecutor: Executor,
+    protected val localStorage: LocalStorage
 ) : ViewModelFactoryInterface {
 
     /**
@@ -69,7 +73,12 @@ open class StockViewModelFactory(
     override fun viewModelForNotificationCenter(context: Context): NotificationCenterListViewModelInterface {
         return NotificationCenterListViewModel(
             // TODO: redo this for DI reboot
-            NotificationsRepository(dataPlugin, DateFormatting(), SharedPreferencesLocalStorage(context))
+            NotificationsRepository(dataPlugin, DateFormatting(),
+                ioExecutor,
+                eventsPlugin,
+                localStorage
+            ),
+            eventsPlugin
         )
     }
 }

@@ -16,6 +16,7 @@ class NotificationActionRoutingBehaviour(
     override fun notificationActionToIntent(action: PushNotificationAction): Intent {
         return when(action) {
             is PushNotificationAction.PresentExperience ->
+                // TODO: shouldn't this be making use of TopLevelNavigation?
                 StandaloneExperienceHostActivity.makeIntent(applicationContext, action.experienceId)
             is PushNotificationAction.PresentWebsite ->
                 // Note: PresentWebsite URIs come from a trusted source, that is, the app's owner
