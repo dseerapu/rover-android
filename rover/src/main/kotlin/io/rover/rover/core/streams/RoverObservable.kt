@@ -375,6 +375,8 @@ internal fun <T, R> Publisher<T>.flatMap(transform: (T) -> Publisher<R>): Publis
  * Subscribe to the [Publisher] once, and multicast yielded signals to multiple subscribers.
  *
  * Note that [share] will subscribe to the source once the first consumer subscribes to it.
+ *
+ * NB. This operator is not yet thread safe.
  */
 internal fun <T> Publisher<T>.share(): Publisher<T> {
     val multicastTo: MutableSet<Subscriber<T>> = mutableSetOf()
@@ -429,6 +431,8 @@ internal fun <T> Publisher<T>.share(): Publisher<T> {
  * Similar to [shareAndReplay], but in addition buffering and re-emitting the [count] most recent
  * events to any new subscriber, it will also immediately subscribe to the source and begin
  * buffering.  This is suitable for use with hot observables.
+ *
+ * NB. This operator is not yet thread safe.
  */
 internal fun <T> Publisher<T>.shareHotAndReplay(count: Int): Publisher<T> {
     val buffer = ArrayDeque<T>(count)
@@ -1028,17 +1032,11 @@ internal fun <T> (((r: T) -> Unit) -> NetworkTask).asPublisher(): Publisher<T> {
     return object : Publisher<T> {
         override fun subscribe(subscriber: Subscriber<T>) {
             val networkTask = this@asPublisher.invoke { result: T ->
-                if (Looper.myLooper() != Looper.getMainLooper()) {
-                    throw RuntimeException("NetworkTask emitter did not dispatch result handler to main thread correctly.  Running on thread ${Thread.currentThread()}")
-                }
                 subscriber.onNext(result)
                 subscriber.onComplete()
             }
             val subscription = object : Subscription {
                 override fun cancel() {
-                    if (Looper.myLooper() != Looper.getMainLooper()) {
-                        throw RuntimeException("NetworkTask emitter did not dispatch cancel handler to main thread correctly.  Running on thread ${Thread.currentThread()}")
-                    }
                     networkTask.cancel()
                 }
             }
@@ -1062,6 +1060,22 @@ internal fun <T> Publisher<T>.subscribeOn(executor: Executor): Publisher<T> {
         }
     }
 }
+
+/**
+ * This will subscribe to Publisher `this` when it is subscribed to itself.  It will execute
+ * subscription on the given executor.
+ */
+internal fun <T> Publisher<T>.subscribeOn(scheduler: Scheduler): Publisher<T> {
+    return object : Publisher<T> {
+        override fun subscribe(subscriber: Subscriber<T>) {
+            scheduler.execute {
+                // TODO: should we run unsubsriptions on the executor as well?
+                this@subscribeOn.subscribe(subscriber)
+            }
+        }
+    }
+}
+
 
 /**
  * This will subscribe to Publisher `this` when it is subscribed to itself.  It will deliver all
@@ -1102,32 +1116,48 @@ internal fun <T> Publisher<T>.observeOn(executor: Executor): Publisher<T> {
     }
 }
 
-internal fun <T> Publisher<T>.observeOnAndroidMainThread(): Publisher<T> {
-    val handler = Handler(Looper.getMainLooper())
+interface Scheduler {
+    fun execute(runnable: () -> Unit)
 
+    companion object
+}
+
+/**
+ * Generate a [Scheduler] for the Android main thread/looper.
+ */
+internal fun Scheduler.Companion.forAndroidMainThread(): Scheduler {
+    val handler = Handler(Looper.getMainLooper())
+    return object : Scheduler {
+        override fun execute(runnable: () -> Unit) {
+            handler.post(runnable)
+        }
+    }
+}
+
+internal fun <T> Publisher<T>.observeOn(scheduler: Scheduler): Publisher<T> {
     return object : Publisher<T> {
         override fun subscribe(subscriber: Subscriber<T>) {
-            this@observeOnAndroidMainThread.subscribe(object: Subscriber<T> {
+            this@observeOn.subscribe(object: Subscriber<T> {
                 override fun onComplete() {
-                    handler.post {
+                    scheduler.execute {
                         subscriber.onComplete()
                     }
                 }
 
                 override fun onError(error: Throwable) {
-                    handler.post {
+                    scheduler.execute {
                         subscriber.onError(error)
                     }
                 }
 
                 override fun onNext(item: T) {
-                    handler.post {
+                    scheduler.execute {
                         subscriber.onNext(item)
                     }
                 }
 
                 override fun onSubscribe(subscription: Subscription) {
-                    handler.post {
+                    scheduler.execute {
                         subscriber.onSubscribe(subscription)
                     }
                 }

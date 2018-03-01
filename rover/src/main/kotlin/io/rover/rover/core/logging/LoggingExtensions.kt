@@ -1,11 +1,12 @@
 package io.rover.rover.core.logging
 
 import android.util.Log
+import io.rover.rover.Rover
 
 /**
  * A very simple facade wrapped around the Android logger using Kotlin extension methods.
  */
-interface SimpleLogger {
+interface LogReceiver {
     fun e(message: String)
     fun w(message: String)
     fun v(message: String)
@@ -13,30 +14,84 @@ interface SimpleLogger {
     fun d(message: String)
 }
 
-internal val Any.log: SimpleLogger
+interface LogEmitter {
+    fun e(logTag: String, message: String)
+    fun w(logTag: String, message: String)
+    fun v(logTag: String, message: String)
+    fun i(logTag: String, message: String)
+    fun d(logTag: String, message: String)
+}
+
+internal val Any.log: LogReceiver
     get() {
+        val receiver = Rover.sharedInstance.logEmitter
+
         val logTag = "Rover::${this.javaClass.simpleName}"
 
-        return object : SimpleLogger {
+        return object : LogReceiver {
 
             override fun e(message: String) {
-                Log.e(logTag, message)
+                receiver.e(logTag, message)
             }
 
             override fun w(message: String) {
-                Log.w(logTag, message)
+                receiver.w(logTag, message)
             }
 
             override fun v(message: String) {
-                Log.v(logTag, message)
+                receiver.v(logTag, message)
             }
 
             override fun i(message: String) {
-                Log.i(logTag, message)
+                receiver.i(logTag, message)
             }
 
             override fun d(message: String) {
-                Log.d(logTag, message)
+                receiver.d(logTag, message)
             }
         }
     }
+
+class AndroidLogger : LogEmitter {
+    override fun e(logTag: String, message: String) {
+        Log.e(logTag, message)
+    }
+
+    override fun w(logTag: String, message: String) {
+        Log.w(logTag, message)
+    }
+
+    override fun v(logTag: String, message: String) {
+        Log.v(logTag, message)
+    }
+
+    override fun i(logTag: String, message: String) {
+        Log.i(logTag, message)
+    }
+
+    override fun d(logTag: String, message: String) {
+        Log.d(logTag, message)
+    }
+}
+
+class JvmLogger : LogEmitter {
+    override fun e(logTag: String, message: String) {
+        System.out.println("E/$logTag $message")
+    }
+
+    override fun w(logTag: String, message: String) {
+        System.out.println("W/$logTag $message")
+    }
+
+    override fun v(logTag: String, message: String) {
+        System.out.println("V/$logTag $message")
+    }
+
+    override fun i(logTag: String, message: String) {
+        System.out.println("I/$logTag $message")
+    }
+
+    override fun d(logTag: String, message: String) {
+        System.out.println("D/$logTag $message")
+    }
+}

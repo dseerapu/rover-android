@@ -61,7 +61,7 @@ class NotificationCenterListViewModel(
                     }
 
                     is Action.DeleteNotification -> {
-                        notificationsRepository.markRead(action.notification)
+                        notificationsRepository.delete(action.notification)
                         null
                     }
                 }

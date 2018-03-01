@@ -1,10 +1,12 @@
 package io.rover.rover
 
 import android.content.Context
+import android.util.Log
 import io.rover.rover.core.container.Assembler
 import io.rover.rover.core.container.ContainerResolver
 import io.rover.rover.core.container.PluginContainer
-import io.rover.rover.core.logging.log
+import io.rover.rover.core.logging.LogEmitter
+import io.rover.rover.core.logging.LogReceiver
 import io.rover.rover.plugins.data.http.AsyncTaskAndHttpUrlConnectionNetworkClient
 import io.rover.rover.plugins.data.DataPlugin
 import io.rover.rover.plugins.events.EventsPluginInterface
@@ -38,6 +40,9 @@ class Rover(
 
     val pushPlugin: PushPluginInterface
         get() = this.resolve(PushPluginInterface::class.java) ?: throw missingPluginError(("PushPlugin"))
+
+    val logEmitter: LogEmitter
+        get() = this.resolve(LogEmitter::class.java) ?: throw missingPluginError("LogEmitter")
 
     private fun missingPluginError(name: String): Throwable {
         throw RuntimeException("Data Plugin not registered.  Did you include $name() in the assembler list?")

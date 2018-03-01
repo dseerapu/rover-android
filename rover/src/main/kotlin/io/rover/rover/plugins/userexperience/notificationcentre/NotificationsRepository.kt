@@ -5,6 +5,7 @@ import io.rover.rover.core.streams.CallbackReceiver
 import io.rover.rover.core.streams.Observable
 import io.rover.rover.core.streams.PublishSubject
 import io.rover.rover.core.streams.Publisher
+import io.rover.rover.core.streams.Scheduler
 import io.rover.rover.core.streams.asPublisher
 import io.rover.rover.core.streams.doOnNext
 import io.rover.rover.core.streams.doOnSubscribe
@@ -12,8 +13,7 @@ import io.rover.rover.core.streams.filterForSubtype
 import io.rover.rover.core.streams.filterNulls
 import io.rover.rover.core.streams.flatMap
 import io.rover.rover.core.streams.map
-import io.rover.rover.core.streams.observeOnAndroidMainThread
-import io.rover.rover.core.streams.share
+import io.rover.rover.core.streams.observeOn
 import io.rover.rover.core.streams.shareHotAndReplay
 import io.rover.rover.core.streams.subscribeOn
 import io.rover.rover.platform.DateFormattingInterface
@@ -36,6 +36,7 @@ class NotificationsRepository(
     private val dataPlugin: DataPluginInterface,
     private val dateFormatting: DateFormattingInterface,
     private val ioExecutor: Executor,
+    private val mainThreadScheduler: Scheduler,
     private val eventsPlugin: EventsPluginInterface,
     localStorage: LocalStorage
 ): NotificationsRepositoryInterface {
@@ -160,7 +161,7 @@ class NotificationsRepository(
                 doMarkAsRead(action.notification).map {NotificationsRepositoryInterface.Emission.Update(it) }
             }
         }
-    }.observeOnAndroidMainThread().shareHotAndReplay(0) // TODO: using observeOnAndroidMainThread in its current form will be problematic for tests.
+    }.observeOn(mainThreadScheduler).shareHotAndReplay(0) // TODO: using observeOnAndroidMainThread in its current form will be problematic for tests.
 
     /**
      * When subscribed, performs the side-effect of marking the given notification as deleted
@@ -176,12 +177,14 @@ class NotificationsRepository(
 
             val alreadyDeleted = onDisk.find { it.id == notification.id }?.isDeleted ?: false
 
+            val modified = onDisk.map { onDiskNotification ->
+                if(onDiskNotification.id == notification.id) {
+                    onDiskNotification.copy(isDeleted = true)
+                } else onDiskNotification
+            }
+
             replaceLocalStorage(
-                onDisk.map { onDiskNotification ->
-                    if(onDiskNotification.id == notification.id) {
-                        onDiskNotification.copy(isDeleted = true)
-                    } else onDiskNotification
-                }
+                modified
             )
 
             if(!alreadyDeleted) {
@@ -193,7 +196,7 @@ class NotificationsRepository(
                 )
             }
 
-            currentNotificationsOnDisk().filterNulls()
+            Observable.just(modified)
         }.subscribeOn(ioExecutor)
     }
 

@@ -2,6 +2,8 @@ package io.rover.rover.plugins.userexperience.experience
 
 import android.content.Context
 import android.os.Parcelable
+import io.rover.rover.core.streams.Scheduler
+import io.rover.rover.core.streams.forAndroidMainThread
 import io.rover.rover.platform.DateFormatting
 import io.rover.rover.platform.LocalStorage
 import io.rover.rover.platform.SharedPreferencesLocalStorage
@@ -75,6 +77,7 @@ open class StockViewModelFactory(
             // TODO: redo this for DI reboot
             NotificationsRepository(dataPlugin, DateFormatting(),
                 ioExecutor,
+                Scheduler.forAndroidMainThread(),
                 eventsPlugin,
                 localStorage
             ),
