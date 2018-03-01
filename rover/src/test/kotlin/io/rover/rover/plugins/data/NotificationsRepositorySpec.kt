@@ -79,7 +79,7 @@ class NotificationsRepositorySpec: Spek({
             },
             eventsPlugin,
             object : LocalStorage {
-                override fun getKeyValueStorageFor(namedContext: String): KeyValueStorage {
+                override fun getKeyValuaeStorageFor(namedContext: String): KeyValueStorage {
                     return object : KeyValueStorage {
                         override fun get(key: String): String? {
                             return keyValueStorage[key]

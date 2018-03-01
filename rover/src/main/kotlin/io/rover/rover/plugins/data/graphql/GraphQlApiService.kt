@@ -70,18 +70,19 @@ class GraphQlApiService(
         when (httpResponse) {
             is HttpClientResponse.ConnectionFailure -> NetworkResult.Error(httpResponse.reason, true)
             is HttpClientResponse.ApplicationError -> {
+                log.w("Given GraphQL error reason: ${httpResponse.reportedReason}")
                 NetworkResult.Error(
                     NetworkError.InvalidStatusCode(httpResponse.responseCode, httpResponse.reportedReason),
                     when {
-                    // actually won't see any 200 codes here; already filtered about in the
-                    // HttpClient response mapping.
+                        // actually won't see any 200 codes here; already filtered about in the
+                        // HttpClient response mapping.
                         httpResponse.responseCode < 300 -> false
-                    // 3xx redirects
+                        // 3xx redirects
                         httpResponse.responseCode < 400 -> false
-                    // 4xx request errors (we don't want to retry these; onus is likely on
-                    // request creator).
+                        // 4xx request errors (we don't want to retry these; onus is likely on
+                        // request creator).
                         httpResponse.responseCode < 500 -> false
-                    // 5xx - any transient errors from the backend.
+                        // 5xx - any transient errors from the backend.
                         else -> true
                     }
                 )
@@ -100,6 +101,7 @@ class GraphQlApiService(
                                     httpRequest.decode(body, wireEncoder)
                                 )
                             } catch (e: APIException) {
+                                log.w("API error: $e")
                                 NetworkResult.Error<TEntity>(
                                     NetworkError.InvalidResponseData(e.message ?: "API returned unknown error."),
                                     // retry is not appropriate when we're getting a domain-level

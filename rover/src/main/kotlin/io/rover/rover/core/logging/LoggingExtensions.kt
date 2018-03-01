@@ -80,7 +80,7 @@ class JvmLogger : LogEmitter {
     }
 
     override fun w(logTag: String, message: String) {
-        System.out.println("W/$logTag $message")
+        System.out.println("/$logTag $message")
     }
 
     override fun v(logTag: String, message: String) {

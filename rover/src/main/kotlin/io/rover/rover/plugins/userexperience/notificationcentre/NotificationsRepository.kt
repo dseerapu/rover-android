@@ -81,7 +81,9 @@ class NotificationsRepository(
             .doOnSubscribe { log.v("Refreshing device state to obtain notifications list.") }
             .map { networkResult ->
                 when(networkResult) {
-                    is NetworkResult.Error -> CloudFetchResult.CouldNotFetch(networkResult.throwable.message ?: "Unknown")
+                    is NetworkResult.Error -> {
+                        CloudFetchResult.CouldNotFetch(networkResult.throwable.message ?: "Unknown")
+                    }
                     is NetworkResult.Success -> CloudFetchResult.Succeeded(networkResult.response.notifications)
                 }
             }.subscribeOn(ioExecutor)

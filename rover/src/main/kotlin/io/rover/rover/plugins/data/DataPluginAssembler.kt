@@ -3,6 +3,8 @@ package io.rover.rover.plugins.data
 import android.content.Context
 import io.rover.rover.core.container.Assembler
 import io.rover.rover.core.container.Container
+import io.rover.rover.core.logging.AndroidLogger
+import io.rover.rover.core.logging.LogEmitter
 import io.rover.rover.platform.DateFormatting
 import io.rover.rover.platform.DateFormattingInterface
 import io.rover.rover.platform.DeviceIdentification
@@ -94,6 +96,10 @@ open class DataPluginAssembler(
                     applicationContext
                 )
             )
+        }
+
+        container.register(LogEmitter::class.java) { _ ->
+            AndroidLogger()
         }
     }
 }

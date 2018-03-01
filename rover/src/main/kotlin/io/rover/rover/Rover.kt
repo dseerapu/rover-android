@@ -45,7 +45,7 @@ class Rover(
         get() = this.resolve(LogEmitter::class.java) ?: throw missingPluginError("LogEmitter")
 
     private fun missingPluginError(name: String): Throwable {
-        throw RuntimeException("Data Plugin not registered.  Did you include $name() in the assembler list?")
+        throw RuntimeException("Logger not registered.  Did you include $name() in the assembler list?")
     }
 
     companion object {

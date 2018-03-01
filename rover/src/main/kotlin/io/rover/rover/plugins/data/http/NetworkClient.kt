@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.net.http.HttpResponseCache
 import android.os.AsyncTask
+import android.util.Log
 import io.rover.rover.core.logging.log
 import java.io.BufferedInputStream
 import java.io.DataOutputStream
@@ -158,7 +159,7 @@ class AsyncTaskAndHttpUrlConnectionNetworkClient : NetworkClient {
             val httpCacheDir = File(context.cacheDir, "http")
             val httpCacheSize = (50 * 1024 * 1024).toLong() // 50 MiB
             HttpResponseCache.install(httpCacheDir, httpCacheSize)
-            log.v("Global HttpUrlConnection cache installed.")
+            Log.v("NetworkClient", "Global HttpUrlConnection cache installed.")
         }
 
         @JvmStatic
