@@ -8,14 +8,14 @@ import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.util.AttributeSet
 import android.view.Gravity
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.widget.FrameLayout
+import android.widget.RelativeLayout
 import android.widget.TextView
 import io.rover.rover.R
 import io.rover.rover.core.logging.log
-import io.rover.rover.core.streams.doOnError
 import io.rover.rover.core.streams.subscribe
 import io.rover.rover.platform.whenNotNull
 import io.rover.rover.plugins.data.domain.Notification
@@ -48,11 +48,6 @@ open class NotificationCenterListView : CoordinatorLayout, BindableView<Notifica
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
     constructor(context: Context?, attrs: AttributeSet?, defStyle: Int) : super(context, attrs, defStyle)
 
-    // UI graph:
-
-    // CoordinatorLayout -> SwipeRefreshLayout -> FrameLayout with [Empty View/List View]
-
-
     /**
      * This method will generate a row view.
      *
@@ -60,9 +55,9 @@ open class NotificationCenterListView : CoordinatorLayout, BindableView<Notifica
      * override this method.
      */
     open fun makeNotificationRowView(): View {
-        return TextView(context).apply {
-            layoutParams = RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT, RecyclerView.LayoutParams.WRAP_CONTENT)
-        }
+        // Override this method to inflate (or programmatically create) your own row view.
+        val inflater = LayoutInflater.from(context)
+        return inflater.inflate(R.layout.notification_center_default_item, null)
     }
 
     /**
@@ -70,7 +65,10 @@ open class NotificationCenterListView : CoordinatorLayout, BindableView<Notifica
      * need to override this.
      */
     open fun bindNotificationToRow(view: View, notification: Notification) {
-        (view as TextView).text = notification.title
+        (view as RelativeLayout).apply {
+            view.findViewById<TextView>(R.id.body_text).text = notification.body
+            view.findViewById<TextView>(R.id.title_text).text = notification.title
+        }
     }
 
     override var viewModel: NotificationCenterListViewModelInterface? by ViewModelBinding { viewModel, subscriptionCallback ->
@@ -106,9 +104,6 @@ open class NotificationCenterListView : CoordinatorLayout, BindableView<Notifica
             swipeRefreshLayout.setOnRefreshListener {
                 viewModel.requestRefresh()
             }
-
-            // won't need to subscribe to any events I don't think.  *possibly* may need to be
-            // informed of the deletes from the list.
         }
     }
 
