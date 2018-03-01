@@ -5,6 +5,7 @@ package io.rover.rover.core.streams
 import android.arch.lifecycle.GenericLifecycleObserver
 import android.arch.lifecycle.Lifecycle
 import android.arch.lifecycle.LifecycleOwner
+import android.os.Handler
 import android.os.Looper
 import android.view.View
 import io.rover.rover.core.logging.log
@@ -1093,6 +1094,40 @@ internal fun <T> Publisher<T>.observeOn(executor: Executor): Publisher<T> {
 
                 override fun onSubscribe(subscription: Subscription) {
                     executor.execute {
+                        subscriber.onSubscribe(subscription)
+                    }
+                }
+            })
+        }
+    }
+}
+
+internal fun <T> Publisher<T>.observeOnAndroidMainThread(): Publisher<T> {
+    val handler = Handler(Looper.getMainLooper())
+
+    return object : Publisher<T> {
+        override fun subscribe(subscriber: Subscriber<T>) {
+            this@observeOnAndroidMainThread.subscribe(object: Subscriber<T> {
+                override fun onComplete() {
+                    handler.post {
+                        subscriber.onComplete()
+                    }
+                }
+
+                override fun onError(error: Throwable) {
+                    handler.post {
+                        subscriber.onError(error)
+                    }
+                }
+
+                override fun onNext(item: T) {
+                    handler.post {
+                        subscriber.onNext(item)
+                    }
+                }
+
+                override fun onSubscribe(subscription: Subscription) {
+                    handler.post {
                         subscriber.onSubscribe(subscription)
                     }
                 }

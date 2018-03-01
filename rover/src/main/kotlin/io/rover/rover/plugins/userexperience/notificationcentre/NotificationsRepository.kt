@@ -12,7 +12,9 @@ import io.rover.rover.core.streams.filterForSubtype
 import io.rover.rover.core.streams.filterNulls
 import io.rover.rover.core.streams.flatMap
 import io.rover.rover.core.streams.map
+import io.rover.rover.core.streams.observeOnAndroidMainThread
 import io.rover.rover.core.streams.share
+import io.rover.rover.core.streams.shareHotAndReplay
 import io.rover.rover.core.streams.subscribeOn
 import io.rover.rover.platform.DateFormattingInterface
 import io.rover.rover.platform.LocalStorage
@@ -30,6 +32,9 @@ import org.json.JSONArray
 import org.json.JSONException
 import java.util.concurrent.Executor
 
+/**
+ * This repository syncs and stores the Push Notifications
+ */
 class NotificationsRepository(
     private val dataPlugin: DataPluginInterface,
     private val dateFormatting: DateFormattingInterface,
@@ -38,14 +43,10 @@ class NotificationsRepository(
     localStorage: LocalStorage
 ): NotificationsRepositoryInterface {
 
-    // TODO: subscribe to pushes and file them into local cache
+    // TODO: receive and persist notifications inbound from actual pushes.
 
-    // TODO: add methods for markAsRead and markAsDeleted.
-
-    // TODO: change merge behaviour to handle both of those fields
-
-    override fun updates(): Publisher<NotificationsRepositoryInterface.Emission.Update> = Observable.merge(
-        Observable.just(currentNotificationsOnDisk()).filterNulls().map { existingNotifications ->
+    override fun updates(): Publisher<NotificationsRepositoryInterface.Emission.Update> = Observable.concat(
+        currentNotificationsOnDisk().filterNulls().map { existingNotifications ->
             NotificationsRepositoryInterface.Emission.Update(existingNotifications)
         },
         epic
@@ -54,7 +55,6 @@ class NotificationsRepository(
     override fun events(): Publisher<NotificationsRepositoryInterface.Emission.Event> = epic.filterForSubtype()
 
     override fun refresh() {
-        log.v("Dispatching refresh request")
         actions.onNext(Action.Refresh())
     }
 
@@ -86,39 +86,51 @@ class NotificationsRepository(
                     is NetworkResult.Error -> CloudFetchResult.CouldNotFetch(networkResult.throwable.message ?: "Unknown")
                     is NetworkResult.Success -> CloudFetchResult.Succeeded(networkResult.response.notifications)
                 }
-            }
+            }.subscribeOn(ioExecutor)
     }
 
-    private fun currentNotificationsOnDisk(): List<Notification>? {
-        return try {
-            keyValueStorage[STORE_KEY].whenNotNull { jsonString ->
-                JSONArray(jsonString).getObjectIterable().map { notificationJson ->
-                    Notification.decodeJson(notificationJson, dateFormatting)
+    private fun currentNotificationsOnDisk(): Publisher<List<Notification>?> {
+        return Observable.defer {
+                Observable.just(try {
+                    keyValueStorage[STORE_KEY].whenNotNull { jsonString ->
+                        JSONArray(jsonString).getObjectIterable().map { notificationJson ->
+                            Notification.decodeJson(notificationJson, dateFormatting)
+                        }
+                    }
+                } catch (e: JSONException) {
+                    log.e("Invalid JSON appeared in Notifications cache, so starting fresh: ${e.message}")
+                    null
                 }
-            }
-        } catch (e: JSONException) {
-            log.e("Invalid JSON appeared in Notifications cache, so starting fresh: ${e.message}")
-            null
-        }
+            )
+        }.subscribeOn(ioExecutor)
     }
 
-    private fun mergeWithLocalStorage(notificationsFromDeviceState: List<Notification>): List<Notification> {
-        val notificationsOnDiskById = currentNotificationsOnDisk()?.associateBy { it.id } ?: hashMapOf()
-        // return the new notifications list, but OR with any existing records' isRead/isDeleted
-        // state.
-        return notificationsFromDeviceState.map { newNotification ->
-            notificationsOnDiskById[newNotification.id].whenNotNull {
-                newNotification.copy(
-                    isRead = newNotification.isRead || it.isRead,
-                    isDeleted = newNotification.isDeleted || it.isDeleted
-                )
-            } ?: newNotification
-        }.orderNotifications().take(MAX_NOTIFICATIONS_LIMIT)
+    private fun mergeWithLocalStorage(notificationsFromDeviceState: List<Notification>): Publisher<List<Notification>> {
+        return currentNotificationsOnDisk().map { notifications ->
+            val notificationsOnDiskById = notifications?.associateBy { it.id } ?: hashMapOf()
+            // return the new notifications list, but OR with any existing records' isRead/isDeleted
+            // state.
+
+            notificationsFromDeviceState.map { newNotification ->
+                notificationsOnDiskById[newNotification.id].whenNotNull {
+                    newNotification.copy(
+                        isRead = newNotification.isRead || it.isRead,
+                        isDeleted = newNotification.isDeleted || it.isDeleted
+                    )
+                } ?: newNotification
+            }.orderNotifications().take(MAX_NOTIFICATIONS_LIMIT)
+        }.subscribeOn(ioExecutor)
     }
 
-    private fun replaceLocalStorage(notifications: List<Notification>) {
-        log.v("Updating local storage with ${notifications.size} notifications.")
-        keyValueStorage[STORE_KEY] = JSONArray(notifications.map { it.encodeJson(dateFormatting) }).toString()
+    // a rule: things that touch external stuff by I/O must be publishers.  flat functions are only
+    // allowed if they are pure.
+
+    private fun replaceLocalStorage(notifications: List<Notification>): Publisher<Unit> {
+        return Observable.defer {
+            log.v("Updating local storage with ${notifications.size} notifications.")
+            keyValueStorage[STORE_KEY] = JSONArray(notifications.map { it.encodeJson(dateFormatting) }).toString()
+            Observable.empty<Unit>()
+        }.subscribeOn(ioExecutor)
     }
 
     private val epic: Publisher<NotificationsRepositoryInterface.Emission> = actions.flatMap { action ->
@@ -129,45 +141,40 @@ class NotificationsRepository(
                     latestNotificationsFromCloud()
                         .flatMap { fetchResult ->
                             when(fetchResult) {
-                                is CloudFetchResult.CouldNotFetch -> Observable.just(NotificationsRepositoryInterface.Emission.Event.FetchFailure(fetchResult.reason))
-                                is CloudFetchResult.Succeeded -> Observable.just(
+                                is CloudFetchResult.CouldNotFetch -> Observable.just(
+                                    NotificationsRepositoryInterface.Emission.Event.FetchFailure(fetchResult.reason)
+                                )
+                                is CloudFetchResult.Succeeded ->
                                     mergeWithLocalStorage(fetchResult.notifications)
-                                ).doOnNext { notifications ->
-                                    // side-effect: update local storage!
-                                    replaceLocalStorage(notifications)
-                                }.map { NotificationsRepositoryInterface.Emission.Update(it.filter { !it.isDeleted }) } // TODO: move is deleted (and upcoming isexpired) filter over to view model instead to allow for more customization
+                                    .doOnNext { notifications ->
+                                        // side-effect: update local storage!
+                                        replaceLocalStorage(notifications)
+                                    }.map { NotificationsRepositoryInterface.Emission.Update(it.filter { !it.isDeleted }) } // TODO: move is deleted (and upcoming isexpired) filter over to view model instead to allow for more customization
                             }
                         },
                     Observable.just(NotificationsRepositoryInterface.Emission.Event.Refreshing(false))
                 )
             }
 
-            // TODO: the two expressions below are gross. they rely on side-effects and are syntactically bad. fix.
             is Action.MarkDeleted -> {
-                doMarkAsDeleted(action.notification).map {
-                    currentNotificationsOnDisk().whenNotNull { NotificationsRepositoryInterface.Emission.Update(it) }
-                }.filterNulls()
+                doMarkAsDeleted(action.notification).map { NotificationsRepositoryInterface.Emission.Update(it) }
             }
             is Action.MarkRead -> {
-                doMarkAsRead(action.notification).map {
-                    currentNotificationsOnDisk().whenNotNull { NotificationsRepositoryInterface.Emission.Update(it) }
-                }.filterNulls()
+                doMarkAsRead(action.notification).map {NotificationsRepositoryInterface.Emission.Update(it) }
             }
         }
-    }.share()
+    }.observeOnAndroidMainThread().shareHotAndReplay(0) // TODO: using observeOnAndroidMainThread in its current form will be problematic for tests.
 
     /**
      * When subscribed, performs the side-effect of marking the given notification as deleted
      * locally (on the I/O executor).  If successful, it will yield an emission appropriate
      * to inform consumers of the change.
      */
-    private fun doMarkAsDeleted(notification: Notification): Publisher<NotificationsRepositoryInterface.Emission> {
-        return Observable.defer {
-            val onDisk = currentNotificationsOnDisk()
-
+    private fun doMarkAsDeleted(notification: Notification): Publisher<List<Notification>> {
+        return currentNotificationsOnDisk().flatMap { onDisk ->
             if(onDisk == null) {
                 log.w("No notifications currently stored on disk.  Cannot mark notification as deleted.")
-                return@defer Observable.empty<NotificationsRepositoryInterface.Emission>()
+                return@flatMap Observable.empty<List<Notification>>()
             }
 
             val alreadyDeleted = onDisk.find { it.id == notification.id }?.isDeleted ?: false
@@ -189,7 +196,7 @@ class NotificationsRepository(
                 )
             }
 
-            Observable.empty<NotificationsRepositoryInterface.Emission>()
+            currentNotificationsOnDisk().filterNulls()
         }.subscribeOn(ioExecutor)
     }
 
@@ -197,20 +204,18 @@ class NotificationsRepository(
      * When subscribed, performs the side-effect of marking the given notification as deleted
      * locally (on the I/O executor).
      */
-    private fun doMarkAsRead(notification: Notification): Publisher<NotificationsRepositoryInterface.Emission> {
-        return Observable.defer {
-            val onDisk = currentNotificationsOnDisk()
-
+    private fun doMarkAsRead(notification: Notification): Publisher<List<Notification>> {
+        return currentNotificationsOnDisk().flatMap { onDisk ->
             if(onDisk == null) {
                 log.w("No notifications currently stored on disk.  Cannot mark notification as read.")
-                return@defer Observable.empty<NotificationsRepositoryInterface.Emission>()
+                return@flatMap Observable.empty<List<Notification>>()
             }
 
             val existingNotification = onDisk.find { it.id == notification.id }
 
             if(existingNotification == null) {
-                log.w("Attempt to mark a notification (id ${notification.id}) as read when it does not exist in the local repository (local repo contains ${onDisk.size} with ids ${onDisk.map { it.id }.joinToString(", ")}).")
-                return@defer Observable.empty<NotificationsRepositoryInterface.Emission>()
+                log.w("Attempt to mark a notification (id ${notification.id}) as read when it does not exist in the local repository (local repo contains ${onDisk.size}).")
+                return@flatMap Observable.empty<List<Notification>>()
             }
 
             replaceLocalStorage(
@@ -230,7 +235,7 @@ class NotificationsRepository(
                 )
             }
 
-            Observable.empty<NotificationsRepositoryInterface.Emission>()
+            currentNotificationsOnDisk().filterNulls()
         }.subscribeOn(ioExecutor)
     }
 
