@@ -127,7 +127,7 @@ class NotificationsRepository(
 
     private fun replaceLocalStorage(notifications: List<Notification>): Publisher<Unit> {
         return Observable.defer {
-            log.v("Updating local storage with ${notifications.size} notifications.")
+            log.v("Updating local storage with ${notifications.size} notifications containing: ${notifications}")
             keyValueStorage[STORE_KEY] = JSONArray(notifications.map { it.encodeJson(dateFormatting) }).toString()
             Observable.empty<Unit>()
         }.subscribeOn(ioExecutor)
@@ -155,7 +155,6 @@ class NotificationsRepository(
                     Observable.just(NotificationsRepositoryInterface.Emission.Event.Refreshing(false))
                 )
             }
-
             is Action.MarkDeleted -> {
                 doMarkAsDeleted(action.notification).map { NotificationsRepositoryInterface.Emission.Update(it) }
             }
@@ -185,10 +184,6 @@ class NotificationsRepository(
                 } else onDiskNotification
             }
 
-            replaceLocalStorage(
-                modified
-            )
-
             if(!alreadyDeleted) {
                 eventsPlugin.trackEvent(
                     Event(
@@ -198,7 +193,9 @@ class NotificationsRepository(
                 )
             }
 
-            Observable.just(modified)
+            replaceLocalStorage(
+                modified
+            ).map { modified }
         }.subscribeOn(ioExecutor)
     }
 
@@ -213,22 +210,15 @@ class NotificationsRepository(
                 return@flatMap Observable.empty<List<Notification>>()
             }
 
-            val existingNotification = onDisk.find { it.id == notification.id }
+            val alreadyRead = onDisk.find { it.id == notification.id }?.isDeleted ?: false
 
-            if(existingNotification == null) {
-                log.w("Attempt to mark a notification (id ${notification.id}) as read when it does not exist in the local repository (local repo contains ${onDisk.size}).")
-                return@flatMap Observable.empty<List<Notification>>()
+            val modified = onDisk.map { onDiskNotification ->
+                if(onDiskNotification.id == notification.id) {
+                    onDiskNotification.copy(isRead = true)
+                } else onDiskNotification
             }
 
-            replaceLocalStorage(
-                onDisk.map { onDiskNotification ->
-                    if(onDiskNotification.id == notification.id) {
-                        onDiskNotification.copy(isRead = true)
-                    } else onDiskNotification
-                }
-            )
-
-            if(!existingNotification.isRead) {
+            if(!alreadyRead) {
                 eventsPlugin.trackEvent(
                     Event(
                         "Notification Marked Read",
@@ -237,7 +227,9 @@ class NotificationsRepository(
                 )
             }
 
-            currentNotificationsOnDisk().filterNulls()
+            replaceLocalStorage(
+                modified
+            ).map { modified }
         }.subscribeOn(ioExecutor)
     }
 

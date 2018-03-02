@@ -568,6 +568,45 @@ internal fun <T> Publisher<T>.shareAndReplay(count: Int): Publisher<T> {
     }
 }
 
+internal fun <T: Any> Publisher<T>.first(): Publisher<T> {
+    return object : Publisher<T> {
+        override fun subscribe(subscriber: Subscriber<T>) {
+            var sourceSubscription: Subscription? = null
+
+            this@first.subscribe(
+                object : Subscriber<T> by subscriber {
+                    override fun onComplete() {
+                        subscriber.onComplete()
+                        sourceSubscription = null
+                    }
+
+                    override fun onNext(item: T) {
+                        // on first item unsubscribe and complete.
+                        subscriber.onNext(item)
+                        subscriber.onComplete()
+                        sourceSubscription?.cancel()
+                        sourceSubscription = null
+                    }
+
+                    override fun onSubscribe(subscription: Subscription) {
+                        if(sourceSubscription != null) {
+                            throw RuntimeException("first() already subscribed to.")
+                        }
+                        sourceSubscription = subscription
+                        subscriber.onSubscribe(
+                            object : Subscription {
+                                override fun cancel() {
+                                    subscription.cancel()
+                                }
+                            }
+                        )
+                    }
+                }
+            )
+        }
+    }
+}
+
 /**
  * Immediately subscribes and buffers events.  Ensures they are delivered once to a subscriber.
  * Any subsequent subscriber will not receive them, and only one subscriber is permitted at a time.
@@ -1171,7 +1210,7 @@ internal fun <T> Publisher<T>.observeOn(scheduler: Scheduler): Publisher<T> {
  *
  * All emitted items are buffered into a list that is then returned.
  */
-internal fun <T> Publisher<T>.blockForResult(): List<T> {
+internal fun <T> Publisher<T>.blockForResult(afterSubscribe: () -> Unit = {}): List<T> {
     val latch = CountDownLatch(1)
     var receivedError: Throwable? = null
     val results : MutableList<T> = mutableListOf()
@@ -1191,15 +1230,18 @@ internal fun <T> Publisher<T>.blockForResult(): List<T> {
             results.add(item)
         }
 
-        override fun onSubscribe(subscription: Subscription) { /* no-op */ }
+        override fun onSubscribe(subscription: Subscription) {
+            log.v("On subscribe called!")
+            afterSubscribe()
+        }
     })
 
     if(!latch.await(10, TimeUnit.SECONDS)) {
-        log.w("Reached timeout while blocking for publisher!")
+        throw Exception("Reached timeout while blocking for publisher! Items received: ${results.count()}")
     }
 
     if(receivedError != null) {
-        throw Exception("Error while blocking on Publisher.", receivedError)
+        throw Exception("Error while blocking on Publisher.  Items received: ${results.count()}", receivedError)
     }
 
     return results
