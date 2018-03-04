@@ -26,6 +26,8 @@ class NotificationActionRoutingBehaviour(
             is PushNotificationAction.OpenUrl ->
                 // Like above, but non-web URI schemes are not being filtered.
                 Intent(Intent.ACTION_VIEW, Uri.parse(action.url.toString()))
+            is PushNotificationAction.OpenApp ->
+                topLevelNavigation.openAppIntent()
         }
     }
 }

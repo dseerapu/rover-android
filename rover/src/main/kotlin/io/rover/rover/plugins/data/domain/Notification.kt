@@ -68,5 +68,7 @@ sealed class PushNotificationAction {
         val experienceId: String
     ): PushNotificationAction()
 
+    class OpenApp: PushNotificationAction()
+
     companion object
 }

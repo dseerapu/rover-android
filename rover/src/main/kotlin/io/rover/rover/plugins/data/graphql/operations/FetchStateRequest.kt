@@ -38,16 +38,9 @@ class FetchStateRequest : NetworkRequest<DeviceState> {
                         isDeleted
                         isNotificationCenterEnabled
                         action {
-                            __typename
-                            ... on OpenURLNotificationAction {
-                              url
-                            }
-                            ... on PresentExperienceNotificationAction {
-                              experienceId
-                            }
-                            ... on PresentWebsiteNotificationAction {
-                              url
-                            }
+                            type
+                            experienceId
+                            url
                         }
                     }
                 }

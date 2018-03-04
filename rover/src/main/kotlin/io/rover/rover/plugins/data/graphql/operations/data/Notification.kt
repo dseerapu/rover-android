@@ -29,17 +29,18 @@ internal fun Notification.encodeJson(dateFormatting: DateFormattingInterface): J
 }
 
 internal fun PushNotificationAction.Companion.decodeJson(json: JSONObject): PushNotificationAction {
-    val typeName = json.getString("__typename")
+    val typeName = json.getString("type")
     return when(typeName) {
-        "PresentWebsiteNotificationAction" -> PushNotificationAction.PresentWebsite(
+        "PRESENT_WEBSITE" -> PushNotificationAction.PresentWebsite(
             url = URL(json.getString("url"))
         )
-        "OpenURLNotificationAction" -> PushNotificationAction.OpenUrl(
+        "OPEN_URL" -> PushNotificationAction.OpenUrl(
             url = URI(json.getString("url"))
         )
-        "PresentExperienceNotificationAction" -> PushNotificationAction.PresentExperience(
+        "PRESENT_EXPERIENCE" -> PushNotificationAction.PresentExperience(
             experienceId = json.getString("experienceId")
         )
+        "OPEN_APP" -> PushNotificationAction.OpenApp()
         else -> throw JSONException("Unsupported Rover notification type: $typeName.")
     }
 }
@@ -47,20 +48,21 @@ internal fun PushNotificationAction.Companion.decodeJson(json: JSONObject): Push
 internal fun PushNotificationAction.encodeJson(): JSONObject {
     return JSONObject().apply {
         put(
-            "__typename",
+            "type",
             when(this@encodeJson) {
                 is PushNotificationAction.PresentExperience -> {
                     putProp(this@encodeJson, PushNotificationAction.PresentExperience::experienceId, "experienceId")
-                    "PresentExperienceNotificationAction"
+                    "PRESENT_EXPERIENCE"
                 }
                 is PushNotificationAction.OpenUrl -> {
                     putProp(this@encodeJson, PushNotificationAction.OpenUrl::url, "url")
-                    "OpenURLNotificationAction"
+                    "OPEN_URL"
                 }
                 is PushNotificationAction.PresentWebsite -> {
                     putProp(this@encodeJson, PushNotificationAction.PresentWebsite::url, "url")
-                    "PresentWebsiteNotificationAction"
+                    "PRESENT_WEBSITE"
                 }
+                is PushNotificationAction.OpenApp -> "OPEN_APP"
             }
         )
     }
