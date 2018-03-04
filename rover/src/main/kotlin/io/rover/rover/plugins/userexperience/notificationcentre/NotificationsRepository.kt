@@ -119,18 +119,19 @@ class NotificationsRepository(
                     )
                 } ?: newNotification
             }.orderNotifications().take(MAX_NOTIFICATIONS_LIMIT)
-        }.subscribeOn(ioExecutor)
+        }.subscribeOn(ioExecutor).doOnNext { log.v("Merge result: $it") }
     }
 
     // a rule: things that touch external stuff by I/O must be publishers.  flat functions are only
     // allowed if they are pure.
 
-    private fun replaceLocalStorage(notifications: List<Notification>): Publisher<Unit> {
+    private fun replaceLocalStorage(notifications: List<Notification>): Publisher<List<Notification>> {
+        log.v("REPLACE LOCAL STORAGE EVALUATED")
         return Observable.defer {
             log.v("Updating local storage with ${notifications.size} notifications containing: ${notifications}")
             keyValueStorage[STORE_KEY] = JSONArray(notifications.map { it.encodeJson(dateFormatting) }).toString()
-            Observable.empty<Unit>()
-        }.subscribeOn(ioExecutor)
+            Observable.just(notifications)
+        }.subscribeOn(ioExecutor).doOnSubscribe { log.v("REPLACE LOCAL STORAGE SUBSCRIBED") }
     }
 
     private val epic: Publisher<NotificationsRepositoryInterface.Emission> = actions.flatMap { action ->
@@ -146,10 +147,12 @@ class NotificationsRepository(
                                 )
                                 is CloudFetchResult.Succeeded ->
                                     mergeWithLocalStorage(fetchResult.notifications)
-                                    .doOnNext { notifications ->
+                                    .flatMap { notifications ->
                                         // side-effect: update local storage!
-                                        replaceLocalStorage(notifications)
-                                    }.map { NotificationsRepositoryInterface.Emission.Update(it) }
+                                        replaceLocalStorage(notifications).map {
+                                            NotificationsRepositoryInterface.Emission.Update(it)
+                                        }
+                                    }
                             }
                         },
                     Observable.just(NotificationsRepositoryInterface.Emission.Event.Refreshing(false))
