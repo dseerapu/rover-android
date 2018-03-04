@@ -140,11 +140,6 @@ open class NotificationCenterListView : CoordinatorLayout, BindableView<Notifica
         }
 
         override fun onBindViewHolder(holder: NotificationViewHolder, position: Int) {
-            // TODO, create a viewmodel for the given list item, and bind it to the notification
-            // view holder.
-            // do I bloody well need a viewmodel for this?!  Where would I handle the clicks? Just the ItemHolder.
-            // actually the HOlder is kind of like a viewmodel. it might do here.
-
             val notification = currentNotificationsList?.get(position)
             notification.whenNotNull { holder.notification = it }
         }

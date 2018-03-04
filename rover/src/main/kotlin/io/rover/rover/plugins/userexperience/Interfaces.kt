@@ -43,5 +43,5 @@ interface TopLevelNavigation {
      */
     fun displayNotificationCenterIntent(): Intent
 
-    // TODO ANDREW START HERE
+    fun openAppIntent(): Intent
 }

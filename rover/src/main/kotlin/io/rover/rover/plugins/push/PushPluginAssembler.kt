@@ -39,8 +39,15 @@ class PushPluginAssembler(
                 // TODO: once we expose internals to the DI layer directly inject FirebasePushTokenContextProvider here.
                 resolver.resolveOrFail(EventsPluginInterface::class.java),
                 WireEncoder(DateFormatting()), // TODO: borrowed from data plugin, will be OK after transitioning to Sean's new layout
-                DefaultTopLevelNavigation(applicationContext), // TODO: borrowed from User Experience plugin, will be OK after...
-                NotificationActionRoutingBehaviour(applicationContext), // more likely to be overridden by user.
+                // more likely to be overridden by user.
+                NotificationContentPendingIntentSynthesizer(
+                    applicationContext,
+                    DefaultTopLevelNavigation(applicationContext),  // TODO: borrowed from User Experience plugin, will be OK after...
+                    NotificationActionRoutingBehaviour(
+                        applicationContext,
+                        DefaultTopLevelNavigation(applicationContext)
+                    )
+                ),
                 smallIconResId,
                 smallIconDrawableLevel,
                 defaultChannelId

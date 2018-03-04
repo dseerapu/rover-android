@@ -91,17 +91,18 @@ class NotificationsRepository(
 
     private fun currentNotificationsOnDisk(): Publisher<List<Notification>?> {
         return Observable.defer {
-                Observable.just(try {
-                    keyValueStorage[STORE_KEY].whenNotNull { jsonString ->
-                        JSONArray(jsonString).getObjectIterable().map { notificationJson ->
-                            Notification.decodeJson(notificationJson, dateFormatting)
+                Observable.just(
+                    try {
+                        keyValueStorage[STORE_KEY].whenNotNull { jsonString ->
+                            JSONArray(jsonString).getObjectIterable().map { notificationJson ->
+                                Notification.decodeJson(notificationJson, dateFormatting)
+                            }
                         }
+                    } catch (e: JSONException) {
+                        log.w("Invalid JSON appeared in Notifications cache, so starting fresh: ${e.message}")
+                        null
                     }
-                } catch (e: JSONException) {
-                    log.e("Invalid JSON appeared in Notifications cache, so starting fresh: ${e.message}")
-                    null
-                }
-            )
+                )
         }.subscribeOn(ioExecutor)
     }
 
@@ -110,7 +111,6 @@ class NotificationsRepository(
             val notificationsOnDiskById = notifications?.associateBy { it.id } ?: hashMapOf()
             // return the new notifications list, but OR with any existing records' isRead/isDeleted
             // state.
-
             notificationsFromDeviceState.map { newNotification ->
                 notificationsOnDiskById[newNotification.id].whenNotNull {
                     newNotification.copy(

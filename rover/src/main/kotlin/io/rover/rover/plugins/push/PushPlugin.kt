@@ -32,9 +32,7 @@ open class PushPlugin(
 
     private val wireEncoder: WireEncoderInterface,
 
-    private val topLevelNavigation: TopLevelNavigation,
-
-    private val notificationActionRoutingBehaviour: NotificationActionRoutingBehaviourInterface,
+    private val notificationContentPendingIntentSynthesizer: NotificationContentPendingIntentSynthesizerInterface,
 
     /**
      * A small icon is necessary for Android push notifications.  Pass a resid.
@@ -87,21 +85,6 @@ open class PushPlugin(
         handleDataMessage(message)
     }
 
-    /**
-     * Generates an intent for displaying main screen of your activity.  Used to insert a back stack
-     * entry in new Android Tasks created by the user tapping on a push notification from Rover with
-     * Notification Centre is *not* enabled.
-     *
-     * The default is to use either the parent activity you may have specified in your custom entry
-     * for [StandaloneExperienceHostActivity] in your Manifest, or the default Main activity of your
-     * app.  However if you are building a single-Activity app or using some other sort of custom
-     * routing arrangement (say, Fragments or Conductor), you may want to override this behaviour to
-     * build a custom Intent.
-     */
-    open fun activityMainScreenIntent(): Intent {
-        return NavUtils.getParentActivityIntent(applicationContext, StandaloneExperienceHostActivity::class.java)!!
-    }
-
     private val notificationManager: NotificationManagerCompat = NotificationManagerCompat.from(applicationContext)
 
     private fun handleDataMessage(message: String) {
@@ -148,33 +131,13 @@ open class PushPlugin(
         // https://developer.android.com/guide/components/activities/tasks-and-back-stack.html.
         // yeah, i think this is the case.
 
+        // so, in order to emit events for notification opens, I will need to bounce through an
+        // activity that will emit the even and quickly follow through to the intended content. This
+        // is particularly necessary for content hosted by external apps (ie., browser).
 
-        // TODO: I have to move this dispatch-to-Intent behaviour somewhere where the
-        // NotificationListViewModel can make use of it.  just the targetIntent part, I think.
+        // TODO: write notification to the notificationrepository
 
-        val targetIntent = notificationActionRoutingBehaviour.notificationActionToIntent(pushNotification.action)
-
-        // now to synthesize the backstack.
-        val pendingIntent = TaskStackBuilder.create(applicationContext).apply {
-            if(pushNotification.isNotificationCenterEnabled) {
-                // inject the Notification Centre for the user's app. TODO: allow user to *configure*
-                // what their notification centre is, either with a custom URI template method OR
-                // just with a meta-property in their Manifest. but by default we can bundle an Activity that hosts NotificationCentreView, I think.
-
-                // for now, we'll just put some sort of
-                addNextIntent(topLevelNavigation.displayNotificationCenterIntent())
-            } else {
-                // Instead of displaying the notification centre, display the parent activity the user set
-                addNextIntent(activityMainScreenIntent())
-            }
-
-            // so, targetIntent, since it uses extra data to pass arguments, might be a problem:
-            // PendingIntents are value objects, but they do not fully encapsulate any extras data,
-            // so they may find themselves "merged".  However, perhaps TaskStackBuilder is handling
-            // this problem.
-            addNextIntent(targetIntent)
-        }.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT)
-        builder.setContentIntent(pendingIntent)
+        builder.setContentIntent(notificationContentPendingIntentSynthesizer.synthesizePending(pushNotification))
 
         // TODO: set large icon and possibly a big picture style as needed by Rich Media values. Protocol to be determined.
 
