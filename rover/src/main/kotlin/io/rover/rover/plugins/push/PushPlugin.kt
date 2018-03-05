@@ -2,24 +2,18 @@ package io.rover.rover.plugins.push
 
 import android.app.Notification
 import android.app.NotificationChannel
-import android.app.PendingIntent
 import android.content.Context
-import android.content.Intent
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.support.annotation.DrawableRes
-import android.support.v4.app.NavUtils
 import android.support.v4.app.NotificationCompat
 import android.support.v4.app.NotificationManagerCompat
-import android.support.v4.app.TaskStackBuilder
 import io.rover.rover.core.logging.log
 import io.rover.rover.plugins.events.EventsPluginInterface
 import io.rover.rover.plugins.data.http.WireEncoderInterface
-import io.rover.rover.plugins.userexperience.TopLevelNavigation
-import io.rover.rover.plugins.userexperience.experience.containers.StandaloneExperienceHostActivity
+import io.rover.rover.plugins.userexperience.NotificationOpenInterface
 import org.json.JSONException
 import org.json.JSONObject
 import java.net.MalformedURLException
@@ -32,7 +26,8 @@ open class PushPlugin(
 
     private val wireEncoder: WireEncoderInterface,
 
-    private val notificationContentPendingIntentSynthesizer: NotificationContentPendingIntentSynthesizerInterface,
+    // private val notificationContentPendingIntentSynthesizer: NotificationContentPendingIntentSynthesizerInterface,
+    private val notificationOpen: NotificationOpenInterface,
 
     /**
      * A small icon is necessary for Android push notifications.  Pass a resid.
@@ -136,8 +131,11 @@ open class PushPlugin(
         // is particularly necessary for content hosted by external apps (ie., browser).
 
         // TODO: write notification to the notificationrepository
-
-        builder.setContentIntent(notificationContentPendingIntentSynthesizer.synthesizePending(pushNotification))
+        builder.setContentIntent(
+            notificationOpen.pendingIntentForAndroidNotification(
+                pushNotification
+            )
+        )
 
         // TODO: set large icon and possibly a big picture style as needed by Rich Media values. Protocol to be determined.
 

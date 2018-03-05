@@ -89,7 +89,7 @@ interface NotificationCenterListViewModelInterface: BindableViewModel {
         */
         data class ListUpdated(val notifications: List<Notification>): Event()
 
-        data class Navigate(val action: PushNotificationAction): Event()
+        data class Navigate(val notification: Notification): Event()
 
         /**
          * The backing data store is in the process of starting or stopping a refresh operation. The

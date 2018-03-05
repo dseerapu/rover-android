@@ -1,6 +1,10 @@
 package io.rover.rover.plugins.userexperience
 
+import android.app.PendingIntent
 import android.content.Intent
+import android.support.v4.content.ContextCompat
+import io.rover.rover.plugins.data.domain.Notification
+import io.rover.rover.plugins.push.NotificationActionRoutingBehaviour
 import io.rover.rover.plugins.userexperience.experience.StockViewModelFactory
 import io.rover.rover.plugins.userexperience.experience.ViewModelFactoryInterface
 
@@ -44,4 +48,31 @@ interface TopLevelNavigation {
     fun displayNotificationCenterIntent(): Intent
 
     fun openAppIntent(): Intent
+}
+
+interface NotificationOpenInterface {
+    /**
+     * A pending intent that will be used for the Android notification itself
+     *
+     * Will return a [PendingIntent] suitable for use as an Android notification target that will
+     * launch the [TransientNotificationLaunchActivity] to start up and
+     */
+    fun pendingIntentForAndroidNotification(notification: Notification): PendingIntent
+
+    /**
+     * This is called by the transient notification launch activity to replace itself with a new
+     * stack.
+     *
+     * The returned Intents should be started immediately with [ContextCompat.startActivities]. This
+     * method in fact has a side-effect of dispatching an analytics Event.
+     */
+    fun intentStackForImmediateNotificationAction(notificationJson: String): List<Intent>
+
+    /**
+     * Return an intent for directly opening the notification.
+     *
+     * Note: if you wish to override the intent creation logic, instead considering overriding
+     * [TopLevelNavigation] or [NotificationActionRoutingBehaviour].
+     */
+    fun intentForDirectlyOpeningNotification(notification: Notification): Intent
 }

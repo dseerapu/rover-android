@@ -43,6 +43,8 @@ class NotificationsRepository(
 
     // TODO: receive and persist notifications inbound from actual pushes.
 
+    // TODO: gate access to the localStorage via a single-thread executor pool.
+
     override fun updates(): Publisher<NotificationsRepositoryInterface.Emission.Update> = Observable.concat(
         currentNotificationsOnDisk().filterNulls().map { existingNotifications ->
             NotificationsRepositoryInterface.Emission.Update(existingNotifications)

@@ -1231,7 +1231,6 @@ internal fun <T> Publisher<T>.blockForResult(afterSubscribe: () -> Unit = {}): L
         }
 
         override fun onSubscribe(subscription: Subscription) {
-            log.v("On subscribe called!")
             afterSubscribe()
         }
     })

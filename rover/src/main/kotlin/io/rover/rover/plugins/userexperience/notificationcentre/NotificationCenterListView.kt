@@ -3,7 +3,9 @@ package io.rover.rover.plugins.userexperience.notificationcentre
 import android.content.Context
 import android.support.design.widget.CoordinatorLayout
 import android.support.design.widget.Snackbar
+import android.support.v4.content.ContextCompat
 import android.support.v4.widget.SwipeRefreshLayout
+import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.helper.ItemTouchHelper
@@ -16,10 +18,13 @@ import android.widget.FrameLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
 import io.rover.rover.R
+import io.rover.rover.Rover
 import io.rover.rover.core.logging.log
+import io.rover.rover.core.streams.androidLifecycleDispose
 import io.rover.rover.core.streams.subscribe
 import io.rover.rover.platform.whenNotNull
 import io.rover.rover.plugins.data.domain.Notification
+import io.rover.rover.plugins.userexperience.NotificationOpenInterface
 import io.rover.rover.plugins.userexperience.experience.ViewModelBinding
 import io.rover.rover.plugins.userexperience.experience.concerns.BindableView
 
@@ -28,9 +33,16 @@ import io.rover.rover.plugins.userexperience.experience.concerns.BindableView
  * through, as an "Inbox", "Notification Center", or similar.  You can even embed and configure this
  * view directly into your XML layouts.
  *
- * In order to display the list, use the implementation (either the provided one or your own custom
- * version) of [ViewModelFactoryInterface.viewModelForNotificationCenterList] to create an instance
- * of the needed [NotificationCenterListViewModel] view model, and then bind it with [setViewModel].
+ * In order to display the list, there are several steps.
+ *
+ * 1. Add [NotificationCenterListView] to your layout, either in XML or progammatically.
+ *
+ * 2. Set [notificationCenterHost] with your own implementation of [NotificationCenterHost].  This
+ * is needed for navigation in response to tapping notifications to work correctly.
+ *
+ * 3. Then use the implementation of [ViewModelFactoryInterface.viewModelForNotificationCenterList]
+ * (either the provided one or your own custom version) to create an instance of the needed
+ * [NotificationCenterListViewModel] view model, and then bind it with [setViewModel].
  *
  * You may specify the row item view by either setting xml property TODO or with TODO
  *
@@ -48,6 +60,22 @@ open class NotificationCenterListView : CoordinatorLayout, BindableView<Notifica
     constructor(context: Context?) : super(context)
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
     constructor(context: Context?, attrs: AttributeSet?, defStyle: Int) : super(context, attrs, defStyle)
+
+    /**
+     * Implement this (either directly or with an anonymous class) in your containing view for
+     * [NotificationCenterListView].  You will need to provide this before you bind the view model.
+     */
+    interface NotificationCenterHost {
+        /**
+         * Provide access to the host Activity containing the notification center list view.
+         */
+        val provideActivity: AppCompatActivity
+    }
+
+    /**
+     * You must provide a [NotificationCenterHost] before binding the view model.
+     */
+    var notificationCenterHost: NotificationCenterHost? = null
 
     /**
      * This method will generate a row view.
@@ -79,6 +107,7 @@ open class NotificationCenterListView : CoordinatorLayout, BindableView<Notifica
             setUpUnboundState()
         } else {
             viewModel.events()
+                .androidLifecycleDispose(this)
                 .subscribe({ event ->
                 when(event) {
                     is NotificationCenterListViewModelInterface.Event.ListUpdated -> {
@@ -97,7 +126,11 @@ open class NotificationCenterListView : CoordinatorLayout, BindableView<Notifica
                         Snackbar.make(this, R.string.generic_problem, Snackbar.LENGTH_LONG).show()
                     }
                     is NotificationCenterListViewModelInterface.Event.Navigate -> {
-                        log.w("NAV NOT SUPPORTED YET")
+                        log.v("Navigating to action: ${event.notification.action}")
+                        val host = (notificationCenterHost ?: throw RuntimeException("Please set notificationCenterHost on NotificationCenterListView.  Otherwise, navigation cannot work."))
+                        host.provideActivity.startActivity(
+                            notificationOpen.intentForDirectlyOpeningNotification(event.notification)
+                        )
                     }
                 }
             }, { throw(it) }, { subscription -> subscriptionCallback(subscription) })
@@ -157,6 +190,10 @@ open class NotificationCenterListView : CoordinatorLayout, BindableView<Notifica
         }
     }
 
+    private val notificationOpen: NotificationOpenInterface by lazy {
+        Rover.sharedInstance.notificationOpen
+    }
+
     init {
         setUpUnboundState()
 
@@ -172,7 +209,6 @@ open class NotificationCenterListView : CoordinatorLayout, BindableView<Notifica
         ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
             // no drag and drop desired.
             override fun onMove(recyclerView: RecyclerView?, viewHolder: RecyclerView.ViewHolder?, target: RecyclerView.ViewHolder?): Boolean = false
-
 
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                 log.d("Deleting notification at location")
@@ -220,8 +256,6 @@ open class NotificationCenterListView : CoordinatorLayout, BindableView<Notifica
 
     // specifying the empty screen layout
     // specifying the row layout AND binding logic
-    // specifying the delete action colour
-
-
+    // specifying the delete action colour and drawable
 
 }

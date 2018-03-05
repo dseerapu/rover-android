@@ -9,6 +9,7 @@ import io.rover.rover.plugins.data.domain.Notification
 import io.rover.rover.plugins.data.http.WireEncoderInterface
 import io.rover.rover.plugins.data.graphql.operations.data.asJson
 import io.rover.rover.plugins.data.graphql.operations.data.decodeJson
+import io.rover.rover.plugins.data.graphql.operations.data.encodeJson
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -22,6 +23,10 @@ class WireEncoder(
     override fun encodeContextForSending(context: Context): JSONObject {
         return context
             .asJson()
+    }
+
+    override fun encodeNotification(notification: Notification): JSONObject {
+        return notification.encodeJson(dateFormatting)
     }
 
     fun decodeContext(data: String): Context {

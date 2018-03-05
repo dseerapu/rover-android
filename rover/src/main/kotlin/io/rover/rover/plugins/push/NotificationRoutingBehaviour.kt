@@ -37,7 +37,7 @@ open class NotificationActionRoutingBehaviour(
 }
 
 interface NotificationContentPendingIntentSynthesizerInterface {
-    fun synthesizePending(notification: Notification): PendingIntent
+    fun synthesizeNotificationIntentStack(notification: Notification): List<Intent>
 }
 
 class NotificationContentPendingIntentSynthesizer(
@@ -45,7 +45,7 @@ class NotificationContentPendingIntentSynthesizer(
     private val topLevelNavigation: TopLevelNavigation,
     private val notificationActionRoutingBehaviour: NotificationActionRoutingBehaviourInterface
 ): NotificationContentPendingIntentSynthesizerInterface {
-    override fun synthesizePending(notification: Notification): PendingIntent {
+    override fun synthesizeNotificationIntentStack(notification: Notification): List<Intent> {
         val targetIntent = notificationActionRoutingBehaviour.notificationActionToIntent(notification.action)
 
         // now to synthesize the backstack.
@@ -67,6 +67,12 @@ class NotificationContentPendingIntentSynthesizer(
             // so they may find themselves "merged".  However, perhaps TaskStackBuilder is handling
             // this problem.
             addNextIntent(targetIntent)
-        }.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT)!!
+        }.intents.asList().apply {
+            this.first().addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                or Intent.FLAG_ACTIVITY_TASK_ON_HOME)
+            this.last().addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        // .intents.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT)!!
     }
 }

@@ -100,5 +100,9 @@ class UserExperiencePluginAssembler(
                 )
             )
         }
+
+        container.register(NotificationOpenInterface::class.java) { resolver ->
+            NotificationOpen()
+        }
     }
 }

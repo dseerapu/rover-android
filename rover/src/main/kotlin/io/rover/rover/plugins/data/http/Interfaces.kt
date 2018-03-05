@@ -23,6 +23,8 @@ interface WireEncoderInterface {
 
     fun encodeContextForSending(context: Context): JSONObject
 
+    fun encodeNotification(notification: Notification): JSONObject
+
     fun decodeErrors(errors: JSONArray): List<Exception>
 }
 

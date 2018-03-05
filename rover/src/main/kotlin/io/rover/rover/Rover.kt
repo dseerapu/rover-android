@@ -1,16 +1,15 @@
 package io.rover.rover
 
 import android.content.Context
-import android.util.Log
 import io.rover.rover.core.container.Assembler
 import io.rover.rover.core.container.ContainerResolver
 import io.rover.rover.core.container.PluginContainer
 import io.rover.rover.core.logging.LogEmitter
-import io.rover.rover.core.logging.LogReceiver
 import io.rover.rover.plugins.data.http.AsyncTaskAndHttpUrlConnectionNetworkClient
 import io.rover.rover.plugins.data.DataPlugin
 import io.rover.rover.plugins.events.EventsPluginInterface
 import io.rover.rover.plugins.push.PushPluginInterface
+import io.rover.rover.plugins.userexperience.NotificationOpenInterface
 import io.rover.rover.plugins.userexperience.UserExperiencePluginInterface
 import java.net.HttpURLConnection
 
@@ -43,6 +42,9 @@ class Rover(
 
     val logEmitter: LogEmitter
         get() = this.resolve(LogEmitter::class.java) ?: throw missingPluginError("LogEmitter")
+
+    val notificationOpen: NotificationOpenInterface
+        get() = this.resolve(NotificationOpenInterface::class.java) ?: throw missingPluginError("NotificationOpen")
 
     private fun missingPluginError(name: String): Throwable {
         throw RuntimeException("Logger not registered.  Did you include $name() in the assembler list?")
