@@ -48,8 +48,12 @@ open class NotificationOpen(
         )
     }
 
-    override fun intentForDirectlyOpeningNotification(notification: Notification): Intent {
-        return routingBehaviour.notificationActionToIntent(notification.action)
+    override fun intentForDirectlyOpeningNotification(notification: Notification): Intent? {
+        return when(notification.action) {
+            // it is non-sensical to open the app when the app is already open.            
+            is PushNotificationAction.OpenApp -> null
+            else -> routingBehaviour.notificationActionToIntent(notification.action)
+        }
     }
 
     protected fun issueNotificationOpenedEvent(notification: Notification) {

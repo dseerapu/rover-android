@@ -4,11 +4,15 @@ import android.content.Context
 import android.util.DisplayMetrics
 import io.rover.rover.core.container.Assembler
 import io.rover.rover.core.container.Container
+import io.rover.rover.platform.DateFormatting
 import io.rover.rover.platform.IoMultiplexingExecutor
 import io.rover.rover.platform.LocalStorage
 import io.rover.rover.platform.SharedPreferencesLocalStorage
 import io.rover.rover.plugins.data.DataPluginInterface
+import io.rover.rover.plugins.data.graphql.WireEncoder
 import io.rover.rover.plugins.events.EventsPluginInterface
+import io.rover.rover.plugins.push.NotificationActionRoutingBehaviour
+import io.rover.rover.plugins.push.NotificationContentPendingIntentSynthesizer
 import io.rover.rover.plugins.userexperience.assets.AndroidAssetService
 import io.rover.rover.plugins.userexperience.assets.AssetService
 import io.rover.rover.plugins.userexperience.assets.ImageDownloader
@@ -20,6 +24,7 @@ import io.rover.rover.plugins.userexperience.experience.blocks.BlockViewModelFac
 import io.rover.rover.plugins.userexperience.experience.blocks.BlockViewModelFactoryInterface
 import io.rover.rover.plugins.userexperience.experience.blocks.concerns.text.AndroidRichTextToSpannedTransformer
 import io.rover.rover.plugins.userexperience.experience.blocks.concerns.text.RichTextToSpannedTransformer
+import java.text.DateFormat
 import java.util.concurrent.Executor
 
 open class UserExperiencePluginComponents(
@@ -101,8 +106,12 @@ class UserExperiencePluginAssembler(
             )
         }
 
+        // TODO all of what follows is wrong.
         container.register(NotificationOpenInterface::class.java) { resolver ->
-            NotificationOpen()
+            val topnav = DefaultTopLevelNavigation(applicationContext)
+            val routingBehaviour = NotificationActionRoutingBehaviour(applicationContext, topnav)
+
+            NotificationOpen(applicationContext, WireEncoder(DateFormatting()), resolver.resolveOrFail(EventsPluginInterface::class.java), routingBehaviour, NotificationContentPendingIntentSynthesizer(applicationContext, topnav, routingBehaviour))
         }
     }
 }

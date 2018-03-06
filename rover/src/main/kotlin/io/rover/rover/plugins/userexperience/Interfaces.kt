@@ -73,6 +73,8 @@ interface NotificationOpenInterface {
      *
      * Note: if you wish to override the intent creation logic, instead considering overriding
      * [TopLevelNavigation] or [NotificationActionRoutingBehaviour].
+     *
+     * Returns null if no intent is appropriate.
      */
-    fun intentForDirectlyOpeningNotification(notification: Notification): Intent
+    fun intentForDirectlyOpeningNotification(notification: Notification): Intent?
 }

@@ -8,6 +8,7 @@ import io.rover.rover.platform.DateFormatting
 import io.rover.rover.plugins.data.graphql.WireEncoder
 import io.rover.rover.plugins.events.EventsPluginInterface
 import io.rover.rover.plugins.userexperience.DefaultTopLevelNavigation
+import io.rover.rover.plugins.userexperience.NotificationOpen
 import io.rover.rover.plugins.userexperience.TopLevelNavigation
 
 class PushPluginAssembler(
@@ -32,6 +33,17 @@ class PushPluginAssembler(
 ) : Assembler {
     override fun register(container: Container) {
         container.register(PushPluginInterface::class.java) { resolver ->
+            val routingBehaviour = NotificationActionRoutingBehaviour(
+                applicationContext,
+                DefaultTopLevelNavigation(applicationContext)
+            )
+
+            val intentSynth = NotificationContentPendingIntentSynthesizer(
+                applicationContext,
+                DefaultTopLevelNavigation(applicationContext),  // TODO: borrowed from User Experience plugin, will be OK after...
+                routingBehaviour
+            )
+
             PushPlugin(
                 applicationContext,
                 // we need the Events Plugin because push notifications cannot work until the Events
@@ -40,13 +52,12 @@ class PushPluginAssembler(
                 resolver.resolveOrFail(EventsPluginInterface::class.java),
                 WireEncoder(DateFormatting()), // TODO: borrowed from data plugin, will be OK after transitioning to Sean's new layout
                 // more likely to be overridden by user.
-                NotificationContentPendingIntentSynthesizer(
+                NotificationOpen(
                     applicationContext,
-                    DefaultTopLevelNavigation(applicationContext),  // TODO: borrowed from User Experience plugin, will be OK after...
-                    NotificationActionRoutingBehaviour(
-                        applicationContext,
-                        DefaultTopLevelNavigation(applicationContext)
-                    )
+                    WireEncoder(DateFormatting()),
+                    resolver.resolveOrFail(EventsPluginInterface::class.java),
+                    routingBehaviour,
+                    intentSynth
                 ),
                 smallIconResId,
                 smallIconDrawableLevel,

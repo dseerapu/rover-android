@@ -56,7 +56,7 @@ class NotificationCenterListViewModel(
                         )
 
                         NotificationCenterListViewModelInterface.Event.Navigate(
-                           action.notification.action
+                           action.notification
                         )
                     }
 

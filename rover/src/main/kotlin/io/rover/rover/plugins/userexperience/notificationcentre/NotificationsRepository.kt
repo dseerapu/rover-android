@@ -215,7 +215,7 @@ class NotificationsRepository(
                 return@flatMap Observable.empty<List<Notification>>()
             }
 
-            val alreadyRead = onDisk.find { it.id == notification.id }?.isDeleted ?: false
+            val alreadyRead = onDisk.find { it.id == notification.id }?.isRead ?: false
 
             val modified = onDisk.map { onDiskNotification ->
                 if(onDiskNotification.id == notification.id) {

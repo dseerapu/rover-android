@@ -1,5 +1,6 @@
 package io.rover.rover.plugins.userexperience.notificationcentre
 
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.support.design.widget.CoordinatorLayout
 import android.support.design.widget.Snackbar
@@ -128,9 +129,21 @@ open class NotificationCenterListView : CoordinatorLayout, BindableView<Notifica
                     is NotificationCenterListViewModelInterface.Event.Navigate -> {
                         log.v("Navigating to action: ${event.notification.action}")
                         val host = (notificationCenterHost ?: throw RuntimeException("Please set notificationCenterHost on NotificationCenterListView.  Otherwise, navigation cannot work."))
-                        host.provideActivity.startActivity(
-                            notificationOpen.intentForDirectlyOpeningNotification(event.notification)
-                        )
+
+                        // A view is not normally considered an appropriate place to do this
+                        // (perhaps, for example, the activity should subscribe to an event from the
+                        // view model).  However, doing it here allows for a clearer interface for
+                        // consumers: all they need to do is implement and provide the Host object.
+                        val intent = notificationOpen.intentForDirectlyOpeningNotification(event.notification)
+                        if(intent != null) {
+                            try {
+                                host.provideActivity.startActivity(
+                                    intent
+                                )
+                            } catch (e: ActivityNotFoundException) {
+                                log.w("Target activity not available for launching Intent for notification.  Intent was: $intent")
+                            }
+                        } else log.w("Notification not suitable for launching from notification center.  Ignored.")
                     }
                 }
             }, { throw(it) }, { subscription -> subscriptionCallback(subscription) })
