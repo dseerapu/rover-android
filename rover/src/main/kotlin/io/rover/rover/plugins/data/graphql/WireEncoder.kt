@@ -29,6 +29,12 @@ class WireEncoder(
         return notification.encodeJson(dateFormatting)
     }
 
+    override fun decodeEventsForSending(data: JSONArray): List<EventSnapshot> {
+        return data.getObjectIterable().map {
+            EventSnapshot.decodeJson(it, dateFormatting)
+        }
+    }
+
     fun decodeContext(data: String): Context {
         val json = JSONObject(data)
         return Context.Companion.decodeJson(json)

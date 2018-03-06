@@ -19,6 +19,8 @@ interface WireEncoderInterface {
 
     fun decodeNotification(data: JSONObject): Notification
 
+    fun decodeEventsForSending(data: JSONArray): List<EventSnapshot>
+
     fun encodeEventsForSending(events: List<EventSnapshot>): JSONArray
 
     fun encodeContextForSending(context: Context): JSONObject

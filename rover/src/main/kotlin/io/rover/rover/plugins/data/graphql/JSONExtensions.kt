@@ -2,8 +2,14 @@
 
 package io.rover.rover.plugins.data.graphql
 
+import android.os.Build
+import io.rover.rover.platform.DateFormattingInterface
+import io.rover.rover.platform.whenNotNull
 import org.json.JSONArray
+import org.json.JSONException
 import org.json.JSONObject
+import java.text.ParseException
+import java.util.Date
 import kotlin.reflect.KProperty1
 
 /**
@@ -39,6 +45,41 @@ internal fun JSONObject.optIntOrNull(name: String): Int? {
  */
 internal fun JSONObject.safeOptString(name: String): String? {
     return if(isNull(name)) null else optString(name, null)
+}
+
+/**
+ * The stock [JSONObject.optBoolean] method cannot tell you if the value was unset or not present.
+ */
+internal fun JSONObject.safeOptBoolean(name: String): Boolean? {
+    return if(isNull(name) || !this.has(name)) null else optBoolean(name)
+}
+
+internal fun JSONObject.safeOptInt(name: String): Int? {
+    return if(isNull(name) || !this.has(name)) null else optInt(name)
+}
+
+internal fun JSONObject.getDate(name: String, dateFormatting: DateFormattingInterface, localTime : Boolean = false): Date {
+    try {
+        return dateFormatting.iso8601AsDate(getString(name), localTime)
+    } catch (e: ParseException) {
+        if (Build.VERSION.SDK_INT >= 27) {
+            throw JSONException("Unable to parse date.", e)
+        } else {
+            throw JSONException("Unable to parse date, because: ${e.message}")
+        }
+    }
+}
+
+internal fun JSONObject.safeOptDate(name: String, dateFormatting: DateFormattingInterface, localTime : Boolean = false): Date? {
+    try {
+        return if (isNull(name) || !this.has(name)) null else optString(name, null).whenNotNull { dateFormatting.iso8601AsDate(it, localTime) }
+    } catch (e: ParseException) {
+        if (Build.VERSION.SDK_INT >= 27) {
+            throw JSONException("Unable to parse date.", e)
+        } else {
+            throw JSONException("Unable to parse date, because: ${e.message}")
+        }
+    }
 }
 
 @Deprecated("This method uses reflection to obtain the property name, which is not appropriate in case of customer use of Proguard.", ReplaceWith("putProp(obj, prop, name, transform)"))

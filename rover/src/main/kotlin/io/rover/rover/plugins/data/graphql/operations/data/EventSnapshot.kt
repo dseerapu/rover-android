@@ -3,6 +3,7 @@ package io.rover.rover.plugins.data.graphql.operations.data
 import io.rover.rover.platform.DateFormattingInterface
 import io.rover.rover.plugins.data.domain.Context
 import io.rover.rover.plugins.data.domain.EventSnapshot
+import io.rover.rover.plugins.data.graphql.getDate
 import io.rover.rover.plugins.data.graphql.putProp
 import org.json.JSONObject
 import java.util.UUID
@@ -34,7 +35,7 @@ internal fun EventSnapshot.Companion.decodeJson(json: JSONObject, dateFormatting
     return EventSnapshot(
         attributes = json.getJSONObject("attributes").toFlatAttributesHash(),
         name = json.getString("name"),
-        timestamp = dateFormatting.iso8601AsDate(json.getString("timestamp"), true),
+        timestamp = json.getDate("timestamp", dateFormatting, true),
         id = UUID.fromString(json.getString("id")),
         context = Context.decodeJson(json.getJSONObject("context"))
     )

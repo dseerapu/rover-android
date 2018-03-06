@@ -67,32 +67,33 @@ open class PushPlugin(
         // a) the notification does not have a display message component; OR
         // b) the app is running in foreground.
 
-        if(!parameters.containsKey("message")) {
-            log.w("Invalid push notification received: `message` data parameter not present. Possibly was a Display-only push notification. Ignoring.")
+        log.v("Received a push notification. Raw parameters: $parameters")
+
+        if(!parameters.containsKey("rover")) {
+            log.w("Invalid push notification received: `rover` data parameter not present. Possibly was a Display-only push notification, or otherwise not intended for the Rover SDK. Ignoring.")
         }
 
-        val message = parameters["message"] ?: return
-        handleDataMessage(message)
+        val rover = parameters["rover"] ?: return
+        handleRoverNotificationObject(rover)
     }
 
     override fun onMessageReceivedDataAsBundle(parameters: Bundle) {
-        val message = parameters.getString("message") ?: return
-        handleDataMessage(message)
+        val rover = parameters.getString("rover") ?: return
+        handleRoverNotificationObject(rover)
     }
 
     private val notificationManager: NotificationManagerCompat = NotificationManagerCompat.from(applicationContext)
 
-    private fun handleDataMessage(message: String) {
-        val (pushNotification, id) = try {
-            val messageObject = JSONObject(message)
-            val attributes = messageObject.getJSONObject("attributes")
-            val id = messageObject.getInt("id")
-            Pair(wireEncoder.decodeNotification(attributes), id)
+    private fun handleRoverNotificationObject(roverJson: String) {
+        val pushNotification = try {
+            val roverJsonObject = JSONObject(roverJson)
+            val notificationJson = roverJsonObject.getJSONObject("notification")
+            wireEncoder.decodeNotification(notificationJson)
         } catch (e: JSONException) {
-            log.w("Invalid push notification received: `$message`, resulting in '${e.message}'. Ignoring.")
+            log.w("Invalid push notification received: `$roverJson`, resulting in '${e.message}'. Ignoring.")
             return
         } catch (e: MalformedURLException) {
-            log.w("Invalid push notification received: `$message`, resulting in '${e.message}'. Ignoring.")
+            log.w("Invalid push notification received: `$roverJson`, resulting in '${e.message}'. Ignoring.")
             return
         }
 
@@ -139,6 +140,8 @@ open class PushPlugin(
 
         // TODO: set large icon and possibly a big picture style as needed by Rich Media values. Protocol to be determined.
 
-        notificationManager.notify(id, builder.build().apply { this.flags = this.flags or Notification.FLAG_AUTO_CANCEL })
+
+        // lol start here
+        notificationManager.notify(pushNotification.id, 123, builder.build().apply { this.flags = this.flags or Notification.FLAG_AUTO_CANCEL })
     }
 }

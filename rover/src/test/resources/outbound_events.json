@@ -6,6 +6,11 @@
     "attributes": {
       "a key": "a value"
     },
-    "context": { }
+    "context": {
+      "frameworks": {
+        "io.rover.rover": "2.0.0"
+      },
+      "isCellularEnabled": false
+    }
   }
 ]

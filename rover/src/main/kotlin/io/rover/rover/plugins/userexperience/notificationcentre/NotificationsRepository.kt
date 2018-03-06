@@ -128,12 +128,11 @@ class NotificationsRepository(
     // allowed if they are pure.
 
     private fun replaceLocalStorage(notifications: List<Notification>): Publisher<List<Notification>> {
-        log.v("REPLACE LOCAL STORAGE EVALUATED")
         return Observable.defer {
             log.v("Updating local storage with ${notifications.size} notifications containing: ${notifications}")
             keyValueStorage[STORE_KEY] = JSONArray(notifications.map { it.encodeJson(dateFormatting) }).toString()
             Observable.just(notifications)
-        }.subscribeOn(ioExecutor).doOnSubscribe { log.v("REPLACE LOCAL STORAGE SUBSCRIBED") }
+        }.subscribeOn(ioExecutor)
     }
 
     private val epic: Publisher<NotificationsRepositoryInterface.Emission> = actions.flatMap { action ->

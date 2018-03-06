@@ -10,7 +10,9 @@ import io.rover.rover.plugins.events.ContextProvider
 class RoverSdkContextProvider : ContextProvider {
     override fun captureContext(context: Context): Context {
         return context.copy(
-            sdkVersion = BuildConfig.VERSION_NAME
+            frameworks = context.frameworks.plus(hashMapOf(
+                Pair(BuildConfig.APPLICATION_ID, BuildConfig.VERSION_NAME)
+            ))
         )
     }
 }

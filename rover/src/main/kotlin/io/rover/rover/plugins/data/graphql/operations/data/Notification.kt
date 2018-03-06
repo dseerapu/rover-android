@@ -4,7 +4,9 @@ import io.rover.rover.platform.DateFormattingInterface
 import io.rover.rover.platform.whenNotNull
 import io.rover.rover.plugins.data.domain.PushNotificationAction
 import io.rover.rover.plugins.data.domain.Notification
+import io.rover.rover.plugins.data.graphql.getDate
 import io.rover.rover.plugins.data.graphql.putProp
+import io.rover.rover.plugins.data.graphql.safeOptDate
 import io.rover.rover.plugins.data.graphql.safeOptString
 import org.json.JSONException
 import org.json.JSONObject
@@ -76,8 +78,8 @@ internal fun Notification.Companion.decodeJson(json: JSONObject, dateFormatting:
         channelId = json.safeOptString("channelId"),
         isRead = json.getBoolean("isRead"),
         isDeleted = json.getBoolean("isDeleted"),
-        expiresAt = json.safeOptString("expiresAt").whenNotNull { dateFormatting.iso8601AsDate(it) },
-        deliveredAt = dateFormatting.iso8601AsDate(json.getString("deliveredAt")),
+        expiresAt = json.safeOptDate("expiresAt", dateFormatting),
+        deliveredAt = json.getDate("deliveredAt", dateFormatting),
         isNotificationCenterEnabled = json.getBoolean("isNotificationCenterEnabled"),
         action = PushNotificationAction.decodeJson(json.getJSONObject("action"))
     )

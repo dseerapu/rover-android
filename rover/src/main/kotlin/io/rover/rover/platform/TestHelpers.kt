@@ -7,6 +7,7 @@ import io.rover.rover.plugins.data.domain.EventSnapshot
 import io.rover.rover.plugins.data.domain.Experience
 import io.rover.rover.plugins.data.graphql.WireEncoder
 import io.rover.rover.plugins.data.graphql.operations.data.encodeJson
+import org.json.JSONArray
 import org.json.JSONObject
 
 // Android's build system (or perhaps the Kotlin compiler) recently changed to apparently not allow
@@ -18,6 +19,9 @@ import org.json.JSONObject
 
 internal fun WireEncoder.encodeEventsToStringJsonForTests(events: List<EventSnapshot>): String =
     this.encodeEventsForSending(events).toString(4)
+
+internal fun WireEncoder.decodeEventSnapshotsFromJsonStringForTests(json: String): List<EventSnapshot> =
+    this.decodeEventsForSending(JSONArray(json))
 
 internal fun WireEncoder.decodeDeviceStateFromJsonStringForTests(json: String): DeviceState =
     this.decodeDeviceState(JSONObject(json))

@@ -1,6 +1,7 @@
 package io.rover.rover.plugins.data
 
 import com.nhaarman.mockito_kotlin.eq
+import io.rover.rover.core.logging.log
 import io.rover.rover.plugins.data.domain.AttributeValue
 import io.rover.rover.plugins.data.domain.BackgroundContentMode
 import io.rover.rover.plugins.data.domain.BackgroundScale
@@ -21,12 +22,16 @@ import io.rover.rover.junit4ReportingWorkaround
 import io.rover.rover.platform.DateFormatting
 import io.rover.rover.platform.DateFormattingInterface
 import io.rover.rover.platform.decodeDeviceStateFromJsonStringForTests
+import io.rover.rover.platform.decodeEventSnapshotsFromJsonStringForTests
 import io.rover.rover.platform.decodeExperienceFromStringForTests
 import io.rover.rover.platform.encodeEventsToStringJsonForTests
 import io.rover.rover.platform.encodeJsonToStringForTests
 import io.rover.rover.plugins.data.domain.Context
 import io.rover.rover.plugins.data.domain.EventSnapshot
 import io.rover.rover.plugins.data.graphql.WireEncoder
+import io.rover.rover.plugins.data.graphql.getObjectIterable
+import io.rover.rover.plugins.data.graphql.operations.data.asJson
+import io.rover.rover.plugins.data.graphql.operations.data.decodeJson
 import io.rover.rover.plugins.events.domain.Event
 import org.amshove.kluent.When
 import org.amshove.kluent.any
@@ -37,6 +42,7 @@ import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
+import org.json.JSONArray
 import org.json.JSONObject
 import org.skyscreamer.jsonassert.JSONAssert
 import java.net.URI
@@ -63,7 +69,10 @@ class WireEncoderSpec : Spek({
                             Locale.US
                         ).parse("2017-10-04T16:56-04:00"),
                         UUID.fromString("55c5ae35-a8e2-4049-a883-fedc55d22ba9"),
-                        Context.blank()
+                        Context.blank().copy(
+                            isCellularEnabled = false,
+                            frameworks = hashMapOf(Pair("io.rover.rover", "2.0.0"))
+                        )
                     )
             )
 
@@ -76,11 +85,24 @@ class WireEncoderSpec : Spek({
             }
         }
 
+        on("decoding outgoing event snapshots") {
+            val expectedJson = this.javaClass.classLoader.getResourceAsStream("outbound_events.json").bufferedReader(Charsets.UTF_8).readText()
+            val decodedEvents = wireEncoder.decodeEventSnapshotsFromJsonStringForTests(expectedJson)
+
+            val reEncoded = wireEncoder.encodeEventsToStringJsonForTests(decodedEvents)
+            val reDecoded : List<EventSnapshot> = wireEncoder.decodeEventSnapshotsFromJsonStringForTests(reEncoded)
+
+            it("produces valid EventSnapshot objects that can be encoded back into equivalent JSON") {
+                val json = wireEncoder.encodeEventsToStringJsonForTests(reDecoded)
+                JSONAssert.assertEquals(expectedJson, json, true)
+            }
+        }
+
         on("decoding a device") {
             val expectedJson = this.javaClass.classLoader.getResourceAsStream("comprehensive_device.json").bufferedReader(Charsets.UTF_8).readText()
             val decoded = wireEncoder.decodeDeviceStateFromJsonStringForTests(JSONObject(expectedJson).getJSONObject("data").getJSONObject("device").toString(4))
 
-            it("produces valid JSON that can be encoded back into equivalent JSON") {
+            it("produces valid Device objects that can be encoded back into equivalent JSON") {
                 // if we can roundtrip the comprehensive JSON Experience structure to the Rover
                 // SDK model representation and back accurately, then we have a pretty strong
                 // guarantee that the deserialization logic is accurate and complete.

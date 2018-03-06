@@ -2,6 +2,9 @@ package io.rover.rover.plugins.data.graphql.operations.data
 
 import io.rover.rover.plugins.data.domain.Context
 import io.rover.rover.plugins.data.graphql.putProp
+import io.rover.rover.plugins.data.graphql.safeOptBoolean
+import io.rover.rover.plugins.data.graphql.safeOptInt
+import io.rover.rover.plugins.data.graphql.safeOptString
 import org.json.JSONObject
 
 /**
@@ -32,11 +35,12 @@ internal fun Context.asJson(): JSONObject {
             Context::radio,
             Context::screenWidth,
             Context::screenHeight,
-            Context::sdkVersion,
             Context::timeZone
         )
 
         props.forEach { putProp(this@asJson, it) }
+
+        putProp(this@asJson, Context::frameworks, "frameworks") { JSONObject(this@asJson.frameworks) }
     }
 }
 
@@ -45,29 +49,40 @@ internal fun Context.asJson(): JSONObject {
  */
 internal fun Context.Companion.decodeJson(json: JSONObject): Context {
     return Context(
-        appBuild = json.getString("appBuild"),
-        appName = json.getString("appName"),
-        appNamespace = json.getString("appNamespace"),
-        appVersion = json.getString("appVersion"),
-        carrierName = json.getString("carrierName"),
-        deviceManufacturer = json.getString("deviceManufacturer"),
-        deviceModel = json.getString("deviceModel"),
-        isCellularEnabled = json.getBoolean("isCellularEnabled"),
-        isLocationServicesEnabled = json.getBoolean("isLocationServicesEnabled"),
-        isWifiEnabled = json.getBoolean("isWifiEnabled"),
-        locationAuthorization = json.getString("locationAuthorization"),
-        localeLanguage = json.getString("localeLanguage"),
-        localeRegion = json.getString("localeRegion"),
-        localeScript = json.getString("localeScript"),
-        notificationAuthorization = json.getString("notificationAuthorization"),
-        operatingSystemName = json.getString("operatingSystemName"),
-        operatingSystemVersion = json.getString("operatingSystemVersion"),
-        pushEnvironment = json.getString("pushEnvironment"),
-        pushToken = json.getString("pushToken"),
-        radio = json.getString("radio"),
-        screenWidth = json.getInt("screenWidth"),
-        screenHeight = json.getInt("screenHeight"),
-        sdkVersion = json.getString("sdkVersion"),
-        timeZone = json.getString("timeZone")
+        appBuild = json.safeOptString("appBuild"),
+        appName = json.safeOptString("appName"),
+        appNamespace = json.safeOptString("appNamespace"),
+        appVersion = json.safeOptString("appVersion"),
+        carrierName = json.safeOptString("carrierName"),
+        deviceManufacturer = json.safeOptString("deviceManufacturer"),
+        deviceModel = json.safeOptString("deviceModel"),
+        isCellularEnabled = json.safeOptBoolean("isCellularEnabled"),
+        isLocationServicesEnabled = json.safeOptBoolean("isLocationServicesEnabled"),
+        isWifiEnabled = json.safeOptBoolean("isWifiEnabled"),
+        locationAuthorization = json.safeOptString("locationAuthorization"),
+        localeLanguage = json.safeOptString("localeLanguage"),
+        localeRegion = json.safeOptString("localeRegion"),
+        localeScript = json.safeOptString("localeScript"),
+        notificationAuthorization = json.safeOptString("notificationAuthorization"),
+        operatingSystemName = json.safeOptString("operatingSystemName"),
+        operatingSystemVersion = json.safeOptString("operatingSystemVersion"),
+        pushEnvironment = json.safeOptString("pushEnvironment"),
+        pushToken = json.safeOptString("pushToken"),
+        radio = json.safeOptString("radio"),
+        screenWidth = json.safeOptInt("screenWidth"),
+        screenHeight = json.safeOptInt("screenHeight"),
+        frameworks = json.getJSONObject("frameworks").asStringHash(),
+        timeZone = json.safeOptString("timeZone")
     )
+}
+
+
+private fun Map<String, String>.encodeJson(): JSONObject {
+    return JSONObject(this)
+}
+
+private fun JSONObject.asStringHash(): Map<String, String> {
+    return this.keys().asSequence().map { key ->
+        Pair(key, this@asStringHash.getString(key))
+    }.associate { it }
 }
