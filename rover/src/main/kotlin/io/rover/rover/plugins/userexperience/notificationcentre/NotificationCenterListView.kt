@@ -116,6 +116,7 @@ open class NotificationCenterListView : CoordinatorLayout, BindableView<Notifica
                         itemsView.visibility = if(event.notifications.isNotEmpty()) View.VISIBLE else View.GONE
                         emptyLayout.visibility = if(event.notifications.isEmpty()) View.VISIBLE else View.GONE
                         currentNotificationsList = event.notifications
+                        currentStableIdsMap = event.stableIds
                         adapter.notifyDataSetChanged()
                     }
                     is NotificationCenterListViewModelInterface.Event.Refreshing -> {
@@ -174,6 +175,7 @@ open class NotificationCenterListView : CoordinatorLayout, BindableView<Notifica
 
     // State:
     private var currentNotificationsList: List<Notification>? = null
+    private var currentStableIdsMap: Map<String, Int>? = null
 
     private val adapter = object : RecyclerView.Adapter<NotificationViewHolder>() {
         override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): NotificationViewHolder {
@@ -188,6 +190,13 @@ open class NotificationCenterListView : CoordinatorLayout, BindableView<Notifica
             val notification = currentNotificationsList?.get(position)
             notification.whenNotNull { holder.notification = it }
         }
+
+        override fun getItemId(position: Int): Long {
+            val notification = currentNotificationsList?.get(position) ?: return -1
+            return currentStableIdsMap?.get(notification.id)?.toLong() ?: return -1
+        }
+    }.apply {
+        setHasStableIds(true)
     }
 
     private fun setUpUnboundState() {
@@ -230,6 +239,13 @@ open class NotificationCenterListView : CoordinatorLayout, BindableView<Notifica
                 log.d("... it was $notification")
             }
         }).attachToRecyclerView(itemsView)
+
+        // TODO two different approaches for red area:
+
+        // drawing in item touch helper: https://medium.com/@kitek/recyclerview-swipe-to-delete-easier-than-you-thought-cff67ff5e5f6
+        // overlaying layouts: https://www.androidhive.info/2017/09/android-recyclerview-swipe-delete-undo-using-itemtouchhelper/
+
+        // I also need to get animation working for item deletions.
     }
 
     private fun notificationClicked(notification: Notification) {
@@ -241,9 +257,6 @@ open class NotificationCenterListView : CoordinatorLayout, BindableView<Notifica
         private val listView: NotificationCenterListView,
         private val view: View
     ): RecyclerView.ViewHolder(view) {
-
-        // TODO: is it worth trying to factor this out into a NotificationRowViewModel?
-
         var notification: Notification? = null
             set(value) {
                 field = value

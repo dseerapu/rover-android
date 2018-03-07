@@ -1,25 +1,18 @@
 package io.rover.rover.plugins.userexperience.notificationcentre
 
-import io.rover.rover.core.logging.log
-import io.rover.rover.core.streams.Observable
-import io.rover.rover.core.streams.PublishSubject
-import io.rover.rover.core.streams.Publisher
-import io.rover.rover.core.streams.doOnSubscribe
-import io.rover.rover.core.streams.filterNulls
-import io.rover.rover.core.streams.flatMap
-import io.rover.rover.core.streams.map
-import io.rover.rover.core.streams.share
-import io.rover.rover.core.streams.shareHotAndReplay
+import io.rover.rover.core.streams.*
 import io.rover.rover.plugins.data.domain.Notification
 import io.rover.rover.plugins.events.EventsPluginInterface
-import io.rover.rover.plugins.events.domain.Event
-import io.rover.rover.plugins.push.NotificationActionRoutingBehaviourInterface
 import java.util.Date
 
 class NotificationCenterListViewModel(
     private val notificationsRepository: NotificationsRepositoryInterface,
     private val eventsPlugin: EventsPluginInterface
 ): NotificationCenterListViewModelInterface {
+
+
+
+
     override fun events(): Observable<NotificationCenterListViewModelInterface.Event> = epic.doOnSubscribe {
         // Infer from a new subscriber that it's a newly displayed view, and, thus, an
         // automatic refresh should be kicked off.
@@ -37,6 +30,12 @@ class NotificationCenterListViewModel(
     override fun requestRefresh() {
         notificationsRepository.refresh()
     }
+
+    // State: stable IDs mapping.  Ensure that we have a 100% consistent stable ID for the lifetime
+    // of the view model (which will sufficiently match the lifetime of the recyclerview that
+    // requires the stableids).
+    private var highestStableId = 0
+    private val stableIds: MutableMap<String, Int> = mutableMapOf()
 
     private val actions = PublishSubject<Action>()
 
@@ -60,13 +59,19 @@ class NotificationCenterListViewModel(
                 }
             }.filterNulls(),
             notificationsRepository.updates().map { update ->
+                update
+                    .notifications
+                    .filter { !it.isDeleted }
+                    .filter { it.expiresAt?.after(Date()) ?: true }
+            }.doOnNext { notificationsReadyForDisplay ->
+                // side-effect, update the stable ids list map:
+                updateStableIds(notificationsReadyForDisplay)
+            }.map { notificationsReadyForDisplay ->
                 NotificationCenterListViewModelInterface.Event.ListUpdated(
-                    update
-                        .notifications
-                        .filter { !it.isDeleted }
-                        .filter { it.expiresAt?.after(Date()) ?: true }
+                    notificationsReadyForDisplay,
+                    stableIds
                 )
-            },
+            }.doOnNext { updateStableIds(it.notifications) },
             notificationsRepository.events().map { repositoryEvent ->
                 when(repositoryEvent) {
                     is NotificationsRepositoryInterface.Emission.Event.Refreshing -> {
@@ -78,6 +83,14 @@ class NotificationCenterListViewModel(
                 }
             }
         ).shareHotAndReplay(0)
+
+    private fun updateStableIds(notifications: List<Notification>) {
+        notifications.forEach { notification ->
+            if(!stableIds.containsKey(notification.id)) {
+                stableIds[notification.id] = ++highestStableId
+            }
+        }
+    }
 
     private sealed class Action() {
         data class NotificationClicked(val notification: Notification): Action()

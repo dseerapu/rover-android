@@ -80,7 +80,9 @@ interface NotificationCenterListViewModelInterface: BindableViewModel {
 
     sealed class Event {
         /**
-         * The list has changed.
+         * The list has changed.  Gives you the complete list of notifications to be displayed, but
+         * also a map for looking up stable integer ids for RecyclerView's use.  Those stable IDs
+         * are guaranteed to remain consistent over the lifetime of the view model.
          *
          * Note that the IDs of notifications themselves are guaranteed to be stable, so they should
          * be used to perform a differential update (which RecyclerView supports).
@@ -93,7 +95,7 @@ interface NotificationCenterListViewModelInterface: BindableViewModel {
          * This is to better suit View implementations that may display any arbitrary detail of the
          * Notification.  Notification itself is a value object.
         */
-        data class ListUpdated(val notifications: List<Notification>): Event()
+        data class ListUpdated(val notifications: List<Notification>, val stableIds: Map<String, Int>): Event()
 
         data class Navigate(val notification: Notification): Event()
 
