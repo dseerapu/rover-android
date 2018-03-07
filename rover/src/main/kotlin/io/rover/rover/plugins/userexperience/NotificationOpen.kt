@@ -36,11 +36,13 @@ open class NotificationOpen(
         )
     }
 
-    override fun intentStackForImmediateNotificationAction(notificationJson: String): List<Intent> {
+    override fun intentStackForOpeningNotificationFromNotificationsDrawer(notificationJson: String): List<Intent> {
+        // side-effect: issue open event.
         val notification = wireEncoder.decodeNotification(JSONObject(notificationJson))
 
         issueNotificationOpenedEvent(
-            notification
+            notification,
+            NotificationSource.Push
         )
 
         return notificationContentPendingIntentSynthesizer.synthesizeNotificationIntentStack(
@@ -48,23 +50,33 @@ open class NotificationOpen(
         )
     }
 
-    override fun intentForDirectlyOpeningNotification(notification: Notification): Intent? {
+    override fun intentForOpeningNotificationDirectly(notification: Notification): Intent? {
+        // side-effect: issue open event.
+        issueNotificationOpenedEvent(
+            notification,
+            NotificationSource.NotificationCenter
+        )
+
         return when(notification.action) {
-            // it is non-sensical to open the app when the app is already open.            
+            // it is nonsensical to open the app when the app is already open, so this should be a no-op.
             is PushNotificationAction.OpenApp -> null
             else -> routingBehaviour.notificationActionToIntent(notification.action)
         }
     }
 
-    protected fun issueNotificationOpenedEvent(notification: Notification) {
+    protected fun issueNotificationOpenedEvent(notification: Notification, source: NotificationSource) {
         eventsService.trackEvent(
             Event(
                 "Notification Opened",
                 hashMapOf(
                     Pair("notificationID", AttributeValue.String(notification.id)),
-                    Pair("source", AttributeValue.String(""))
+                    Pair("source", AttributeValue.String(source.wireValue))
                 )
             )
         )
+    }
+
+    enum class NotificationSource(val wireValue: String) {
+        NotificationCenter("notificationCenter"), Push("push")
     }
 }

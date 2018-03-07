@@ -48,13 +48,6 @@ class NotificationCenterListViewModel(
                         // the delete operation is entirely asynchronous, as a side-effect.
                         notificationsRepository.markRead(action.notification)
 
-                        eventsPlugin.trackEvent(
-                            Event(
-                                "Notification Opened",
-                                hashMapOf()
-                            )
-                        )
-
                         NotificationCenterListViewModelInterface.Event.Navigate(
                            action.notification
                         )

@@ -6,36 +6,24 @@ import android.content.Intent
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import io.rover.rover.Rover
+import io.rover.rover.core.logging.log
 import io.rover.rover.plugins.data.domain.Notification
 import io.rover.rover.plugins.data.http.WireEncoderInterface
+import io.rover.rover.plugins.push.NotificationContentPendingIntentSynthesizer
 
 /**
  * When the user taps a Rover notification created for the app by
- * [NotificationContentPendingIntentSynthesizer], we want an analytics event to be emitted as a
- * side-effect.  However, the target screen could be either an external application (particularly, a
- * web browser) or some other Activity in the app that would be difficult to instrument.
+ * [NotificationContentPendingIntentSynthesizer] in the Android notification tray, we want an
+ * analytics event to be emitted as a side-effect.  However, the target screen could be either an
+ * external application (particularly, a web browser) or some other Activity in the app that would
+ * be difficult to instrument.
  *
- * So, this Activity will be
+ * So, this Activity will be responsible for emitting that that side-effect happens, although
+ * it does so by delegating to [NotificationOpen].
  */
-
-// points of investigation:
-
-// where should the intent synthesis happen now?  should it shuttled through the notification and
-// eventually to here as a value object (if that's even possible), or should we instead evaluate the
-// notification here, and synthesize the intent with the auto-generated backstack right here (if it
-// is possible to do such a replacement of an existing Task with a synthesized backstack intent)?
-
-// replacing: https://stackoverflow.com/questions/2116158/replace-current-activity
-
-// marshalling built task intent through notification as an extra? actually, wait, probably not
-// worth doing that because to emit the event we're going to want the whole notification anyway.  So
-// let's just shuttle the entire notification.  This also removes the risk of pendingintents being
-// collapsed.
-
-
 class TransientNotificationLaunchActivity: AppCompatActivity() {
-    private val openNotification by lazy {
-        Rover.sharedInstance.notificationOpen
+    private val notificationOpen by lazy {
+        Rover.sharedInstance.openNotification
     }
 
     // TODO: make transparent/invisible somehow to avoid flicker
@@ -43,12 +31,18 @@ class TransientNotificationLaunchActivity: AppCompatActivity() {
     override fun onStart() {
         super.onStart()
 
+        log.v("Transient notification launch activity running.")
+
         // grab the notification back out of the arguments.
         val notificationJson = this.intent.extras.getString(NOTIFICATION_JSON)
 
+        // this will also do the side-effect of issuing the Notification Opened event, which
+        // is the whole reason for this activity existing.
+        val intentStack = notificationOpen.intentStackForOpeningNotificationFromNotificationsDrawer(notificationJson)
+
         ContextCompat.startActivities(
             this,
-            openNotification.intentStackForImmediateNotificationAction(notificationJson).toTypedArray()
+            intentStack.toTypedArray()
         )
         finish()
     }

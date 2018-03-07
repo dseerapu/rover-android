@@ -4,7 +4,6 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.support.design.widget.CoordinatorLayout
 import android.support.design.widget.Snackbar
-import android.support.v4.content.ContextCompat
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
@@ -134,7 +133,7 @@ open class NotificationCenterListView : CoordinatorLayout, BindableView<Notifica
                         // (perhaps, for example, the activity should subscribe to an event from the
                         // view model).  However, doing it here allows for a clearer interface for
                         // consumers: all they need to do is implement and provide the Host object.
-                        val intent = notificationOpen.intentForDirectlyOpeningNotification(event.notification)
+                        val intent = notificationOpen.intentForOpeningNotificationDirectly(event.notification)
                         if(intent != null) {
                             try {
                                 host.provideActivity.startActivity(
@@ -204,7 +203,7 @@ open class NotificationCenterListView : CoordinatorLayout, BindableView<Notifica
     }
 
     private val notificationOpen: NotificationOpenInterface by lazy {
-        Rover.sharedInstance.notificationOpen
+        Rover.sharedInstance.openNotification
     }
 
     init {
@@ -260,15 +259,4 @@ open class NotificationCenterListView : CoordinatorLayout, BindableView<Notifica
             }
         }
     }
-
-    // structure:
-
-    // FrameLayout for switching between the RecyclerView and Empty.
-
-    // Arguments we will support:
-
-    // specifying the empty screen layout
-    // specifying the row layout AND binding logic
-    // specifying the delete action colour and drawable
-
 }

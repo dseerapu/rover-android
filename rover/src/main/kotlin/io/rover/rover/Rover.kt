@@ -43,7 +43,7 @@ class Rover(
     val logEmitter: LogEmitter
         get() = this.resolve(LogEmitter::class.java) ?: throw missingPluginError("LogEmitter")
 
-    val notificationOpen: NotificationOpenInterface
+    val openNotification: NotificationOpenInterface
         get() = this.resolve(NotificationOpenInterface::class.java) ?: throw missingPluginError("NotificationOpen")
 
     private fun missingPluginError(name: String): Throwable {
