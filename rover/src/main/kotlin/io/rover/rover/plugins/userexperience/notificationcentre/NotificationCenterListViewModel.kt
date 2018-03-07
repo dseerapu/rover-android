@@ -92,7 +92,7 @@ class NotificationCenterListViewModel(
         }
     }
 
-    private sealed class Action() {
+    private sealed class Action {
         data class NotificationClicked(val notification: Notification): Action()
         data class DeleteNotification(val notification: Notification): Action()
     }

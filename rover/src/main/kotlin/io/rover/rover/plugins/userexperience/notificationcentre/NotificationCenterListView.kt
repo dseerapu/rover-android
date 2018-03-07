@@ -2,8 +2,12 @@ package io.rover.rover.plugins.userexperience.notificationcentre
 
 import android.content.ActivityNotFoundException
 import android.content.Context
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.support.design.widget.CoordinatorLayout
 import android.support.design.widget.Snackbar
+import android.support.v4.content.ContextCompat
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
@@ -225,7 +229,9 @@ open class NotificationCenterListView : CoordinatorLayout, BindableView<Notifica
 
         // TODO: in design mode, put a description!
 
-        // TODO: and will create the gesture observation stuff needed for swipe-to-delete
+        val icon = ContextCompat.getDrawable(context, R.drawable.delete)!!
+        icon.setTint(ContextCompat.getColor(context, R.color.swipeToDeleteIconTint))
+        val redIndicatorDrawable = ColorDrawable(ContextCompat.getColor(context, R.color.swipeToDeleteBackgroundRed))
 
         ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
             // no drag and drop desired.
@@ -238,14 +244,45 @@ open class NotificationCenterListView : CoordinatorLayout, BindableView<Notifica
                 notification.whenNotNull { viewModel?.deleteNotification(it) }
                 log.d("... it was $notification")
             }
+
+            override fun onChildDraw(
+                canvas: Canvas,
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                dX: Float,
+                dY: Float,
+                actionState: Int,
+                isCurrentlyActive: Boolean
+            ) {
+
+                // Credit given to https://github.com/kitek/android-rv-swipe-delete for guidance here.
+
+                val itemView = viewHolder.itemView
+                val itemHeight = itemView.bottom - itemView.top
+
+                redIndicatorDrawable.setBounds(
+                    itemView.right + dX.toInt(),
+                    itemView.top,
+                    itemView.right,
+                    itemView.bottom
+                )
+                redIndicatorDrawable.draw(canvas)
+
+                val iconTop = itemView.top + (itemHeight - icon.intrinsicHeight) / 2
+                val iconMargin = (itemHeight - icon.intrinsicHeight) / 2
+                val iconLeft = itemView.right - iconMargin - icon.intrinsicWidth
+
+                // TODO: andrew start here and make sure icon is clipped when outside of the red
+                // rectangle.
+                val iconRight = itemView.right - iconMargin
+                val iconBottom = iconTop + icon.intrinsicHeight
+
+                icon.setBounds(iconLeft, iconTop, iconRight, iconBottom)
+                icon.draw(canvas)
+
+                super.onChildDraw(canvas, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
+            }
         }).attachToRecyclerView(itemsView)
-
-        // TODO two different approaches for red area:
-
-        // drawing in item touch helper: https://medium.com/@kitek/recyclerview-swipe-to-delete-easier-than-you-thought-cff67ff5e5f6
-        // overlaying layouts: https://www.androidhive.info/2017/09/android-recyclerview-swipe-delete-undo-using-itemtouchhelper/
-
-        // I also need to get animation working for item deletions.
     }
 
     private fun notificationClicked(notification: Notification) {
@@ -260,7 +297,6 @@ open class NotificationCenterListView : CoordinatorLayout, BindableView<Notifica
         var notification: Notification? = null
             set(value) {
                 field = value
-
                 // delegate to the possibly-overridden binding method.
                 notification.whenNotNull { listView.bindNotificationToRow(view, it) }
             }
