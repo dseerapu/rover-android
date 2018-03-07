@@ -48,6 +48,12 @@ interface NotificationsRepositoryInterface {
     fun markRead(notification: Notification)
 
     /**
+     * A notification arrived by push.  This will asynchronously insert it into the repository. This
+     * method will return immediately.
+     */
+    fun notifcationArrivedByPush(notification: Notification)
+
+    /**
      * Request that the notification be marked as deleted.  This method will return immediately.
      * The consumer will see the changes by a new [Emission.Update] being updated on the [updates]
      * publisher.

@@ -14,6 +14,7 @@ import io.rover.rover.core.logging.log
 import io.rover.rover.plugins.events.EventsPluginInterface
 import io.rover.rover.plugins.data.http.WireEncoderInterface
 import io.rover.rover.plugins.userexperience.NotificationOpenInterface
+import io.rover.rover.plugins.userexperience.notificationcentre.NotificationsRepositoryInterface
 import org.json.JSONException
 import org.json.JSONObject
 import java.net.MalformedURLException
@@ -26,7 +27,9 @@ open class PushPlugin(
 
     private val wireEncoder: WireEncoderInterface,
 
-    // private val notificationContentPendingIntentSynthesizer: NotificationContentPendingIntentSynthesizerInterface,
+    // add this back after solving injection issues.
+    // private val notificationsRepository: NotificationsRepositoryInterface,
+
     private val notificationOpen: NotificationOpenInterface,
 
     /**
@@ -107,31 +110,9 @@ open class PushPlugin(
         builder.setContentText(pushNotification.body)
         builder.setSmallIcon(smallIconResId, smallIconDrawableLevel)
 
-        // so, we need to inject a synthesized backstack.
+        // Add this back after solving injection issues.
+        // notificationsRepository.notifcationArrivedByPush(pushNotification)
 
-        // https://developer.android.com/training/implementing-navigation/temporal.html#SynthesizeBackStack
-
-        // we can also allow the developer to specify behaviour they want with a meta-data tag added
-        // to their Activity entry.  However, I still suspect that adding an opportunity for developer code
-        // to create their own Intent is probably ultimately more powerful.
-
-        // also we'll need a way for developers to specify their own version of StandaloneExperienceHostActivity.
-
-        // for that matter they may to build their own intent even for that so they can have their
-        // own host of ExperienceView if they're doing something special.
-
-        // There’s some question as to what to do with any existing Task for the app that may
-        // already exist. Replace it, add a second Task, or just add to it?  The right answer here
-        // may depend on the implementation of the customer’s app, so maybe just have this be a
-        // setting.  See "Launch Modes" on
-        // https://developer.android.com/guide/components/activities/tasks-and-back-stack.html.
-        // yeah, i think this is the case.
-
-        // so, in order to emit events for notification opens, I will need to bounce through an
-        // activity that will emit the even and quickly follow through to the intended content. This
-        // is particularly necessary for content hosted by external apps (ie., browser).
-
-        // TODO: write notification to the notificationrepository
         builder.setContentIntent(
             notificationOpen.pendingIntentForAndroidNotification(
                 pushNotification

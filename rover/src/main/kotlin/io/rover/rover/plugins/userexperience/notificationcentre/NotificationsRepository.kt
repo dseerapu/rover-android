@@ -1,21 +1,7 @@
 package io.rover.rover.plugins.userexperience.notificationcentre
 
 import io.rover.rover.core.logging.log
-import io.rover.rover.core.streams.CallbackReceiver
-import io.rover.rover.core.streams.Observable
-import io.rover.rover.core.streams.PublishSubject
-import io.rover.rover.core.streams.Publisher
-import io.rover.rover.core.streams.Scheduler
-import io.rover.rover.core.streams.asPublisher
-import io.rover.rover.core.streams.doOnNext
-import io.rover.rover.core.streams.doOnSubscribe
-import io.rover.rover.core.streams.filterForSubtype
-import io.rover.rover.core.streams.filterNulls
-import io.rover.rover.core.streams.flatMap
-import io.rover.rover.core.streams.map
-import io.rover.rover.core.streams.observeOn
-import io.rover.rover.core.streams.shareHotAndReplay
-import io.rover.rover.core.streams.subscribeOn
+import io.rover.rover.core.streams.*
 import io.rover.rover.platform.DateFormattingInterface
 import io.rover.rover.platform.LocalStorage
 import io.rover.rover.platform.whenNotNull
@@ -32,11 +18,16 @@ import org.json.JSONArray
 import org.json.JSONException
 import java.util.concurrent.Executor
 
+/**
+ * Responsible for reactively persisting notifications and informing subscribers of changes.
+ *
+ * Must be a singleton.
+ */
 class NotificationsRepository(
     private val dataPlugin: DataPluginInterface,
     private val dateFormatting: DateFormattingInterface,
     private val ioExecutor: Executor,
-    private val mainThreadScheduler: Scheduler,
+    mainThreadScheduler: Scheduler,
     private val eventsPlugin: EventsPluginInterface,
     localStorage: LocalStorage
 ): NotificationsRepositoryInterface {
@@ -64,6 +55,10 @@ class NotificationsRepository(
 
     override fun delete(notification: Notification) {
         actions.onNext(Action.MarkDeleted(notification))
+    }
+
+    override fun notifcationArrivedByPush(notification: Notification) {
+        actions.onNext(Action.NotificationArrivedByPush(notification))
     }
 
     private val keyValueStorage = localStorage.getKeyValueStorageFor(STORAGE_CONTEXT_IDENTIFIER)
@@ -108,12 +103,15 @@ class NotificationsRepository(
         }.subscribeOn(ioExecutor)
     }
 
-    private fun mergeWithLocalStorage(notificationsFromDeviceState: List<Notification>): Publisher<List<Notification>> {
+    /**
+     * Add
+     */
+    private fun mergeWithLocalStorage(incomingNotifications: List<Notification>): Publisher<List<Notification>> {
         return currentNotificationsOnDisk().map { notifications ->
             val notificationsOnDiskById = notifications?.associateBy { it.id } ?: hashMapOf()
             // return the new notifications list, but OR with any existing records' isRead/isDeleted
             // state.
-            notificationsFromDeviceState.map { newNotification ->
+            incomingNotifications.map { newNotification ->
                 notificationsOnDiskById[newNotification.id].whenNotNull {
                     newNotification.copy(
                         isRead = newNotification.isRead || it.isRead,
@@ -164,6 +162,11 @@ class NotificationsRepository(
             }
             is Action.MarkRead -> {
                 doMarkAsRead(action.notification).map {NotificationsRepositoryInterface.Emission.Update(it) }
+            }
+            is Action.NotificationArrivedByPush -> {
+                mergeWithLocalStorage(listOf(action.notification)).flatMap { merged -> replaceLocalStorage(merged) }.map {
+                    NotificationsRepositoryInterface.Emission.Update(it)
+                }
             }
         }
     }.observeOn(mainThreadScheduler).shareHotAndReplay(0) // TODO: using observeOnAndroidMainThread in its current form will be problematic for tests.
@@ -268,5 +271,10 @@ class NotificationsRepository(
          * User has requested a mark to be delete.
          */
         class MarkDeleted(val notification: Notification): Action()
+
+        /**
+         * A notification arrived by push.  This will add it to the repository.
+         */
+        class NotificationArrivedByPush(val notification: Notification): Action()
     }
 }
