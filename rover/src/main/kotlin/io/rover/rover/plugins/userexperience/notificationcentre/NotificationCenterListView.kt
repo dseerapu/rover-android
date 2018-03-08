@@ -3,11 +3,10 @@ package io.rover.rover.plugins.userexperience.notificationcentre
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
+import android.graphics.Rect
+import android.os.Handler
 import android.support.design.widget.CoordinatorLayout
 import android.support.design.widget.Snackbar
-import android.support.v4.content.ContextCompat
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
@@ -91,6 +90,18 @@ open class NotificationCenterListView : CoordinatorLayout, BindableView<Notifica
         // Override this method to inflate (or programmatically create) your own row view.
         val inflater = LayoutInflater.from(context)
         return inflater.inflate(R.layout.notification_center_default_item, null)
+    }
+
+    /**
+     * This method will generate a row's swipe to delete reveal row.  This contains the shaded red
+     * area and the delete icon.
+     *
+     * Even if you are using a custom row view, you may leave this method untouched and keep
+     * the default version of the reveal layout.
+     */
+    open fun makeSwipeToDeleteRevealBackgroundView(): View {
+        val inflater = LayoutInflater.from(context)
+        return inflater.inflate(R.layout.notification_center_default_item_delete_swipe_reveal, null)
     }
 
     /**
@@ -183,7 +194,7 @@ open class NotificationCenterListView : CoordinatorLayout, BindableView<Notifica
 
     private val adapter = object : RecyclerView.Adapter<NotificationViewHolder>() {
         override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): NotificationViewHolder {
-            return NotificationViewHolder(this@NotificationCenterListView, makeNotificationRowView())
+            return NotificationViewHolder(context, this@NotificationCenterListView, makeNotificationRowView(), makeSwipeToDeleteRevealBackgroundView())
         }
 
         override fun getItemCount(): Int {
@@ -229,20 +240,41 @@ open class NotificationCenterListView : CoordinatorLayout, BindableView<Notifica
 
         // TODO: in design mode, put a description!
 
-        val icon = ContextCompat.getDrawable(context, R.drawable.delete)!!
-        icon.setTint(ContextCompat.getColor(context, R.color.swipeToDeleteIconTint))
-        val redIndicatorDrawable = ColorDrawable(ContextCompat.getColor(context, R.color.swipeToDeleteBackgroundRed))
-
         ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
             // no drag and drop desired.
             override fun onMove(recyclerView: RecyclerView?, viewHolder: RecyclerView.ViewHolder?, target: RecyclerView.ViewHolder?): Boolean = false
+
+            override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
+                if(viewHolder != null) {
+                    ItemTouchHelper.Callback.getDefaultUIUtil().onSelected((viewHolder as NotificationViewHolder).rowItemView)
+                }
+            }
+
+            override fun onChildDrawOver(c: Canvas?, recyclerView: RecyclerView?, viewHolder: RecyclerView.ViewHolder?, dX: Float, dY: Float, actionState: Int, isCurrentlyActive: Boolean) {
+                if(viewHolder != null) {
+                    ItemTouchHelper.Callback.getDefaultUIUtil().onDrawOver(c, recyclerView, (viewHolder as NotificationViewHolder).rowItemView, dX, dY, actionState, isCurrentlyActive)
+                }
+            }
+
+            override fun clearView(recyclerView: RecyclerView?, viewHolder: RecyclerView.ViewHolder?) {
+                if(viewHolder != null) {
+                    ItemTouchHelper.Callback.getDefaultUIUtil().clearView((viewHolder as NotificationViewHolder).rowItemView)
+                }
+            }
 
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                 log.d("Deleting notification at location")
                 val notification = currentNotificationsList?.get(viewHolder.adapterPosition)
 
-                notification.whenNotNull { viewModel?.deleteNotification(it) }
-                log.d("... it was $notification")
+                Handler(context.mainLooper).post {
+                    // the view model may end up emitting the refreshed list synchronously here,
+                    // so we'll defer dispatching the action until the item touch handler itself
+                    // has completed executing onSwiped() (and anything else it may be doing in
+                    // a batch of work on the main looper).  This seems to ameliorate some visual
+                    // artifacts in which the revealed red area can be left displaying on top of
+                    // an incompletely deleted row item.
+                    notification.whenNotNull { viewModel?.deleteNotification(it) }
+                }
             }
 
             override fun onChildDraw(
@@ -254,34 +286,10 @@ open class NotificationCenterListView : CoordinatorLayout, BindableView<Notifica
                 actionState: Int,
                 isCurrentlyActive: Boolean
             ) {
-
-                // Credit given to https://github.com/kitek/android-rv-swipe-delete for guidance here.
-
-                val itemView = viewHolder.itemView
-                val itemHeight = itemView.bottom - itemView.top
-
-                redIndicatorDrawable.setBounds(
-                    itemView.right + dX.toInt(),
-                    itemView.top,
-                    itemView.right,
-                    itemView.bottom
-                )
-                redIndicatorDrawable.draw(canvas)
-
-                val iconTop = itemView.top + (itemHeight - icon.intrinsicHeight) / 2
-                val iconMargin = (itemHeight - icon.intrinsicHeight) / 2
-                val iconLeft = itemView.right - iconMargin - icon.intrinsicWidth
-
-                // TODO: andrew start here and make sure icon is clipped when outside of the red
-                // rectangle.
-                val iconRight = itemView.right - iconMargin
-                val iconBottom = iconTop + icon.intrinsicHeight
-
-                icon.setBounds(iconLeft, iconTop, iconRight, iconBottom)
-                icon.draw(canvas)
-
-                super.onChildDraw(canvas, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
+                ItemTouchHelper.Callback.getDefaultUIUtil().onDraw(canvas, recyclerView, (viewHolder as NotificationViewHolder).rowItemView, dX, dY, actionState, isCurrentlyActive )
             }
+
+
         }).attachToRecyclerView(itemsView)
     }
 
@@ -289,21 +297,28 @@ open class NotificationCenterListView : CoordinatorLayout, BindableView<Notifica
         viewModel?.notificationClicked(notification)
     }
 
-
     private class NotificationViewHolder(
+        private val context: Context,
         private val listView: NotificationCenterListView,
-        private val view: View
-    ): RecyclerView.ViewHolder(view) {
+        val rowItemView: View,
+        swipeToDeleteRevealView: View,
+        containerView: ViewGroup = FrameLayout(context)
+    ): RecyclerView.ViewHolder(containerView) {
+        init {
+            containerView.addView(swipeToDeleteRevealView)
+            containerView.addView(rowItemView)
+        }
+
         var notification: Notification? = null
             set(value) {
                 field = value
                 // delegate to the possibly-overridden binding method.
-                notification.whenNotNull { listView.bindNotificationToRow(view, it) }
+                notification.whenNotNull { listView.bindNotificationToRow(rowItemView, it) }
             }
 
         init {
-            view.isClickable = true
-            view.setOnClickListener {
+            rowItemView.isClickable = true
+            rowItemView.setOnClickListener {
                 notification.whenNotNull { listView.notificationClicked(it) }
             }
         }

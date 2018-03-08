@@ -6,12 +6,8 @@ import io.rover.rover.plugins.events.EventsPluginInterface
 import java.util.Date
 
 class NotificationCenterListViewModel(
-    private val notificationsRepository: NotificationsRepositoryInterface,
-    private val eventsPlugin: EventsPluginInterface
+    private val notificationsRepository: NotificationsRepositoryInterface
 ): NotificationCenterListViewModelInterface {
-
-
-
 
     override fun events(): Observable<NotificationCenterListViewModelInterface.Event> = epic.doOnSubscribe {
         // Infer from a new subscriber that it's a newly displayed view, and, thus, an

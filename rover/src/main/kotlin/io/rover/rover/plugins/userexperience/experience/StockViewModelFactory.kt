@@ -80,8 +80,7 @@ open class StockViewModelFactory(
                 Scheduler.forAndroidMainThread(),
                 eventsPlugin,
                 localStorage
-            ),
-            eventsPlugin
+            )
         )
     }
 }
