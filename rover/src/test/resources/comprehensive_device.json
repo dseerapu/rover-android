@@ -147,6 +147,10 @@
                     "action": {
                         "type": "PRESENT_EXPERIENCE",
                         "experienceId": "5436635463"
+                    },
+                    "attachment": {
+                        "type": "IMAGE",
+                        "url": "https://www.debian.org/Pics/openlogo-50.png"
                     }
                 }
             ]

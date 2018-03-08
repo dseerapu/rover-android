@@ -286,7 +286,14 @@ open class NotificationCenterListView : CoordinatorLayout, BindableView<Notifica
                 actionState: Int,
                 isCurrentlyActive: Boolean
             ) {
-                ItemTouchHelper.Callback.getDefaultUIUtil().onDraw(canvas, recyclerView, (viewHolder as NotificationViewHolder).rowItemView, dX, dY, actionState, isCurrentlyActive )
+                ItemTouchHelper.Callback.getDefaultUIUtil().onDraw(
+                    canvas,
+                    recyclerView,
+                    (viewHolder as NotificationViewHolder).rowItemView,
+                    dX, dY,
+                    actionState,
+                    isCurrentlyActive
+                )
             }
 
 

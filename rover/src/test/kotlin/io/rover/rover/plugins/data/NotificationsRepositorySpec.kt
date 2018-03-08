@@ -99,7 +99,7 @@ class NotificationsRepositorySpec: Spek({
 
 
         given("the cloud API returns device state with one event") {
-            val repository by memoized() { repo(
+            val repository by memoized { repo(
                 NetworkResult.Success(
                     DeviceState(
                         Profile(
@@ -109,7 +109,8 @@ class NotificationsRepositorySpec: Spek({
                         listOf(
                             Notification(
                                 "41C7F235-7B47-4DC9-9ED8-E1C937F6C6D1",
-                                null, null, "body", false, false, true, Date(), Date(), PushNotificationAction.PresentExperience("deadbeef")
+                                null, null, "body", false, false, true, Date(), Date(), PushNotificationAction.PresentExperience("deadbeef"),
+                                null
                             )
                         )
                     )

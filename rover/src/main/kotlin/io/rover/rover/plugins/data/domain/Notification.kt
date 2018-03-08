@@ -50,7 +50,9 @@ data class Notification(
 
     val deliveredAt: Date,
 
-    val action: PushNotificationAction
+    val action: PushNotificationAction,
+
+    val attachment: NotificationAttachment?
 ) {
     companion object
 }
@@ -69,6 +71,16 @@ sealed class PushNotificationAction {
     ): PushNotificationAction()
 
     class OpenApp: PushNotificationAction()
+
+    companion object
+}
+
+sealed class NotificationAttachment(
+    val url: URL
+) {
+    class Audio(url: URL): NotificationAttachment(url)
+    class Image(url: URL): NotificationAttachment(url)
+    class Video(url: URL): NotificationAttachment(url)
 
     companion object
 }

@@ -4,6 +4,7 @@ import io.rover.rover.platform.DateFormattingInterface
 import io.rover.rover.platform.whenNotNull
 import io.rover.rover.plugins.data.domain.PushNotificationAction
 import io.rover.rover.plugins.data.domain.Notification
+import io.rover.rover.plugins.data.domain.NotificationAttachment
 import io.rover.rover.plugins.data.graphql.getDate
 import io.rover.rover.plugins.data.graphql.putProp
 import io.rover.rover.plugins.data.graphql.safeOptDate
@@ -27,6 +28,7 @@ internal fun Notification.encodeJson(dateFormatting: DateFormattingInterface): J
         putProp(this@encodeJson, Notification::action, "action" ) {
             it.encodeJson()
         }
+        putProp(this@encodeJson, Notification::attachment, "attachment") { it.whenNotNull { it.encodeJson() }}
     }
 }
 
@@ -44,6 +46,18 @@ internal fun PushNotificationAction.Companion.decodeJson(json: JSONObject): Push
         )
         "OPEN_APP" -> PushNotificationAction.OpenApp()
         else -> throw JSONException("Unsupported Rover notification type: $typeName.")
+    }
+}
+
+internal fun NotificationAttachment.Companion.decodeJson(json: JSONObject): NotificationAttachment {
+    // all three types have URLs.
+    val type = json.getString("type")
+    val url = URL(json.getString("url"))
+    return when(type) {
+        "AUDIO" -> NotificationAttachment.Audio(url)
+        "IMAGE" -> NotificationAttachment.Image(url)
+        "VIDEO" -> NotificationAttachment.Video(url)
+        else -> throw JSONException("Unsupported Rover attachment type: $type")
     }
 }
 
@@ -70,6 +84,20 @@ internal fun PushNotificationAction.encodeJson(): JSONObject {
     }
 }
 
+internal fun NotificationAttachment.encodeJson(): JSONObject {
+    return JSONObject().apply {
+        putProp(this@encodeJson, NotificationAttachment::url, "url")
+        put(
+            "type",
+            when(this@encodeJson) {
+                is NotificationAttachment.Video -> "VIDEO"
+                is NotificationAttachment.Audio -> "AUDIO"
+                is NotificationAttachment.Image -> "IMAGE"
+            }
+        )
+    }
+}
+
 internal fun Notification.Companion.decodeJson(json: JSONObject, dateFormatting: DateFormattingInterface): Notification {
     return Notification(
         id = json.getString("id"),
@@ -81,6 +109,7 @@ internal fun Notification.Companion.decodeJson(json: JSONObject, dateFormatting:
         expiresAt = json.safeOptDate("expiresAt", dateFormatting),
         deliveredAt = json.getDate("deliveredAt", dateFormatting),
         isNotificationCenterEnabled = json.getBoolean("isNotificationCenterEnabled"),
-        action = PushNotificationAction.decodeJson(json.getJSONObject("action"))
+        action = PushNotificationAction.decodeJson(json.getJSONObject("action")),
+        attachment = if (json.has("attachment")) NotificationAttachment.decodeJson(json.getJSONObject("attachment")) else null
     )
 }
