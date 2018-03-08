@@ -32,7 +32,7 @@ interface AssetService {
     /**
      * Retrieve the needed photo, from caches if possible.
      *
-     * [completionHandler] will be called on app's main UI thread.
+     * The Publisher will will yield on the app's main UI thread.
      *
      * TODO: retry logic will not exist on the consumer-side of this method, so rather than
      * NetworkResult, another result<->error optional type should be used instead.

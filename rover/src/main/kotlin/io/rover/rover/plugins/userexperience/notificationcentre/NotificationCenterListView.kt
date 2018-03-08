@@ -316,6 +316,10 @@ open class NotificationCenterListView : CoordinatorLayout, BindableView<Notifica
             containerView.addView(rowItemView)
         }
 
+        // TODO so, to display images, we really do need a view model.  need to come up with an
+        // arrangement for binding the VM through the view holder.  The VM will then subscribe to
+        // AssetService to fetch notification rich media as necessary.
+
         var notification: Notification? = null
             set(value) {
                 field = value
