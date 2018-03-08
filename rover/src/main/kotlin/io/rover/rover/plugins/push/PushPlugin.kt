@@ -11,13 +11,21 @@ import android.support.annotation.DrawableRes
 import android.support.v4.app.NotificationCompat
 import android.support.v4.app.NotificationManagerCompat
 import io.rover.rover.core.logging.log
+import io.rover.rover.core.streams.Observable
+import io.rover.rover.core.streams.onErrorReturn
+import io.rover.rover.core.streams.subscribe
+import io.rover.rover.core.streams.timeout
+import io.rover.rover.plugins.data.NetworkResult
+import io.rover.rover.plugins.data.domain.NotificationAttachment
 import io.rover.rover.plugins.events.EventsPluginInterface
 import io.rover.rover.plugins.data.http.WireEncoderInterface
 import io.rover.rover.plugins.userexperience.NotificationOpenInterface
+import io.rover.rover.plugins.userexperience.assets.AssetService
 import io.rover.rover.plugins.userexperience.notificationcentre.NotificationsRepositoryInterface
 import org.json.JSONException
 import org.json.JSONObject
 import java.net.MalformedURLException
+import java.util.concurrent.TimeUnit
 
 open class PushPlugin(
     private val applicationContext: Context,
@@ -31,6 +39,8 @@ open class PushPlugin(
     // private val notificationsRepository: NotificationsRepositoryInterface,
 
     private val notificationOpen: NotificationOpenInterface,
+
+    private val assetService: AssetService,
 
     /**
      * A small icon is necessary for Android push notifications.  Pass a resid.
@@ -65,6 +75,11 @@ open class PushPlugin(
         }
     }
 
+    /**
+     * Process an the parameters from an incoming notification.
+     *
+     * Note that this is running in the context of a 10 second wallclock execution time restriction.
+     */
     override fun onMessageReceivedData(parameters: Map<String, String>) {
         // if we have been called, then:
         // a) the notification does not have a display message component; OR
@@ -111,7 +126,7 @@ open class PushPlugin(
         builder.setSmallIcon(smallIconResId, smallIconDrawableLevel)
 
         // Add this back after solving injection issues.
-        // notificationsRepository.notifcationArrivedByPush(pushNotification)
+        // notificationsRepository.notificationArrivedByPush(pushNotification)
 
         builder.setContentIntent(
             notificationOpen.pendingIntentForAndroidNotification(
@@ -119,10 +134,51 @@ open class PushPlugin(
             )
         )
 
-        // TODO: set large icon and possibly a big picture style as needed by Rich Media values. Protocol to be determined.
+        // Set large icon and Big Picture as needed by Rich Media values.  Enforce a timeout
+        // so we don't fail to create the notification in the allotted 10s if network doesn't
+        // cooperate.
+        val attachmentBitmapPublisher = when(pushNotification.attachment) {
+            is NotificationAttachment.Image -> {
+                assetService.getImageByUrl(pushNotification.attachment.url)
+                    .timeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
+                    .onErrorReturn { error ->
+                        // log.w("Timed out fetching notification image.  Will create image without the rich media.")
+                        NetworkResult.Error(error, false)
+                    }
+            }
+            null -> Observable.just(null)
+            else -> {
+                log.w("Notification attachments of type ${pushNotification.attachment.typeName} not supported on Android.")
+                Observable.just(null)
+            }
+        }
 
+        attachmentBitmapPublisher
+            .subscribe { attachmentBitmapResult ->
+                when(attachmentBitmapResult) {
+                    is NetworkResult.Success -> {
+                        builder.setLargeIcon(attachmentBitmapResult.response)
+                        builder.setStyle(
+                            NotificationCompat.BigPictureStyle()
+                                .bigPicture(attachmentBitmapResult.response)
+                        )
+                    }
+                    is NetworkResult.Error -> {
+                        log.w("Unable to retrieve notification image: ${pushNotification.attachment?.url}, because: ${attachmentBitmapResult.throwable.message}")
+                        log.w("Will create image without the rich media.")
+                    }
+                }
+                notificationManager.notify(pushNotification.id, 123, builder.build().apply { this.flags = this.flags or Notification.FLAG_AUTO_CANCEL })
+            }
+    }
 
-        // lol start here
-        notificationManager.notify(pushNotification.id, 123, builder.build().apply { this.flags = this.flags or Notification.FLAG_AUTO_CANCEL })
+    companion object {
+        /**
+         * Android gives push handlers 10 seconds to complete.
+         *
+         * If we can't get our image downloaded in the 10 seconds, instead of failing we want to
+         * timeout gracefully.
+         */
+        private const val TIMEOUT_SECONDS = 8L
     }
 }

@@ -57,7 +57,7 @@ class NotificationsRepository(
         actions.onNext(Action.MarkDeleted(notification))
     }
 
-    override fun notifcationArrivedByPush(notification: Notification) {
+    override fun notificationArrivedByPush(notification: Notification) {
         actions.onNext(Action.NotificationArrivedByPush(notification))
     }
 

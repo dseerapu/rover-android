@@ -802,6 +802,64 @@ class PublishSubject<T> : Subject<T> {
     }
 }
 
+/**
+ * Mirrors the source Publisher, but yields an error in the event that the given timeout runs
+ * out before the source Publisher emits at least one item.
+ *
+ * Not thread safe, and uses Android static API (the main looper) and thus assumes subscription
+ * and emission on the Android main thread.  Thus will break tests.
+ */
+internal fun <T> Publisher<T>.timeout(interval: Long, unit: TimeUnit): Publisher<T> {
+    return object : Publisher<T> {
+        override fun subscribe(subscriber: Subscriber<T>) {
+            var stillWaiting = true
+            this@timeout.subscribe(
+                object : Subscriber<T> by subscriber {
+                    override fun onComplete() {
+                        stillWaiting = false
+                        subscriber.onComplete()
+                    }
+
+                    override fun onNext(item: T) {
+                        stillWaiting = false
+                        subscriber.onNext(item)
+                    }
+
+                    override fun onError(error: Throwable) {
+                        stillWaiting = false
+                        subscriber.onError(error)
+                    }
+
+                    override fun onSubscribe(subscription: Subscription) {
+                        val handler = Handler(Looper.getMainLooper())
+
+                        handler.postDelayed({
+                            if(stillWaiting) {
+                                // timeout has run out!
+                                onError(Throwable("$interval ${unit.name.toLowerCase()} timeout has expired."))
+                                subscription.cancel()
+                            }
+                        }, unit.toMillis(interval))
+
+                        val clientSubscription = object : Subscription {
+                            override fun cancel() {
+
+                                // cancel the source:
+                                subscription.cancel()
+
+                                // cancel the timer:
+                                stillWaiting = false
+                            }
+                        }
+
+                        subscriber.onSubscribe(clientSubscription)
+                    }
+                }
+            )
+        }
+    }
+}
+
 internal fun <T> Collection<T>.asPublisher(): Publisher<T> {
     return object : Publisher<T> {
         override fun subscribe(subscriber: Subscriber<T>) {
@@ -1070,13 +1128,16 @@ typealias CallbackReceiver<T> = (T) -> Unit
 internal fun <T> (((r: T) -> Unit) -> NetworkTask).asPublisher(): Publisher<T> {
     return object : Publisher<T> {
         override fun subscribe(subscriber: Subscriber<T>) {
+            var cancelled = false
             val networkTask = this@asPublisher.invoke { result: T ->
+                if(cancelled) return@invoke
                 subscriber.onNext(result)
                 subscriber.onComplete()
             }
             val subscription = object : Subscription {
                 override fun cancel() {
                     networkTask.cancel()
+                    cancelled = true
                 }
             }
             subscriber.onSubscribe(subscription)

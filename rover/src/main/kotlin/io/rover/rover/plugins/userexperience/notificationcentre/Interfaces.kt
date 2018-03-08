@@ -51,7 +51,7 @@ interface NotificationsRepositoryInterface {
      * A notification arrived by push.  This will asynchronously insert it into the repository. This
      * method will return immediately.
      */
-    fun notifcationArrivedByPush(notification: Notification)
+    fun notificationArrivedByPush(notification: Notification)
 
     /**
      * Request that the notification be marked as deleted.  This method will return immediately.

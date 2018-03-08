@@ -12,8 +12,10 @@ import java.util.concurrent.TimeUnit
 /**
  * A builder that will produce an [Executor] suitable for multiplexing across many blocking I/O
  * operations.
+ *
+ * TODO make internal again after DI fixes.
  */
-internal class IoMultiplexingExecutor {
+class IoMultiplexingExecutor {
     companion object {
         /**
          * This will produce an [Executor] tuned for multiplexing I/O, not for computation.
@@ -22,14 +24,14 @@ internal class IoMultiplexingExecutor {
          */
         @SuppressLint("NewApi")
         @JvmStatic
-        internal fun build(name: String): Executor {
+        fun build(name: String): Executor {
             val alwaysUseLegacyThreadPool = false
 
             val cpuCount = Runtime.getRuntime().availableProcessors()
 
             val useModernThreadPool = Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && !alwaysUseLegacyThreadPool
 
-            log.v("Setting up ioExecutor Thread Pool for $name.  Number of CPU cores: $cpuCount. Using ${if(useModernThreadPool) "forkjoin" else "legacy"} executor.")
+            // log.v("Setting up ioExecutor Thread Pool for $name.  Number of CPU cores: $cpuCount. Using ${if(useModernThreadPool) "forkjoin" else "legacy"} executor.")
 
             return if (useModernThreadPool) {
                 // The below is equivalent to:

@@ -5,11 +5,14 @@ import android.support.annotation.DrawableRes
 import io.rover.rover.core.container.Assembler
 import io.rover.rover.core.container.Container
 import io.rover.rover.platform.DateFormatting
+import io.rover.rover.platform.IoMultiplexingExecutor
 import io.rover.rover.plugins.data.graphql.WireEncoder
 import io.rover.rover.plugins.events.EventsPluginInterface
 import io.rover.rover.plugins.userexperience.DefaultTopLevelNavigation
 import io.rover.rover.plugins.userexperience.NotificationOpen
 import io.rover.rover.plugins.userexperience.TopLevelNavigation
+import io.rover.rover.plugins.userexperience.assets.AndroidAssetService
+import io.rover.rover.plugins.userexperience.assets.ImageDownloader
 
 class PushPluginAssembler(
     private val applicationContext: Context,
@@ -44,6 +47,8 @@ class PushPluginAssembler(
                 routingBehaviour
             )
 
+            val ioExecutor = IoMultiplexingExecutor.build("push plugin temporary")
+
             PushPlugin(
                 applicationContext,
                 // we need the Events Plugin because push notifications cannot work until the Events
@@ -59,6 +64,7 @@ class PushPluginAssembler(
                     routingBehaviour,
                     intentSynth
                 ),
+                AndroidAssetService(ImageDownloader(ioExecutor), ioExecutor),
                 smallIconResId,
                 smallIconDrawableLevel,
                 defaultChannelId

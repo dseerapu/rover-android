@@ -76,11 +76,16 @@ sealed class PushNotificationAction {
 }
 
 sealed class NotificationAttachment(
+    val typeName: String,
     val url: URL
 ) {
-    class Audio(url: URL): NotificationAttachment(url)
-    class Image(url: URL): NotificationAttachment(url)
-    class Video(url: URL): NotificationAttachment(url)
+    class Audio(url: URL): NotificationAttachment("audio", url)
+    class Image(url: URL): NotificationAttachment("image", url)
+    class Video(url: URL): NotificationAttachment("video", url)
+
+    override fun toString(): String {
+        return "NotificationAttachment(typeName=$typeName, url=$url)"
+    }
 
     companion object
 }
