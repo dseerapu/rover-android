@@ -72,13 +72,12 @@ class ViewImage(
                         imageView.resources.displayMetrics
                     ).androidLifecycleDispose(imageView)
                         .subscribe({ bitmap ->
-                        imageView.setImageBitmap(bitmap)
-                        imageView.animate()
-                            .alpha(viewModel.opacity)
-                            .setDuration(shortAnimationDuration.toLong())
-                            .start()
-                    }, { error -> throw(error) }, { subscriptionCallback(it) }
-                    )
+                            imageView.setImageBitmap(bitmap)
+                            imageView.animate()
+                                .alpha(viewModel.opacity)
+                                .setDuration(shortAnimationDuration.toLong())
+                                .start()
+                        }, { error -> throw(error) }, { subscriptionCallback(it) })
                 }
             }
         }

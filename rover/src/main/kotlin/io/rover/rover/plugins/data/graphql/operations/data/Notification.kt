@@ -110,6 +110,6 @@ internal fun Notification.Companion.decodeJson(json: JSONObject, dateFormatting:
         deliveredAt = json.getDate("deliveredAt", dateFormatting),
         isNotificationCenterEnabled = json.getBoolean("isNotificationCenterEnabled"),
         action = PushNotificationAction.decodeJson(json.getJSONObject("action")),
-        attachment = if (json.has("attachment")) NotificationAttachment.decodeJson(json.getJSONObject("attachment")) else null
+        attachment = if (json.has("attachment") && !json.isNull("attachment")) NotificationAttachment.decodeJson(json.getJSONObject("attachment")) else null
     )
 }

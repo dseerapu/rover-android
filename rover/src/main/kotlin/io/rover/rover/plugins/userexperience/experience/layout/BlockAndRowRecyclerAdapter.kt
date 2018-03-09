@@ -52,6 +52,8 @@ class BlockAndRowRecyclerAdapter(
             ViewType.WebView -> WebBlockView(parent.context)
             ViewType.Barcode -> BarcodeBlockView(parent.context)
         } as LayoutableView<LayoutableViewModel>
+
+        // TODO: should we delegate this to the upcoming improved DI system?
     }
 
     /**

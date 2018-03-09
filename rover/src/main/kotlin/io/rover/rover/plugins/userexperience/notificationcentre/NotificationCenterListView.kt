@@ -25,9 +25,12 @@ import io.rover.rover.Rover
 import io.rover.rover.core.logging.log
 import io.rover.rover.core.streams.androidLifecycleDispose
 import io.rover.rover.core.streams.subscribe
+import io.rover.rover.platform.IoMultiplexingExecutor
 import io.rover.rover.platform.whenNotNull
 import io.rover.rover.plugins.data.domain.Notification
 import io.rover.rover.plugins.userexperience.NotificationOpenInterface
+import io.rover.rover.plugins.userexperience.assets.AndroidAssetService
+import io.rover.rover.plugins.userexperience.assets.ImageDownloader
 import io.rover.rover.plugins.userexperience.experience.ViewModelBinding
 import io.rover.rover.plugins.userexperience.experience.concerns.BindableView
 
@@ -64,6 +67,12 @@ open class NotificationCenterListView : CoordinatorLayout, BindableView<Notifica
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
     constructor(context: Context?, attrs: AttributeSet?, defStyle: Int) : super(context, attrs, defStyle)
 
+    // TODO: this will be injected after great DI cleanup.
+
+    private val shittyLocalIoExecutor = IoMultiplexingExecutor.build("temporary notification list")
+
+    private val shittyLocalAssetService = AndroidAssetService(ImageDownloader(shittyLocalIoExecutor), shittyLocalIoExecutor)
+
     /**
      * Implement this (either directly or with an anonymous class) in your containing view for
      * [NotificationCenterListView].  You will need to provide this before you bind the view model.
@@ -84,12 +93,10 @@ open class NotificationCenterListView : CoordinatorLayout, BindableView<Notifica
      * This method will generate a row view.
      *
      * We bundle a basic row view, but if you would like to use your own row view, then you may
-     * override this method.
+     * override [NotificationItemView] with your own implementation and then override this method.
      */
-    open fun makeNotificationRowView(): View {
-        // Override this method to inflate (or programmatically create) your own row view.
-        val inflater = LayoutInflater.from(context)
-        return inflater.inflate(R.layout.notification_center_default_item, null)
+    open fun makeNotificationRowView(): NotificationItemView {
+        return NotificationItemView(context)
     }
 
     /**
@@ -104,15 +111,8 @@ open class NotificationCenterListView : CoordinatorLayout, BindableView<Notifica
         return inflater.inflate(R.layout.notification_center_default_item_delete_swipe_reveal, null)
     }
 
-    /**
-     * This method will bind a view to a notification.  If you are using a custom layout, you will
-     * need to override this.
-     */
-    open fun bindNotificationToRow(view: View, notification: Notification) {
-        (view as RelativeLayout).apply {
-            view.findViewById<TextView>(R.id.body_text).text = notification.body
-            view.findViewById<TextView>(R.id.title_text).text = notification.title
-        }
+    open fun makeNotificationItemViewModel(notification: Notification): NotificationItemViewModelInterface {
+        return NotificationItemViewModel(notification, shittyLocalAssetService)
     }
 
     override var viewModel: NotificationCenterListViewModelInterface? by ViewModelBinding { viewModel, subscriptionCallback ->
@@ -203,7 +203,8 @@ open class NotificationCenterListView : CoordinatorLayout, BindableView<Notifica
 
         override fun onBindViewHolder(holder: NotificationViewHolder, position: Int) {
             val notification = currentNotificationsList?.get(position)
-            notification.whenNotNull { holder.notification = it }
+
+            notification.whenNotNull { holder.notificationItemViewModel = makeNotificationItemViewModel(it) }
         }
 
         override fun getItemId(position: Int): Long {
@@ -304,10 +305,13 @@ open class NotificationCenterListView : CoordinatorLayout, BindableView<Notifica
         viewModel?.notificationClicked(notification)
     }
 
+    /**
+     * This [RecyclerView.ViewHolder] wraps a [NotificationItemViewModelInterface].
+     */
     private class NotificationViewHolder(
         private val context: Context,
         private val listView: NotificationCenterListView,
-        val rowItemView: View,
+        val rowItemView: NotificationItemView,
         swipeToDeleteRevealView: View,
         containerView: ViewGroup = FrameLayout(context)
     ): RecyclerView.ViewHolder(containerView) {
@@ -316,21 +320,14 @@ open class NotificationCenterListView : CoordinatorLayout, BindableView<Notifica
             containerView.addView(rowItemView)
         }
 
-        // TODO so, to display images, we really do need a view model.  need to come up with an
-        // arrangement for binding the VM through the view holder.  The VM will then subscribe to
-        // AssetService to fetch notification rich media as necessary.
-
-        var notification: Notification? = null
-            set(value) {
-                field = value
-                // delegate to the possibly-overridden binding method.
-                notification.whenNotNull { listView.bindNotificationToRow(rowItemView, it) }
-            }
+        var notificationItemViewModel: NotificationItemViewModelInterface? by ViewModelBinding { viewModel, _ ->
+            rowItemView.viewModel = viewModel
+        }
 
         init {
             rowItemView.isClickable = true
             rowItemView.setOnClickListener {
-                notification.whenNotNull { listView.notificationClicked(it) }
+                notificationItemViewModel.whenNotNull { listView.notificationClicked(it.notificationForDisplay) }
             }
         }
     }

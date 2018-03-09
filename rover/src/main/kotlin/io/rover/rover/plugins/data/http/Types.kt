@@ -20,6 +20,8 @@ sealed class HttpClientResponse {
         /**
          * The HTTP request has gotten a successful reply, and now the server is streaming the
          * response body to us.
+         *
+         * Remember to close the stream after completing reading from it!
          */
         val bufferedInputStream: BufferedInputStream
     ) : HttpClientResponse()

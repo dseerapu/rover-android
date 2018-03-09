@@ -42,6 +42,10 @@ class FetchStateRequest : NetworkRequest<DeviceState> {
                             experienceId
                             url
                         }
+                        attachment {
+                            type
+                            url
+                        }
                     }
                 }
             }

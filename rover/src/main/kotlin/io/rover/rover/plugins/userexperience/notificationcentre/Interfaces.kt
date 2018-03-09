@@ -1,5 +1,6 @@
 package io.rover.rover.plugins.userexperience.notificationcentre
 
+import android.graphics.Bitmap
 import io.rover.rover.core.streams.Observable
 import io.rover.rover.core.streams.Publisher
 import io.rover.rover.plugins.data.domain.Notification
@@ -123,4 +124,29 @@ interface NotificationCenterListViewModelInterface: BindableViewModel {
      * User did the pull down gesture to ask for a refresh.
      */
     fun requestRefresh()
+}
+
+/**
+ * View model for notification list items in the notification center.
+ */
+interface NotificationItemViewModelInterface: BindableViewModel {
+    /**
+     * Indicates whether the view should should show an image thumbnail area.
+     */
+    val showThumbnailArea: Boolean
+
+    /**
+     *
+     * (Note: normally with a view model design, one would avoid exposing the domain object
+     * to the view. In this case, to allow for more convenient extensibility, we expose it.
+     */
+    val notificationForDisplay: Notification
+
+    /**
+     * Get the image that should be displayed in the thumbnail area of a notification list item, if
+     * the Notification has Rich Media image attachment.
+     *
+     * It should be displayed with "Fill"-style scaling.
+     */
+    fun requestThumbnailImage(): Publisher<Bitmap>
 }

@@ -89,7 +89,9 @@ class GraphQlApiService(
             }
             is HttpClientResponse.Success -> {
                 try {
-                    val body = httpResponse.bufferedInputStream.reader(Charsets.UTF_8).readText()
+                    val body = httpResponse.bufferedInputStream.use {
+                        it.reader(Charsets.UTF_8).readText()
+                    }
 
                     log.v("RESPONSE BODY: $body")
                     when (body) {
