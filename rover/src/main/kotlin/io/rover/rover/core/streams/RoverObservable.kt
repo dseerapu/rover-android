@@ -1278,7 +1278,6 @@ internal fun <T> Publisher<T>.blockForResult(afterSubscribe: () -> Unit = {}): L
 
     this.subscribe(object : Subscriber<T> {
         override fun onComplete() {
-
             latch.countDown()
         }
 

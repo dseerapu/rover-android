@@ -4,6 +4,7 @@ import android.content.Context
 import android.support.annotation.DrawableRes
 import io.rover.rover.core.container.Assembler
 import io.rover.rover.core.container.Container
+import io.rover.rover.core.container.Scope
 import io.rover.rover.platform.DateFormatting
 import io.rover.rover.platform.IoMultiplexingExecutor
 import io.rover.rover.plugins.data.graphql.WireEncoder
@@ -34,8 +35,8 @@ class PushPluginAssembler(
 
     private val defaultChannelId: String? = null
 ) : Assembler {
-    override fun register(container: Container) {
-        container.register(PushPluginInterface::class.java) { resolver ->
+    override fun assemble(container: Container) {
+        container.register(Scope.Singleton, PushPluginInterface::class.java) { resolver ->
             val routingBehaviour = NotificationActionRoutingBehaviour(
                 applicationContext,
                 DefaultTopLevelNavigation(applicationContext)
@@ -54,13 +55,13 @@ class PushPluginAssembler(
                 // we need the Events Plugin because push notifications cannot work until the Events
                 // plugin reports an event containing our Firebase Push Token to the Rover API.
                 // TODO: once we expose internals to the DI layer directly inject FirebasePushTokenContextProvider here.
-                resolver.resolveOrFail(EventsPluginInterface::class.java),
+                resolver.resolveSingletonOrFail(EventsPluginInterface::class.java),
                 WireEncoder(DateFormatting()), // TODO: borrowed from data plugin, will be OK after transitioning to Sean's new layout
                 // more likely to be overridden by user.
                 NotificationOpen(
                     applicationContext,
                     WireEncoder(DateFormatting()),
-                    resolver.resolveOrFail(EventsPluginInterface::class.java),
+                    resolver.resolveSingletonOrFail(EventsPluginInterface::class.java),
                     routingBehaviour,
                     intentSynth
                 ),

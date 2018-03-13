@@ -3,6 +3,8 @@ package io.rover.rover.plugins.data
 import android.content.Context
 import io.rover.rover.core.container.Assembler
 import io.rover.rover.core.container.Container
+import io.rover.rover.core.container.Resolver
+import io.rover.rover.core.container.Scope
 import io.rover.rover.core.logging.AndroidLogger
 import io.rover.rover.core.logging.LogEmitter
 import io.rover.rover.platform.DateFormatting
@@ -83,22 +85,30 @@ open class DataPluginComponents(
  * to the Rover API and is required for all other Rover functionality.
  */
 open class DataPluginAssembler(
-    private val sdkKey: String,
+    private val accountToken: String,
     private val applicationContext: Context,
     private val url: String = "https://api.rover.io/graphql"
 ) : Assembler {
-    override fun register(container: Container) {
-        container.register(DataPluginInterface::class.java) { _ ->
+
+    override fun assemble(container: Container) {
+        container.register(
+            Scope.Singleton,
+            AuthenticationContext::class.java
+        ) { _ ->
+            ServerKey(accountToken)
+        }
+
+        container.register(Scope.Singleton, DataPluginInterface::class.java) { resolver ->
             DataPlugin(
                 DataPluginComponents(
                     URL(url),
-                    ServerKey(sdkKey),
+                    resolver.resolveSingletonOrFail(AuthenticationContext::class.java),
                     applicationContext
                 )
             )
         }
 
-        container.register(LogEmitter::class.java) { _ ->
+        container.register(Scope.Singleton, LogEmitter::class.java) { _ ->
             AndroidLogger()
         }
     }

@@ -3,6 +3,7 @@ package io.rover.rover.plugins.events
 import android.app.Application
 import io.rover.rover.core.container.Assembler
 import io.rover.rover.core.container.Container
+import io.rover.rover.core.container.Scope
 import io.rover.rover.platform.DateFormatting
 import io.rover.rover.platform.DateFormattingInterface
 import io.rover.rover.platform.LocalStorage
@@ -67,10 +68,10 @@ open class EventsPluginAssembler(
     private val resetPushToken: () -> Unit
 ): Assembler {
 
-    override fun register(container: Container) {
-        container.register(EventsPluginInterface::class.java) { resolver ->
+    override fun assemble(container: Container) {
+        container.register(Scope.Singleton, EventsPluginInterface::class.java) { resolver ->
             val components = EventsPluginComponents(
-                resolver.resolveOrFail(DataPluginInterface::class.java),
+                resolver.resolveSingletonOrFail(DataPluginInterface::class.java),
                 application,
                 resetPushToken
             )

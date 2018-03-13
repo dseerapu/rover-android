@@ -4,6 +4,8 @@ import android.content.Context
 import android.util.DisplayMetrics
 import io.rover.rover.core.container.Assembler
 import io.rover.rover.core.container.Container
+import io.rover.rover.core.container.Resolver
+import io.rover.rover.core.container.Scope
 import io.rover.rover.platform.DateFormatting
 import io.rover.rover.platform.IoMultiplexingExecutor
 import io.rover.rover.platform.LocalStorage
@@ -90,8 +92,8 @@ open class UserExperiencePluginComponents(
 class UserExperiencePluginAssembler(
     private val applicationContext: Context
 ): Assembler {
-    override fun register(container: Container) {
-        container.register(UserExperiencePluginInterface::class.java) { resolver ->
+    override fun assemble(container: Container) {
+        container.register(Scope.Singleton, UserExperiencePluginInterface::class.java, null) { resolver: Resolver ->
             UserExperiencePlugin(
                 UserExperiencePluginComponents(
                     applicationContext.resources.displayMetrics,
@@ -107,11 +109,19 @@ class UserExperiencePluginAssembler(
         }
 
         // TODO all of what follows is wrong.
-        container.register(NotificationOpenInterface::class.java) { resolver ->
+        container.register(Scope.Singleton, NotificationOpenInterface::class.java) { resolver: Resolver ->
             val topnav = DefaultTopLevelNavigation(applicationContext)
             val routingBehaviour = NotificationActionRoutingBehaviour(applicationContext, topnav)
 
-            NotificationOpen(applicationContext, WireEncoder(DateFormatting()), resolver.resolveOrFail(EventsPluginInterface::class.java), routingBehaviour, NotificationContentPendingIntentSynthesizer(applicationContext, topnav, routingBehaviour))
+            NotificationOpen(
+                applicationContext,
+                WireEncoder(DateFormatting()),
+                resolver.resolveSingletonOrFail(EventsPluginInterface::class.java),
+                routingBehaviour,
+                NotificationContentPendingIntentSynthesizer(
+                    applicationContext, topnav, routingBehaviour
+                )
+            )
         }
     }
 }

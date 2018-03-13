@@ -46,7 +46,7 @@ class NotificationsRepositorySpec: Spek({
             try {
                 Rover.initialize(
                     object : Assembler {
-                        override fun register(container: Container) {
+                        override fun assemble(container: Container) {
                             container.register(LogEmitter::class.java) { _ ->
                                 JvmLogger()
                             }
