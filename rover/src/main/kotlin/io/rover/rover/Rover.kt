@@ -5,12 +5,12 @@ import io.rover.rover.core.container.Assembler
 import io.rover.rover.core.container.ContainerResolver
 import io.rover.rover.core.container.PluginContainer
 import io.rover.rover.core.logging.LogEmitter
-import io.rover.rover.plugins.data.http.AsyncTaskAndHttpUrlConnectionNetworkClient
-import io.rover.rover.plugins.data.DataPlugin
-import io.rover.rover.plugins.events.EventsPluginInterface
-import io.rover.rover.plugins.push.PushPluginInterface
-import io.rover.rover.plugins.userexperience.NotificationOpenInterface
-import io.rover.rover.plugins.userexperience.UserExperiencePluginInterface
+import io.rover.rover.core.data.http.AsyncTaskAndHttpUrlConnectionNetworkClient
+import io.rover.rover.core.data.DataPlugin
+import io.rover.rover.core.events.EventQueueServiceInterface
+import io.rover.rover.notifications.NotificationHandlerInterface
+import io.rover.rover.experiences.NotificationOpenInterface
+import io.rover.rover.experiences.UserExperiencePluginInterface
 import java.net.HttpURLConnection
 
 /**
@@ -31,19 +31,22 @@ class Rover(
     val dataPlugin: DataPlugin
         get() = this.resolve(DataPlugin::class.java) ?: throw missingPluginError("DataPlugin")
 
+    // TODO: these accessors will likely disappear entirely and instead be replaced with usage of a DI container.
+
+    @Deprecated("Consumers will soon obtain view models from the DI container directly.")
     val userExperiencePlugin: UserExperiencePluginInterface
         get() = this.resolve(UserExperiencePluginInterface::class.java) ?: throw missingPluginError("UserExperiencePlugin")
 
-    val eventsPlugin: EventsPluginInterface
-        get() = this.resolve(EventsPluginInterface::class.java) ?: throw missingPluginError(("EventsPlugin"))
+    val eventQueue: EventQueueServiceInterface
+        get() = this.resolve(EventQueueServiceInterface::class.java) ?: throw missingPluginError(("EventQueueService"))
 
-    val pushPlugin: PushPluginInterface
-        get() = this.resolve(PushPluginInterface::class.java) ?: throw missingPluginError(("PushPlugin"))
+    val notificationHandler: NotificationHandlerInterface
+        get() = this.resolve(NotificationHandlerInterface::class.java) ?: throw missingPluginError(("NotificationHandler"))
 
     val logEmitter: LogEmitter
         get() = this.resolve(LogEmitter::class.java) ?: throw missingPluginError("LogEmitter")
 
-    val openNotification: NotificationOpenInterface
+    val notificationOpen: NotificationOpenInterface
         get() = this.resolve(NotificationOpenInterface::class.java) ?: throw missingPluginError("NotificationOpen")
 
     private fun missingPluginError(name: String): Throwable {

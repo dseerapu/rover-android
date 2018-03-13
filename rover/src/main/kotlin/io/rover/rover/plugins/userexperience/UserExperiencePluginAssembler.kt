@@ -10,29 +10,29 @@ import io.rover.rover.platform.DateFormatting
 import io.rover.rover.platform.IoMultiplexingExecutor
 import io.rover.rover.platform.LocalStorage
 import io.rover.rover.platform.SharedPreferencesLocalStorage
-import io.rover.rover.plugins.data.DataPluginInterface
-import io.rover.rover.plugins.data.graphql.WireEncoder
-import io.rover.rover.plugins.events.EventsPluginInterface
-import io.rover.rover.plugins.push.NotificationActionRoutingBehaviour
-import io.rover.rover.plugins.push.NotificationContentPendingIntentSynthesizer
-import io.rover.rover.plugins.userexperience.assets.AndroidAssetService
-import io.rover.rover.plugins.userexperience.assets.AssetService
-import io.rover.rover.plugins.userexperience.assets.ImageDownloader
-import io.rover.rover.plugins.userexperience.assets.ImageOptimizationService
-import io.rover.rover.plugins.userexperience.assets.ImageOptimizationServiceInterface
-import io.rover.rover.plugins.userexperience.experience.StockViewModelFactory
-import io.rover.rover.plugins.userexperience.experience.ViewModelFactoryInterface
+import io.rover.rover.core.data.DataPluginInterface
+import io.rover.rover.core.data.graphql.WireEncoder
+import io.rover.rover.core.events.EventQueueServiceInterface
+import io.rover.rover.notifications.NotificationActionRoutingBehaviour
+import io.rover.rover.notifications.NotificationContentPendingIntentSynthesizer
+import io.rover.rover.core.assets.AndroidAssetService
+import io.rover.rover.core.assets.AssetService
+import io.rover.rover.core.assets.ImageDownloader
+import io.rover.rover.core.assets.ImageOptimizationService
+import io.rover.rover.core.assets.ImageOptimizationServiceInterface
+import io.rover.rover.experiences.*
+import io.rover.rover.experiences.ui.StockViewModelFactory
+import io.rover.rover.experiences.ui.ViewModelFactoryInterface
 import io.rover.rover.plugins.userexperience.experience.blocks.BlockViewModelFactory
 import io.rover.rover.plugins.userexperience.experience.blocks.BlockViewModelFactoryInterface
 import io.rover.rover.plugins.userexperience.experience.blocks.concerns.text.AndroidRichTextToSpannedTransformer
 import io.rover.rover.plugins.userexperience.experience.blocks.concerns.text.RichTextToSpannedTransformer
-import java.text.DateFormat
 import java.util.concurrent.Executor
 
 open class UserExperiencePluginComponents(
     protected val displayMetrics: DisplayMetrics,
     protected val dataPluginInterface: DataPluginInterface,
-    protected val eventsPlugin: EventsPluginInterface,
+    protected val eventsPlugin: EventQueueServiceInterface,
     protected val applicationContext: Context
 ) : UserExperiencePluginComponentsInterface {
     override val stockViewModelFactory: ViewModelFactoryInterface by lazy {
@@ -100,7 +100,7 @@ class UserExperiencePluginAssembler(
                     resolver.resolve(DataPluginInterface::class.java) ?: throw RuntimeException(
                         "The User Experience Plugin requires the Data Plugin.  Make sure you have the Data Plugin added to the Assemblers list in Rover.initialize()."
                     ),
-                    resolver.resolve(EventsPluginInterface::class.java) ?: throw RuntimeException(
+                    resolver.resolve(EventQueueServiceInterface::class.java) ?: throw RuntimeException(
                         "The User Experience Plugin requires the Events Plugin.  Make sure you have the Events Plugin added to the Assemblers list in Rover.initialize()."
                     ),
                     applicationContext
@@ -116,7 +116,7 @@ class UserExperiencePluginAssembler(
             NotificationOpen(
                 applicationContext,
                 WireEncoder(DateFormatting()),
-                resolver.resolveSingletonOrFail(EventsPluginInterface::class.java),
+                resolver.resolveSingletonOrFail(EventQueueServiceInterface::class.java),
                 routingBehaviour,
                 NotificationContentPendingIntentSynthesizer(
                     applicationContext, topnav, routingBehaviour

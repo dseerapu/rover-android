@@ -2,11 +2,11 @@
 
 package io.rover.rover.platform
 
-import io.rover.rover.plugins.data.domain.DeviceState
-import io.rover.rover.plugins.data.domain.EventSnapshot
-import io.rover.rover.plugins.data.domain.Experience
-import io.rover.rover.plugins.data.graphql.WireEncoder
-import io.rover.rover.plugins.data.graphql.operations.data.encodeJson
+import io.rover.rover.core.data.domain.DeviceState
+import io.rover.rover.core.data.domain.EventSnapshot
+import io.rover.rover.core.data.domain.Experience
+import io.rover.rover.core.data.graphql.WireEncoder
+import io.rover.rover.core.data.graphql.operations.data.encodeJson
 import org.json.JSONArray
 import org.json.JSONObject
 

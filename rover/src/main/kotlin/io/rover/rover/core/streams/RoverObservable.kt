@@ -8,8 +8,7 @@ import android.arch.lifecycle.LifecycleOwner
 import android.os.Handler
 import android.os.Looper
 import android.view.View
-import io.rover.rover.core.logging.log
-import io.rover.rover.plugins.data.http.NetworkTask
+import io.rover.rover.core.data.http.NetworkTask
 import java.util.ArrayDeque
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CountDownLatch

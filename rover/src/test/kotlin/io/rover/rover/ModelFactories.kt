@@ -1,22 +1,21 @@
 package io.rover.rover
 
-import io.rover.rover.plugins.data.domain.Attributes
-import io.rover.rover.plugins.data.domain.BackgroundContentMode
-import io.rover.rover.plugins.data.domain.BackgroundScale
-import io.rover.rover.plugins.data.domain.Color
-import io.rover.rover.plugins.data.domain.HorizontalAlignment
-import io.rover.rover.plugins.data.domain.ID
-import io.rover.rover.plugins.data.domain.Insets
-import io.rover.rover.plugins.data.domain.Length
-import io.rover.rover.plugins.data.domain.Offsets
-import io.rover.rover.plugins.data.domain.Position
-import io.rover.rover.plugins.data.domain.RectangleBlock
-import io.rover.rover.plugins.data.domain.Row
-import io.rover.rover.plugins.data.domain.Screen
-import io.rover.rover.plugins.data.domain.StatusBarStyle
-import io.rover.rover.plugins.data.domain.TitleBarButtons
-import io.rover.rover.plugins.data.domain.UnitOfMeasure
-import io.rover.rover.plugins.data.domain.VerticalAlignment
+import io.rover.rover.core.data.domain.BackgroundContentMode
+import io.rover.rover.core.data.domain.BackgroundScale
+import io.rover.rover.core.data.domain.Color
+import io.rover.rover.core.data.domain.HorizontalAlignment
+import io.rover.rover.core.data.domain.ID
+import io.rover.rover.core.data.domain.Insets
+import io.rover.rover.core.data.domain.Length
+import io.rover.rover.core.data.domain.Offsets
+import io.rover.rover.core.data.domain.Position
+import io.rover.rover.core.data.domain.RectangleBlock
+import io.rover.rover.core.data.domain.Row
+import io.rover.rover.core.data.domain.Screen
+import io.rover.rover.core.data.domain.StatusBarStyle
+import io.rover.rover.core.data.domain.TitleBarButtons
+import io.rover.rover.core.data.domain.UnitOfMeasure
+import io.rover.rover.core.data.domain.VerticalAlignment
 
 class ModelFactories {
     companion object {

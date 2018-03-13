@@ -1,8 +1,9 @@
 package io.rover.rover.plugins.userexperience
 
 import io.rover.rover.Rover
-import io.rover.rover.plugins.userexperience.experience.StockViewModelFactory
-import io.rover.rover.plugins.userexperience.experience.ViewModelFactoryInterface
+import io.rover.rover.experiences.UserExperiencePluginComponentsInterface
+import io.rover.rover.experiences.UserExperiencePluginInterface
+import io.rover.rover.experiences.ui.ViewModelFactoryInterface
 
 /**
  * This is the Rover User Experience plugin.  It contains the entire Rover Experiences system.
