@@ -1,23 +1,7 @@
 package io.rover.rover.core.events
 
-import android.app.Application
-import io.rover.rover.platform.DateFormattingInterface
-import io.rover.rover.platform.LocalStorage
-import io.rover.rover.core.data.DataPluginInterface
 import io.rover.rover.core.data.domain.Context
 import io.rover.rover.core.events.domain.Event
-
-interface EventsPluginComponentsInterface {
-    val dataPlugin: DataPluginInterface
-
-    val localStorage: LocalStorage
-
-    val dateFormatting: DateFormattingInterface
-
-    val application: Application
-
-    val contextProviders: List<ContextProvider>
-}
 
 /**
  * Objects that can contribute to a [Context] structure.

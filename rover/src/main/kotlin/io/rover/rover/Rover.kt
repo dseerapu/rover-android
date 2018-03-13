@@ -6,7 +6,6 @@ import io.rover.rover.core.container.ContainerResolver
 import io.rover.rover.core.container.PluginContainer
 import io.rover.rover.core.logging.LogEmitter
 import io.rover.rover.core.data.http.AsyncTaskAndHttpUrlConnectionNetworkClient
-import io.rover.rover.core.data.DataPlugin
 import io.rover.rover.core.events.EventQueueServiceInterface
 import io.rover.rover.notifications.NotificationHandlerInterface
 import io.rover.rover.experiences.NotificationOpenInterface
@@ -27,10 +26,6 @@ import java.net.HttpURLConnection
 class Rover(
     assemblers: List<Assembler>
 ): ContainerResolver by PluginContainer(assemblers) {
-
-    val dataPlugin: DataPlugin
-        get() = this.resolve(DataPlugin::class.java) ?: throw missingPluginError("DataPlugin")
-
     // TODO: these accessors will likely disappear entirely and instead be replaced with usage of a DI container.
 
     @Deprecated("Consumers will soon obtain view models from the DI container directly.")

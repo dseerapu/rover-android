@@ -7,7 +7,7 @@ import io.rover.rover.core.events.ContextProvider
 /**
  * Captures and adds the Rover SDK version number to [Context].
  */
-class RoverSdkContextProvider : ContextProvider {
+class RoverSdkCoreVersionContextProvider : ContextProvider {
     override fun captureContext(context: Context): Context {
         return context.copy(
             frameworks = context.frameworks.plus(hashMapOf(

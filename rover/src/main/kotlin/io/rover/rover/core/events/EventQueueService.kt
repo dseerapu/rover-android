@@ -9,10 +9,13 @@ import io.rover.rover.core.logging.log
 import io.rover.rover.core.data.NetworkResult
 import io.rover.rover.core.data.domain.Context
 import io.rover.rover.core.data.domain.EventSnapshot
+import io.rover.rover.core.data.graphql.GraphQlApiServiceInterface
 import io.rover.rover.core.data.graphql.getObjectIterable
 import io.rover.rover.core.data.graphql.operations.data.asJson
 import io.rover.rover.core.data.graphql.operations.data.decodeJson
 import io.rover.rover.core.events.domain.Event
+import io.rover.rover.platform.DateFormattingInterface
+import io.rover.rover.platform.LocalStorage
 import org.json.JSONArray
 import java.util.Deque
 import java.util.LinkedList
@@ -20,7 +23,10 @@ import java.util.concurrent.Executors
 
 
 class EventQueueService(
-    private val eventsPluginComponents: EventsPluginComponentsInterface,
+    private val graphQlApiService: GraphQlApiServiceInterface,
+    localStorage: LocalStorage,
+    private val dateFormatting: DateFormattingInterface,
+    application: Application,
     private val flushAt: Int,
     private val flushIntervalSeconds: Double,
     private val maxBatchSize: Int,
@@ -28,7 +34,7 @@ class EventQueueService(
 ) : EventQueueServiceInterface {
     private val serialQueueExecutor = Executors.newSingleThreadExecutor()
     private val contextProviders: MutableList<ContextProvider> = mutableListOf()
-    private val keyValueStorage = eventsPluginComponents.localStorage.getKeyValueStorageFor(Companion.STORAGE_CONTEXT_IDENTIFIER)
+    private val keyValueStorage = localStorage.getKeyValueStorageFor(Companion.STORAGE_CONTEXT_IDENTIFIER)
 
     // state:
     private val eventQueue: Deque<EventSnapshot> = LinkedList()
@@ -68,7 +74,7 @@ class EventQueueService(
 
     private fun persistEvents() {
         serialQueueExecutor.execute {
-            val json = JSONArray(eventQueue.map { event -> event.asJson(eventsPluginComponents.dateFormatting) }).toString(4)
+            val json = JSONArray(eventQueue.map { event -> event.asJson(dateFormatting) }).toString(4)
             keyValueStorage.set(Companion.QUEUE_KEY, json)
         }
     }
@@ -85,7 +91,7 @@ class EventQueueService(
         if(storedJson != null) {
             val decoded = try {
                 JSONArray(storedJson).getObjectIterable().map { jsonObject ->
-                    EventSnapshot.decodeJson(jsonObject, eventsPluginComponents.dateFormatting)
+                    EventSnapshot.decodeJson(jsonObject, dateFormatting)
                 }
             } catch (e: Throwable) {
                 log.w("Invalid persisted events queue.  Ignoring and starting fresh. ${e.message}")
@@ -122,7 +128,7 @@ class EventQueueService(
 
             isFlushingEvents = true
 
-            eventsPluginComponents.dataPlugin.sendEventsTask(events) { networkResult ->
+            graphQlApiService.sendEventsTask(events) { networkResult ->
                 when(networkResult) {
                     is NetworkResult.Error -> {
                         log.w("Error delivering ${events.count()} to the Rover API: ${networkResult.throwable.message}")
@@ -187,7 +193,7 @@ class EventQueueService(
         scheduleFlushPoll()
 
         // TODO: wire up Application-level activity callbacks after all to flush queue whenever an activity pauses.
-        eventsPluginComponents.application.registerActivityLifecycleCallbacks(
+        application.registerActivityLifecycleCallbacks(
             object : Application.ActivityLifecycleCallbacks {
                 override fun onActivityPaused(activity: Activity?) {
                     log.d("An Activity is pausing, flushing Rover events queue.")

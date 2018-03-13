@@ -6,7 +6,6 @@ import io.rover.rover.core.logging.log
 import io.rover.rover.platform.DeviceIdentificationInterface
 import io.rover.rover.core.data.APIException
 import io.rover.rover.core.data.AuthenticationContext
-import io.rover.rover.core.data.DataPlugin
 import io.rover.rover.core.data.NetworkError
 import io.rover.rover.core.data.NetworkRequest
 import io.rover.rover.core.data.NetworkResult

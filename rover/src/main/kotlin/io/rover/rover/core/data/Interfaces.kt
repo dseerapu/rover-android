@@ -108,8 +108,6 @@ interface NetworkRequest<out TInput> {
     }
 }
 
-interface DataPluginInterface: GraphQlApiServiceInterface
-
 class APIException(
     val errors: List<Exception>
 ) : Exception("Rover API reported: ${errors.map { it.message }.joinToString(", ")}")
