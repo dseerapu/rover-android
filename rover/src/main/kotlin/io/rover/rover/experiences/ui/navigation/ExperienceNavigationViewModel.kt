@@ -2,6 +2,7 @@ package io.rover.rover.plugins.userexperience.experience.navigation
 
 import android.annotation.SuppressLint
 import android.os.Parcelable
+import io.rover.rover.core.container.Resolver
 import io.rover.rover.core.data.domain.Experience
 import io.rover.rover.core.logging.log
 import io.rover.rover.platform.whenNotNull
@@ -28,6 +29,7 @@ import io.rover.rover.plugins.userexperience.experience.blocks.BlockViewModelFac
 import io.rover.rover.plugins.userexperience.experience.containers.StandaloneExperienceHostActivity
 import io.rover.rover.plugins.userexperience.experience.toolbar.ExperienceToolbarViewModelInterface
 import io.rover.rover.plugins.userexperience.experience.layout.screen.ScreenViewModelInterface
+import io.rover.rover.plugins.userexperience.experience.toolbar.ToolbarConfiguration
 import kotlinx.android.parcel.Parcelize
 
 /**
@@ -39,9 +41,11 @@ import kotlinx.android.parcel.Parcelize
  */
 open class ExperienceNavigationViewModel(
     private val experience: Experience,
-    private val blockViewModelFactory: BlockViewModelFactoryInterface,
-    private val viewModelFactory: ViewModelFactoryInterface,
+//    private val blockViewModelFactory: BlockViewModelFactoryInterface,
+//    private val viewModelFactory: ViewModelFactoryInterface,
     private val eventsPlugin: EventQueueServiceInterface,
+    private val resolveScreenViewModel: (screen: Screen) -> ScreenViewModelInterface,
+    private val resolveToolbarViewModel: (configuration: ToolbarConfiguration) -> ExperienceToolbarViewModelInterface,
     // TODO: consider an optional interface type here called "CustomNavigationBehaviour", which implementers may provide if they want custom nav
     icicle: Parcelable? = null
 ) : ExperienceNavigationViewModelInterface {
@@ -60,7 +64,7 @@ open class ExperienceNavigationViewModel(
     // TODO: right now we bring up viewmodels for the *entire* experience (ie., all the screens at
     // once).  This is unnecessary.  It should be lazy instead.
     private val screenViewModelsById: Map<String, ScreenViewModelInterface> = screensById.mapValues {
-        blockViewModelFactory.viewModelForScreen(it.value)
+        resolveScreenViewModel(it.value)
     }
 
     init {
@@ -278,7 +282,7 @@ open class ExperienceNavigationViewModel(
             is ExperienceNavigationViewModelInterface.Emission.Update.GoToScreen -> event.screenViewModel.appBarConfiguration
             else -> null
         }.whenNotNull {
-            val toolbarViewModel = viewModelFactory.viewModelForExperienceToolbar(it)
+            val toolbarViewModel = resolveToolbarViewModel(it)
             ExperienceNavigationViewModelInterface.Emission.Update.SetActionBar(
                 toolbarViewModel
             )

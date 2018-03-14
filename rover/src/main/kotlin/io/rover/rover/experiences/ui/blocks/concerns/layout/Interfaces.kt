@@ -55,7 +55,18 @@ interface Measurable {
 }
 
 /**
- * A view model for Blocks (particularly, the dynamic layout thereof).
+ * This is a complete "top-level" block within an experience row.
+ *
+ * This exists to discriminate between BlockViewModelInterface, which is specifically only block
+ * level concerns shared by all blocks, but has its own mixin implementation -- BlockViewModel --
+ * that would cause an ambiguity with the
+ *
+ * TODO rename to RowBlockViewModel, TopLevelBlockViewModel, or something
+ */
+interface CompositeBlockViewModelInterface : BlockViewModelInterface
+
+/**
+ * A view model for Blocks (particularly, the dynamic layout concerns thereof).  Note
  */
 interface BlockViewModelInterface : LayoutableViewModel {
 

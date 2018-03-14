@@ -111,19 +111,3 @@ interface NetworkRequest<out TInput> {
 class APIException(
     val errors: List<Exception>
 ) : Exception("Rover API reported: ${errors.map { it.message }.joinToString(", ")}")
-
-interface DataPluginComponentsInterface {
-    val authenticationContext: AuthenticationContext
-
-    val networkClient: NetworkClient
-
-    val wireEncoder: WireEncoderInterface
-
-    val ioExecutor: Executor
-
-    val deviceIdentification: DeviceIdentificationInterface
-
-    val dateFormatting: DateFormattingInterface
-
-    val graphQlApiService: GraphQlApiServiceInterface
-}

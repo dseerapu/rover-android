@@ -10,6 +10,7 @@ import io.rover.rover.core.data.http.WireEncoderInterface
 import io.rover.rover.core.events.EventQueueServiceInterface
 import io.rover.rover.core.events.domain.Event
 import io.rover.rover.notifications.NotificationActionRoutingBehaviour
+import io.rover.rover.notifications.NotificationActionRoutingBehaviourInterface
 import io.rover.rover.notifications.NotificationContentPendingIntentSynthesizerInterface
 import org.json.JSONObject
 
@@ -20,7 +21,7 @@ open class NotificationOpen(
     private val applicationContext: Context,
     private val wireEncoder: WireEncoderInterface,
     private val eventsService: EventQueueServiceInterface,
-    private val routingBehaviour: NotificationActionRoutingBehaviour,
+    private val routingBehaviour: NotificationActionRoutingBehaviourInterface,
     private val notificationContentPendingIntentSynthesizer: NotificationContentPendingIntentSynthesizerInterface
 ): NotificationOpenInterface {
     override fun pendingIntentForAndroidNotification(notification: Notification): PendingIntent {

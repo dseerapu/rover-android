@@ -3,6 +3,7 @@ package io.rover.rover.plugins.userexperience.experience.blocks.web
 import io.rover.rover.plugins.userexperience.experience.blocks.concerns.background.BackgroundViewModelInterface
 import io.rover.rover.plugins.userexperience.experience.blocks.concerns.border.BorderViewModelInterface
 import io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout.BlockViewModelInterface
+import io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout.CompositeBlockViewModelInterface
 import io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout.LayoutableViewModel
 import java.net.URL
 
@@ -16,6 +17,7 @@ interface WebViewModelInterface {
 }
 
 interface WebViewBlockViewModelInterface :
+    CompositeBlockViewModelInterface,
     LayoutableViewModel,
     BlockViewModelInterface,
     BackgroundViewModelInterface,

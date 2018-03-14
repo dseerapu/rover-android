@@ -23,15 +23,17 @@ class PluginContainer(
         return doResolve<T, () -> T>(type, name)?.invoke()
     }
 
-    override fun <T : Any, Arg1 : Any> resolve(type: Class<T>, name: String?, arg1: Arg1): T? {
+
+
+    override fun <T : Any, Arg1> resolve(type: Class<T>, name: String?, arg1: Arg1): T? {
         return doResolve<T, (Arg1) -> T>(type, name)?.invoke(arg1)
     }
 
-    override fun <T : Any, Arg1 : Any, Arg2: Any> resolve(type: Class<T>, name: String?, arg1: Arg1, arg2: Arg2): T? {
+    override fun <T : Any, Arg1, Arg2> resolve(type: Class<T>, name: String?, arg1: Arg1, arg2: Arg2): T? {
         return doResolve<T, (Arg1, Arg2) -> T>(type, name)?.invoke(arg1, arg2)
     }
 
-    override fun <T : Any, Arg1 : Any, Arg2: Any, Arg3: Any> resolve(type: Class<T>, name: String?, arg1: Arg1, arg2: Arg2, arg3: Arg3): T? {
+    override fun <T : Any, Arg1, Arg2, Arg3> resolve(type: Class<T>, name: String?, arg1: Arg1, arg2: Arg2, arg3: Arg3): T? {
         return doResolve<T, (Arg1, Arg2, Arg3) -> T>(type, name)?.invoke(arg1, arg2, arg3)
     }
 
@@ -86,15 +88,15 @@ class PluginContainer(
         doRegister(scope, type, factory, name)
     }
 
-    override fun <T : Any, Arg1 : Any> register(scope: Scope, type: Class<T>, name: String?, factory: (Resolver, Arg1) -> T) {
+    override fun <T : Any, Arg1> register(scope: Scope, type: Class<T>, name: String?, factory: (Resolver, Arg1) -> T) {
         doRegisterWithArgs(scope, type, factory, name)
     }
 
-    override fun <T : Any, Arg1 : Any, Arg2: Any> register(scope: Scope, type: Class<T>, name: String?, factory: (Resolver, Arg1, Arg2) -> T) {
+    override fun <T : Any, Arg1, Arg2> register(scope: Scope, type: Class<T>, name: String?, factory: (Resolver, Arg1, Arg2) -> T) {
         doRegisterWithArgs(scope, type, factory, name)
     }
 
-    override fun <T : Any, Arg1 : Any, Arg2: Any, Arg3: Any> register(scope: Scope, type: Class<T>, name: String?, factory: (Resolver, Arg1, Arg2, Arg3) -> T) {
+    override fun <T : Any, Arg1, Arg2, Arg3> register(scope: Scope, type: Class<T>, name: String?, factory: (Resolver, Arg1, Arg2, Arg3) -> T) {
         doRegisterWithArgs(scope, type, factory, name)
     }
 

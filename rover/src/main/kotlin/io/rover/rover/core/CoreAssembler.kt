@@ -19,6 +19,8 @@ import io.rover.rover.core.events.EventQueueServiceInterface
 import io.rover.rover.core.events.contextproviders.*
 import io.rover.rover.core.logging.AndroidLogger
 import io.rover.rover.core.logging.LogEmitter
+import io.rover.rover.core.streams.Scheduler
+import io.rover.rover.core.streams.forAndroidMainThread
 import io.rover.rover.platform.*
 import java.net.URL
 import java.util.concurrent.Executor
@@ -50,6 +52,11 @@ class CoreAssembler(
     private val resetPushToken: () -> Unit
 ): Assembler {
     override fun assemble(container: Container) {
+//        container.register(
+//            Scope.Singleton,
+//            Application::class.java
+//        ) { _ -> application }
+
         // logger
         container.register(Scope.Singleton, LogEmitter::class.java) { _ ->
             AndroidLogger()
@@ -63,12 +70,16 @@ class CoreAssembler(
             DateFormatting()
         }
 
-        container.register(Scope.Singleton, WireEncoder::class.java) { resolver ->
+        container.register(Scope.Singleton, WireEncoderInterface::class.java) { resolver ->
             WireEncoder(resolver.resolveSingletonOrFail(DateFormattingInterface::class.java))
         }
 
         container.register(Scope.Singleton, Executor::class.java, "io") { _ ->
             IoMultiplexingExecutor.build("io")
+        }
+
+        container.register(Scope.Singleton, Scheduler::class.java, "main") { _ ->
+            Scheduler.forAndroidMainThread()
         }
 
         container.register(Scope.Singleton, LocalStorage::class.java) { _ ->

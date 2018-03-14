@@ -6,6 +6,7 @@ import io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout.L
 import io.rover.rover.plugins.userexperience.experience.blocks.concerns.background.BackgroundViewModelInterface
 import io.rover.rover.plugins.userexperience.experience.blocks.concerns.border.BorderViewModelInterface
 import io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout.BlockViewModel
+import io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout.CompositeBlockViewModelInterface
 import io.rover.rover.plugins.userexperience.experience.blocks.concerns.text.TextViewModelInterface
 import io.rover.rover.plugins.userexperience.experience.concerns.BindableViewModel
 
@@ -51,6 +52,7 @@ interface ButtonViewModelInterface {
 }
 
 interface ButtonBlockViewModelInterface :
+    CompositeBlockViewModelInterface,
     LayoutableViewModel,
     BlockViewModelInterface,
     ButtonViewModelInterface

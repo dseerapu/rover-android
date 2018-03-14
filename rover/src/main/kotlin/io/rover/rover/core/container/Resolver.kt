@@ -19,7 +19,7 @@ interface Resolver {
      * Dot not use this method to resolve objects registered with [Scope.Singleton] scope, because
      * they must not accept arguments.
      */
-    fun <T: Any, Arg1: Any> resolve(type: Class<T>, name: String?, arg1: Arg1): T?
+    fun <T: Any, Arg1> resolve(type: Class<T>, name: String?, arg1: Arg1): T?
 
     /**
      * Retrieve an object for the given type and name.  The appropriate registered factory
@@ -29,7 +29,7 @@ interface Resolver {
      * Dot not use this method to resolve objects registered with [Scope.Singleton] scope, because
      * they must not accept arguments.
      */
-    fun <T: Any, Arg1: Any, Arg2: Any> resolve(type: Class<T>, name: String?, arg1: Arg1, arg2: Arg2): T?
+    fun <T: Any, Arg1, Arg2> resolve(type: Class<T>, name: String?, arg1: Arg1, arg2: Arg2): T?
 
     /**
      * Retrieve an object for the given type and name.  The appropriate registered factory
@@ -39,7 +39,7 @@ interface Resolver {
      * Dot not use this method to resolve objects registered with [Scope.Singleton] scope, because
      * they must not accept arguments.
      */
-    fun <T: Any, Arg1: Any, Arg2: Any, Arg3: Any> resolve(type: Class<T>, name: String?, arg1: Arg1, arg2: Arg2, arg3: Arg3): T?
+    fun <T: Any, Arg1, Arg2, Arg3> resolve(type: Class<T>, name: String?, arg1: Arg1, arg2: Arg2, arg3: Arg3): T?
 
     /**
      * Retrieve an object for the given type and name.  The appropriate registered factory

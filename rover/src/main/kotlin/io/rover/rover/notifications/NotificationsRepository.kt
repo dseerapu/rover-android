@@ -5,10 +5,10 @@ import io.rover.rover.core.streams.*
 import io.rover.rover.platform.DateFormattingInterface
 import io.rover.rover.platform.LocalStorage
 import io.rover.rover.platform.whenNotNull
-import io.rover.rover.core.data.DataPluginInterface
 import io.rover.rover.core.data.NetworkResult
 import io.rover.rover.core.data.domain.DeviceState
 import io.rover.rover.core.data.domain.Notification
+import io.rover.rover.core.data.graphql.GraphQlApiServiceInterface
 import io.rover.rover.core.data.graphql.getObjectIterable
 import io.rover.rover.core.data.graphql.operations.data.decodeJson
 import io.rover.rover.core.data.graphql.operations.data.encodeJson
@@ -25,7 +25,7 @@ import java.util.concurrent.Executor
  * Must be a singleton.
  */
 class NotificationsRepository(
-    private val dataPlugin: DataPluginInterface,
+    private val graphQlApiService: GraphQlApiServiceInterface,
     private val dateFormatting: DateFormattingInterface,
     private val ioExecutor: Executor,
     mainThreadScheduler: Scheduler,
@@ -74,7 +74,7 @@ class NotificationsRepository(
         data class Succeeded(val notifications: List<Notification>): CloudFetchResult()
     }
     private fun latestNotificationsFromCloud(): Publisher<CloudFetchResult> {
-        return { callback: CallbackReceiver<NetworkResult<DeviceState>> ->  dataPlugin.fetchStateTask(callback) }
+        return { callback: CallbackReceiver<NetworkResult<DeviceState>> ->  graphQlApiService.fetchStateTask(callback) }
             .asPublisher()
             .doOnSubscribe { log.v("Refreshing device state to obtain notifications list.") }
             .map { networkResult ->

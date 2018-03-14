@@ -20,7 +20,7 @@ import io.rover.rover.plugins.userexperience.experience.layout.row.RowViewModelI
 class ScreenViewModel(
     private val screen: Screen,
     private val backgroundViewModel: BackgroundViewModelInterface,
-    private val viewModelFactory: BlockViewModelFactoryInterface
+    private val resolveNavigationViewModel: (row: Row) -> RowViewModelInterface
 ) : ScreenViewModelInterface,
     BackgroundViewModelInterface by backgroundViewModel {
 
@@ -39,7 +39,7 @@ class ScreenViewModel(
     private val rowViewModelsById : Map<String, RowViewModelInterface> by lazy {
         rowsById.mapValues { (_, row) ->
             // TODO: why on earth is this copy() here?
-            viewModelFactory.viewModelForRow(row.copy(blocks = row.blocks))
+            resolveNavigationViewModel(row.copy(blocks = row.blocks))
         }
     }
 

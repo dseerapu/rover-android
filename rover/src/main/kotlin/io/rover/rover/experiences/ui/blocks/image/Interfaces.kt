@@ -9,6 +9,7 @@ import io.rover.rover.plugins.userexperience.experience.blocks.concerns.border.B
 import io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout.BlockViewModelInterface
 import io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout.LayoutableViewModel
 import io.rover.rover.experiences.types.PixelSize
+import io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout.CompositeBlockViewModelInterface
 import io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout.Measurable
 
 interface ViewImageInterface {
@@ -34,6 +35,7 @@ interface ImageViewModelInterface : Measurable {
 }
 
 interface ImageBlockViewModelInterface :
+    CompositeBlockViewModelInterface,
     LayoutableViewModel,
     BlockViewModelInterface,
     BackgroundViewModelInterface,

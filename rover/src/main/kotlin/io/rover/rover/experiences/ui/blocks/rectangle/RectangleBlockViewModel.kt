@@ -9,7 +9,7 @@ import io.rover.rover.plugins.userexperience.experience.blocks.concerns.border.B
 class RectangleBlockViewModel(
     blockViewModel: BlockViewModelInterface,
     backgroundViewModel: BackgroundViewModelInterface,
-    borderViewModel: BorderViewModel
+    borderViewModel: BorderViewModelInterface
 ) : RectangleBlockViewModelInterface,
     BlockViewModelInterface by blockViewModel,
     BackgroundViewModelInterface by backgroundViewModel,

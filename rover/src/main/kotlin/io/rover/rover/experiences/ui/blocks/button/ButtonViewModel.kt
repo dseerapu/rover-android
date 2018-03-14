@@ -1,6 +1,7 @@
 package io.rover.rover.plugins.userexperience.experience.blocks.button
 
 import io.rover.rover.core.data.domain.ButtonBlock
+import io.rover.rover.core.data.domain.ButtonState
 import io.rover.rover.core.streams.Observable
 import io.rover.rover.core.streams.map
 import io.rover.rover.core.streams.share
@@ -10,12 +11,13 @@ import io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout.B
 class ButtonViewModel(
     block: ButtonBlock,
     blockViewModel: BlockViewModelInterface,
-    viewModelFactory: BlockViewModelFactoryInterface
+    // viewModelFactory: BlockViewModelFactoryInterface
+    stateViewModelResolver: (buttonState: ButtonState) -> ButtonStateViewModelInterface
 ) : ButtonViewModelInterface {
-    private val normalStateViewModel = viewModelFactory.viewModelForButtonState(block.normal)
-    private val disabledStateViewModel = viewModelFactory.viewModelForButtonState(block.disabled)
-    private val highlightedStateViewModel = viewModelFactory.viewModelForButtonState(block.highlighted)
-    private val selectedStateViewModel = viewModelFactory.viewModelForButtonState(block.selected)
+    private val normalStateViewModel = stateViewModelResolver(block.normal)
+    private val disabledStateViewModel = stateViewModelResolver(block.disabled)
+    private val highlightedStateViewModel = stateViewModelResolver(block.highlighted)
+    private val selectedStateViewModel = stateViewModelResolver(block.selected)
 
     private val epic = blockViewModel
         .events

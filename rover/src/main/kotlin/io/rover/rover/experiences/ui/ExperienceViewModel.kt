@@ -6,7 +6,7 @@ import io.rover.rover.core.data.domain.Experience
 import io.rover.rover.core.data.domain.ID
 import io.rover.rover.core.logging.log
 import io.rover.rover.core.data.NetworkResult
-import io.rover.rover.core.data.DataPluginInterface
+import io.rover.rover.core.data.graphql.GraphQlApiServiceInterface
 import io.rover.rover.core.streams.CallbackReceiver
 import io.rover.rover.core.streams.Observable
 import io.rover.rover.core.streams.PublishSubject
@@ -24,8 +24,8 @@ import kotlinx.android.parcel.Parcelize
 
 class ExperienceViewModel(
     private val experienceId: String,
-    private val dataPlugin: DataPluginInterface,
-    private val viewModelFactory: ViewModelFactoryInterface,
+    private val graphQlApiService: GraphQlApiServiceInterface,
+    private val resolveNavigationViewModel: (experience: Experience, icicle: Parcelable?) -> ExperienceNavigationViewModelInterface,
     private val icicle: Parcelable? = null
 ) : ExperienceViewModelInterface {
     private var navigationViewModel: ExperienceNavigationViewModelInterface? = null
@@ -51,7 +51,7 @@ class ExperienceViewModel(
     private val actions = actionSource.share()
 
     private fun fetchExperience(): Publisher<NetworkResult<Experience>> =
-        ({ callback: CallbackReceiver<NetworkResult<Experience>> -> dataPlugin.fetchExperienceTask(ID(experienceId), callback) }).asPublisher()
+        ({ callback: CallbackReceiver<NetworkResult<Experience>> -> graphQlApiService.fetchExperienceTask(ID(experienceId), callback) }).asPublisher()
 
     private val epic: Observable<ExperienceViewModelInterface.Event> =
         Observable.merge(
@@ -73,9 +73,12 @@ class ExperienceViewModel(
                             )
                         )
                         is NetworkResult.Success -> {
-                            val navigationViewModel = viewModelFactory.viewModelForExperienceNavigation(
-                                networkResult.response, (state as State).navigationState
+
+                            val navigationViewModel = resolveNavigationViewModel(
+                                networkResult.response,
+                                (state as State).navigationState
                             )
+
                             val experienceReadyEvent = ExperienceViewModelInterface.Event.ExperienceReady(navigationViewModel)
 
                             Observable.concat(
