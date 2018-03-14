@@ -1,7 +1,7 @@
-package io.rover.rover.plugins.userexperience.experience.blocks.concerns.border
+package io.rover.rover.experiences.ui.blocks.concerns.border
 
 import io.rover.rover.core.data.domain.Border
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout.LayoutPaddingDeflection
+import io.rover.rover.experiences.ui.blocks.concerns.layout.LayoutPaddingDeflection
 
 /**
  * Binds [BorderViewModelInterface] properties to that of a view.

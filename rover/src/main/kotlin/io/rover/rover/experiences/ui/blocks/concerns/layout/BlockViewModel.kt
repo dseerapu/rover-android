@@ -1,4 +1,4 @@
-package io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout
+package io.rover.rover.experiences.ui.blocks.concerns.layout
 
 import io.rover.rover.core.logging.log
 import io.rover.rover.core.streams.PublishSubject
@@ -9,10 +9,10 @@ import io.rover.rover.core.data.domain.BlockAction
 import io.rover.rover.core.data.domain.HorizontalAlignment
 import io.rover.rover.core.data.domain.Position
 import io.rover.rover.core.data.domain.VerticalAlignment
-import io.rover.rover.plugins.userexperience.experience.layout.ViewType
-import io.rover.rover.plugins.userexperience.experience.layout.measuredAgainst
-import io.rover.rover.plugins.userexperience.experience.layout.screen.ScreenViewModel
-import io.rover.rover.plugins.userexperience.experience.navigation.NavigateTo
+import io.rover.rover.experiences.ui.layout.ViewType
+import io.rover.rover.experiences.ui.layout.measuredAgainst
+import io.rover.rover.experiences.ui.layout.screen.ScreenViewModel
+import io.rover.rover.experiences.ui.navigation.NavigateTo
 import io.rover.rover.experiences.types.RectF
 
 /**

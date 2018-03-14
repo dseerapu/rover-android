@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.support.v4.app.NavUtils
-import io.rover.rover.plugins.userexperience.experience.containers.StandaloneExperienceHostActivity
+import io.rover.rover.experiences.ui.containers.StandaloneExperienceHostActivity
 
 /**
  * A default version of [TopLevelNavigation] that will use the two Activities bundled with the Rover

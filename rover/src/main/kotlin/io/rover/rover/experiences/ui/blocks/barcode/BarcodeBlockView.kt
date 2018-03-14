@@ -1,15 +1,15 @@
-package io.rover.rover.plugins.userexperience.experience.blocks.barcode
+package io.rover.rover.experiences.ui.blocks.barcode
 
 import android.content.Context
 import android.graphics.Canvas
 import android.support.v7.widget.AppCompatImageView
 import android.util.AttributeSet
 import io.rover.rover.experiences.ui.ViewModelBinding
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout.LayoutableView
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.background.ViewBackground
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout.ViewBlock
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.border.ViewBorder
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.ViewComposition
+import io.rover.rover.experiences.ui.blocks.concerns.layout.LayoutableView
+import io.rover.rover.experiences.ui.blocks.concerns.background.ViewBackground
+import io.rover.rover.experiences.ui.blocks.concerns.layout.ViewBlock
+import io.rover.rover.experiences.ui.blocks.concerns.border.ViewBorder
+import io.rover.rover.experiences.ui.blocks.concerns.ViewComposition
 
 class BarcodeBlockView : AppCompatImageView, LayoutableView<BarcodeBlockViewModelInterface> {
     constructor(context: Context?) : super(context)

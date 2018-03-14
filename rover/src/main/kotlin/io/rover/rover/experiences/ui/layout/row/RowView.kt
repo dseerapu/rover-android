@@ -1,4 +1,4 @@
-package io.rover.rover.plugins.userexperience.experience.layout.row
+package io.rover.rover.experiences.ui.layout.row
 
 import android.content.Context
 import android.graphics.Canvas
@@ -6,9 +6,9 @@ import android.os.Build
 import android.support.annotation.RequiresApi
 import android.util.AttributeSet
 import android.view.View
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.ViewComposition
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.background.ViewBackground
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout.LayoutableView
+import io.rover.rover.experiences.ui.blocks.concerns.ViewComposition
+import io.rover.rover.experiences.ui.blocks.concerns.background.ViewBackground
+import io.rover.rover.experiences.ui.blocks.concerns.layout.LayoutableView
 
 class RowView : View, LayoutableView<RowViewModelInterface> {
     constructor(context: Context?) : super(context)

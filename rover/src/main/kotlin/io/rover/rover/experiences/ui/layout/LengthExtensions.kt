@@ -1,6 +1,6 @@
 @file:JvmName("LengthExtensions")
 
-package io.rover.rover.plugins.userexperience.experience.layout
+package io.rover.rover.experiences.ui.layout
 
 import io.rover.rover.core.data.domain.Length
 import io.rover.rover.core.data.domain.UnitOfMeasure

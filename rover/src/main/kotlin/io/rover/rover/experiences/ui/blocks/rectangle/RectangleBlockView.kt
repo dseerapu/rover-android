@@ -1,4 +1,4 @@
-package io.rover.rover.plugins.userexperience.experience.blocks.rectangle
+package io.rover.rover.experiences.ui.blocks.rectangle
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -8,10 +8,10 @@ import android.support.annotation.RequiresApi
 import android.util.AttributeSet
 import android.view.View
 import io.rover.rover.core.logging.log
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout.LayoutableView
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.background.ViewBackground
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.border.ViewBorder
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.ViewComposition
+import io.rover.rover.experiences.ui.blocks.concerns.layout.LayoutableView
+import io.rover.rover.experiences.ui.blocks.concerns.background.ViewBackground
+import io.rover.rover.experiences.ui.blocks.concerns.border.ViewBorder
+import io.rover.rover.experiences.ui.blocks.concerns.ViewComposition
 
 class RectangleBlockView : View, LayoutableView<RectangleBlockViewModelInterface> {
     constructor(context: Context?) : super(context)

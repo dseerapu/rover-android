@@ -7,7 +7,7 @@ import io.rover.rover.core.data.domain.Background
 import io.rover.rover.core.data.domain.ImageBlock
 import io.rover.rover.core.data.NetworkResult
 import io.rover.rover.experiences.types.PixelSize
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.background.BackgroundImageConfiguration
+import io.rover.rover.experiences.ui.blocks.concerns.background.BackgroundImageConfiguration
 import java.net.URI
 import java.net.URL
 

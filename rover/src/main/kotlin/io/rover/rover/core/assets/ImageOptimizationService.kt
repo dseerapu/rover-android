@@ -10,7 +10,7 @@ import io.rover.rover.core.logging.log
 import io.rover.rover.experiences.types.PixelSize
 import io.rover.rover.experiences.types.Rect
 import io.rover.rover.experiences.types.dpAsPx
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.background.BackgroundImageConfiguration
+import io.rover.rover.experiences.ui.blocks.concerns.background.BackgroundImageConfiguration
 import java.net.URI
 
 class ImageOptimizationService : ImageOptimizationServiceInterface {

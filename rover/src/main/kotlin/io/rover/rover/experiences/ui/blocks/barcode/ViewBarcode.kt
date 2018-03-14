@@ -1,4 +1,4 @@
-package io.rover.rover.plugins.userexperience.experience.blocks.barcode
+package io.rover.rover.experiences.ui.blocks.barcode
 
 import android.R
 import android.graphics.Rect
@@ -7,7 +7,7 @@ import android.support.v7.widget.AppCompatImageView
 import android.widget.ImageView
 import io.rover.rover.platform.toAndroidBitmap
 import io.rover.rover.experiences.ui.ViewModelBinding
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout.PaddingContributor
+import io.rover.rover.experiences.ui.blocks.concerns.layout.PaddingContributor
 import io.rover.shaded.zxing.com.google.zxing.BarcodeFormat
 import io.rover.shaded.zxing.com.google.zxing.EncodeHintType
 import io.rover.shaded.zxing.com.google.zxing.MultiFormatWriter

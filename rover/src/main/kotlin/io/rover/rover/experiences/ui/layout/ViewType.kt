@@ -1,4 +1,4 @@
-package io.rover.rover.plugins.userexperience.experience.layout
+package io.rover.rover.experiences.ui.layout
 
 /**
  * The set of possible types of view that can be laid out in the [BlockAndRowRecyclerAdapter].

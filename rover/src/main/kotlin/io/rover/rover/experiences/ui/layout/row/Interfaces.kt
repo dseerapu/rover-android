@@ -1,11 +1,11 @@
-package io.rover.rover.plugins.userexperience.experience.layout.row
+package io.rover.rover.experiences.ui.layout.row
 
 import io.rover.rover.core.streams.Observable
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.background.BackgroundViewModelInterface
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout.BlockViewModelInterface
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout.LayoutableViewModel
-import io.rover.rover.plugins.userexperience.experience.layout.DisplayItem
-import io.rover.rover.plugins.userexperience.experience.navigation.NavigateTo
+import io.rover.rover.experiences.ui.blocks.concerns.background.BackgroundViewModelInterface
+import io.rover.rover.experiences.ui.blocks.concerns.layout.BlockViewModelInterface
+import io.rover.rover.experiences.ui.blocks.concerns.layout.LayoutableViewModel
+import io.rover.rover.experiences.ui.layout.DisplayItem
+import io.rover.rover.experiences.ui.navigation.NavigateTo
 import io.rover.rover.experiences.types.RectF
 
 /**

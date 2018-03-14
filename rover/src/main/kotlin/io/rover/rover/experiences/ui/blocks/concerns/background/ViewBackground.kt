@@ -1,4 +1,4 @@
-package io.rover.rover.plugins.userexperience.experience.blocks.concerns.background
+package io.rover.rover.experiences.ui.blocks.concerns.background
 
 import android.animation.ObjectAnimator
 import android.graphics.Canvas
@@ -12,9 +12,9 @@ import io.rover.rover.core.streams.androidLifecycleDispose
 import io.rover.rover.core.streams.subscribe
 import io.rover.rover.platform.DrawableWrapper
 import io.rover.rover.experiences.ui.ViewModelBinding
-import io.rover.rover.plugins.userexperience.experience.blocks.image.DimensionCallback
+import io.rover.rover.experiences.ui.blocks.image.DimensionCallback
 import io.rover.rover.experiences.types.PixelSize
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.ViewCompositionInterface
+import io.rover.rover.experiences.ui.blocks.concerns.ViewCompositionInterface
 
 class ViewBackground(
     private val view: View,

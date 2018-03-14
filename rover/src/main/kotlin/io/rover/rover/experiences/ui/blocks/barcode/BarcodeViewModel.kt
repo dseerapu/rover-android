@@ -1,4 +1,4 @@
-package io.rover.rover.plugins.userexperience.experience.blocks.barcode
+package io.rover.rover.experiences.ui.blocks.barcode
 
 import io.rover.rover.core.data.domain.BarcodeBlock
 import io.rover.rover.core.data.domain.BarcodeFormat

@@ -1,10 +1,10 @@
-package io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout
+package io.rover.rover.experiences.ui.blocks.concerns.layout
 
 import android.graphics.Rect
 import io.rover.rover.core.streams.Observable
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.border.BorderViewModel
+import io.rover.rover.experiences.ui.blocks.concerns.border.BorderViewModel
 import io.rover.rover.experiences.types.RectF
-import io.rover.rover.plugins.userexperience.experience.navigation.NavigateTo
+import io.rover.rover.experiences.ui.navigation.NavigateTo
 
 /**
  * Binds [BlockViewModelInterface] properties to that of a view.

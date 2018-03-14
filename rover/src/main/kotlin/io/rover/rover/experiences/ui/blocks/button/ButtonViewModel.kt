@@ -1,12 +1,12 @@
-package io.rover.rover.plugins.userexperience.experience.blocks.button
+package io.rover.rover.experiences.ui.blocks.button
 
 import io.rover.rover.core.data.domain.ButtonBlock
 import io.rover.rover.core.data.domain.ButtonState
 import io.rover.rover.core.streams.Observable
 import io.rover.rover.core.streams.map
 import io.rover.rover.core.streams.share
-import io.rover.rover.plugins.userexperience.experience.blocks.BlockViewModelFactoryInterface
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout.BlockViewModelInterface
+import io.rover.rover.experiences.ui.blocks.BlockViewModelFactoryInterface
+import io.rover.rover.experiences.ui.blocks.concerns.layout.BlockViewModelInterface
 
 class ButtonViewModel(
     block: ButtonBlock,

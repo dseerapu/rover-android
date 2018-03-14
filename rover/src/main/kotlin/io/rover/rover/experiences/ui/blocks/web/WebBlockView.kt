@@ -1,4 +1,4 @@
-package io.rover.rover.plugins.userexperience.experience.blocks.web
+package io.rover.rover.experiences.ui.blocks.web
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -9,11 +9,11 @@ import android.util.AttributeSet
 import android.webkit.WebView
 import io.rover.rover.core.logging.log
 import android.view.MotionEvent
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.border.ViewBorder
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout.LayoutableView
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.background.ViewBackground
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout.ViewBlock
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.ViewComposition
+import io.rover.rover.experiences.ui.blocks.concerns.border.ViewBorder
+import io.rover.rover.experiences.ui.blocks.concerns.layout.LayoutableView
+import io.rover.rover.experiences.ui.blocks.concerns.background.ViewBackground
+import io.rover.rover.experiences.ui.blocks.concerns.layout.ViewBlock
+import io.rover.rover.experiences.ui.blocks.concerns.ViewComposition
 
 class WebBlockView : WebView, LayoutableView<WebViewBlockViewModelInterface> {
     constructor(context: Context?) : super(context)

@@ -1,14 +1,14 @@
-package io.rover.rover.plugins.userexperience.experience.navigation
+package io.rover.rover.experiences.ui.navigation
 
 import android.app.Activity
 import android.os.Parcelable
 import android.view.WindowManager
 import io.rover.rover.core.streams.Observable
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout.BlockViewModel
-import io.rover.rover.plugins.userexperience.experience.concerns.BindableViewModel
-import io.rover.rover.plugins.userexperience.experience.layout.screen.ScreenViewModel
-import io.rover.rover.plugins.userexperience.experience.toolbar.ExperienceToolbarViewModelInterface
-import io.rover.rover.plugins.userexperience.experience.layout.screen.ScreenViewModelInterface
+import io.rover.rover.experiences.ui.blocks.concerns.layout.BlockViewModel
+import io.rover.rover.experiences.ui.concerns.BindableViewModel
+import io.rover.rover.experiences.ui.layout.screen.ScreenViewModel
+import io.rover.rover.experiences.ui.toolbar.ExperienceToolbarViewModelInterface
+import io.rover.rover.experiences.ui.layout.screen.ScreenViewModelInterface
 import java.net.URI
 
 interface ExperienceNavigationViewModelInterface : BindableViewModel {

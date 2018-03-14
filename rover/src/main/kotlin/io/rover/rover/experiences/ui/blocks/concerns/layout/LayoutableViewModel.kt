@@ -1,11 +1,11 @@
-package io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout
+package io.rover.rover.experiences.ui.blocks.concerns.layout
 
 import io.rover.rover.experiences.types.RectF
-import io.rover.rover.plugins.userexperience.experience.layout.ViewType
-import io.rover.rover.plugins.userexperience.experience.concerns.BindableViewModel
-import io.rover.rover.plugins.userexperience.experience.layout.BlockAndRowRecyclerAdapter
-import io.rover.rover.plugins.userexperience.experience.layout.row.RowViewModel
-import io.rover.rover.plugins.userexperience.experience.layout.screen.ScreenViewModel
+import io.rover.rover.experiences.ui.layout.ViewType
+import io.rover.rover.experiences.ui.concerns.BindableViewModel
+import io.rover.rover.experiences.ui.layout.BlockAndRowRecyclerAdapter
+import io.rover.rover.experiences.ui.layout.row.RowViewModel
+import io.rover.rover.experiences.ui.layout.screen.ScreenViewModel
 import io.rover.rover.experiences.types.Rect
 
 /**

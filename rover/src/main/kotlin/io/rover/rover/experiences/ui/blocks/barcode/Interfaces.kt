@@ -1,8 +1,8 @@
-package io.rover.rover.plugins.userexperience.experience.blocks.barcode
+package io.rover.rover.experiences.ui.blocks.barcode
 
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.background.BackgroundViewModelInterface
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.border.BorderViewModelInterface
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout.*
+import io.rover.rover.experiences.ui.blocks.concerns.background.BackgroundViewModelInterface
+import io.rover.rover.experiences.ui.blocks.concerns.border.BorderViewModelInterface
+import io.rover.rover.experiences.ui.blocks.concerns.layout.*
 
 interface ViewBarcodeInterface {
     var barcodeViewModel: BarcodeViewModelInterface?

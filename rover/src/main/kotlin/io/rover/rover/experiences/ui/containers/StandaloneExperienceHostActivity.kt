@@ -1,4 +1,4 @@
-package io.rover.rover.plugins.userexperience.experience.containers
+package io.rover.rover.experiences.ui.containers
 
 import android.app.Activity
 import android.content.ActivityNotFoundException
@@ -21,7 +21,7 @@ import io.rover.rover.core.data.http.AsyncTaskAndHttpUrlConnectionInterceptor
 import io.rover.rover.core.data.http.AsyncTaskAndHttpUrlConnectionNetworkClient
 import io.rover.rover.experiences.ui.ExperienceView
 import io.rover.rover.experiences.ui.ExperienceViewModelInterface
-import io.rover.rover.plugins.userexperience.experience.navigation.ExperienceExternalNavigationEvent
+import io.rover.rover.experiences.ui.navigation.ExperienceExternalNavigationEvent
 import java.io.IOException
 import java.io.InputStream
 import java.net.HttpURLConnection

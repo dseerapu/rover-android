@@ -1,4 +1,4 @@
-package io.rover.rover.plugins.userexperience.experience.navigation
+package io.rover.rover.experiences.ui.navigation
 
 import android.content.Context
 import android.os.Build
@@ -15,9 +15,9 @@ import io.rover.rover.core.streams.androidLifecycleDispose
 import io.rover.rover.core.streams.subscribe
 import io.rover.rover.platform.whenNotNull
 import io.rover.rover.experiences.ui.ViewModelBinding
-import io.rover.rover.plugins.userexperience.experience.concerns.BindableView
-import io.rover.rover.plugins.userexperience.experience.layout.screen.ScreenView
-import io.rover.rover.plugins.userexperience.experience.layout.screen.ScreenViewModelInterface
+import io.rover.rover.experiences.ui.concerns.BindableView
+import io.rover.rover.experiences.ui.layout.screen.ScreenView
+import io.rover.rover.experiences.ui.layout.screen.ScreenViewModelInterface
 
 /**
  * Navigation behaviour between screens of an Experience.

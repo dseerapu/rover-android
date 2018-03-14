@@ -1,4 +1,4 @@
-package io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout
+package io.rover.rover.experiences.ui.blocks.concerns.layout
 
 import android.view.MotionEvent
 import android.view.View

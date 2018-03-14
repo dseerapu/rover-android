@@ -1,9 +1,9 @@
-package io.rover.rover.plugins.userexperience.experience.blocks.image
+package io.rover.rover.experiences.ui.blocks.image
 
-import io.rover.rover.plugins.userexperience.experience.layout.ViewType
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.background.BackgroundViewModelInterface
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout.BlockViewModelInterface
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.border.BorderViewModelInterface
+import io.rover.rover.experiences.ui.layout.ViewType
+import io.rover.rover.experiences.ui.blocks.concerns.background.BackgroundViewModelInterface
+import io.rover.rover.experiences.ui.blocks.concerns.layout.BlockViewModelInterface
+import io.rover.rover.experiences.ui.blocks.concerns.border.BorderViewModelInterface
 
 class ImageBlockViewModel(
     private val blockViewModel: BlockViewModelInterface,

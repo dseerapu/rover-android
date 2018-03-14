@@ -1,4 +1,4 @@
-package io.rover.rover.plugins.userexperience.experience.blocks.image
+package io.rover.rover.experiences.ui.blocks.image
 
 import android.graphics.Bitmap
 import android.util.DisplayMetrics

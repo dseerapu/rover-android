@@ -1,4 +1,4 @@
-package io.rover.rover.plugins.userexperience.experience.blocks.concerns.background
+package io.rover.rover.experiences.ui.blocks.concerns.background
 
 import android.graphics.Bitmap
 import android.graphics.Shader

@@ -1,4 +1,4 @@
-package io.rover.rover.plugins.userexperience.experience.blocks.web
+package io.rover.rover.experiences.ui.blocks.web
 
 import android.annotation.SuppressLint
 import android.webkit.WebView

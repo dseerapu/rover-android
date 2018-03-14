@@ -1,8 +1,8 @@
 package io.rover.rover.experiences
 
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.text.Font
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.text.FontAppearance
-import io.rover.rover.plugins.userexperience.experience.blocks.barcode.BarcodeViewModelInterface
+import io.rover.rover.experiences.ui.blocks.concerns.text.Font
+import io.rover.rover.experiences.ui.blocks.concerns.text.FontAppearance
+import io.rover.rover.experiences.ui.blocks.barcode.BarcodeViewModelInterface
 
 interface MeasurementService {
 

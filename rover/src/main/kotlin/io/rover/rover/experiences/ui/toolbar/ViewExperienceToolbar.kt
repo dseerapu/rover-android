@@ -1,4 +1,4 @@
-package io.rover.rover.plugins.userexperience.experience.toolbar
+package io.rover.rover.experiences.ui.toolbar
 
 import android.annotation.SuppressLint
 import android.content.Context

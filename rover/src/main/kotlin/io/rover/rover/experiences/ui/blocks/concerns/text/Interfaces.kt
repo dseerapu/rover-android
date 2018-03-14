@@ -1,8 +1,8 @@
-package io.rover.rover.plugins.userexperience.experience.blocks.concerns.text
+package io.rover.rover.experiences.ui.blocks.concerns.text
 
 import android.text.Spanned
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout.Measurable
-import io.rover.rover.plugins.userexperience.experience.blocks.text.TextBlockViewModel
+import io.rover.rover.experiences.ui.blocks.concerns.layout.Measurable
+import io.rover.rover.experiences.ui.blocks.text.TextBlockViewModel
 
 interface ViewTextInterface {
     var textViewModel: TextViewModelInterface?

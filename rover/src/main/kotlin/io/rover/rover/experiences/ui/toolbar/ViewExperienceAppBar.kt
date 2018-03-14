@@ -1,4 +1,4 @@
-package io.rover.rover.plugins.userexperience.experience.toolbar
+package io.rover.rover.experiences.ui.toolbar
 
 import android.graphics.drawable.ColorDrawable
 import android.os.Build

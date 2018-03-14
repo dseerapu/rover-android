@@ -1,4 +1,4 @@
-package io.rover.rover.plugins.userexperience.experience.blocks.concerns.border
+package io.rover.rover.experiences.ui.blocks.concerns.border
 
 import io.rover.rover.core.data.domain.Border
 import io.rover.rover.experiences.types.Rect

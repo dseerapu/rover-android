@@ -1,4 +1,4 @@
-package io.rover.rover.plugins.userexperience.experience.navigation
+package io.rover.rover.experiences.ui.navigation
 
 import java.net.URI
 

@@ -16,10 +16,10 @@ import io.rover.rover.platform.whenNotNull
 import io.rover.rover.core.streams.Observable
 import io.rover.rover.core.streams.androidLifecycleDispose
 import io.rover.rover.core.streams.subscribe
-import io.rover.rover.plugins.userexperience.experience.navigation.ExperienceNavigationView
-import io.rover.rover.plugins.userexperience.experience.toolbar.ViewExperienceToolbar
-import io.rover.rover.plugins.userexperience.experience.concerns.BindableView
-import io.rover.rover.plugins.userexperience.experience.containers.StandaloneExperienceHostActivity
+import io.rover.rover.experiences.ui.navigation.ExperienceNavigationView
+import io.rover.rover.experiences.ui.toolbar.ViewExperienceToolbar
+import io.rover.rover.experiences.ui.concerns.BindableView
+import io.rover.rover.experiences.ui.containers.StandaloneExperienceHostActivity
 
 /**
  * Embed this view to include a Rover Experience in a layout.

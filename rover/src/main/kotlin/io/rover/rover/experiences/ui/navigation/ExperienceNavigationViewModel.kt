@@ -1,4 +1,4 @@
-package io.rover.rover.plugins.userexperience.experience.navigation
+package io.rover.rover.experiences.ui.navigation
 
 import android.annotation.SuppressLint
 import android.os.Parcelable
@@ -25,11 +25,11 @@ import io.rover.rover.core.events.EventQueueService
 import io.rover.rover.core.events.EventQueueServiceInterface
 import io.rover.rover.core.events.domain.Event
 import io.rover.rover.experiences.ui.ViewModelFactoryInterface
-import io.rover.rover.plugins.userexperience.experience.blocks.BlockViewModelFactoryInterface
-import io.rover.rover.plugins.userexperience.experience.containers.StandaloneExperienceHostActivity
-import io.rover.rover.plugins.userexperience.experience.toolbar.ExperienceToolbarViewModelInterface
-import io.rover.rover.plugins.userexperience.experience.layout.screen.ScreenViewModelInterface
-import io.rover.rover.plugins.userexperience.experience.toolbar.ToolbarConfiguration
+import io.rover.rover.experiences.ui.blocks.BlockViewModelFactoryInterface
+import io.rover.rover.experiences.ui.containers.StandaloneExperienceHostActivity
+import io.rover.rover.experiences.ui.toolbar.ExperienceToolbarViewModelInterface
+import io.rover.rover.experiences.ui.layout.screen.ScreenViewModelInterface
+import io.rover.rover.experiences.ui.toolbar.ToolbarConfiguration
 import kotlinx.android.parcel.Parcelize
 
 /**

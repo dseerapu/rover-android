@@ -1,4 +1,4 @@
-package io.rover.rover.plugins.userexperience.experience.blocks.image
+package io.rover.rover.experiences.ui.blocks.image
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -6,11 +6,11 @@ import android.graphics.Canvas
 import android.support.v7.widget.AppCompatImageView
 import android.util.AttributeSet
 import io.rover.rover.core.logging.log
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout.LayoutableView
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.background.ViewBackground
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout.ViewBlock
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.border.ViewBorder
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.ViewComposition
+import io.rover.rover.experiences.ui.blocks.concerns.layout.LayoutableView
+import io.rover.rover.experiences.ui.blocks.concerns.background.ViewBackground
+import io.rover.rover.experiences.ui.blocks.concerns.layout.ViewBlock
+import io.rover.rover.experiences.ui.blocks.concerns.border.ViewBorder
+import io.rover.rover.experiences.ui.blocks.concerns.ViewComposition
 
 class ImageBlockView : AppCompatImageView, LayoutableView<ImageBlockViewModelInterface> {
     constructor(context: Context?) : super(context)

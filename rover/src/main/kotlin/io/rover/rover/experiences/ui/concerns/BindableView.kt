@@ -1,4 +1,4 @@
-package io.rover.rover.plugins.userexperience.experience.concerns
+package io.rover.rover.experiences.ui.concerns
 
 import android.view.View
 

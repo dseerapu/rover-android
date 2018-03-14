@@ -1,4 +1,4 @@
-package io.rover.rover.plugins.userexperience.experience.blocks.concerns
+package io.rover.rover.experiences.ui.blocks.concerns
 
 import android.graphics.Canvas
 import android.view.View

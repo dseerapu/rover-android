@@ -1,17 +1,17 @@
-package io.rover.rover.plugins.userexperience.experience.layout.screen
+package io.rover.rover.experiences.ui.layout.screen
 
 import io.rover.rover.core.streams.Observable
 import io.rover.rover.core.data.domain.Experience
 import io.rover.rover.core.data.domain.Screen
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.background.BackgroundViewModelInterface
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout.BlockViewModelInterface
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout.LayoutableViewModel
-import io.rover.rover.plugins.userexperience.experience.concerns.BindableViewModel
-import io.rover.rover.plugins.userexperience.experience.layout.BlockAndRowLayoutManager
-import io.rover.rover.plugins.userexperience.experience.layout.row.RowViewModelInterface
-import io.rover.rover.plugins.userexperience.experience.toolbar.ToolbarConfiguration
-import io.rover.rover.plugins.userexperience.experience.layout.Layout
-import io.rover.rover.plugins.userexperience.experience.navigation.NavigateTo
+import io.rover.rover.experiences.ui.blocks.concerns.background.BackgroundViewModelInterface
+import io.rover.rover.experiences.ui.blocks.concerns.layout.BlockViewModelInterface
+import io.rover.rover.experiences.ui.blocks.concerns.layout.LayoutableViewModel
+import io.rover.rover.experiences.ui.concerns.BindableViewModel
+import io.rover.rover.experiences.ui.layout.BlockAndRowLayoutManager
+import io.rover.rover.experiences.ui.layout.row.RowViewModelInterface
+import io.rover.rover.experiences.ui.toolbar.ToolbarConfiguration
+import io.rover.rover.experiences.ui.layout.Layout
+import io.rover.rover.experiences.ui.navigation.NavigateTo
 
 /**
  * View Model for a Screen.  Used in [Experience]s.

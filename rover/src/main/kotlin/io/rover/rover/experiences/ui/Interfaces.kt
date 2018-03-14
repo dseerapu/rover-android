@@ -5,11 +5,11 @@ import android.os.Parcelable
 import android.view.WindowManager
 import io.rover.rover.core.data.domain.Experience
 import io.rover.rover.core.streams.Observable
-import io.rover.rover.plugins.userexperience.experience.concerns.BindableViewModel
-import io.rover.rover.plugins.userexperience.experience.navigation.ExperienceExternalNavigationEvent
-import io.rover.rover.plugins.userexperience.experience.navigation.ExperienceNavigationViewModelInterface
-import io.rover.rover.plugins.userexperience.experience.toolbar.ExperienceToolbarViewModelInterface
-import io.rover.rover.plugins.userexperience.experience.toolbar.ToolbarConfiguration
+import io.rover.rover.experiences.ui.concerns.BindableViewModel
+import io.rover.rover.experiences.ui.navigation.ExperienceExternalNavigationEvent
+import io.rover.rover.experiences.ui.navigation.ExperienceNavigationViewModelInterface
+import io.rover.rover.experiences.ui.toolbar.ExperienceToolbarViewModelInterface
+import io.rover.rover.experiences.ui.toolbar.ToolbarConfiguration
 import io.rover.rover.notifications.ui.NotificationCenterListViewModelInterface
 
 /**

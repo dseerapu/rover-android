@@ -1,4 +1,4 @@
-package io.rover.rover.plugins.userexperience.experience.blocks.image
+package io.rover.rover.experiences.ui.blocks.image
 
 import android.support.v7.widget.AppCompatImageView
 import android.widget.ImageView

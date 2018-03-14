@@ -1,4 +1,4 @@
-package io.rover.rover.plugins.userexperience.experience.toolbar
+package io.rover.rover.experiences.ui.toolbar
 
 /**
  * Tool bar configuration.  Colour overrides, text, text colour, and status bar settings.

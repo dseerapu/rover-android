@@ -1,4 +1,4 @@
-package io.rover.rover.plugins.userexperience.experience.toolbar
+package io.rover.rover.experiences.ui.toolbar
 
 import io.rover.rover.core.streams.PublishSubject
 import io.rover.rover.core.streams.share

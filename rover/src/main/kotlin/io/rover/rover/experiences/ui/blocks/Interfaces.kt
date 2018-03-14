@@ -1,13 +1,13 @@
-package io.rover.rover.plugins.userexperience.experience.blocks
+package io.rover.rover.experiences.ui.blocks
 
 import io.rover.rover.core.data.domain.Block
 import io.rover.rover.core.data.domain.ButtonState
 import io.rover.rover.core.data.domain.Row
 import io.rover.rover.core.data.domain.Screen
-import io.rover.rover.plugins.userexperience.experience.blocks.button.ButtonStateViewModelInterface
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout.BlockViewModelInterface
-import io.rover.rover.plugins.userexperience.experience.layout.row.RowViewModelInterface
-import io.rover.rover.plugins.userexperience.experience.layout.screen.ScreenViewModelInterface
+import io.rover.rover.experiences.ui.blocks.button.ButtonStateViewModelInterface
+import io.rover.rover.experiences.ui.blocks.concerns.layout.BlockViewModelInterface
+import io.rover.rover.experiences.ui.layout.row.RowViewModelInterface
+import io.rover.rover.experiences.ui.layout.screen.ScreenViewModelInterface
 
 /**
  *

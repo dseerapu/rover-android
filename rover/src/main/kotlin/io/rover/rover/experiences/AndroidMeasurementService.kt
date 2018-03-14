@@ -8,12 +8,12 @@ import android.text.Layout
 import android.text.StaticLayout
 import android.text.TextPaint
 import android.util.DisplayMetrics
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.text.RichTextToSpannedTransformer
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.text.Font
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.text.FontAppearance
+import io.rover.rover.experiences.ui.blocks.concerns.text.RichTextToSpannedTransformer
+import io.rover.rover.experiences.ui.blocks.concerns.text.Font
+import io.rover.rover.experiences.ui.blocks.concerns.text.FontAppearance
 import io.rover.rover.experiences.types.dpAsPx
 import io.rover.rover.experiences.types.pxAsDp
-import io.rover.rover.plugins.userexperience.experience.blocks.barcode.BarcodeViewModelInterface
+import io.rover.rover.experiences.ui.blocks.barcode.BarcodeViewModelInterface
 import io.rover.shaded.zxing.com.google.zxing.BarcodeFormat
 import io.rover.shaded.zxing.com.google.zxing.EncodeHintType
 import io.rover.shaded.zxing.com.google.zxing.MultiFormatWriter

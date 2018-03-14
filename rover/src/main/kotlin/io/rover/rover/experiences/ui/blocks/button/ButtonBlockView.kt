@@ -1,4 +1,4 @@
-package io.rover.rover.plugins.userexperience.experience.blocks.button
+package io.rover.rover.experiences.ui.blocks.button
 
 import android.animation.Animator
 import android.animation.AnimatorSet
@@ -15,10 +15,10 @@ import io.rover.rover.core.logging.log
 import io.rover.rover.core.streams.androidLifecycleDispose
 import io.rover.rover.core.streams.subscribe
 import io.rover.rover.experiences.ui.ViewModelBinding
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.text.AndroidRichTextToSpannedTransformer
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout.LayoutableView
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout.ViewBlock
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.text.ViewText
+import io.rover.rover.experiences.ui.blocks.concerns.text.AndroidRichTextToSpannedTransformer
+import io.rover.rover.experiences.ui.blocks.concerns.layout.LayoutableView
+import io.rover.rover.experiences.ui.blocks.concerns.layout.ViewBlock
+import io.rover.rover.experiences.ui.blocks.concerns.text.ViewText
 
 // API compatibility is managed at runtime in a way that Android lint's static analysis is not able
 // to pick up.

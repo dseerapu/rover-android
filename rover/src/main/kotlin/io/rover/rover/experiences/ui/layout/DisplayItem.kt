@@ -1,7 +1,7 @@
-package io.rover.rover.plugins.userexperience.experience.layout
+package io.rover.rover.experiences.ui.layout
 
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout.LayoutableViewModel
-import io.rover.rover.plugins.userexperience.experience.layout.screen.ScreenViewModel
+import io.rover.rover.experiences.ui.blocks.concerns.layout.LayoutableViewModel
+import io.rover.rover.experiences.ui.layout.screen.ScreenViewModel
 import io.rover.rover.experiences.types.RectF
 
 /**

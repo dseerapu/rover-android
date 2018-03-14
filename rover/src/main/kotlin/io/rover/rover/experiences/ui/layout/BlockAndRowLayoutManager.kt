@@ -1,4 +1,4 @@
-package io.rover.rover.plugins.userexperience.experience.layout
+package io.rover.rover.experiences.ui.layout
 
 import android.support.v7.widget.RecyclerView
 import android.util.DisplayMetrics
@@ -9,7 +9,7 @@ import io.rover.rover.core.data.domain.Screen
 import io.rover.rover.core.logging.log
 import io.rover.rover.experiences.types.dpAsPx
 import io.rover.rover.experiences.types.pxAsDp
-import io.rover.rover.plugins.userexperience.experience.layout.screen.ScreenViewModelInterface
+import io.rover.rover.experiences.ui.layout.screen.ScreenViewModelInterface
 
 /**
  * A [RecyclerView.LayoutManager] that can position Rover UI elements (namely, all the [Row]s in

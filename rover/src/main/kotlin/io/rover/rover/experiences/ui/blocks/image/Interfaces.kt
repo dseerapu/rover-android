@@ -1,16 +1,16 @@
-package io.rover.rover.plugins.userexperience.experience.blocks.image
+package io.rover.rover.experiences.ui.blocks.image
 
 import android.graphics.Bitmap
 import android.util.DisplayMetrics
 import io.rover.rover.core.streams.Publisher
 import io.rover.rover.core.data.http.NetworkTask
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.background.BackgroundViewModelInterface
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.border.BorderViewModelInterface
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout.BlockViewModelInterface
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout.LayoutableViewModel
+import io.rover.rover.experiences.ui.blocks.concerns.background.BackgroundViewModelInterface
+import io.rover.rover.experiences.ui.blocks.concerns.border.BorderViewModelInterface
+import io.rover.rover.experiences.ui.blocks.concerns.layout.BlockViewModelInterface
+import io.rover.rover.experiences.ui.blocks.concerns.layout.LayoutableViewModel
 import io.rover.rover.experiences.types.PixelSize
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout.CompositeBlockViewModelInterface
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout.Measurable
+import io.rover.rover.experiences.ui.blocks.concerns.layout.CompositeBlockViewModelInterface
+import io.rover.rover.experiences.ui.blocks.concerns.layout.Measurable
 
 interface ViewImageInterface {
     var imageBlockViewModel: ImageBlockViewModelInterface?

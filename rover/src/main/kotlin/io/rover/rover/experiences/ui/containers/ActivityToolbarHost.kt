@@ -1,4 +1,4 @@
-package io.rover.rover.plugins.userexperience.experience.containers
+package io.rover.rover.experiences.ui.containers
 
 import android.support.v7.app.ActionBar
 import android.support.v7.app.AppCompatActivity

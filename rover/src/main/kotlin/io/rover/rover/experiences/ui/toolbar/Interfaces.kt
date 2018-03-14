@@ -1,4 +1,4 @@
-package io.rover.rover.plugins.userexperience.experience.toolbar
+package io.rover.rover.experiences.ui.toolbar
 
 import android.support.v7.widget.Toolbar
 import io.rover.rover.core.streams.Observable

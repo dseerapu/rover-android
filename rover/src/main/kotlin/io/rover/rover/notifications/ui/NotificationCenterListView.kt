@@ -30,7 +30,7 @@ import io.rover.rover.experiences.NotificationOpenInterface
 import io.rover.rover.core.assets.AndroidAssetService
 import io.rover.rover.core.assets.ImageDownloader
 import io.rover.rover.experiences.ui.ViewModelBinding
-import io.rover.rover.plugins.userexperience.experience.concerns.BindableView
+import io.rover.rover.experiences.ui.concerns.BindableView
 
 /**
  * Embed this view to embed a list of previously received push notifications for the user to browse

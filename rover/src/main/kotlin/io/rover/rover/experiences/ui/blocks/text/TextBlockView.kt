@@ -1,4 +1,4 @@
-package io.rover.rover.plugins.userexperience.experience.blocks.text
+package io.rover.rover.experiences.ui.blocks.text
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -6,13 +6,13 @@ import android.graphics.Canvas
 import android.support.v7.widget.AppCompatTextView
 import android.util.AttributeSet
 import io.rover.rover.core.logging.log
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout.LayoutableView
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.background.ViewBackground
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout.ViewBlock
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.border.ViewBorder
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.text.AndroidRichTextToSpannedTransformer
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.text.ViewText
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.ViewComposition
+import io.rover.rover.experiences.ui.blocks.concerns.layout.LayoutableView
+import io.rover.rover.experiences.ui.blocks.concerns.background.ViewBackground
+import io.rover.rover.experiences.ui.blocks.concerns.layout.ViewBlock
+import io.rover.rover.experiences.ui.blocks.concerns.border.ViewBorder
+import io.rover.rover.experiences.ui.blocks.concerns.text.AndroidRichTextToSpannedTransformer
+import io.rover.rover.experiences.ui.blocks.concerns.text.ViewText
+import io.rover.rover.experiences.ui.blocks.concerns.ViewComposition
 
 class TextBlockView : AppCompatTextView, LayoutableView<TextBlockViewModelInterface> {
     constructor(context: Context?) : super(context)

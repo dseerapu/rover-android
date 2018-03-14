@@ -18,8 +18,8 @@ import io.rover.rover.core.streams.flatMap
 import io.rover.rover.core.streams.map
 import io.rover.rover.core.streams.shareAndReplayTypesOnResubscribe
 import io.rover.rover.core.streams.share
-import io.rover.rover.plugins.userexperience.experience.navigation.ExperienceExternalNavigationEvent
-import io.rover.rover.plugins.userexperience.experience.navigation.ExperienceNavigationViewModelInterface
+import io.rover.rover.experiences.ui.navigation.ExperienceExternalNavigationEvent
+import io.rover.rover.experiences.ui.navigation.ExperienceNavigationViewModelInterface
 import kotlinx.android.parcel.Parcelize
 
 class ExperienceViewModel(

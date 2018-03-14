@@ -1,16 +1,16 @@
-package io.rover.rover.plugins.userexperience.experience.layout
+package io.rover.rover.experiences.ui.layout
 
 import android.support.v7.widget.RecyclerView
 import android.view.ViewGroup
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout.LayoutableViewModel
-import io.rover.rover.plugins.userexperience.experience.blocks.barcode.BarcodeBlockView
-import io.rover.rover.plugins.userexperience.experience.blocks.button.ButtonBlockView
-import io.rover.rover.plugins.userexperience.experience.blocks.image.ImageBlockView
-import io.rover.rover.plugins.userexperience.experience.blocks.concerns.layout.LayoutableView
-import io.rover.rover.plugins.userexperience.experience.blocks.rectangle.RectangleBlockView
-import io.rover.rover.plugins.userexperience.experience.layout.row.RowView
-import io.rover.rover.plugins.userexperience.experience.blocks.text.TextBlockView
-import io.rover.rover.plugins.userexperience.experience.blocks.web.WebBlockView
+import io.rover.rover.experiences.ui.blocks.concerns.layout.LayoutableViewModel
+import io.rover.rover.experiences.ui.blocks.barcode.BarcodeBlockView
+import io.rover.rover.experiences.ui.blocks.button.ButtonBlockView
+import io.rover.rover.experiences.ui.blocks.image.ImageBlockView
+import io.rover.rover.experiences.ui.blocks.concerns.layout.LayoutableView
+import io.rover.rover.experiences.ui.blocks.rectangle.RectangleBlockView
+import io.rover.rover.experiences.ui.layout.row.RowView
+import io.rover.rover.experiences.ui.blocks.text.TextBlockView
+import io.rover.rover.experiences.ui.blocks.web.WebBlockView
 
 /**
  * The RecyclerView adapter for Experience layouts.

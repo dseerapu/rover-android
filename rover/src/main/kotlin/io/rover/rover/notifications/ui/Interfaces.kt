@@ -4,7 +4,7 @@ import android.graphics.Bitmap
 import io.rover.rover.core.streams.Observable
 import io.rover.rover.core.streams.Publisher
 import io.rover.rover.core.data.domain.Notification
-import io.rover.rover.plugins.userexperience.experience.concerns.BindableViewModel
+import io.rover.rover.experiences.ui.concerns.BindableViewModel
 
 /**
  * This repository syncs and stores the Push Notifications.
