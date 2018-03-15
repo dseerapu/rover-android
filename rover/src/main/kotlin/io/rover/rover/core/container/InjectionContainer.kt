@@ -134,8 +134,6 @@ class InjectionContainer(
         }
     }
 
-
-
     sealed class ServiceEntry<T: Any>: ServiceEntryInterface {
         /**
          * This entry will dynamically create its instance on first use, and then continue

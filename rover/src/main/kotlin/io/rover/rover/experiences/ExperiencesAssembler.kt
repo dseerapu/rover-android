@@ -44,7 +44,6 @@ import io.rover.rover.experiences.ui.navigation.ExperienceNavigationViewModelInt
 import io.rover.rover.experiences.ui.toolbar.ExperienceToolbarViewModel
 import io.rover.rover.experiences.ui.toolbar.ExperienceToolbarViewModelInterface
 import io.rover.rover.experiences.ui.toolbar.ToolbarConfiguration
-import kotlin.reflect.KClass
 
 /**
  * This is the Rover User Experience plugin.  It contains the entire Rover Experiences system.
@@ -345,31 +344,5 @@ class ExperiencesAssembler(
                 )
             }
         }
-
-
-        // crap. run into another problem.  so I commonly need to pass a given object to several
-        // places in the context of setting, up, say a block in an Experience.  Right now it will
-        // just yield new copies to each one.  That might be OK for many of them, since most of the
-        // view models are not stateful, but it is wasteful and may prove a problem in the event of
-        // a more stateful view model.  I can't even readily cheat by holding a reference and
-        // passing it multiple times, because I'm recursing into the DI structure by calling
-        // .resolve() for the various dependencies (and that's there the saved dep would be needed).
-        // So, I'd have to break DI entirely and just construct each's block entire graph directly
-        // in the CompositeBlockViewModelInterface factory.  That is no good, because that prevents
-        // customization by overriding the individual view model mixins in the DI framework.
-
-        // Solutions, one of:
-
-        // * don't worry about VM mixin duplication, and avoid stateful VMs, particularly for view model mixins
-
-        // * implement multiton support in DI, ideally with some sort of context resolver-overlay
-        // that will restrict the memoization behaviour to a given context.
-
-        // * implement multiton support in DI, without context awareness.  current behaviour like
-        // current.
-
-        // * defer it, because it appears that avoiding VM mixin duplication is only an
-        // optimization, because all of the mixins appear to be (and should be, anyway) stateless.
-
     }
 }

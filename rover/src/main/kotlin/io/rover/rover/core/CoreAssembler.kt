@@ -40,22 +40,7 @@ import java.util.concurrent.Executor
 class CoreAssembler(
     private val accountToken: String,
     private val application: Application,
-    private val endpoint: String = "https://api.rover.io/graphql",
-    /**
-     * While normally your `FirebaseInstanceIdService` class will be responsible for being
-     * informed of push token changes, from time to time (particularly on app upgrades or when
-     * Rover 2.0 is first integrated in your app) Rover may need to force a reset of your Firebase
-     * push token.
-     *
-     * This closure will be called on a background worker thread.  Please pass a block with
-     * the following contents:
-     *
-     * ```kotlin
-     * FirebaseInstanceId.getInstance().deleteInstanceId()
-     * FirebaseInstanceId.getInstance().token
-     * ```
-     */
-    private val resetPushToken: () -> Unit
+    private val endpoint: String = "https://api.rover.io/graphql"
 ): Assembler {
     override fun assemble(container: Container) {
         // logger, which we "inject" using static scope
@@ -150,14 +135,6 @@ class CoreAssembler(
             TimeZoneContextProvider()
         }
 
-        // TODO: move this to NotificationsAssembler.
-        container.register(Scope.Singleton, ContextProvider::class.java, "pushToken") { resolver ->
-            FirebasePushTokenContextProvider(
-                resolver.resolveSingletonOrFail(LocalStorage::class.java),
-                resetPushToken
-            )
-        }
-
         container.register(Scope.Singleton, EventQueueServiceInterface::class.java) { resolver ->
             EventQueueService(
                 resolver.resolveSingletonOrFail(GraphQlApiServiceInterface::class.java),
@@ -182,8 +159,7 @@ class CoreAssembler(
             resolver.resolveSingletonOrFail(ContextProvider::class.java, "coreVersion"),
             resolver.resolveSingletonOrFail(ContextProvider::class.java, "screen"),
             resolver.resolveSingletonOrFail(ContextProvider::class.java, "telephony"),
-            resolver.resolveSingletonOrFail(ContextProvider::class.java, "timeZone"),
-            resolver.resolveSingletonOrFail(ContextProvider::class.java, "pushToken")
+            resolver.resolveSingletonOrFail(ContextProvider::class.java, "timeZone")
         ).forEach { eventQueue.addContextProvider(it) }
     }
 }
