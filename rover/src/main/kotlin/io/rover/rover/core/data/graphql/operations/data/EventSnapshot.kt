@@ -19,7 +19,7 @@ internal fun EventSnapshot.asJson(
         val props = listOf(
             EventSnapshot::name,
             EventSnapshot::id,
-            EventSnapshot::name
+            EventSnapshot::namespace
         )
 
         putProp(this@asJson, EventSnapshot::timestamp, { dateFormatting.dateAsIso8601(it, true) })

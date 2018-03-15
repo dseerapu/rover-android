@@ -55,6 +55,7 @@ class WireEncoderSpec : Spek({
                             Locale.US
                         ).parse("2017-10-04T16:56-04:00"),
                         UUID.fromString("55c5ae35-a8e2-4049-a883-fedc55d22ba9"),
+                        "rover",
                         Context.blank().copy(
                             isCellularEnabled = false,
                             frameworks = hashMapOf(Pair("io.rover.rover", "2.0.0"))

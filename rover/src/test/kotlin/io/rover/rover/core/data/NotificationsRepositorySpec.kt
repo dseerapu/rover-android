@@ -3,6 +3,9 @@ package io.rover.rover.core.data
 import io.rover.rover.Rover
 import io.rover.rover.core.container.Assembler
 import io.rover.rover.core.container.Container
+import io.rover.rover.core.container.InjectionContainer
+import io.rover.rover.core.container.Resolver
+import io.rover.rover.core.container.Scope
 import io.rover.rover.core.logging.JvmLogger
 import io.rover.rover.core.logging.LogEmitter
 import io.rover.rover.core.logging.log
@@ -15,8 +18,10 @@ import io.rover.rover.core.data.domain.DeviceState
 import io.rover.rover.core.data.domain.Notification
 import io.rover.rover.core.data.domain.Profile
 import io.rover.rover.core.data.domain.PushNotificationAction
+import io.rover.rover.core.data.graphql.GraphQlApiServiceInterface
 import io.rover.rover.core.data.http.NetworkTask
 import io.rover.rover.core.events.EventQueueServiceInterface
+import io.rover.rover.core.logging.GlobalStaticLogHolder
 import io.rover.rover.notifications.NotificationsRepository
 import io.rover.rover.notifications.ui.NotificationsRepositoryInterface
 import org.amshove.kluent.mock
@@ -36,26 +41,12 @@ class NotificationsRepositorySpec: Spek({
     given("a notifications repository") {
         // set up a minimal Rover instance just to get logging working.
 
-        fun repo(deviceStateToReturn: NetworkResult<DeviceState>): NotificationsRepository {
-            try {
-                Rover.initialize(
-                    object : Assembler {
-                        override fun assemble(container: Container) {
-                            container.register(LogEmitter::class.java) { _ ->
-                                JvmLogger()
-                            }
-                        }
-                    }
-                )
-            } catch (e: RuntimeException) {
-                // handle the double-initalize warning
-                System.out.println(e.message)
-            }
-            val dataPlugin : DataPluginInterface = object : DataPluginInterface by mock() {
-                override fun fetchStateTask(completionHandler: (NetworkResult<DeviceState>) -> Unit): NetworkTask {
-                    return object : NetworkTask {
-                        override fun cancel() { }
+        GlobalStaticLogHolder.globalLogEmitter = JvmLogger()
 
+        fun repo(deviceStateToReturn: NetworkResult<DeviceState>): NotificationsRepository {
+            val graphQl = object : GraphQlApiServiceInterface by mock() {
+                override fun fetchStateTask(completionHandler: (NetworkResult<DeviceState>) -> Unit): NetworkTask {
+                    return object : NetworkTask by mock() {
                         override fun resume() {
                             log.v("Yielding $deviceStateToReturn")
                             completionHandler(deviceStateToReturn)
@@ -63,10 +54,12 @@ class NotificationsRepositorySpec: Spek({
                     }
                 }
             }
-            val eventsPlugin : EventQueueServiceInterface = mock()
+
+            val eventQueue : EventQueueServiceInterface = mock()
+
             val keyValueStorage : MutableMap<String, String?> = mutableMapOf()
             return NotificationsRepository(
-                dataPlugin,
+                graphQl,
                 DateFormatting(),
                 Executor { command -> command.run() },
                 object : Scheduler {
@@ -74,7 +67,7 @@ class NotificationsRepositorySpec: Spek({
                         runnable()
                     }
                 },
-                eventsPlugin,
+                eventQueue,
                 object : LocalStorage {
                     override fun getKeyValueStorageFor(namedContext: String): KeyValueStorage {
                         return object : KeyValueStorage {

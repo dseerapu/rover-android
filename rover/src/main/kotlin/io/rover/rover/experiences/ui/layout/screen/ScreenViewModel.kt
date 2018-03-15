@@ -96,7 +96,7 @@ class ScreenViewModel(
             return results
         }
 
-        val row = remainingRowViewModels.first()
+        val rowViewModel = remainingRowViewModels.first()
 
         val rowBounds = RectF(
             0f,
@@ -107,17 +107,17 @@ class ScreenViewModel(
             0.0f
         )
 
-        val rowFrame = row.frame(rowBounds)
+        val rowFrame = rowViewModel.frame(rowBounds)
 
         val tail = remainingRowViewModels.subList(1, remainingRowViewModels.size)
 
-        val rowHead = listOf(DisplayItem(rowFrame, null, row))
+        val rowHead = listOf(DisplayItem(rowFrame, null, rowViewModel))
 
         // Lay out the blocks, and then reverse the list to suit the requirement that *later* items
         // in the list must occlude prior ones.
-        val blocks = row.mapBlocksToRectDisplayList(rowFrame).asReversed()
+        val blocks = rowViewModel.mapBlocksToRectDisplayList(rowFrame).asReversed()
 
-        return mapRowsToRectDisplayList(tail, width, Layout(results.coordinatesAndViewModels + rowHead + blocks, results.height + row.frame(rowBounds).height(), results.width))
+        return mapRowsToRectDisplayList(tail, width, Layout(results.coordinatesAndViewModels + rowHead + blocks, results.height + rowViewModel.frame(rowBounds).height(), results.width))
     }
 
     override val screenId: String

@@ -1,5 +1,6 @@
 package io.rover.rover.experiences
 
+import android.content.Context
 import android.os.Parcelable
 import io.rover.rover.core.assets.AssetService
 import io.rover.rover.core.assets.ImageOptimizationServiceInterface
@@ -51,7 +52,7 @@ import io.rover.rover.experiences.ui.toolbar.ToolbarConfiguration
  * To use it to your project, add [ExperiencesAssembler] to your [Rover.initialize] invocation.
  */
 class ExperiencesAssembler(
-    private val applicationContext: android.content.Context
+
 ): Assembler {
     override fun assemble(container: Container) {
         container.register(
@@ -68,7 +69,7 @@ class ExperiencesAssembler(
             // perhaps some day Android might do per-display DisplayMetrics (which seems necessary
             // to support displays with diverse densities), in which case, this will need to change.
             AndroidMeasurementService(
-                applicationContext.resources.displayMetrics,
+                resolver.resolveSingletonOrFail(Context::class.java).resources.displayMetrics,
                 resolver.resolveSingletonOrFail(RichTextToSpannedTransformer::class.java)
             )
         }

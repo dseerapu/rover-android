@@ -1,18 +1,27 @@
 package io.rover.rover.experiences.ui.layout
 
 import io.rover.rover.ModelFactories
+import io.rover.rover.core.container.Assembler
+import io.rover.rover.core.container.Container
+import io.rover.rover.core.container.InjectionContainer
+import io.rover.rover.core.container.Resolver
+import io.rover.rover.core.container.Scope
 import io.rover.rover.core.data.domain.HorizontalAlignment
 import io.rover.rover.core.data.domain.ID
 import io.rover.rover.core.data.domain.Length
 import io.rover.rover.core.data.domain.Offsets
 import io.rover.rover.core.data.domain.UnitOfMeasure
 import io.rover.rover.core.data.domain.VerticalAlignment
-import io.rover.rover.experiences.ui.blocks.BlockViewModelFactory
+import io.rover.rover.experiences.ExperiencesAssembler
+import io.rover.rover.experiences.MeasurementService
 import io.rover.rover.experiences.ui.blocks.concerns.layout.LayoutableViewModel
 import io.rover.rover.experiences.ui.blocks.rectangle.RectangleBlockViewModel
 import io.rover.rover.experiences.ui.layout.row.RowViewModel
 import io.rover.rover.experiences.ui.layout.screen.ScreenViewModel
 import io.rover.rover.experiences.types.RectF
+import io.rover.rover.experiences.ui.blocks.concerns.layout.CompositeBlockViewModelInterface
+import io.rover.rover.experiences.ui.layout.row.RowViewModelInterface
+import io.rover.rover.experiences.ui.navigation.ExperienceNavigationViewModelInterface
 import org.amshove.kluent.mock
 import org.amshove.kluent.shouldBeInstanceOf
 import org.amshove.kluent.shouldEqual
@@ -23,6 +32,22 @@ import org.jetbrains.spek.api.dsl.on
 
 class ScreenViewModelSpec : Spek({
     given("integration tests with real row view models") {
+
+        val realObjectStack = InjectionContainer(
+            listOf(
+                ExperiencesAssembler(),
+                // now I need to override certain objects in the experiences assembler with mock ones.
+                object : Assembler {
+                    override fun assemble(container: Container) {
+                        container.register(
+                            Scope.Singleton,
+                            MeasurementService::class.java
+                        ) { _: Resolver -> mock() }
+                    }
+                }
+            )
+        )
+
         given("a basic screen with one row with a rectangle block") {
             val screen = ModelFactories.emptyScreen().copy(
                 rows = listOf(
@@ -36,7 +61,17 @@ class ScreenViewModelSpec : Spek({
                     )
                 )
             )
-            val screenViewModel = ScreenViewModel(screen, mock(), BlockViewModelFactory(mock(), mock(), mock()))
+            val screenViewModel = ScreenViewModel(
+                screen,
+                mock(),
+                { row ->
+                    realObjectStack.resolve(
+                        RowViewModelInterface::class.java,
+                        null,
+                        row
+                    )!!
+                }
+            )
 
             on("rendering") {
                 val rendered = screenViewModel.render(
@@ -76,7 +111,7 @@ class ScreenViewModelSpec : Spek({
                     )
                 )
             )
-            val screenViewModel = ScreenViewModel(screen, mock(), BlockViewModelFactory(mock(), mock(), mock()))
+            val screenViewModel = ScreenViewModel(screen, mock(), { row -> mock() })
 
             on("rendering") {
                 val rendered = screenViewModel.render(
@@ -133,7 +168,7 @@ class ScreenViewModelSpec : Spek({
                     )
                 )
             )
-            val screenViewModel = ScreenViewModel(screen, mock(), BlockViewModelFactory(mock(), mock(), mock()))
+            val screenViewModel = ScreenViewModel(screen, mock(), { row -> mock() })
 
             on("rendering") {
                 val rendered = screenViewModel.render(
@@ -164,7 +199,7 @@ class ScreenViewModelSpec : Spek({
                     )
                 )
             )
-            val screenViewModel = ScreenViewModel(screen, mock(), BlockViewModelFactory(mock(), mock(), mock()))
+            val screenViewModel = ScreenViewModel(screen, mock(), { row -> mock() })
 
             on("rendering") {
                 val rendered = screenViewModel.render(
