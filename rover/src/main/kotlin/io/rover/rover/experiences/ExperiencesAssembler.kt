@@ -41,7 +41,9 @@ import io.rover.rover.experiences.ui.layout.screen.ScreenViewModel
 import io.rover.rover.experiences.ui.layout.screen.ScreenViewModelInterface
 import io.rover.rover.experiences.ui.navigation.ExperienceNavigationViewModel
 import io.rover.rover.experiences.ui.navigation.ExperienceNavigationViewModelInterface
+import io.rover.rover.experiences.ui.toolbar.ExperienceToolbarViewModel
 import io.rover.rover.experiences.ui.toolbar.ExperienceToolbarViewModelInterface
+import io.rover.rover.experiences.ui.toolbar.ToolbarConfiguration
 import kotlin.reflect.KClass
 
 /**
@@ -70,6 +72,13 @@ class ExperiencesAssembler(
                 applicationContext.resources.displayMetrics,
                 resolver.resolveSingletonOrFail(RichTextToSpannedTransformer::class.java)
             )
+        }
+
+        container.register(
+            Scope.Transient,
+            ExperienceToolbarViewModelInterface::class.java
+        ) { _, toolbarConfiguration: ToolbarConfiguration ->
+            ExperienceToolbarViewModel(toolbarConfiguration)
         }
 
         container.register(
@@ -273,7 +282,7 @@ class ExperiencesAssembler(
             when(block) {
                 is RectangleBlock -> {
                     RectangleBlockViewModel(
-                        resolver.resolve(BlockViewModelInterface::class.java, null, block)!!,
+                        resolver.resolve(BlockViewModelInterface::class.java, null, block, setOf<LayoutPaddingDeflection>(),null)!!,
                         resolver.resolve(BackgroundViewModelInterface::class.java, null, block)!!,
                         resolver.resolve(BorderViewModelInterface::class.java, null, block)!!
                     )
@@ -299,7 +308,12 @@ class ExperiencesAssembler(
                     )
                 }
                 is ButtonBlock -> {
-                    val blockViewModel = resolver.resolve(BlockViewModelInterface::class.java, null, block)!!
+
+                    // buttons have no measurable content and also cannot contribute padding, so we
+                    // pass empty values for both the layout deflections set and
+
+                    val blockViewModel = resolver.resolve(BlockViewModelInterface::class.java, null, block, setOf<LayoutPaddingDeflection>(),null)!!
+
                     ButtonBlockViewModel(
                         blockViewModel,
                         resolver.resolve(
@@ -309,7 +323,7 @@ class ExperiencesAssembler(
                 }
                 is WebViewBlock -> {
                     WebViewBlockViewModel(
-                        resolver.resolve(BlockViewModelInterface::class.java, null, block)!!,
+                        resolver.resolve(BlockViewModelInterface::class.java, null, block, setOf<LayoutPaddingDeflection>(),null)!!,
                         resolver.resolve(BackgroundViewModelInterface::class.java, null, block)!!,
                         resolver.resolve(BorderViewModelInterface::class.java, null, block)!!,
                         resolver.resolve(WebViewModelInterface::class.java, null, block)!!
