@@ -18,9 +18,6 @@ class InjectionContainer(
         assemblers.forEach { it.afterAssembly(this) }
     }
 
-    // TODO: consider trapping any late-binding exceptions caused by the mess of unchecked casts and
-    // emitting somewhat more helpful errors.
-
     override fun <T: Any> resolve(type: Class<T>, name: String?): T? {
         return doResolve<T, (Resolver) -> T>(type, name)?.invoke(this)
     }
@@ -29,9 +26,8 @@ class InjectionContainer(
         return try {
             doResolve<T, (Resolver, Arg1) -> T>(type, name)?.invoke(this, arg1)
         } catch(e: ClassCastException) {
-            log.w(inspectRegisteredFactory(type, name) ?: "nutin")
             throw(
-                RuntimeException("Arguments did not match.  Check assembler registering factory for $type with possible name '$name'.  Given argument:   '$arg1'.", e)
+                RuntimeException(errorMessageForFactoryInvocationFailure(type, name), e)
             )
         }
     }
@@ -41,7 +37,7 @@ class InjectionContainer(
             doResolve<T, (Resolver, Arg1, Arg2) -> T>(type, name)?.invoke(this, arg1, arg2)
         } catch(e: ClassCastException) {
             throw(
-                RuntimeException("Arguments did not match.  Check assembler registering factory for $type with possible name '$name'.  Given arguments: '$arg1', '$arg2'.", e)
+                RuntimeException(errorMessageForFactoryInvocationFailure(type, name), e)
             )
         }
     }
@@ -51,7 +47,7 @@ class InjectionContainer(
             doResolve<T, (Resolver, Arg1, Arg2, Arg3) -> T>(type, name)?.invoke(this, arg1, arg2, arg3)
         } catch(e: ClassCastException) {
             throw(
-                RuntimeException("Arguments did not match.  Check assembler registering factory for $type with possible name '$name'.  Given arguments: '$arg1', '$arg2', '$arg3'.", e)
+                RuntimeException(errorMessageForFactoryInvocationFailure(type, name), e)
             )
         }
     }
@@ -126,21 +122,19 @@ class InjectionContainer(
 
     interface ServiceEntryInterface
 
-    private fun <T> inspectRegisteredFactory(type: Class<T>, name: String? = null): String? {
+    private fun <T> errorMessageForFactoryInvocationFailure(type: Class<T>, name: String? = null): String {
         val key = ServiceKey(type, name)
-
         val entry = registeredPlugins[key]
 
-        // TODO: andrew start here and figure out how to get as many details as possible from the
-        // theoretically non-erased type object here. then we can use this instead of printing arg1
-        // and arg2 etc above, which is useless because the exception is already emitted proximate
-        // to the usage of the arguments which caused the failure.
-        return when (entry) {
-            is ServiceEntry.Transient<*> -> entry.factory.javaClass.toGenericString()
-            is ServiceEntry.Singleton<*> -> entry.factory.javaClass.toGenericString()
+        return "Injection arguments did not match for $type${if(name != null) " named $name" else ""}.\n" +
+            "Must match the argument types specified for the factory, as follows: \n  " + when (entry) {
+            is ServiceEntry.Transient<*> -> entry.factory.javaClass.methods.toList().filter { it.name == "invoke" }.joinToString("\n  ")
+            is ServiceEntry.Singleton<*> -> entry.factory.javaClass.methods.toList().filter { it.name == "invoke" }.joinToString("\n  ")
             else -> null
         }
     }
+
+
 
     sealed class ServiceEntry<T: Any>: ServiceEntryInterface {
         /**
