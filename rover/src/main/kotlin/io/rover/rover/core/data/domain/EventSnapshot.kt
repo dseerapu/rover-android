@@ -14,6 +14,7 @@ data class EventSnapshot(
     val attributes: Attributes,
     val timestamp: Date,
     val id: UUID,
+    val namespace: String,
     val context: Context
 ) {
     companion object {
@@ -23,6 +24,7 @@ data class EventSnapshot(
                 event.attributes,
                 event.timestamp,
                 event.id,
+                event.namespace,
                 context
             )
         }

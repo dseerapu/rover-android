@@ -6,6 +6,7 @@
     "attributes": {
       "a key": "a value"
     },
+    "namespace": "rover",
     "context": {
       "frameworks": {
         "io.rover.rover": "2.0.0"

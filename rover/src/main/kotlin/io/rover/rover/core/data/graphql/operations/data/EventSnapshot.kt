@@ -18,7 +18,8 @@ internal fun EventSnapshot.asJson(
     return JSONObject().apply {
         val props = listOf(
             EventSnapshot::name,
-            EventSnapshot::id
+            EventSnapshot::id,
+            EventSnapshot::name
         )
 
         putProp(this@asJson, EventSnapshot::timestamp, { dateFormatting.dateAsIso8601(it, true) })
@@ -37,6 +38,7 @@ internal fun EventSnapshot.Companion.decodeJson(json: JSONObject, dateFormatting
         name = json.getString("name"),
         timestamp = json.getDate("timestamp", dateFormatting, true),
         id = UUID.fromString(json.getString("id")),
-        context = Context.decodeJson(json.getJSONObject("context"))
+        context = Context.decodeJson(json.getJSONObject("context")),
+        namespace = json.getString("namespace")
     )
 }
