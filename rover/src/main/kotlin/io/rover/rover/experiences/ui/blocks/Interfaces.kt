@@ -9,15 +9,15 @@ import io.rover.rover.experiences.ui.blocks.concerns.layout.BlockViewModelInterf
 import io.rover.rover.experiences.ui.layout.row.RowViewModelInterface
 import io.rover.rover.experiences.ui.layout.screen.ScreenViewModelInterface
 
-/**
- *
- */
-interface BlockViewModelFactoryInterface {
-    fun viewModelForBlock(block: Block): BlockViewModelInterface
-
-    fun viewModelForRow(row: Row): RowViewModelInterface
-
-    fun viewModelForScreen(screen: Screen): ScreenViewModelInterface
-
-    fun viewModelForButtonState(buttonState: ButtonState): ButtonStateViewModelInterface
-}
+///**
+// *
+// */
+//interface BlockViewModelFactoryInterface {
+//    fun viewModelForBlock(block: Block): BlockViewModelInterface
+//
+//    fun viewModelForRow(row: Row): RowViewModelInterface
+//
+//    fun viewModelForScreen(screen: Screen): ScreenViewModelInterface
+//
+//    fun viewModelForButtonState(buttonState: ButtonState): ButtonStateViewModelInterface
+//}

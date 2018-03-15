@@ -24,8 +24,6 @@ import io.rover.rover.core.data.domain.Screen
 import io.rover.rover.core.events.EventQueueService
 import io.rover.rover.core.events.EventQueueServiceInterface
 import io.rover.rover.core.events.domain.Event
-import io.rover.rover.experiences.ui.ViewModelFactoryInterface
-import io.rover.rover.experiences.ui.blocks.BlockViewModelFactoryInterface
 import io.rover.rover.experiences.ui.containers.StandaloneExperienceHostActivity
 import io.rover.rover.experiences.ui.toolbar.ExperienceToolbarViewModelInterface
 import io.rover.rover.experiences.ui.layout.screen.ScreenViewModelInterface
@@ -41,8 +39,6 @@ import kotlinx.android.parcel.Parcelize
  */
 open class ExperienceNavigationViewModel(
     private val experience: Experience,
-//    private val blockViewModelFactory: BlockViewModelFactoryInterface,
-//    private val viewModelFactory: ViewModelFactoryInterface,
     private val eventsPlugin: EventQueueServiceInterface,
     private val resolveScreenViewModel: (screen: Screen) -> ScreenViewModelInterface,
     private val resolveToolbarViewModel: (configuration: ToolbarConfiguration) -> ExperienceToolbarViewModelInterface,

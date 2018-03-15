@@ -10,6 +10,7 @@ import io.rover.rover.core.container.Scope
 import io.rover.rover.core.data.domain.*
 import io.rover.rover.core.data.graphql.GraphQlApiServiceInterface
 import io.rover.rover.core.events.EventQueueServiceInterface
+import io.rover.rover.core.logging.log
 import io.rover.rover.experiences.ui.ExperienceViewModel
 import io.rover.rover.experiences.ui.ExperienceViewModelInterface
 import io.rover.rover.notifications.NotificationsRepository
@@ -22,30 +23,54 @@ import io.rover.rover.experiences.ui.blocks.concerns.background.BackgroundViewMo
 import io.rover.rover.experiences.ui.blocks.concerns.border.BorderViewModel
 import io.rover.rover.experiences.ui.blocks.concerns.border.BorderViewModelInterface
 import io.rover.rover.experiences.ui.blocks.concerns.layout.*
+import io.rover.rover.experiences.ui.blocks.concerns.text.AndroidRichTextToSpannedTransformer
+import io.rover.rover.experiences.ui.blocks.concerns.text.RichTextToSpannedTransformer
 import io.rover.rover.experiences.ui.blocks.concerns.text.TextViewModel
 import io.rover.rover.experiences.ui.blocks.concerns.text.TextViewModelInterface
 import io.rover.rover.experiences.ui.blocks.image.ImageBlockViewModel
+import io.rover.rover.experiences.ui.blocks.image.ImageViewModel
 import io.rover.rover.experiences.ui.blocks.image.ImageViewModelInterface
 import io.rover.rover.experiences.ui.blocks.rectangle.RectangleBlockViewModel
 import io.rover.rover.experiences.ui.blocks.text.TextBlockViewModel
 import io.rover.rover.experiences.ui.blocks.web.WebViewBlockViewModel
 import io.rover.rover.experiences.ui.blocks.web.WebViewModel
 import io.rover.rover.experiences.ui.blocks.web.WebViewModelInterface
+import io.rover.rover.experiences.ui.layout.row.RowViewModel
 import io.rover.rover.experiences.ui.layout.row.RowViewModelInterface
 import io.rover.rover.experiences.ui.layout.screen.ScreenViewModel
 import io.rover.rover.experiences.ui.layout.screen.ScreenViewModelInterface
 import io.rover.rover.experiences.ui.navigation.ExperienceNavigationViewModel
 import io.rover.rover.experiences.ui.navigation.ExperienceNavigationViewModelInterface
 import io.rover.rover.experiences.ui.toolbar.ExperienceToolbarViewModelInterface
+import kotlin.reflect.KClass
 
 /**
  * This is the Rover User Experience plugin.  It contains the entire Rover Experiences system.
  *
  * To use it to your project, add [ExperiencesAssembler] to your [Rover.initialize] invocation.
  */
-class ExperiencesAssembler: Assembler {
+class ExperiencesAssembler(
+    private val applicationContext: android.content.Context
+): Assembler {
     override fun assemble(container: Container) {
-        // top-level view models:
+        container.register(
+            Scope.Singleton,
+            RichTextToSpannedTransformer::class.java
+        ) { _ ->
+            AndroidRichTextToSpannedTransformer()
+        }
+
+        container.register(
+            Scope.Singleton,
+            MeasurementService::class.java
+        ) { resolver ->
+            // perhaps some day Android might do per-display DisplayMetrics (which seems necessary
+            // to support displays with diverse densities), in which case, this will need to change.
+            AndroidMeasurementService(
+                applicationContext.resources.displayMetrics,
+                resolver.resolveSingletonOrFail(RichTextToSpannedTransformer::class.java)
+            )
+        }
 
         container.register(
             Scope.Transient,
@@ -82,6 +107,16 @@ class ExperiencesAssembler: Assembler {
             )
         }
 
+        container.register(
+            Scope.Transient,
+            RowViewModelInterface::class.java
+        ) { resolver: Resolver, row: Row ->
+            RowViewModel(
+                row,
+                { block -> resolver.resolve(CompositeBlockViewModelInterface::class.java, null, block)!! },
+                resolver.resolve(BackgroundViewModelInterface::class.java, null, row)!!
+            )
+        }
 
         container.register(
             Scope.Transient,
@@ -96,8 +131,6 @@ class ExperiencesAssembler: Assembler {
                 icicle
             )
         }
-
-        // TODO: row view model
 
         // embedded/block type view models:
 
@@ -142,6 +175,17 @@ class ExperiencesAssembler: Assembler {
 
         container.register(
             Scope.Transient,
+            ImageViewModelInterface::class.java
+        ) { resolver, imageBlock: ImageBlock ->
+            ImageViewModel(
+                imageBlock,
+                resolver.resolveSingletonOrFail(AssetService::class.java),
+                resolver.resolveSingletonOrFail(ImageOptimizationServiceInterface::class.java)
+            )
+        }
+
+        container.register(
+            Scope.Transient,
             ButtonViewModelInterface::class.java
         ) { resolver, block: ButtonBlock, blockViewModel: BlockViewModelInterface ->
             ButtonViewModel(
@@ -151,11 +195,7 @@ class ExperiencesAssembler: Assembler {
             }
         }
 
-        container.register(
-            Scope.Transient,
-            ButtonStateViewModelInterface::class.java
-        ) { resolver: Resolver, buttonState: ButtonState ->
-
+        val buttonStateFactory = { resolver: Resolver, buttonState: ButtonState ->
             ButtonStateViewModel(
                 resolver.resolve(BorderViewModelInterface::class.java, null, buttonState)!!,
                 resolver.resolve(BackgroundViewModelInterface::class.java, null, buttonState)!!,
@@ -163,6 +203,19 @@ class ExperiencesAssembler: Assembler {
                 resolver.resolve(TextViewModelInterface::class.java, "buttonState", buttonState)!!
             )
         }
+
+        val fdsafsd = buttonStateFactory::class
+
+        val invokeMethods = fdsafsd.java.methods.toList().filter { it.name  == "invoke" }
+
+        log.v("CLASS TYPE FOR BUTTON STATE FACTORY IS:\n    ${invokeMethods.joinToString("\n    ")}")
+
+        container.register(
+            Scope.Transient,
+            ButtonStateViewModelInterface::class.java,
+            null,
+            buttonStateFactory
+        )
 
         container.register(
             Scope.Transient,

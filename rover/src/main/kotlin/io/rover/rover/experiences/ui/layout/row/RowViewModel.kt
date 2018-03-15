@@ -1,5 +1,6 @@
 package io.rover.rover.experiences.ui.layout.row
 
+import io.rover.rover.core.data.domain.Block
 import io.rover.rover.core.data.domain.Row
 import io.rover.rover.core.streams.Observable
 import io.rover.rover.core.streams.asPublisher
@@ -7,25 +8,25 @@ import io.rover.rover.core.streams.filterNulls
 import io.rover.rover.core.streams.flatMap
 import io.rover.rover.core.streams.map
 import io.rover.rover.core.streams.share
-import io.rover.rover.experiences.ui.blocks.BlockViewModelFactoryInterface
 import io.rover.rover.experiences.ui.blocks.concerns.layout.BlockViewModelInterface
 import io.rover.rover.experiences.ui.blocks.barcode.BarcodeBlockViewModel
 import io.rover.rover.experiences.ui.blocks.concerns.background.BackgroundViewModelInterface
 import io.rover.rover.experiences.ui.layout.measuredAgainst
 import io.rover.rover.experiences.ui.layout.DisplayItem
 import io.rover.rover.experiences.types.RectF
+import io.rover.rover.experiences.ui.blocks.concerns.layout.CompositeBlockViewModelInterface
 import io.rover.rover.experiences.ui.layout.ViewType
 import io.rover.rover.experiences.ui.layout.screen.ScreenViewModel
 
 class RowViewModel(
     private val row: Row,
-    private val viewModelFactory: BlockViewModelFactoryInterface,
+    private val blockViewModelResolver: (block: Block) -> CompositeBlockViewModelInterface,
     private val backgroundViewModel: BackgroundViewModelInterface
 ) : RowViewModelInterface, BackgroundViewModelInterface by backgroundViewModel {
     override val viewType: ViewType = ViewType.Row
 
     override val blockViewModels: List<BlockViewModelInterface> by lazy {
-        row.blocks.map { viewModelFactory.viewModelForBlock(it) }
+        row.blocks.map { blockViewModelResolver(it) }
     }
 
     override val eventSource: Observable<RowViewModelInterface.Event> = blockViewModels.map { blockViewModel ->

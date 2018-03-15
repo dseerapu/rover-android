@@ -5,13 +5,11 @@ import io.rover.rover.core.data.domain.ButtonState
 import io.rover.rover.core.streams.Observable
 import io.rover.rover.core.streams.map
 import io.rover.rover.core.streams.share
-import io.rover.rover.experiences.ui.blocks.BlockViewModelFactoryInterface
 import io.rover.rover.experiences.ui.blocks.concerns.layout.BlockViewModelInterface
 
 class ButtonViewModel(
     block: ButtonBlock,
     blockViewModel: BlockViewModelInterface,
-    // viewModelFactory: BlockViewModelFactoryInterface
     stateViewModelResolver: (buttonState: ButtonState) -> ButtonStateViewModelInterface
 ) : ButtonViewModelInterface {
     private val normalStateViewModel = stateViewModelResolver(block.normal)

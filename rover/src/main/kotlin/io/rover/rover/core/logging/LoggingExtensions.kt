@@ -22,9 +22,17 @@ interface LogEmitter {
     fun d(logTag: String, message: String)
 }
 
+internal class GlobalStaticLogHolder {
+    companion object {
+        // This is the only example of a global scope, mutable, allocated-at-runtime value.  This is
+        // to avoid the complexity of trying to inject a logger into all and sundry location.
+        var globalLogEmitter: LogEmitter? = null
+    }
+}
+
 internal val Any.log: LogReceiver
     get() {
-        val receiver = Rover.sharedInstance.logEmitter
+        val receiver = GlobalStaticLogHolder.globalLogEmitter ?: throw RuntimeException("Logger has not yet been configured.")
 
         val logTag = "Rover::${this.javaClass.simpleName}"
 

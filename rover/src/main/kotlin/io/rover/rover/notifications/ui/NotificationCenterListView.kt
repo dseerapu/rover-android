@@ -67,9 +67,9 @@ open class NotificationCenterListView : CoordinatorLayout, BindableView<Notifica
 
     // TODO: this will be injected after great DI cleanup.
 
-    private val shittyLocalIoExecutor = IoMultiplexingExecutor.build("temporary notification list")
-
-    private val shittyLocalAssetService = AndroidAssetService(ImageDownloader(shittyLocalIoExecutor), shittyLocalIoExecutor)
+//    private val shittyLocalIoExecutor = IoMultiplexingExecutor.build("temporary notification list")
+//
+//    private val shittyLocalAssetService = AndroidAssetService(ImageDownloader(shittyLocalIoExecutor), shittyLocalIoExecutor)
 
     /**
      * Implement this (either directly or with an anonymous class) in your containing view for
@@ -110,7 +110,7 @@ open class NotificationCenterListView : CoordinatorLayout, BindableView<Notifica
     }
 
     open fun makeNotificationItemViewModel(notification: Notification): NotificationItemViewModelInterface {
-        return NotificationItemViewModel(notification, shittyLocalAssetService)
+        return NotificationItemViewModel(notification, Rover.sharedInstance.assetService)
     }
 
     override var viewModel: NotificationCenterListViewModelInterface? by ViewModelBinding { viewModel, subscriptionCallback ->

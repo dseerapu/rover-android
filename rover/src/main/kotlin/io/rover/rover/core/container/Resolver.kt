@@ -51,6 +51,6 @@ interface Resolver {
     fun <T: Any> resolveSingletonOrFail(type: Class<T>, name: String? = null): T {
         // return resolve(type) ?: throw RuntimeException("Could not resolve item of type ${type.name}.  Ensure that what you are asking for is the Interface of a Plugin, such as DataPluginInterface.")
         val byName = if(name == null) "" else " named '$name'"
-        return resolve(type) ?: throw RuntimeException("DI container cannot resolve type '${type.name}'$byName.  Make sure you've added all the assemblers you need to Rover.initialize().")
+        return resolve(type, name) ?: throw RuntimeException("DI container cannot resolve type '${type.name}'$byName.  Make sure you've added all the assemblers you need to Rover.initialize().")
     }
 }

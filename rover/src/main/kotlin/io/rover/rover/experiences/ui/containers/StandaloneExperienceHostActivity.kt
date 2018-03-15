@@ -77,9 +77,6 @@ open class StandaloneExperienceHostActivity : AppCompatActivity() {
     // private val experiencesView by lazy { ScreenView(this) }
     protected open val experiencesView by lazy { ExperienceView(this) }
 
-    private val userExperiencePlugin by lazy {
-        Rover.sharedInstance.userExperiencePlugin
-    }
 
     private var experienceViewModel: ExperienceViewModelInterface? = null
         set(viewModel) {
@@ -137,7 +134,7 @@ open class StandaloneExperienceHostActivity : AppCompatActivity() {
         // wire up the toolbar host to the ExperienceView.
         experiencesView.toolbarHost = toolbarHost
 
-        experienceViewModel = userExperiencePlugin.viewModelForExperience(
+        experienceViewModel = Rover.sharedInstance.experienceViewModel(
             experienceId,
             // obtain any possibly saved state for the experience view model.  See
             // onSaveInstanceState.

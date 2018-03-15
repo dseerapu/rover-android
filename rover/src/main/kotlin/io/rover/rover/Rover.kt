@@ -1,15 +1,17 @@
 package io.rover.rover
 
 import android.content.Context
+import android.os.Parcelable
+import io.rover.rover.core.assets.AssetService
 import io.rover.rover.core.container.Assembler
 import io.rover.rover.core.container.ContainerResolver
-import io.rover.rover.core.container.PluginContainer
-import io.rover.rover.core.logging.LogEmitter
+import io.rover.rover.core.container.InjectionContainer
 import io.rover.rover.core.data.http.AsyncTaskAndHttpUrlConnectionNetworkClient
 import io.rover.rover.core.events.EventQueueServiceInterface
 import io.rover.rover.notifications.NotificationHandlerInterface
 import io.rover.rover.experiences.NotificationOpenInterface
-import io.rover.rover.experiences.UserExperiencePluginInterface
+import io.rover.rover.experiences.ui.ExperienceViewModelInterface
+import io.rover.rover.notifications.ui.NotificationCenterListViewModelInterface
 import java.net.HttpURLConnection
 
 /**
@@ -25,28 +27,34 @@ import java.net.HttpURLConnection
  */
 class Rover(
     assemblers: List<Assembler>
-): ContainerResolver by PluginContainer(assemblers) {
-    // TODO: these accessors will likely disappear entirely and instead be replaced with usage of a DI container.
+): ContainerResolver by InjectionContainer(assemblers) {
 
-    @Deprecated("Consumers will soon obtain view models from the DI container directly.")
-    val userExperiencePlugin: UserExperiencePluginInterface
-        get() = this.resolve(UserExperiencePluginInterface::class.java) ?: throw missingPluginError("UserExperiencePlugin")
+    // These accessors for specific objects in DI exist for two reasons: access by top-level UI
+    // objects, and access directly by developers' code. TODO re-evaluate that.
 
     val eventQueue: EventQueueServiceInterface
-        get() = this.resolve(EventQueueServiceInterface::class.java) ?: throw missingPluginError(("EventQueueService"))
+        get() = this.resolve(EventQueueServiceInterface::class.java) ?: throw missingDependencyError(("EventQueueService"))
 
     val notificationHandler: NotificationHandlerInterface
-        get() = this.resolve(NotificationHandlerInterface::class.java) ?: throw missingPluginError(("NotificationHandler"))
+        get() = this.resolve(NotificationHandlerInterface::class.java) ?: throw missingDependencyError(("NotificationHandler"))
 
-    val logEmitter: LogEmitter
-        get() = this.resolve(LogEmitter::class.java) ?: throw missingPluginError("LogEmitter")
+    val notificationCenterViewModel: NotificationCenterListViewModelInterface
+        get() = this.resolve(NotificationCenterListViewModelInterface::class.java) ?: throw missingDependencyError("NotificationCenterViewModel")
+
+    fun experienceViewModel(experienceId: String, icicle: Parcelable?): ExperienceViewModelInterface {
+        return this.resolve(ExperienceViewModelInterface::class.java, null, experienceId, icicle) ?: throw missingDependencyError("ExperienceViewModel")
+    }
 
     val notificationOpen: NotificationOpenInterface
-        get() = this.resolve(NotificationOpenInterface::class.java) ?: throw missingPluginError("NotificationOpen")
+        get() = this.resolve(NotificationOpenInterface::class.java) ?: throw missingDependencyError("NotificationOpen")
 
-    private fun missingPluginError(name: String): Throwable {
-        throw RuntimeException("Logger not registered.  Did you include $name() in the assembler list?")
+    val assetService: AssetService
+        get() = this.resolve(AssetService::class.java) ?: throw missingDependencyError("AssetService")
+
+    private fun missingDependencyError(name: String): Throwable {
+        throw RuntimeException("Dependency not registered.  Did you include $name() in the assembler list?")
     }
+
 
     companion object {
         private var sharedInstanceBackingField: Rover? = null

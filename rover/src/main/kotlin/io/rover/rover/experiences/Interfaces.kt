@@ -5,21 +5,20 @@ import android.content.Intent
 import android.support.v4.content.ContextCompat
 import io.rover.rover.core.data.domain.Notification
 import io.rover.rover.notifications.NotificationActionRoutingBehaviour
-import io.rover.rover.experiences.ui.ViewModelFactoryInterface
-
-interface UserExperiencePluginInterface : ViewModelFactoryInterface {
-    // for now all consumers of the User Plugin only use it to construct the view models.
-}
-
-interface UserExperiencePluginComponentsInterface {
-    /**
-     * This is the stock view model factory.  It can manufacture the top-level Experience view
-     * models.
-     */
-    val stockViewModelFactory: ViewModelFactoryInterface
-
-    val measurementService: MeasurementService
-}
+//
+//interface UserExperiencePluginInterface : ViewModelFactoryInterface {
+//    // for now all consumers of the User Plugin only use it to construct the view models.
+//}
+//
+//interface UserExperiencePluginComponentsInterface {
+//    /**
+//     * This is the stock view model factory.  It can manufacture the top-level Experience view
+//     * models.
+//     */
+//    val stockViewModelFactory: ViewModelFactoryInterface
+//
+//    val measurementService: MeasurementService
+//}
 
 /**
  * Responsible for generating Intents that will route the user to the appropriate place in your app

@@ -1,12 +1,14 @@
 package io.rover.rover.core.container
 
+import io.rover.rover.core.logging.log
+
 /**
  * Implements both [Container] and [Resolver].  Thus, it hosts a set of live objects for a given set
  * of types, and delegates instantiation of them to a set of [Assembler]s.
  *
  * Can be thought of as mildly analogous to a Dagger or Koin module.
  */
-class PluginContainer(
+class InjectionContainer(
     assemblers: List<Assembler>
 ) : Container, Resolver, ContainerResolver {
     private var registeredPlugins: HashMap<ServiceKey<*>, ServiceEntryInterface> = hashMapOf()
@@ -20,21 +22,38 @@ class PluginContainer(
     // emitting somewhat more helpful errors.
 
     override fun <T: Any> resolve(type: Class<T>, name: String?): T? {
-        return doResolve<T, () -> T>(type, name)?.invoke()
+        return doResolve<T, (Resolver) -> T>(type, name)?.invoke(this)
     }
 
-
-
     override fun <T : Any, Arg1> resolve(type: Class<T>, name: String?, arg1: Arg1): T? {
-        return doResolve<T, (Arg1) -> T>(type, name)?.invoke(arg1)
+        return try {
+            doResolve<T, (Resolver, Arg1) -> T>(type, name)?.invoke(this, arg1)
+        } catch(e: ClassCastException) {
+            log.w(inspectRegisteredFactory(type, name) ?: "nutin")
+            throw(
+                RuntimeException("Arguments did not match.  Check assembler registering factory for $type with possible name '$name'.  Given argument:   '$arg1'.", e)
+            )
+        }
     }
 
     override fun <T : Any, Arg1, Arg2> resolve(type: Class<T>, name: String?, arg1: Arg1, arg2: Arg2): T? {
-        return doResolve<T, (Arg1, Arg2) -> T>(type, name)?.invoke(arg1, arg2)
+        return try {
+            doResolve<T, (Resolver, Arg1, Arg2) -> T>(type, name)?.invoke(this, arg1, arg2)
+        } catch(e: ClassCastException) {
+            throw(
+                RuntimeException("Arguments did not match.  Check assembler registering factory for $type with possible name '$name'.  Given arguments: '$arg1', '$arg2'.", e)
+            )
+        }
     }
 
     override fun <T : Any, Arg1, Arg2, Arg3> resolve(type: Class<T>, name: String?, arg1: Arg1, arg2: Arg2, arg3: Arg3): T? {
-        return doResolve<T, (Arg1, Arg2, Arg3) -> T>(type, name)?.invoke(arg1, arg2, arg3)
+        return  try {
+            doResolve<T, (Resolver, Arg1, Arg2, Arg3) -> T>(type, name)?.invoke(this, arg1, arg2, arg3)
+        } catch(e: ClassCastException) {
+            throw(
+                RuntimeException("Arguments did not match.  Check assembler registering factory for $type with possible name '$name'.  Given arguments: '$arg1', '$arg2', '$arg3'.", e)
+            )
+        }
     }
 
     private fun <TClass: Any, TFactory: Any> doResolve(type: Class<*>, name: String?): TFactory? {
@@ -53,7 +72,7 @@ class PluginContainer(
             }
             is ServiceEntry.Singleton<TClass> -> {
                 @Suppress("UNCHECKED_CAST")
-                return {
+                return { _: Resolver ->
                     entry.instance ?: entry.factory(this).apply {
                         // if constructing a new instance, replace the Entry in the list with one that has
                         // the memoized/cached instance.
@@ -101,11 +120,27 @@ class PluginContainer(
     }
 
     data class ServiceKey<T>(
-        val factoryType: Class<T>,
+        val resultType: Class<T>,
         val name: String? = null
     )
 
     interface ServiceEntryInterface
+
+    private fun <T> inspectRegisteredFactory(type: Class<T>, name: String? = null): String? {
+        val key = ServiceKey(type, name)
+
+        val entry = registeredPlugins[key]
+
+        // TODO: andrew start here and figure out how to get as many details as possible from the
+        // theoretically non-erased type object here. then we can use this instead of printing arg1
+        // and arg2 etc above, which is useless because the exception is already emitted proximate
+        // to the usage of the arguments which caused the failure.
+        return when (entry) {
+            is ServiceEntry.Transient<*> -> entry.factory.javaClass.toGenericString()
+            is ServiceEntry.Singleton<*> -> entry.factory.javaClass.toGenericString()
+            else -> null
+        }
+    }
 
     sealed class ServiceEntry<T: Any>: ServiceEntryInterface {
         /**
@@ -141,4 +176,7 @@ class PluginContainer(
         ): ServiceEntry<T>()
     }
 }
-
+//
+//class Registrator(val container: Container) {
+//    inline fun register <T>
+//}

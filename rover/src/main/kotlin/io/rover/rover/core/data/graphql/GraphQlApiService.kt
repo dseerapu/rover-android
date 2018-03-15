@@ -159,6 +159,22 @@ class GraphQlApiService(
         events: List<EventSnapshot>,
         completionHandler: ((NetworkResult<String>) -> Unit)
     ): NetworkTask {
+        if(!authenticationContext.isAvailable()) {
+            log.w("Events may not be submitted without a Rover authentication context being configured.")
+
+            return object : NetworkTask {
+                override fun cancel() { /* no-op */}
+
+                override fun resume() {
+                    completionHandler(
+                        NetworkResult.Error(
+                            Exception("Attempt to submit Events without Rover authentication context being configured."),
+                            false
+                        )
+                    )
+                }
+            }
+        }
         val request = SendEventsRequest(
             events,
             wireEncoder

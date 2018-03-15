@@ -1,6 +1,11 @@
 package io.rover.rover.core
 
 import android.app.Application
+import io.rover.rover.core.assets.AndroidAssetService
+import io.rover.rover.core.assets.AssetService
+import io.rover.rover.core.assets.ImageDownloader
+import io.rover.rover.core.assets.ImageOptimizationService
+import io.rover.rover.core.assets.ImageOptimizationServiceInterface
 import io.rover.rover.core.container.Assembler
 import io.rover.rover.core.container.Container
 import io.rover.rover.core.container.Resolver
@@ -18,6 +23,7 @@ import io.rover.rover.core.events.EventQueueService
 import io.rover.rover.core.events.EventQueueServiceInterface
 import io.rover.rover.core.events.contextproviders.*
 import io.rover.rover.core.logging.AndroidLogger
+import io.rover.rover.core.logging.GlobalStaticLogHolder
 import io.rover.rover.core.logging.LogEmitter
 import io.rover.rover.core.streams.Scheduler
 import io.rover.rover.core.streams.forAndroidMainThread
@@ -52,15 +58,8 @@ class CoreAssembler(
     private val resetPushToken: () -> Unit
 ): Assembler {
     override fun assemble(container: Container) {
-//        container.register(
-//            Scope.Singleton,
-//            Application::class.java
-//        ) { _ -> application }
-
-        // logger
-        container.register(Scope.Singleton, LogEmitter::class.java) { _ ->
-            AndroidLogger()
-        }
+        // logger, which we "inject" using static scope
+        GlobalStaticLogHolder.globalLogEmitter = AndroidLogger()
 
         container.register(Scope.Singleton, NetworkClient::class.java) { _ ->
             AsyncTaskAndHttpUrlConnectionNetworkClient()
@@ -104,6 +103,21 @@ class CoreAssembler(
             )
         }
 
+        container.register(Scope.Singleton, ImageDownloader::class.java) { resolver ->
+            ImageDownloader(resolver.resolveSingletonOrFail(Executor::class.java, "io"))
+        }
+
+        container.register(Scope.Singleton, AssetService::class.java) { resolver ->
+            AndroidAssetService(
+                resolver.resolveSingletonOrFail(ImageDownloader::class.java),
+                resolver.resolveSingletonOrFail(Executor::class.java, "io")
+            )
+        }
+
+        container.register(Scope.Singleton, ImageOptimizationServiceInterface::class.java) { resolver ->
+            ImageOptimizationService()
+        }
+
         container.register(Scope.Singleton, ContextProvider::class.java, "device") { _ ->
             DeviceContextProvider()
         }
@@ -136,6 +150,7 @@ class CoreAssembler(
             TimeZoneContextProvider()
         }
 
+        // TODO: move this to NotificationsAssembler.
         container.register(Scope.Singleton, ContextProvider::class.java, "pushToken") { resolver ->
             FirebasePushTokenContextProvider(
                 resolver.resolveSingletonOrFail(LocalStorage::class.java),

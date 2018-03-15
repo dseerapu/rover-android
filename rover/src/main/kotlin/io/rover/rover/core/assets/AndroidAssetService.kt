@@ -12,8 +12,7 @@ import io.rover.rover.core.data.http.NetworkTask
 import java.net.URL
 import java.util.concurrent.Executor
 
-// TODO: make internal again after DI fixes
-class AndroidAssetService(
+internal class AndroidAssetService(
     imageDownloader: ImageDownloader,
     private val ioExecutor: Executor
 ) : AssetService {

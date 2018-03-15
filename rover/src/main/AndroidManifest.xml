@@ -11,7 +11,7 @@
         android:supportsRtl="true">
 
         <activity
-            android:name="io.rover.rover.plugins.userexperience.experience.containers.StandaloneExperienceHostActivity"
+            android:name=".experiences.ui.containers.StandaloneExperienceHostActivity"
             android:theme="@style/EmptyThemeToDisableActionBar"
         />
     </application>
