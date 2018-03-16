@@ -12,6 +12,7 @@ import io.rover.rover.core.data.graphql.GraphQlApiServiceInterface
 import io.rover.rover.core.data.graphql.getObjectIterable
 import io.rover.rover.core.data.graphql.operations.data.decodeJson
 import io.rover.rover.core.data.graphql.operations.data.encodeJson
+import io.rover.rover.core.events.EventQueueService
 import io.rover.rover.notifications.ui.NotificationsRepositoryInterface
 import io.rover.rover.core.events.EventQueueServiceInterface
 import io.rover.rover.core.events.domain.Event
@@ -198,7 +199,8 @@ class NotificationsRepository(
                     Event(
                         "Notification Marked Deleted",
                         hashMapOf()
-                    )
+                    ),
+                    EventQueueService.ROVER_NAMESPACE
                 )
             }
 
@@ -232,7 +234,8 @@ class NotificationsRepository(
                     Event(
                         "Notification Marked Read",
                         hashMapOf()
-                    )
+                    ),
+                    EventQueueService.ROVER_NAMESPACE
                 )
             }
 

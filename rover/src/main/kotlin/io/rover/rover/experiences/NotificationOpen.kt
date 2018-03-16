@@ -7,6 +7,7 @@ import io.rover.rover.core.data.domain.AttributeValue
 import io.rover.rover.core.data.domain.Notification
 import io.rover.rover.core.data.domain.PushNotificationAction
 import io.rover.rover.core.data.http.WireEncoderInterface
+import io.rover.rover.core.events.EventQueueService
 import io.rover.rover.core.events.EventQueueServiceInterface
 import io.rover.rover.core.events.domain.Event
 import io.rover.rover.notifications.NotificationActionRoutingBehaviour
@@ -73,7 +74,8 @@ open class NotificationOpen(
                     Pair("notificationID", AttributeValue.String(notification.id)),
                     Pair("source", AttributeValue.String(source.wireValue))
                 )
-            )
+            ),
+            EventQueueService.ROVER_NAMESPACE
         )
     }
 

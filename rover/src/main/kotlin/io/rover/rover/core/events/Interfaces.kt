@@ -48,8 +48,12 @@ interface EventQueueServiceInterface {
      * Track the given [Event].  Enqueues it to be sent up to the Rover API.
      *
      * Asynchronous, will immediately return.
+     *
+     * @param namespace Specify a namespace name to your events in order to separate them from other
+     * events. They will appear as a separate table in your BigQuery instance. May be left null to
+     * have it appear in a default table.
      */
-    fun trackEvent(event: Event)
+    fun trackEvent(event: Event, namespace: String? = null)
 
     /**
      * Install the given context provider, so that all outgoing events can the given context

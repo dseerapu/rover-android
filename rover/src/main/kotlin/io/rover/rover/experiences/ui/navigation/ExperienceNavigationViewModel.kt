@@ -85,7 +85,8 @@ open class ExperienceNavigationViewModel(
             Event(
                 "Experience Viewed",
                 hashMapOf(Pair("experienceID", AttributeValue.String(experience.id.rawValue)))
-            )
+            ),
+            EventQueueService.ROVER_NAMESPACE
         )
     }
 
@@ -372,7 +373,7 @@ open class ExperienceNavigationViewModel(
                     ).apply { putAll(attributes) }
                 )
 
-                eventsPlugin.trackEvent(event)
+                eventsPlugin.trackEvent(event, EventQueueService.ROVER_NAMESPACE)
             }
         }
     }
@@ -389,7 +390,8 @@ open class ExperienceNavigationViewModel(
                             Pair("experienceID", AttributeValue.String(experience.id.rawValue)),
                             Pair("screenID", AttributeValue.String(emission.screenViewModel.screenId))
                         )
-                    )
+                    ),
+                    EventQueueService.ROVER_NAMESPACE
                 )
             }
         }

@@ -45,10 +45,10 @@ class EventQueueService(
         contextProviders.add(contextProvider)
     }
 
-    override fun trackEvent(event: Event) {
+    override fun trackEvent(event: Event, namespace: String?) {
         log.v("Tracking event: $event")
         captureContext()
-        enqueueEvent(event)
+        enqueueEvent(event, namespace)
         flushEvents(flushAt)
     }
 
@@ -56,7 +56,7 @@ class EventQueueService(
         flushEvents(1)
     }
 
-    private fun enqueueEvent(event: Event) {
+    private fun enqueueEvent(event: Event, namespace: String?) {
         serialQueueExecutor.execute {
             if(eventQueue.count() == maxQueueSize) {
                 log.w("Event queue is at capacity ($maxQueueSize) -- removing oldest event.")
@@ -65,7 +65,8 @@ class EventQueueService(
 
             val snapshot = EventSnapshot.fromEvent(
                 event,
-                context ?: throw RuntimeException("enqueueEvent() occurred before Context set up?")
+                context ?: throw RuntimeException("enqueueEvent() occurred before Context set up?"),
+                namespace
             )
             eventQueue.add(snapshot)
             persistEvents()
@@ -218,5 +219,7 @@ class EventQueueService(
     companion object {
         private const val STORAGE_CONTEXT_IDENTIFIER = "io.rover.rover.events-queue"
         private const val QUEUE_KEY = "queue"
+
+        const val ROVER_NAMESPACE = "rover"
     }
 }

@@ -8,14 +8,10 @@ data class Event(
     val name: String,
     val attributes: Attributes,
     val timestamp: Date,
-    val id: UUID,
-    val namespace: String
+    val id: UUID
 ) {
     constructor(
         name: String,
         attributes: Attributes
-    ): this(name, attributes, Date(), UUID.randomUUID(), ROVER_NAMESPACE)
-    companion object {
-        const val ROVER_NAMESPACE = "rover"
-    }
+    ): this(name, attributes, Date(), UUID.randomUUID())
 }

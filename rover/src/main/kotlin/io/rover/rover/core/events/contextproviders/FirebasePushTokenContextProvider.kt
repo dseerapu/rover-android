@@ -5,6 +5,7 @@ import io.rover.rover.core.logging.log
 import io.rover.rover.platform.LocalStorage
 import io.rover.rover.core.data.domain.Context
 import io.rover.rover.core.events.ContextProvider
+import io.rover.rover.core.events.EventQueueService
 import io.rover.rover.core.events.EventQueueServiceInterface
 import io.rover.rover.core.events.PushTokenTransmissionChannel
 import io.rover.rover.core.events.domain.Event
@@ -45,7 +46,7 @@ class FirebasePushTokenContextProvider(
             )
             this.token = token
             val eventsPlugin = eventsPlugin ?: throw RuntimeException("registeredWithEventsPlugin() not called on FirebasePushTokenContextProvider during setup.")
-            eventsPlugin.trackEvent(event)
+            eventsPlugin.trackEvent(event, EventQueueService.ROVER_NAMESPACE)
             val elapsed = (Date().time - launchTime.time) / 1000
             log.v("Push token set after $elapsed seconds.")
         }
