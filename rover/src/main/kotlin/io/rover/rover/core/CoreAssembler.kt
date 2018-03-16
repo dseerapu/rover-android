@@ -1,6 +1,7 @@
 package io.rover.rover.core
 
 import android.app.Application
+import android.content.Context
 import io.rover.rover.core.assets.AndroidAssetService
 import io.rover.rover.core.assets.AssetService
 import io.rover.rover.core.assets.ImageDownloader
@@ -45,6 +46,10 @@ class CoreAssembler(
     override fun assemble(container: Container) {
         // logger, which we "inject" using static scope
         GlobalStaticLogHolder.globalLogEmitter = AndroidLogger()
+
+        container.register(Scope.Singleton, Context::class.java) { _ ->
+            application
+        }
 
         container.register(Scope.Singleton, NetworkClient::class.java) { _ ->
             AsyncTaskAndHttpUrlConnectionNetworkClient()
