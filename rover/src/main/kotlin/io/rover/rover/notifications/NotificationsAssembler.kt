@@ -14,8 +14,6 @@ import io.rover.rover.core.events.EventQueueServiceInterface
 import io.rover.rover.core.events.contextproviders.FirebasePushTokenContextProvider
 import io.rover.rover.core.streams.Scheduler
 import io.rover.rover.experiences.DefaultTopLevelNavigation
-import io.rover.rover.experiences.NotificationOpen
-import io.rover.rover.experiences.NotificationOpenInterface
 import io.rover.rover.experiences.TopLevelNavigation
 import io.rover.rover.notifications.ui.NotificationCenterListViewModel
 import io.rover.rover.notifications.ui.NotificationCenterListViewModelInterface
@@ -26,22 +24,6 @@ import java.util.concurrent.Executor
 
 class NotificationsAssembler(
     private val applicationContext: Context,
-
-    /**
-     * While normally your `FirebaseInstanceIdService` class will be responsible for being
-     * informed of push token changes, from time to time (particularly on app upgrades or when
-     * Rover 2.0 is first integrated in your app) Rover may need to force a reset of your Firebase
-     * push token.
-     *
-     * This closure will be called on a background worker thread.  Please pass a block with
-     * the following contents:
-     *
-     * ```kotlin
-     * FirebaseInstanceId.getInstance().deleteInstanceId()
-     * FirebaseInstanceId.getInstance().token
-     * ```
-     */
-    private val resetPushToken: () -> Unit,
 
     /**
      * A small icon is necessary for Android push notifications.  Pass a resid.
@@ -59,7 +41,23 @@ class NotificationsAssembler(
      */
     private val smallIconDrawableLevel: Int = 0,
 
-    private val defaultChannelId: String? = null
+    private val defaultChannelId: String = "rover",
+
+    /**
+     * While normally your `FirebaseInstanceIdService` class will be responsible for being
+     * informed of push token changes, from time to time (particularly on app upgrades or when
+     * Rover 2.0 is first integrated in your app) Rover may need to force a reset of your Firebase
+     * push token.
+     *
+     * This closure will be called on a background worker thread.  Please pass a block with
+     * the following contents:
+     *
+     * ```kotlin
+     * FirebaseInstanceId.getInstance().deleteInstanceId()
+     * FirebaseInstanceId.getInstance().token
+     * ```
+     */
+    private val resetPushToken: () -> Unit
 ) : Assembler {
     override fun assemble(container: Container) {
         container.register(
@@ -144,7 +142,7 @@ class NotificationsAssembler(
                 applicationContext,
                 resolver.resolveSingletonOrFail(EventQueueServiceInterface::class.java),
                 resolver.resolveSingletonOrFail(WireEncoderInterface::class.java),
-
+                resolver.resolveSingletonOrFail(NotificationsRepositoryInterface::class.java),
                 // more likely to be overridden by user.
                 resolver.resolveSingletonOrFail(NotificationOpenInterface::class.java),
                 resolver.resolveSingletonOrFail(AssetService::class.java),

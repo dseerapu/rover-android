@@ -1,4 +1,4 @@
-package io.rover.rover.experiences
+package io.rover.rover.notifications
 
 import android.app.PendingIntent
 import android.content.Context
@@ -10,9 +10,7 @@ import io.rover.rover.core.data.http.WireEncoderInterface
 import io.rover.rover.core.events.EventQueueService
 import io.rover.rover.core.events.EventQueueServiceInterface
 import io.rover.rover.core.events.domain.Event
-import io.rover.rover.notifications.NotificationActionRoutingBehaviour
-import io.rover.rover.notifications.NotificationActionRoutingBehaviourInterface
-import io.rover.rover.notifications.NotificationContentPendingIntentSynthesizerInterface
+import io.rover.rover.experiences.TransientNotificationLaunchActivity
 import org.json.JSONObject
 
 /**

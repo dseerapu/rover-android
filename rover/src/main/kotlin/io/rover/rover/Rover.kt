@@ -9,7 +9,7 @@ import io.rover.rover.core.container.InjectionContainer
 import io.rover.rover.core.data.http.AsyncTaskAndHttpUrlConnectionNetworkClient
 import io.rover.rover.core.events.EventQueueServiceInterface
 import io.rover.rover.notifications.NotificationHandlerInterface
-import io.rover.rover.experiences.NotificationOpenInterface
+import io.rover.rover.notifications.NotificationOpenInterface
 import io.rover.rover.experiences.ui.ExperienceViewModelInterface
 import io.rover.rover.notifications.ui.NotificationCenterListViewModelInterface
 import java.net.HttpURLConnection

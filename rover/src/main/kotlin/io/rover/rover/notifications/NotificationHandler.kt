@@ -1,7 +1,9 @@
 package io.rover.rover.notifications
 
+import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
@@ -19,12 +21,16 @@ import io.rover.rover.core.data.NetworkResult
 import io.rover.rover.core.data.domain.NotificationAttachment
 import io.rover.rover.core.events.EventQueueServiceInterface
 import io.rover.rover.core.data.http.WireEncoderInterface
-import io.rover.rover.experiences.NotificationOpenInterface
 import io.rover.rover.core.assets.AssetService
+import io.rover.rover.notifications.ui.NotificationsRepositoryInterface
 import org.json.JSONException
 import org.json.JSONObject
 import java.net.MalformedURLException
 import java.util.concurrent.TimeUnit
+import android.content.Context.NOTIFICATION_SERVICE
+import android.support.annotation.RequiresApi
+import io.rover.rover.R
+
 
 open class NotificationHandler(
     private val applicationContext: Context,
@@ -35,7 +41,7 @@ open class NotificationHandler(
     private val wireEncoder: WireEncoderInterface,
 
     // add this back after solving injection issues.
-    // private val notificationsRepository: NotificationsRepositoryInterface,
+    private val notificationsRepository: NotificationsRepositoryInterface,
 
     private val notificationOpen: NotificationOpenInterface,
 
@@ -102,6 +108,7 @@ open class NotificationHandler(
     private val notificationManager: NotificationManagerCompat = NotificationManagerCompat.from(applicationContext)
 
     private fun handleRoverNotificationObject(roverJson: String) {
+        verifyChannelSetUp()
         val pushNotification = try {
             val roverJsonObject = JSONObject(roverJson)
             val notificationJson = roverJsonObject.getJSONObject("notification")
@@ -125,7 +132,7 @@ open class NotificationHandler(
         builder.setSmallIcon(smallIconResId, smallIconDrawableLevel)
 
         // Add this back after solving injection issues.
-        // notificationsRepository.notificationArrivedByPush(pushNotification)
+        notificationsRepository.notificationArrivedByPush(pushNotification)
 
         builder.setContentIntent(
             notificationOpen.pendingIntentForAndroidNotification(
@@ -169,6 +176,46 @@ open class NotificationHandler(
                 }
                 notificationManager.notify(pushNotification.id, 123, builder.build().apply { this.flags = this.flags or Notification.FLAG_AUTO_CANCEL })
             }
+    }
+
+    /**
+     * By default, if running on Oreo and later, and the [NotificationHandler.defaultChannelId] you
+     * gave does not exist, then we will lazily create it at notification reception time to
+     * avoid the
+     *
+     * We include a default implementation here,
+     */
+    @RequiresApi(Build.VERSION_CODES.O)
+    open fun registerDefaultChannelId() {
+        log.w("Rover is registering a default channel ID for you.  This isn't optimal; if you are targeting Android SDK >= 26 then you should create your Notification Channels.\n" +
+            "See https://developer.android.com/training/notify-user/channels.html")
+        // Create the NotificationChannel
+        val name = applicationContext.getString(R.string.default_notification_channel_name)
+        val description = applicationContext.getString(R.string.default_notification_description)
+
+        val importance = NotificationManager.IMPORTANCE_DEFAULT
+        val mChannel = NotificationChannel(defaultChannelId, name, importance)
+        mChannel.description = description
+        // Register the channel with the system; you can't change the importance
+        // or other notification behaviors after this
+        val notificationManager = applicationContext.getSystemService(
+            NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(mChannel)
+    }
+
+    @SuppressLint("NewApi")
+    private fun verifyChannelSetUp() {
+        val notificationManager = applicationContext.getSystemService(
+            NOTIFICATION_SERVICE
+        ) as NotificationManager
+
+        val existingChannel = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            notificationManager.getNotificationChannel(defaultChannelId)
+        } else {
+            return
+        }
+
+        if(existingChannel == null) registerDefaultChannelId()
     }
 
     companion object {

@@ -23,12 +23,9 @@ import io.rover.rover.Rover
 import io.rover.rover.core.logging.log
 import io.rover.rover.core.streams.androidLifecycleDispose
 import io.rover.rover.core.streams.subscribe
-import io.rover.rover.platform.IoMultiplexingExecutor
 import io.rover.rover.platform.whenNotNull
 import io.rover.rover.core.data.domain.Notification
-import io.rover.rover.experiences.NotificationOpenInterface
-import io.rover.rover.core.assets.AndroidAssetService
-import io.rover.rover.core.assets.ImageDownloader
+import io.rover.rover.notifications.NotificationOpenInterface
 import io.rover.rover.experiences.ui.ViewModelBinding
 import io.rover.rover.experiences.ui.concerns.BindableView
 

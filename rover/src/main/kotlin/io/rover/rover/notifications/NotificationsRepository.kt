@@ -16,6 +16,7 @@ import io.rover.rover.core.events.EventQueueService
 import io.rover.rover.notifications.ui.NotificationsRepositoryInterface
 import io.rover.rover.core.events.EventQueueServiceInterface
 import io.rover.rover.core.events.domain.Event
+import io.rover.rover.platform.merge
 import org.json.JSONArray
 import org.json.JSONException
 import java.util.concurrent.Executor
@@ -111,17 +112,16 @@ class NotificationsRepository(
      */
     private fun mergeWithLocalStorage(incomingNotifications: List<Notification>): Publisher<List<Notification>> {
         return currentNotificationsOnDisk().map { notifications ->
+
             val notificationsOnDiskById = notifications?.associateBy { it.id } ?: hashMapOf()
-            // return the new notifications list, but OR with any existing records' isRead/isDeleted
-            // state.
-            incomingNotifications.map { newNotification ->
-                notificationsOnDiskById[newNotification.id].whenNotNull {
-                    newNotification.copy(
-                        isRead = newNotification.isRead || it.isRead,
-                        isDeleted = newNotification.isDeleted || it.isDeleted
-                    )
-                } ?: newNotification
-            }.orderNotifications().take(MAX_NOTIFICATIONS_LIMIT)
+            val incomingNotificationsById = incomingNotifications.associateBy { it.id }
+
+            notificationsOnDiskById.merge(incomingNotificationsById) { existing, incoming ->
+                incoming.copy(
+                    isRead = incoming.isRead || existing.isRead,
+                    isDeleted = incoming.isDeleted || existing.isDeleted
+                )
+            }.values.orderNotifications().take(MAX_NOTIFICATIONS_LIMIT)
         }.subscribeOn(ioExecutor).doOnNext { log.v("Merge result: $it") }
     }
 
@@ -172,7 +172,7 @@ class NotificationsRepository(
                 }
             }
         }
-    }.observeOn(mainThreadScheduler).shareHotAndReplay(0) // TODO: using observeOnAndroidMainThread in its current form will be problematic for tests.
+    }.observeOn(mainThreadScheduler).shareHotAndReplay(0)
 
     /**
      * When subscribed, performs the side-effect of marking the given notification as deleted
@@ -245,7 +245,7 @@ class NotificationsRepository(
         }.subscribeOn(ioExecutor)
     }
 
-    private fun List<Notification>.orderNotifications(): List<Notification> {
+    private fun Collection<Notification>.orderNotifications(): List<Notification> {
         return this
             .sortedByDescending { it.deliveredAt }
     }
