@@ -7,13 +7,13 @@ import io.rover.rover.core.data.http.WireEncoderInterface
 import org.json.JSONObject
 
 class FetchExperienceRequest(
-    val id: ID
+    val queryIdentifier: ExperienceQueryIdentifier
 ) : NetworkRequest<Experience> {
     override val operationName: String = "FetchExperience"
 
     override val query: String = """
-        query FetchExperience(${"\$"}id: ID!) {
-            experience(id: ${"\$"}id) {
+        query FetchExperience(${"\$"}id: ID, ${"\$"}campaignId: ID!, ${"\$"}, ${"\$"}url: String) {
+            experience(id: ${"\$"}id, campaignId: ${"\$"}campaignId, url: ${"\$"}url) {
                 homeScreenId
                 id
                 customKeys
@@ -224,12 +224,47 @@ class FetchExperienceRequest(
         }
     """
     override val variables: JSONObject = JSONObject().apply {
-        put("id", id.rawValue)
+        when(queryIdentifier) {
+            is ExperienceQueryIdentifier.ById -> {
+                put("id", queryIdentifier.id)
+                put("campaignId", queryIdentifier.campaignId)
+            }
+            is ExperienceQueryIdentifier.ByUniversalLink -> {
+                put("url", queryIdentifier.uri)
+            }
+        }
     }
 
     override fun decodePayload(responseObject: JSONObject, wireEncoder: WireEncoderInterface): Experience {
         return wireEncoder.decodeExperience(
             responseObject.getJSONObject("data").getJSONObject("experience")
         )
+    }
+
+    private val idQueryFragment: String = when(queryIdentifier) {
+        is ExperienceQueryIdentifier.ById -> "${"\$"}id: ID!, ${"\$"}campaignId: ID!"
+        is ExperienceQueryIdentifier.ByUniversalLink -> "${"\$"}id: ID!"
+    }
+
+
+    sealed class ExperienceQueryIdentifier {
+        /**
+         * Experiences may be started by just their ID, and a possibly associated campaign Id
+         * such that campaign-specific parameters may be interpolated into the Experience.
+         *
+         * (This method is typically used when experiences are started from a deep link or
+         * progammatically.)
+         */
+        data class ById(val id: String, val campaignId: String? = null): ExperienceQueryIdentifier()
+
+        /**
+         * Experiences may be started from a universal link.  The link itself may ultimately, but
+         * opaquely, address the experience and a possibly associated campaign, but it is up to the
+         * cloud API to resolve it.
+         *
+         * (This method is typically used when experiences are started from external sources,
+         * particularly email, social, external apps, and other services integrated into the app).
+         */
+        data class ByUniversalLink(val uri: String): ExperienceQueryIdentifier()
     }
 }

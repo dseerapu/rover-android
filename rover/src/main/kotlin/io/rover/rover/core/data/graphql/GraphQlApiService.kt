@@ -147,7 +147,7 @@ class GraphQlApiService(
     }
 
     override fun fetchExperienceTask(experienceID: ID, completionHandler: ((NetworkResult<Experience>) -> Unit)): NetworkTask {
-        val request = FetchExperienceRequest(experienceID)
+        val request = FetchExperienceRequest(FetchExperienceRequest.ExperienceQueryIdentifier.ById(experienceID.rawValue))
         return uploadTask(request) { experienceResult ->
             mainThreadHandler.post {
                 completionHandler.invoke(experienceResult)

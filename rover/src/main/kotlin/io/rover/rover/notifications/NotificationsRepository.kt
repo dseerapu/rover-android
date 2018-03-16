@@ -20,11 +20,12 @@ import io.rover.rover.platform.merge
 import org.json.JSONArray
 import org.json.JSONException
 import java.util.concurrent.Executor
+import java.util.concurrent.Executors
 
 /**
  * Responsible for reactively persisting notifications and informing subscribers of changes.
  *
- * Must be a singleton.
+ * Must be a singleton, because changes dispatch updates to all subscribers as a side-effect.
  */
 class NotificationsRepository(
     private val graphQlApiService: GraphQlApiServiceInterface,
@@ -108,7 +109,10 @@ class NotificationsRepository(
     }
 
     /**
-     * Add
+     * Add the existing notifications on disk together any new ones.
+     *
+     * The new list need not be exhaustive; existing non-conflicting records will be kept,
+     * up until a cutoff.  That means this method may be used for partial updates.
      */
     private fun mergeWithLocalStorage(incomingNotifications: List<Notification>): Publisher<List<Notification>> {
         return currentNotificationsOnDisk().map { notifications ->
