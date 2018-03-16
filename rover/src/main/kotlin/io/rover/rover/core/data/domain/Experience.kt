@@ -11,7 +11,8 @@ data class Experience(
     val id: ID,
     val homeScreenId: ID,
     val screens: List<Screen>,
-    val customKeys: Attributes
+    val customKeys: Attributes,
+    val campaignId: String?
 ) {
     companion object
 }

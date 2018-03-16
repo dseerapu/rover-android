@@ -17,6 +17,7 @@ class FetchExperienceRequest(
                 homeScreenId
                 id
                 customKeys
+                campaignId
                 screens {
                     ...backgroundFields
                     experienceId

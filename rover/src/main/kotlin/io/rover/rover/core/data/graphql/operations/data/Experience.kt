@@ -37,6 +37,7 @@ import io.rover.rover.core.data.domain.VerticalAlignment
 import io.rover.rover.core.data.domain.WebViewBlock
 import io.rover.rover.core.data.graphql.getObjectIterable
 import io.rover.rover.core.data.graphql.putProp
+import io.rover.rover.core.data.graphql.safeOptString
 import org.json.JSONArray
 import org.json.JSONObject
 import java.net.URI
@@ -48,7 +49,8 @@ internal fun Experience.Companion.decodeJson(json: JSONObject): Experience {
         screens = json.getJSONArray("screens").getObjectIterable().map {
             Screen.decodeJson(it)
         },
-        customKeys = json.getJSONObject("customKeys").toFlatAttributesHash()
+        customKeys = json.getJSONObject("customKeys").toFlatAttributesHash(),
+        campaignId = json.safeOptString("campaignId")
     )
 }
 
@@ -58,6 +60,7 @@ internal fun Experience.encodeJson(): JSONObject {
         putProp(this@encodeJson, Experience::homeScreenId) { it.rawValue }
         putProp(this@encodeJson, Experience::screens) { JSONArray(it.map { it.encodeJson(this@encodeJson.id.rawValue) }) }
         putProp(this@encodeJson, Experience::customKeys) { it.encodeJson() }
+        putProp(this@encodeJson, Experience::campaignId)
     }
 }
 

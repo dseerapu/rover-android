@@ -84,7 +84,9 @@ open class ExperienceNavigationViewModel(
         eventsPlugin.trackEvent(
             Event(
                 "Experience Viewed",
-                hashMapOf(Pair("experienceID", AttributeValue.String(experience.id.rawValue)))
+                hashMapOf(
+                    Pair("experienceID", AttributeValue.String(experience.id.rawValue))
+                ) + attributeHashFragmentForCampaignId()
             ),
             EventQueueService.ROVER_NAMESPACE
         )
@@ -370,7 +372,7 @@ open class ExperienceNavigationViewModel(
                         Pair("experienceID", AttributeValue.String(experience.id.rawValue)),
                         Pair("screenID", AttributeValue.String(action.sourceScreenId)),
                         Pair("blockID", AttributeValue.String(action.sourceBlockId))
-                    ).apply { putAll(attributes) }
+                    ).apply { putAll(attributes) } + attributeHashFragmentForCampaignId()
                 )
 
                 eventsPlugin.trackEvent(event, EventQueueService.ROVER_NAMESPACE)
@@ -389,7 +391,7 @@ open class ExperienceNavigationViewModel(
                         hashMapOf(
                             Pair("experienceID", AttributeValue.String(experience.id.rawValue)),
                             Pair("screenID", AttributeValue.String(emission.screenViewModel.screenId))
-                        )
+                        ) + attributeHashFragmentForCampaignId()
                     ),
                     EventQueueService.ROVER_NAMESPACE
                 )
@@ -417,6 +419,12 @@ open class ExperienceNavigationViewModel(
             ExperienceNavigationViewModelInterface.Emission.Update.SetBacklightBoost::class.java
         )
         .doOnNext { log.v("Update emitted: $it.  Only should be one two these messages per event.") }
+
+    private fun attributeHashFragmentForCampaignId(): HashMap<String, AttributeValue.String> {
+        return if(experience.campaignId != null) hashMapOf(
+            Pair("campaignID", AttributeValue.String(experience.campaignId))
+        ) else hashMapOf()
+    }
 
     // @Parcelize Kotlin synthetics are generating the CREATOR method for us.
     @SuppressLint("ParcelCreator")
