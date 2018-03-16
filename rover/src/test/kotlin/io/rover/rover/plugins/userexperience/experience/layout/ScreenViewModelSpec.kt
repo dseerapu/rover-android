@@ -1,6 +1,8 @@
 package io.rover.rover.experiences.ui.layout
 
 import io.rover.rover.ModelFactories
+import io.rover.rover.core.assets.AssetService
+import io.rover.rover.core.assets.ImageOptimizationServiceInterface
 import io.rover.rover.core.container.Assembler
 import io.rover.rover.core.container.Container
 import io.rover.rover.core.container.InjectionContainer
@@ -21,6 +23,7 @@ import io.rover.rover.experiences.ui.layout.screen.ScreenViewModel
 import io.rover.rover.experiences.types.RectF
 import io.rover.rover.experiences.ui.blocks.concerns.layout.CompositeBlockViewModelInterface
 import io.rover.rover.experiences.ui.layout.row.RowViewModelInterface
+import io.rover.rover.experiences.ui.layout.screen.ScreenViewModelInterface
 import io.rover.rover.experiences.ui.navigation.ExperienceNavigationViewModelInterface
 import org.amshove.kluent.mock
 import org.amshove.kluent.shouldBeInstanceOf
@@ -39,6 +42,14 @@ class ScreenViewModelSpec : Spek({
                 // now I need to override certain objects in the experiences assembler with mock ones.
                 object : Assembler {
                     override fun assemble(container: Container) {
+                        container.register(Scope.Singleton, AssetService::class.java) { resolver ->
+                            mock()
+                        }
+
+                        container.register(Scope.Singleton, ImageOptimizationServiceInterface::class.java) { resolver ->
+                            mock()
+                        }
+
                         container.register(
                             Scope.Singleton,
                             MeasurementService::class.java
@@ -61,17 +72,19 @@ class ScreenViewModelSpec : Spek({
                     )
                 )
             )
-            val screenViewModel = ScreenViewModel(
-                screen,
-                mock(),
-                { row ->
-                    realObjectStack.resolve(
-                        RowViewModelInterface::class.java,
-                        null,
-                        row
-                    )!!
-                }
-            )
+//            val screenViewModel = ScreenViewModel(
+//                screen,
+//                realObjectStack.,
+//                { row ->
+//                    realObjectStack.resolve(
+//                        RowViewModelInterface::class.java,
+//                        null,
+//                        row
+//                    )!!
+//                }
+//            )
+
+            val screenViewModel = realObjectStack.resolve(ScreenViewModelInterface::class.java, null, screen)!!
 
             on("rendering") {
                 val rendered = screenViewModel.render(
@@ -111,7 +124,7 @@ class ScreenViewModelSpec : Spek({
                     )
                 )
             )
-            val screenViewModel = ScreenViewModel(screen, mock(), { row -> mock() })
+            val screenViewModel = realObjectStack.resolve(ScreenViewModelInterface::class.java, null, screen)!!
 
             on("rendering") {
                 val rendered = screenViewModel.render(
@@ -168,7 +181,7 @@ class ScreenViewModelSpec : Spek({
                     )
                 )
             )
-            val screenViewModel = ScreenViewModel(screen, mock(), { row -> mock() })
+            val screenViewModel = realObjectStack.resolve(ScreenViewModelInterface::class.java, null, screen)!!
 
             on("rendering") {
                 val rendered = screenViewModel.render(
@@ -199,7 +212,7 @@ class ScreenViewModelSpec : Spek({
                     )
                 )
             )
-            val screenViewModel = ScreenViewModel(screen, mock(), { row -> mock() })
+            val screenViewModel = realObjectStack.resolve(ScreenViewModelInterface::class.java, null, screen)!!
 
             on("rendering") {
                 val rendered = screenViewModel.render(

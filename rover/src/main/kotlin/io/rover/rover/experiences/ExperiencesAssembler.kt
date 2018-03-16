@@ -204,7 +204,11 @@ class ExperiencesAssembler(
             }
         }
 
-        val buttonStateFactory = { resolver: Resolver, buttonState: ButtonState ->
+        container.register(
+            Scope.Transient,
+            ButtonStateViewModelInterface::class.java,
+            null
+        ) { resolver: Resolver, buttonState: ButtonState ->
             ButtonStateViewModel(
                 resolver.resolve(BorderViewModelInterface::class.java, null, buttonState)!!,
                 resolver.resolve(BackgroundViewModelInterface::class.java, null, buttonState)!!,
@@ -212,19 +216,6 @@ class ExperiencesAssembler(
                 resolver.resolve(TextViewModelInterface::class.java, "buttonState", buttonState)!!
             )
         }
-
-        val fdsafsd = buttonStateFactory::class
-
-        val invokeMethods = fdsafsd.java.methods.toList().filter { it.name  == "invoke" }
-
-        log.v("CLASS TYPE FOR BUTTON STATE FACTORY IS:\n    ${invokeMethods.joinToString("\n    ")}")
-
-        container.register(
-            Scope.Transient,
-            ButtonStateViewModelInterface::class.java,
-            null,
-            buttonStateFactory
-        )
 
         container.register(
             Scope.Transient,

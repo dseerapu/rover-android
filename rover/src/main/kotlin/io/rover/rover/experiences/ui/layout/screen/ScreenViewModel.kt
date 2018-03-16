@@ -7,6 +7,7 @@ import io.rover.rover.core.streams.asPublisher
 import io.rover.rover.core.streams.flatMap
 import io.rover.rover.core.streams.map
 import io.rover.rover.core.data.domain.Row
+import io.rover.rover.core.logging.log
 import io.rover.rover.experiences.ui.blocks.concerns.background.BackgroundViewModelInterface
 import io.rover.rover.experiences.ui.blocks.concerns.layout.LayoutableViewModel
 import io.rover.rover.experiences.ui.toolbar.ToolbarConfiguration
