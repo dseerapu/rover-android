@@ -41,8 +41,8 @@ class Rover(
     val notificationCenterViewModel: NotificationCenterListViewModelInterface
         get() = this.resolve(NotificationCenterListViewModelInterface::class.java) ?: throw missingDependencyError("NotificationCenterViewModel")
 
-    fun experienceViewModel(experienceId: String, icicle: Parcelable?): ExperienceViewModelInterface {
-        return this.resolve(ExperienceViewModelInterface::class.java, null, experienceId, icicle) ?: throw missingDependencyError("ExperienceViewModel")
+    fun experienceViewModel(experienceId: String, campaignId: String?, icicle: Parcelable?): ExperienceViewModelInterface {
+        return this.resolve(ExperienceViewModelInterface::class.java, null, experienceId, campaignId, icicle) ?: throw missingDependencyError("ExperienceViewModel")
     }
 
     val notificationOpen: NotificationOpenInterface
@@ -54,7 +54,6 @@ class Rover(
     private fun missingDependencyError(name: String): Throwable {
         throw RuntimeException("Dependency not registered.  Did you include $name() in the assembler list?")
     }
-
 
     companion object {
         private var sharedInstanceBackingField: Rover? = null

@@ -112,16 +112,18 @@ class ImageDownloader (
                         else -> {
                             // we don't support handling redirects as anything other than an onError for now.
                             try {
-                                val stream = BufferedInputStream(
-                                    connection.errorStream
-                                )
-                                val result = HttpClientResponse.ApplicationError(
-                                    responseCode,
-                                    stream.reader(Charsets.UTF_8).readText()
-                                )
-                                stream.close()
-                                connection.disconnect()
-                                result
+                                connection.errorStream.use { errorStream ->
+                                    val stream = BufferedInputStream(
+                                        errorStream
+                                    )
+                                    val result = HttpClientResponse.ApplicationError(
+                                        responseCode,
+                                        stream.reader(Charsets.UTF_8).readText()
+                                    )
+                                    stream.close()
+                                    connection.disconnect()
+                                    result
+                                }
                             } catch (e: IOException) {
                                 HttpClientResponse.ConnectionFailure(
                                     e

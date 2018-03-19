@@ -130,9 +130,10 @@ class ExperiencesAssembler(
         container.register(
             Scope.Transient,
             ExperienceViewModelInterface::class.java
-        ) { resolver: Resolver, experienceId: String, icicle: Parcelable? ->
+        ) { resolver: Resolver, experienceId: String, campaignId: String?, icicle: Parcelable? ->
             ExperienceViewModel(
                 experienceId,
+                campaignId,
                 resolver.resolveSingletonOrFail(GraphQlApiServiceInterface::class.java),
                 { experience: Experience, navigationIcicle: Parcelable? ->
                     resolver.resolve(ExperienceNavigationViewModelInterface::class.java, null, experience, navigationIcicle)!!

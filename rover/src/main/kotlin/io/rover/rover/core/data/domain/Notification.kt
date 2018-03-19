@@ -57,21 +57,9 @@ data class Notification(
     companion object
 }
 
-sealed class PushNotificationAction {
-    data class PresentWebsite(
-        val url: URL
-    ): PushNotificationAction()
-
-    data class OpenUrl(
-        val url: URI
-    ): PushNotificationAction()
-
-    data class PresentExperience(
-        val experienceId: String
-    ): PushNotificationAction()
-
-    class OpenApp: PushNotificationAction()
-
+data class PushNotificationAction(
+    val uri: URI
+) {
     companion object
 }
 

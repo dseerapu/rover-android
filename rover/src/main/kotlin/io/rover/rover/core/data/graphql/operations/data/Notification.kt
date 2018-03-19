@@ -33,20 +33,9 @@ internal fun Notification.encodeJson(dateFormatting: DateFormattingInterface): J
 }
 
 internal fun PushNotificationAction.Companion.decodeJson(json: JSONObject): PushNotificationAction {
-    val typeName = json.getString("type")
-    return when(typeName) {
-        "PRESENT_WEBSITE" -> PushNotificationAction.PresentWebsite(
-            url = URL(json.getString("url"))
-        )
-        "OPEN_URL" -> PushNotificationAction.OpenUrl(
-            url = URI(json.getString("url"))
-        )
-        "PRESENT_EXPERIENCE" -> PushNotificationAction.PresentExperience(
-            experienceId = json.getString("experienceId")
-        )
-        "OPEN_APP" -> PushNotificationAction.OpenApp()
-        else -> throw JSONException("Unsupported Rover notification type: $typeName.")
-    }
+    return PushNotificationAction(
+        uri = URI(json.getString("url"))
+    )
 }
 
 internal fun NotificationAttachment.Companion.decodeJson(json: JSONObject): NotificationAttachment {
@@ -63,24 +52,7 @@ internal fun NotificationAttachment.Companion.decodeJson(json: JSONObject): Noti
 
 internal fun PushNotificationAction.encodeJson(): JSONObject {
     return JSONObject().apply {
-        put(
-            "type",
-            when(this@encodeJson) {
-                is PushNotificationAction.PresentExperience -> {
-                    putProp(this@encodeJson, PushNotificationAction.PresentExperience::experienceId, "experienceId")
-                    "PRESENT_EXPERIENCE"
-                }
-                is PushNotificationAction.OpenUrl -> {
-                    putProp(this@encodeJson, PushNotificationAction.OpenUrl::url, "url")
-                    "OPEN_URL"
-                }
-                is PushNotificationAction.PresentWebsite -> {
-                    putProp(this@encodeJson, PushNotificationAction.PresentWebsite::url, "url")
-                    "PRESENT_WEBSITE"
-                }
-                is PushNotificationAction.OpenApp -> "OPEN_APP"
-            }
-        )
+        putProp(this@encodeJson, PushNotificationAction::uri, "url")
     }
 }
 

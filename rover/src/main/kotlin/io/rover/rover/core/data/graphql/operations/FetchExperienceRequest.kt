@@ -12,7 +12,7 @@ class FetchExperienceRequest(
     override val operationName: String = "FetchExperience"
 
     override val query: String = """
-        query FetchExperience(${"\$"}id: ID, ${"\$"}campaignId: ID!, ${"\$"}, ${"\$"}url: String) {
+        query FetchExperience(${"\$"}id: ID, ${"\$"}campaignId: ID, ${"\$"}url: String) {
             experience(id: ${"\$"}id, campaignId: ${"\$"}campaignId, url: ${"\$"}url) {
                 homeScreenId
                 id
@@ -228,9 +228,12 @@ class FetchExperienceRequest(
             is ExperienceQueryIdentifier.ById -> {
                 put("id", queryIdentifier.id)
                 put("campaignId", queryIdentifier.campaignId)
+                put("url", JSONObject.NULL)
             }
             is ExperienceQueryIdentifier.ByUniversalLink -> {
                 put("url", queryIdentifier.uri)
+                put("id", JSONObject.NULL)
+                put("campaignId", JSONObject.NULL)
             }
         }
     }
@@ -240,12 +243,6 @@ class FetchExperienceRequest(
             responseObject.getJSONObject("data").getJSONObject("experience")
         )
     }
-
-    private val idQueryFragment: String = when(queryIdentifier) {
-        is ExperienceQueryIdentifier.ById -> "${"\$"}id: ID!, ${"\$"}campaignId: ID!"
-        is ExperienceQueryIdentifier.ByUniversalLink -> "${"\$"}id: ID!"
-    }
-
 
     sealed class ExperienceQueryIdentifier {
         /**

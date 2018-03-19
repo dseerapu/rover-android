@@ -60,6 +60,8 @@ interface NotificationHandlerInterface {
 
 interface NotificationActionRoutingBehaviourInterface {
     /**
+     * Map a given action URI to the appropriate Rover behaviour.
+     *
      * Should return an Intent for the given push notification action.
      */
     fun notificationActionToIntent(action: PushNotificationAction): Intent
@@ -67,7 +69,7 @@ interface NotificationActionRoutingBehaviourInterface {
 
 interface NotificationOpenInterface {
     /**
-     * A pending intent that will be used for the Android notification itself
+     * A pending intent that will be used for the Android notification itself.
      *
      * Will return a [PendingIntent] suitable for use as an Android notification target that will
      * launch the [TransientNotificationLaunchActivity] to start up and

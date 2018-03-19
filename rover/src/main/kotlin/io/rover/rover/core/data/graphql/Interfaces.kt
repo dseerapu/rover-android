@@ -14,7 +14,8 @@ interface GraphQlApiServiceInterface {
      * @param completionHandler callback will be called with a result.
      */
     fun fetchExperienceTask(
-        experienceID: ID,
+        experienceId: ID,
+        campaignId: ID?,
         completionHandler: ((NetworkResult<Experience>) -> Unit)
     ): NetworkTask
 

@@ -20,10 +20,12 @@ import io.rover.rover.core.streams.shareAndReplayTypesOnResubscribe
 import io.rover.rover.core.streams.share
 import io.rover.rover.experiences.ui.navigation.ExperienceExternalNavigationEvent
 import io.rover.rover.experiences.ui.navigation.ExperienceNavigationViewModelInterface
+import io.rover.rover.platform.whenNotNull
 import kotlinx.android.parcel.Parcelize
 
 class ExperienceViewModel(
     private val experienceId: String,
+    private val campaignId: String?,
     private val graphQlApiService: GraphQlApiServiceInterface,
     private val resolveNavigationViewModel: (experience: Experience, icicle: Parcelable?) -> ExperienceNavigationViewModelInterface,
     private val icicle: Parcelable? = null
@@ -51,7 +53,7 @@ class ExperienceViewModel(
     private val actions = actionSource.share()
 
     private fun fetchExperience(): Publisher<NetworkResult<Experience>> =
-        ({ callback: CallbackReceiver<NetworkResult<Experience>> -> graphQlApiService.fetchExperienceTask(ID(experienceId), callback) }).asPublisher()
+        ({ callback: CallbackReceiver<NetworkResult<Experience>> -> graphQlApiService.fetchExperienceTask(ID(experienceId), campaignId.whenNotNull { ID(it) }, callback) }).asPublisher()
 
     private val epic: Observable<ExperienceViewModelInterface.Event> =
         Observable.merge(

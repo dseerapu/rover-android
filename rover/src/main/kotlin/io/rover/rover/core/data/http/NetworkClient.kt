@@ -123,16 +123,19 @@ class AsyncTaskAndHttpUrlConnectionNetworkClient : NetworkClient {
                     else -> {
                         // we don't support handling redirects as anything other than an onError for now.
                         try {
-                            val stream = BufferedInputStream(
-                                intercepted?.sniffStream(connection.errorStream) ?: connection.errorStream
-                            ).reader(Charsets.UTF_8)
-                            val result = HttpClientResponse.ApplicationError(
-                                responseCode,
-                                stream.readText()
-                            )
-                            stream.close()
-                            connection.disconnect()
-                            result
+                            connection.errorStream.use { errorStream ->
+                                val stream = BufferedInputStream(
+                                    intercepted?.sniffStream(errorStream) ?: errorStream
+                                ).reader(Charsets.UTF_8)
+                                val result = HttpClientResponse.ApplicationError(
+                                    responseCode,
+                                    stream.use { it.readText() }
+                                )
+                                stream.close()
+                                connection.disconnect()
+                                result
+                            }
+
                         } catch (e: IOException) {
                             HttpClientResponse.ConnectionFailure(
                                 e

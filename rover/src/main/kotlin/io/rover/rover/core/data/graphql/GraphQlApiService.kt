@@ -140,14 +140,16 @@ class GraphQlApiService(
         val urlRequest = urlRequest(true)
         val bodyData = request.encode()
 
+        log.v("REQUEST BODY: $bodyData")
+
         return networkClient.networkTask(urlRequest, bodyData) { httpClientResponse ->
             val result = httpResult(request, httpClientResponse)
             completionHandler?.invoke(result)
         }
     }
 
-    override fun fetchExperienceTask(experienceID: ID, completionHandler: ((NetworkResult<Experience>) -> Unit)): NetworkTask {
-        val request = FetchExperienceRequest(FetchExperienceRequest.ExperienceQueryIdentifier.ById(experienceID.rawValue))
+    override fun fetchExperienceTask(experienceId: ID, campaignId: ID?, completionHandler: ((NetworkResult<Experience>) -> Unit)): NetworkTask {
+        val request = FetchExperienceRequest(FetchExperienceRequest.ExperienceQueryIdentifier.ById(experienceId.rawValue, campaignId?.rawValue))
         return uploadTask(request) { experienceResult ->
             mainThreadHandler.post {
                 completionHandler.invoke(experienceResult)

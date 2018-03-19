@@ -30,7 +30,7 @@ interface TopLevelNavigation {
     /**
      * Generate an Intent for displaying an Experience.
      */
-    fun displayExperienceIntent(experienceId: String): Intent
+    fun displayExperienceIntent(experienceId: String, campaignId: String?): Intent
 
     /**
      * Generate an Intent for navigating your app to the Notification Center.

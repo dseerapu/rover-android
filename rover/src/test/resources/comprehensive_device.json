@@ -145,8 +145,7 @@
                     "expiresAt": "2019-02-21T19:14:38Z",
                     "deliveredAt": "2018-02-21T19:14:38Z",
                     "action": {
-                        "type": "PRESENT_EXPERIENCE",
-                        "experienceId": "5436635463"
+                        "url": "rv-testapp://experience/645656"
                     },
                     "attachment": {
                         "type": "IMAGE",

@@ -44,6 +44,20 @@ class NotificationsAssembler(
     private val defaultChannelId: String = "rover",
 
     /**
+     * Rover deep links are customized for each app in this way:
+     *
+     * rv-myapp://...
+     *
+     * You must select an appropriate slug without spaces or special characters to be used in place
+     * of `myapp` above.  You must also configure this in your Rover settings TODO explain how
+     *
+     * You should also consider adding the handler to the manifest.  While this is not needed for
+     * any Rover functionality to work, it is required for clickable deep/universal links to work from
+     * anywhere else. TODO explain how once the stuff to do so is built
+     */
+    private val deepLinkSchemaSlug: String,
+
+    /**
      * While normally your `FirebaseInstanceIdService` class will be responsible for being
      * informed of push token changes, from time to time (particularly on app upgrades or when
      * Rover 2.0 is first integrated in your app) Rover may need to force a reset of your Firebase
@@ -106,7 +120,8 @@ class NotificationsAssembler(
         ) { resolver ->
             NotificationActionRoutingBehaviour(
                 applicationContext,
-                resolver.resolveSingletonOrFail(TopLevelNavigation::class.java)
+                resolver.resolveSingletonOrFail(TopLevelNavigation::class.java),
+                deepLinkSchemaSlug
             )
         }
 

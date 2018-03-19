@@ -96,7 +96,8 @@ class NotificationsRepositorySpec: Spek({
                         listOf(
                             Notification(
                                 "41C7F235-7B47-4DC9-9ED8-E1C937F6C6D1",
-                                null, null, "body", false, false, true, Date(), Date(), PushNotificationAction.PresentExperience("deadbeef"),
+                                null, null, "body", false, false, true, Date(), Date(),
+                                PushNotificationAction(""),
                                 null
                             )
                         )

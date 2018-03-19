@@ -13,8 +13,8 @@ import io.rover.rover.experiences.ui.containers.StandaloneExperienceHostActivity
 open class DefaultTopLevelNavigation(
     private val applicationContext: Context
 ): TopLevelNavigation {
-    override fun displayExperienceIntent(experienceId: String): Intent {
-        return StandaloneExperienceHostActivity.makeIntent(applicationContext, experienceId)
+    override fun displayExperienceIntent(experienceId: String, campaignId: String?): Intent {
+        return StandaloneExperienceHostActivity.makeIntent(applicationContext, experienceId, campaignId)
     }
 
     override fun displayNotificationCenterIntent(): Intent {

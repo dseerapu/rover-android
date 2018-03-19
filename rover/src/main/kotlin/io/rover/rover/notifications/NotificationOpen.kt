@@ -58,8 +58,11 @@ open class NotificationOpen(
         )
 
         return when(notification.action) {
-            // it is nonsensical to open the app when the app is already open, so this should be a no-op.
-            is PushNotificationAction.OpenApp -> null
+
+            // TODO it is nonsensical to open the app when the app is already open, so this should
+            // be a no-op if it's a deep link with blank.  change the notificationActionToIntent to
+            // return a rich type (again) and then transform that to a URI separately, so we can
+            // sniff it here.
             else -> routingBehaviour.notificationActionToIntent(notification.action)
         }
     }

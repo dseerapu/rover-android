@@ -38,6 +38,9 @@ open class StandaloneExperienceHostActivity : AppCompatActivity() {
             "Please pass EXPERIENCE_ID. Consider using StandaloneExperienceHostActivity.makeIntent()"
         )
 
+    private val campaignId
+        get() = this.intent.getStringExtra("CAMPAIGN_ID")
+
     /**
      * This method is responsible for performing external navigation events: that is, navigation
      * events emitted by an Experience that "break out" of the Experience's intrinsic navigation
@@ -136,6 +139,7 @@ open class StandaloneExperienceHostActivity : AppCompatActivity() {
 
         experienceViewModel = Rover.sharedInstance.experienceViewModel(
             experienceId,
+            campaignId,
             // obtain any possibly saved state for the experience view model.  See
             // onSaveInstanceState.
             savedInstanceState?.getParcelable("experienceState")
@@ -160,9 +164,10 @@ open class StandaloneExperienceHostActivity : AppCompatActivity() {
     companion object {
         @JvmStatic
         @JvmOverloads
-        fun makeIntent(packageContext: Context, experienceId: String, activityClass: Class<out Activity> = StandaloneExperienceHostActivity::class.java): Intent {
+        fun makeIntent(packageContext: Context, experienceId: String, campaignId: String?, activityClass: Class<out Activity> = StandaloneExperienceHostActivity::class.java): Intent {
             return Intent(packageContext, activityClass).apply {
                 putExtra("EXPERIENCE_ID", experienceId)
+                putExtra("CAMPAIGN_ID", campaignId)
             }
         }
     }
