@@ -7,6 +7,7 @@ import io.rover.rover.core.data.domain.Notification
 import io.rover.rover.core.data.domain.NotificationAttachment
 import io.rover.rover.core.data.graphql.getDate
 import io.rover.rover.core.data.graphql.putProp
+import io.rover.rover.core.data.graphql.safeGetString
 import io.rover.rover.core.data.graphql.safeOptDate
 import io.rover.rover.core.data.graphql.safeOptString
 import org.json.JSONException
@@ -34,14 +35,14 @@ internal fun Notification.encodeJson(dateFormatting: DateFormattingInterface): J
 
 internal fun PushNotificationAction.Companion.decodeJson(json: JSONObject): PushNotificationAction {
     return PushNotificationAction(
-        uri = URI(json.getString("url"))
+        uri = URI(json.safeGetString("url"))
     )
 }
 
 internal fun NotificationAttachment.Companion.decodeJson(json: JSONObject): NotificationAttachment {
     // all three types have URLs.
-    val type = json.getString("type")
-    val url = URL(json.getString("url"))
+    val type = json.safeGetString("type")
+    val url = URL(json.safeGetString("url"))
     return when(type) {
         "AUDIO" -> NotificationAttachment.Audio(url)
         "IMAGE" -> NotificationAttachment.Image(url)
@@ -72,9 +73,9 @@ internal fun NotificationAttachment.encodeJson(): JSONObject {
 
 internal fun Notification.Companion.decodeJson(json: JSONObject, dateFormatting: DateFormattingInterface): Notification {
     return Notification(
-        id = json.getString("id"),
+        id = json.safeGetString("id"),
         title = json.safeOptString("title"),
-        body = json.getString("body"),
+        body = json.safeGetString("body"),
         channelId = json.safeOptString("channelId"),
         isRead = json.getBoolean("isRead"),
         isDeleted = json.getBoolean("isDeleted"),

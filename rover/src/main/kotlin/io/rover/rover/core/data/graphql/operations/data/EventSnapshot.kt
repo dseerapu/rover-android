@@ -5,6 +5,7 @@ import io.rover.rover.core.data.domain.Context
 import io.rover.rover.core.data.domain.EventSnapshot
 import io.rover.rover.core.data.graphql.getDate
 import io.rover.rover.core.data.graphql.putProp
+import io.rover.rover.core.data.graphql.safeGetString
 import io.rover.rover.core.data.graphql.safeOptString
 import org.json.JSONObject
 import java.util.UUID
@@ -36,9 +37,9 @@ internal fun EventSnapshot.asJson(
 internal fun EventSnapshot.Companion.decodeJson(json: JSONObject, dateFormatting: DateFormattingInterface): EventSnapshot {
     return EventSnapshot(
         attributes = json.getJSONObject("attributes").toFlatAttributesHash(),
-        name = json.getString("name"),
+        name = json.safeGetString("name"),
         timestamp = json.getDate("timestamp", dateFormatting, true),
-        id = UUID.fromString(json.getString("id")),
+        id = UUID.fromString(json.safeGetString("id")),
         context = Context.decodeJson(json.getJSONObject("context")),
         namespace = json.safeOptString("namespace")
     )

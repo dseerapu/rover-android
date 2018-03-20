@@ -2,6 +2,7 @@ package io.rover.rover.core.data.graphql.operations
 
 import io.rover.rover.core.data.NetworkRequest
 import io.rover.rover.core.data.domain.EventSnapshot
+import io.rover.rover.core.data.graphql.safeGetString
 import io.rover.rover.core.data.http.WireEncoderInterface
 import org.json.JSONObject
 
@@ -22,5 +23,5 @@ class SendEventsRequest(
     }
 
     override fun decodePayload(responseObject: JSONObject, wireEncoder: WireEncoderInterface): String =
-        responseObject.getString("data")
+        responseObject.safeGetString("data")
 }

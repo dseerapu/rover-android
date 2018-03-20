@@ -37,7 +37,7 @@ internal fun JSONObject.optIntOrNull(name: String): Int? {
 /**
  * The stock [JSONObject.optString] method has a nasty known bug for which the behaviour is kept
  * for backwards bug compatibility: if a `null` literal appears as the value for the string, you'll
- * get the string "null" back.
+ * get the string "null" back instead of a null value.
  *
  * This version of the method solves that problem.
  *
@@ -45,6 +45,22 @@ internal fun JSONObject.optIntOrNull(name: String): Int? {
  */
 internal fun JSONObject.safeOptString(name: String): String? {
     return if(isNull(name)) null else optString(name, null)
+}
+
+/**
+ * The stock [JSONObject.getString] method has a nasty known bug for which the behaviour is kept
+ * for backwards bug compatibility: if a `null` literal appears as the value for the string, you'll
+ * get the string "null" back instead of raising an exception.
+ *
+ * This version of the method solves that problem.
+ *
+ * See [Android Bug #36924550](https://issuetracker.google.com/issues/36924550).
+ */
+internal fun JSONObject.safeGetString(name: String): String {
+    if(isNull(name)) {
+        throw JSONException("Field '$name' is null instead of string")
+    }
+    return getString(name)
 }
 
 /**

@@ -66,9 +66,6 @@ class NotificationsRepository(
     }
 
     private val keyValueStorage = localStorage.getKeyValueStorageFor(STORAGE_CONTEXT_IDENTIFIER)
-    // will subscribe to pushes and keep itself up to date
-
-    // will pull updates from data plugin (devicestate) on demand
 
     private val actions = PublishSubject<Action>()
 

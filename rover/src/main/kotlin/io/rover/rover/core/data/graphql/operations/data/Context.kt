@@ -2,6 +2,7 @@ package io.rover.rover.core.data.graphql.operations.data
 
 import io.rover.rover.core.data.domain.Context
 import io.rover.rover.core.data.graphql.putProp
+import io.rover.rover.core.data.graphql.safeGetString
 import io.rover.rover.core.data.graphql.safeOptBoolean
 import io.rover.rover.core.data.graphql.safeOptInt
 import io.rover.rover.core.data.graphql.safeOptString
@@ -83,6 +84,6 @@ private fun Map<String, String>.encodeJson(): JSONObject {
 
 private fun JSONObject.asStringHash(): Map<String, String> {
     return this.keys().asSequence().map { key ->
-        Pair(key, this@asStringHash.getString(key))
+        Pair(key, this@asStringHash.safeGetString(key))
     }.associate { it }
 }

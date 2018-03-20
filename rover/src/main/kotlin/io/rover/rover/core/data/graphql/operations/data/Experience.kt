@@ -37,6 +37,7 @@ import io.rover.rover.core.data.domain.VerticalAlignment
 import io.rover.rover.core.data.domain.WebViewBlock
 import io.rover.rover.core.data.graphql.getObjectIterable
 import io.rover.rover.core.data.graphql.putProp
+import io.rover.rover.core.data.graphql.safeGetString
 import io.rover.rover.core.data.graphql.safeOptString
 import org.json.JSONArray
 import org.json.JSONObject
@@ -44,8 +45,8 @@ import java.net.URI
 
 internal fun Experience.Companion.decodeJson(json: JSONObject): Experience {
     return Experience(
-        id = ID(json.getString("id")),
-        homeScreenId = ID(json.getString("homeScreenId")),
+        id = ID(json.safeGetString("id")),
+        homeScreenId = ID(json.safeGetString("homeScreenId")),
         screens = json.getJSONArray("screens").getObjectIterable().map {
             Screen.decodeJson(it)
         },
@@ -92,9 +93,9 @@ internal fun Image.Companion.optDecodeJSON(json: JSONObject?): Image? = when (js
     else -> Image(
         json.getInt("width"),
         json.getInt("height"),
-        json.getString("name"),
+        json.safeGetString("name"),
         json.getInt("size"),
-        URI.create(json.getString("url"))
+        URI.create(json.safeGetString("url"))
     )
 }
 
@@ -115,7 +116,7 @@ internal fun Image?.optEncodeJson(): JSONObject? {
 
 internal fun Length.Companion.decodeJson(json: JSONObject): Length {
     return Length(
-        UnitOfMeasure.decodeJson(json.getString("unit")),
+        UnitOfMeasure.decodeJson(json.safeGetString("unit")),
         json.getDouble("value")
     )
 }
@@ -173,7 +174,7 @@ internal fun Offsets.encodeJson(): JSONObject {
 internal fun Font.Companion.decodeJson(json: JSONObject): Font {
     return Font(
         size = json.getInt("size"),
-        weight = FontWeight.decodeJson(json.getString("weight"))
+        weight = FontWeight.decodeJson(json.safeGetString("weight"))
     )
 }
 
@@ -214,16 +215,16 @@ internal fun TitleBarButtons.Companion.decodeJson(value: String): TitleBarButton
 internal fun ButtonState.Companion.decodeJson(json: JSONObject): ButtonState {
     return ButtonState(
         backgroundColor = Color.decodeJson(json.getJSONObject("backgroundColor")),
-        backgroundContentMode = BackgroundContentMode.decodeJSON(json.getString("backgroundContentMode")),
+        backgroundContentMode = BackgroundContentMode.decodeJSON(json.safeGetString("backgroundContentMode")),
         backgroundImage = Image.optDecodeJSON(json.optJSONObject("backgroundImage")),
-        backgroundScale = BackgroundScale.decodeJson(json.getString("backgroundScale")),
+        backgroundScale = BackgroundScale.decodeJson(json.safeGetString("backgroundScale")),
         borderColor = Color.decodeJson(json.getJSONObject("borderColor")),
         borderRadius = json.getInt("borderRadius"),
         borderWidth = json.getInt("borderWidth"),
-        textAlignment = TextAlignment.decodeJson(json.getString("textAlignment")),
+        textAlignment = TextAlignment.decodeJson(json.safeGetString("textAlignment")),
         textColor = Color.decodeJson(json.getJSONObject("textColor")),
         textFont = Font.decodeJson(json.getJSONObject("textFont")),
-        text = json.getString("text")
+        text = json.safeGetString("text")
     )
 }
 
@@ -240,23 +241,23 @@ internal fun BarcodeBlock.Companion.decodeJson(json: JSONObject): BarcodeBlock {
         action = BlockAction.optDecodeJson(json.optJSONObject("action")),
         autoHeight = json.getBoolean("autoHeight"),
         backgroundColor = Color.decodeJson(json.getJSONObject("backgroundColor")),
-        backgroundContentMode = BackgroundContentMode.decodeJSON(json.getString("backgroundContentMode")),
+        backgroundContentMode = BackgroundContentMode.decodeJSON(json.safeGetString("backgroundContentMode")),
         backgroundImage = Image.optDecodeJSON(json.optJSONObject("backgroundImage")),
-        backgroundScale = BackgroundScale.decodeJson(json.getString("backgroundScale")),
+        backgroundScale = BackgroundScale.decodeJson(json.safeGetString("backgroundScale")),
         barcodeScale = json.getInt("barcodeScale"),
-        barcodeText = json.getString("barcodeText"),
-        barcodeFormat = BarcodeFormat.decodeJson(json.getString("barcodeFormat")),
+        barcodeText = json.safeGetString("barcodeText"),
+        barcodeFormat = BarcodeFormat.decodeJson(json.safeGetString("barcodeFormat")),
         borderColor = Color.decodeJson(json.getJSONObject("borderColor")),
         borderRadius = json.getInt("borderRadius"),
         borderWidth = json.getInt("borderWidth"),
         height = Length.decodeJson(json.getJSONObject("height")),
-        id = ID(json.getString("id")),
+        id = ID(json.safeGetString("id")),
         insets = Insets.decodeJson(json.getJSONObject("insets")),
-        horizontalAlignment = HorizontalAlignment.decodeJson(json.getString("horizontalAlignment")),
+        horizontalAlignment = HorizontalAlignment.decodeJson(json.safeGetString("horizontalAlignment")),
         offsets = Offsets.decodeJson(json.getJSONObject("offsets")),
         opacity = json.getDouble("opacity"),
-        position = Position.decodeJson(json.getString("position")),
-        verticalAlignment = VerticalAlignment.decodeJson(json.getString("verticalAlignment")),
+        position = Position.decodeJson(json.safeGetString("position")),
+        verticalAlignment = VerticalAlignment.decodeJson(json.safeGetString("verticalAlignment")),
         width = Length.decodeJson(json.getJSONObject("width")),
         customKeys = json.getJSONObject("customKeys").toFlatAttributesHash()
     )
@@ -350,13 +351,13 @@ internal fun ButtonBlock.Companion.decodeJson(json: JSONObject): ButtonBlock {
         action = BlockAction.optDecodeJson(json.optJSONObject("action")),
         autoHeight = json.getBoolean("autoHeight"),
         height = Length.decodeJson(json.getJSONObject("height")),
-        id = ID(json.getString("id")),
+        id = ID(json.safeGetString("id")),
         insets = Insets.decodeJson(json.getJSONObject("insets")),
-        horizontalAlignment = HorizontalAlignment.decodeJson(json.getString("horizontalAlignment")),
+        horizontalAlignment = HorizontalAlignment.decodeJson(json.safeGetString("horizontalAlignment")),
         offsets = Offsets.decodeJson(json.getJSONObject("offsets")),
         opacity = json.getDouble("opacity"),
-        position = Position.decodeJson(json.getString("position")),
-        verticalAlignment = VerticalAlignment.decodeJson(json.getString("verticalAlignment")),
+        position = Position.decodeJson(json.safeGetString("position")),
+        verticalAlignment = VerticalAlignment.decodeJson(json.safeGetString("verticalAlignment")),
         width = Length.decodeJson(json.getJSONObject("width")),
         disabled = ButtonState.decodeJson(json.getJSONObject("disabled")),
         highlighted = ButtonState.decodeJson(json.getJSONObject("highlighted")),
@@ -371,20 +372,20 @@ internal fun RectangleBlock.Companion.decodeJson(json: JSONObject): RectangleBlo
         action = BlockAction.optDecodeJson(json.optJSONObject("action")),
         autoHeight = json.getBoolean("autoHeight"),
         backgroundColor = Color.decodeJson(json.getJSONObject("backgroundColor")),
-        backgroundContentMode = BackgroundContentMode.decodeJSON(json.getString("backgroundContentMode")),
+        backgroundContentMode = BackgroundContentMode.decodeJSON(json.safeGetString("backgroundContentMode")),
         backgroundImage = Image.optDecodeJSON(json.optJSONObject("backgroundImage")),
-        backgroundScale = BackgroundScale.decodeJson(json.getString("backgroundScale")),
+        backgroundScale = BackgroundScale.decodeJson(json.safeGetString("backgroundScale")),
         borderColor = Color.decodeJson(json.getJSONObject("borderColor")),
         borderRadius = json.getInt("borderRadius"),
         borderWidth = json.getInt("borderWidth"),
         height = Length.decodeJson(json.getJSONObject("height")),
-        id = ID(json.getString("id")),
+        id = ID(json.safeGetString("id")),
         insets = Insets.decodeJson(json.getJSONObject("insets")),
-        horizontalAlignment = HorizontalAlignment.decodeJson(json.getString("horizontalAlignment")),
+        horizontalAlignment = HorizontalAlignment.decodeJson(json.safeGetString("horizontalAlignment")),
         offsets = Offsets.decodeJson(json.getJSONObject("offsets")),
         opacity = json.getDouble("opacity"),
-        position = Position.decodeJson(json.getString("position")),
-        verticalAlignment = VerticalAlignment.decodeJson(json.getString("verticalAlignment")),
+        position = Position.decodeJson(json.safeGetString("position")),
+        verticalAlignment = VerticalAlignment.decodeJson(json.safeGetString("verticalAlignment")),
         width = Length.decodeJson(json.getJSONObject("width")),
         customKeys = json.getJSONObject("customKeys").toFlatAttributesHash()
     )
@@ -395,23 +396,23 @@ internal fun WebViewBlock.Companion.decodeJson(json: JSONObject): WebViewBlock {
         action = BlockAction.optDecodeJson(json.optJSONObject("action")),
         autoHeight = json.getBoolean("autoHeight"),
         backgroundColor = Color.decodeJson(json.getJSONObject("backgroundColor")),
-        backgroundContentMode = BackgroundContentMode.decodeJSON(json.getString("backgroundContentMode")),
+        backgroundContentMode = BackgroundContentMode.decodeJSON(json.safeGetString("backgroundContentMode")),
         backgroundImage = Image.optDecodeJSON(json.optJSONObject("backgroundImage")),
-        backgroundScale = BackgroundScale.decodeJson(json.getString("backgroundScale")),
+        backgroundScale = BackgroundScale.decodeJson(json.safeGetString("backgroundScale")),
         borderColor = Color.decodeJson(json.getJSONObject("borderColor")),
         borderRadius = json.getInt("borderRadius"),
         borderWidth = json.getInt("borderWidth"),
         height = Length.decodeJson(json.getJSONObject("height")),
-        id = ID(json.getString("id")),
+        id = ID(json.safeGetString("id")),
         insets = Insets.decodeJson(json.getJSONObject("insets")),
-        horizontalAlignment = HorizontalAlignment.decodeJson(json.getString("horizontalAlignment")),
+        horizontalAlignment = HorizontalAlignment.decodeJson(json.safeGetString("horizontalAlignment")),
         offsets = Offsets.decodeJson(json.getJSONObject("offsets")),
         opacity = json.getDouble("opacity"),
-        position = Position.decodeJson(json.getString("position")),
-        verticalAlignment = VerticalAlignment.decodeJson(json.getString("verticalAlignment")),
+        position = Position.decodeJson(json.safeGetString("position")),
+        verticalAlignment = VerticalAlignment.decodeJson(json.safeGetString("verticalAlignment")),
         width = Length.decodeJson(json.getJSONObject("width")),
         isScrollingEnabled = json.getBoolean("isScrollingEnabled"),
-        url = URI.create(json.getString("url")),
+        url = URI.create(json.safeGetString("url")),
         customKeys = json.getJSONObject("customKeys").toFlatAttributesHash()
     )
 }
@@ -421,25 +422,25 @@ internal fun TextBlock.Companion.decodeJson(json: JSONObject): TextBlock {
         action = BlockAction.optDecodeJson(json.optJSONObject("action")),
         autoHeight = json.getBoolean("autoHeight"),
         backgroundColor = Color.decodeJson(json.getJSONObject("backgroundColor")),
-        backgroundContentMode = BackgroundContentMode.decodeJSON(json.getString("backgroundContentMode")),
+        backgroundContentMode = BackgroundContentMode.decodeJSON(json.safeGetString("backgroundContentMode")),
         backgroundImage = Image.optDecodeJSON(json.optJSONObject("backgroundImage")),
-        backgroundScale = BackgroundScale.decodeJson(json.getString("backgroundScale")),
+        backgroundScale = BackgroundScale.decodeJson(json.safeGetString("backgroundScale")),
         borderColor = Color.decodeJson(json.getJSONObject("borderColor")),
         borderRadius = json.getInt("borderRadius"),
         borderWidth = json.getInt("borderWidth"),
         height = Length.decodeJson(json.getJSONObject("height")),
-        id = ID(json.getString("id")),
+        id = ID(json.safeGetString("id")),
         insets = Insets.decodeJson(json.getJSONObject("insets")),
-        horizontalAlignment = HorizontalAlignment.decodeJson(json.getString("horizontalAlignment")),
+        horizontalAlignment = HorizontalAlignment.decodeJson(json.safeGetString("horizontalAlignment")),
         offsets = Offsets.decodeJson(json.getJSONObject("offsets")),
         opacity = json.getDouble("opacity"),
-        position = Position.decodeJson(json.getString("position")),
-        verticalAlignment = VerticalAlignment.decodeJson(json.getString("verticalAlignment")),
+        position = Position.decodeJson(json.safeGetString("position")),
+        verticalAlignment = VerticalAlignment.decodeJson(json.safeGetString("verticalAlignment")),
         width = Length.decodeJson(json.getJSONObject("width")),
-        textAlignment = TextAlignment.decodeJson(json.getString("textAlignment")),
+        textAlignment = TextAlignment.decodeJson(json.safeGetString("textAlignment")),
         textColor = Color.decodeJson(json.getJSONObject("textColor")),
         textFont = Font.decodeJson(json.getJSONObject("textFont")),
-        text = json.getString("text"),
+        text = json.safeGetString("text"),
         customKeys = json.getJSONObject("customKeys").toFlatAttributesHash()
     )
 }
@@ -449,20 +450,20 @@ internal fun ImageBlock.Companion.decodeJson(json: JSONObject): ImageBlock {
         action = BlockAction.optDecodeJson(json.optJSONObject("action")),
         autoHeight = json.getBoolean("autoHeight"),
         backgroundColor = Color.decodeJson(json.getJSONObject("backgroundColor")),
-        backgroundContentMode = BackgroundContentMode.decodeJSON(json.getString("backgroundContentMode")),
+        backgroundContentMode = BackgroundContentMode.decodeJSON(json.safeGetString("backgroundContentMode")),
         backgroundImage = Image.optDecodeJSON(json.optJSONObject("backgroundImage")),
-        backgroundScale = BackgroundScale.decodeJson(json.getString("backgroundScale")),
+        backgroundScale = BackgroundScale.decodeJson(json.safeGetString("backgroundScale")),
         borderColor = Color.decodeJson(json.getJSONObject("borderColor")),
         borderRadius = json.getInt("borderRadius"),
         borderWidth = json.getInt("borderWidth"),
         height = Length.decodeJson(json.getJSONObject("height")),
-        id = ID(json.getString("id")),
+        id = ID(json.safeGetString("id")),
         insets = Insets.decodeJson(json.getJSONObject("insets")),
-        horizontalAlignment = HorizontalAlignment.decodeJson(json.getString("horizontalAlignment")),
+        horizontalAlignment = HorizontalAlignment.decodeJson(json.safeGetString("horizontalAlignment")),
         offsets = Offsets.decodeJson(json.getJSONObject("offsets")),
         opacity = json.getDouble("opacity"),
-        position = Position.decodeJson(json.getString("position")),
-        verticalAlignment = VerticalAlignment.decodeJson(json.getString("verticalAlignment")),
+        position = Position.decodeJson(json.safeGetString("position")),
+        verticalAlignment = VerticalAlignment.decodeJson(json.safeGetString("verticalAlignment")),
         width = Length.decodeJson(json.getJSONObject("width")),
         image = Image.optDecodeJSON(json.optJSONObject("image")),
         customKeys = json.getJSONObject("customKeys").toFlatAttributesHash()
@@ -477,15 +478,15 @@ internal fun BlockAction.Companion.optDecodeJson(json: JSONObject?): BlockAction
     // BlockAction has subclasses, so we need to delegate to the appropriate deserializer for each
     // block action type.
 
-    val typeName = json.getString("__typename")
+    val typeName = json.safeGetString("__typename")
 
     return when (typeName) {
         BlockAction.OpenUrlAction.resourceName -> BlockAction.OpenUrlAction(
-            url = URI.create(json.getString("url"))
+            url = URI.create(json.safeGetString("url"))
         )
         BlockAction.GoToScreenAction.resourceName -> BlockAction.GoToScreenAction(
-            experienceId = ID(json.getString("experienceId")),
-            screenId = ID(json.getString("screenId"))
+            experienceId = ID(json.safeGetString("experienceId")),
+            screenId = ID(json.safeGetString("screenId"))
         )
         else -> throw RuntimeException("Unsupported Block Action type '$typeName'.")
     }
@@ -519,7 +520,7 @@ internal val ImageBlock.Companion.resourceName get() = "ImageBlock"
 internal fun Block.Companion.decodeJson(json: JSONObject): Block {
     // Block has subclasses, so we need to delegate to the appropriate deserializer for each
     // block type.
-    val typeName = json.getString("__typename")
+    val typeName = json.safeGetString("__typename")
 
     return when (typeName) {
         BarcodeBlock.resourceName -> BarcodeBlock.decodeJson(json)
@@ -536,12 +537,12 @@ internal fun Row.Companion.decodeJSON(json: JSONObject): Row {
     return Row(
         autoHeight = json.getBoolean("autoHeight"),
         backgroundColor = Color.decodeJson(json.getJSONObject("backgroundColor")),
-        backgroundContentMode = BackgroundContentMode.decodeJSON(json.getString("backgroundContentMode")),
+        backgroundContentMode = BackgroundContentMode.decodeJSON(json.safeGetString("backgroundContentMode")),
         backgroundImage = Image.optDecodeJSON(json.optJSONObject("backgroundImage")),
-        backgroundScale = BackgroundScale.decodeJson(json.getString("backgroundScale")),
+        backgroundScale = BackgroundScale.decodeJson(json.safeGetString("backgroundScale")),
         blocks = json.getJSONArray("blocks").getObjectIterable().map { Block.decodeJson(it) },
         height = Length.decodeJson(json.getJSONObject("height")),
-        id = ID(json.getString("id")),
+        id = ID(json.safeGetString("id")),
         customKeys = json.getJSONObject("customKeys").toFlatAttributesHash()
     )
 }
@@ -565,20 +566,20 @@ internal fun Row.encodeJson(experienceId: String, screenId: String): JSONObject 
 internal fun Screen.Companion.decodeJson(json: JSONObject): Screen {
     return Screen(
         backgroundColor = Color.decodeJson(json.getJSONObject("backgroundColor")),
-        backgroundContentMode = BackgroundContentMode.decodeJson(json.getString("backgroundContentMode")),
+        backgroundContentMode = BackgroundContentMode.decodeJson(json.safeGetString("backgroundContentMode")),
         backgroundImage = Image.optDecodeJSON(json.optJSONObject("backgroundImage")),
-        backgroundScale = BackgroundScale.decodeJson(json.getString("backgroundScale")),
-        id = ID(json.getString("id")),
+        backgroundScale = BackgroundScale.decodeJson(json.safeGetString("backgroundScale")),
+        id = ID(json.safeGetString("id")),
         isStretchyHeaderEnabled = json.getBoolean("isStretchyHeaderEnabled"),
         rows = json.getJSONArray("rows").getObjectIterable().map {
             Row.decodeJSON(it)
         },
-        statusBarStyle = StatusBarStyle.decodeJson(json.getString("statusBarStyle")),
+        statusBarStyle = StatusBarStyle.decodeJson(json.safeGetString("statusBarStyle")),
         statusBarColor = Color.decodeJson(json.getJSONObject("statusBarColor")),
         titleBarBackgroundColor = Color.decodeJson(json.getJSONObject("titleBarBackgroundColor")),
-        titleBarButtons = TitleBarButtons.decodeJson(json.getString("titleBarButtons")),
+        titleBarButtons = TitleBarButtons.decodeJson(json.safeGetString("titleBarButtons")),
         titleBarButtonColor = Color.decodeJson(json.getJSONObject("titleBarButtonColor")),
-        titleBarText = json.getString("titleBarText"),
+        titleBarText = json.safeGetString("titleBarText"),
         titleBarTextColor = Color.decodeJson(json.getJSONObject("titleBarTextColor")),
         useDefaultTitleBarStyle = json.getBoolean("useDefaultTitleBarStyle"),
         customKeys = json.getJSONObject("customKeys").toFlatAttributesHash()

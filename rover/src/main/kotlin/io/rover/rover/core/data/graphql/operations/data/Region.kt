@@ -3,6 +3,7 @@ package io.rover.rover.core.data.graphql.operations.data
 import io.rover.rover.core.data.domain.Region
 import io.rover.rover.core.data.graphql.optIntOrNull
 import io.rover.rover.core.data.graphql.putProp
+import io.rover.rover.core.data.graphql.safeGetString
 import org.json.JSONObject
 import java.util.UUID
 
@@ -10,11 +11,11 @@ val Region.BeaconRegion.Companion.resourceName get() = "BeaconRegion"
 val Region.GeofenceRegion.Companion.resourceName get() = "GeofenceRegion"
 
 internal fun Region.Companion.decodeJson(json: JSONObject): Region {
-    val typeName = json.getString("__typename")
+    val typeName = json.safeGetString("__typename")
 
     return when (typeName) {
         Region.BeaconRegion.resourceName -> Region.BeaconRegion(
-            uuid = UUID.fromString(json.getString("uuid")),
+            uuid = UUID.fromString(json.safeGetString("uuid")),
             major = json.optIntOrNull("major"),
             minor = json.optIntOrNull("minor")
         )
