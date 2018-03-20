@@ -19,10 +19,9 @@ interface ContextProvider {
     fun captureContext(context: Context): Context
 
     /**
-     * Called when this Context Provider is registered with the events plugin.  Useful for wiring
-     * up
+     * Called when this Context Provider is registered with the events plugin.
      */
-    fun registeredWithEventsPlugin(eventsPlugin: EventQueueServiceInterface) { }
+    fun registeredWithEventQueue(eventQueue: EventQueueServiceInterface) { }
 }
 
 /**

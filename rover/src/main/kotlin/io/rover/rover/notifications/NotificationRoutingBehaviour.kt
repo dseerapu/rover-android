@@ -99,6 +99,10 @@ open class NotificationActionRoutingBehaviour(
         }
     }
 
+    override fun isDirectOpenAppropriate(action: PushNotificationAction): Boolean {
+        return !(action.uri.scheme == fullSchema && action.uri.authority.isBlank())
+    }
+
     private fun String.parseAsQueryParameters(): Map<String, String> {
         return split("&").map {
             val keyAndValue = it.split("=")

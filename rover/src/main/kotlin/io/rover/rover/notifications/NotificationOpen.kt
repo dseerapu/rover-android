@@ -51,20 +51,17 @@ open class NotificationOpen(
     }
 
     override fun intentForOpeningNotificationDirectly(notification: Notification): Intent? {
-        // side-effect: issue open event.
-        issueNotificationOpenedEvent(
-            notification,
-            NotificationSource.NotificationCenter
-        )
+        // we only want to open the given notification's action in the case where it would
+        // navigate somewhere useful, not just re-open the app.
+        return if (routingBehaviour.isDirectOpenAppropriate(notification.action)) {
+            // side-effect: issue open event.
+            issueNotificationOpenedEvent(
+                notification,
+                NotificationSource.NotificationCenter
+            )
 
-        return when(notification.action) {
-
-            // TODO it is nonsensical to open the app when the app is already open, so this should
-            // be a no-op if it's a deep link with blank.  change the notificationActionToIntent to
-            // return a rich type (again) and then transform that to a URI separately, so we can
-            // sniff it here.
-            else -> routingBehaviour.notificationActionToIntent(notification.action)
-        }
+            routingBehaviour.notificationActionToIntent(notification.action)
+        } else null
     }
 
     protected fun issueNotificationOpenedEvent(notification: Notification, source: NotificationSource) {

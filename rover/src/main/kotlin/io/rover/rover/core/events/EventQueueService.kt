@@ -43,6 +43,7 @@ class EventQueueService(
 
     override fun addContextProvider(contextProvider: ContextProvider) {
         contextProviders.add(contextProvider)
+        contextProvider.registeredWithEventQueue(this)
     }
 
     override fun trackEvent(event: Event, namespace: String?) {

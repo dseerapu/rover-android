@@ -41,8 +41,6 @@ class NotificationsAssembler(
      */
     private val smallIconDrawableLevel: Int = 0,
 
-    private val defaultChannelId: String = "rover",
-
     /**
      * Rover deep links are customized for each app in this way:
      *
@@ -56,6 +54,8 @@ class NotificationsAssembler(
      * anywhere else. TODO explain how once the stuff to do so is built
      */
     private val deepLinkSchemaSlug: String,
+
+    private val defaultChannelId: String = "rover",
 
     /**
      * While normally your `FirebaseInstanceIdService` class will be responsible for being
@@ -170,9 +170,11 @@ class NotificationsAssembler(
 
     override fun afterAssembly(resolver: Resolver) {
         val eventQueue = resolver.resolveSingletonOrFail(EventQueueServiceInterface::class.java)
-
+        // wire up the push context provider such that the current push token can always be
+        // included with outgoing events.
+        val pushTokenContextProvider = resolver.resolveSingletonOrFail(ContextProvider::class.java, "pushToken")
         eventQueue.addContextProvider(
-            resolver.resolveSingletonOrFail(ContextProvider::class.java, "pushToken")
+            pushTokenContextProvider
         )
     }
 }

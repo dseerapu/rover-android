@@ -65,6 +65,13 @@ interface NotificationActionRoutingBehaviourInterface {
      * Should return an Intent for the given push notification action.
      */
     fun notificationActionToIntent(action: PushNotificationAction): Intent
+
+    /**
+     * Determine if the given action is appropriate for opening directly in a currently open app.
+     *
+     * For example, "open app" deep links would be pointless if opened within the app.
+     */
+    fun isDirectOpenAppropriate(action: PushNotificationAction): Boolean
 }
 
 interface NotificationOpenInterface {

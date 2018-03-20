@@ -24,8 +24,8 @@ class FirebasePushTokenContextProvider(
     private val resetPushToken: () -> Unit
 ): ContextProvider, PushTokenTransmissionChannel {
 
-    override fun registeredWithEventsPlugin(eventsPlugin: EventQueueServiceInterface) {
-        this.eventsPlugin = eventsPlugin
+    override fun registeredWithEventQueue(eventQueue: EventQueueServiceInterface) {
+        this.eventQueue = eventQueue
     }
 
     override fun captureContext(context: Context): Context {
@@ -45,7 +45,7 @@ class FirebasePushTokenContextProvider(
                 hashMapOf()
             )
             this.token = token
-            val eventsPlugin = eventsPlugin ?: throw RuntimeException("registeredWithEventsPlugin() not called on FirebasePushTokenContextProvider during setup.")
+            val eventsPlugin = eventQueue ?: throw RuntimeException("registeredWithEventQueue() not called on FirebasePushTokenContextProvider during setup.")
             eventsPlugin.trackEvent(event, EventQueueService.ROVER_NAMESPACE)
             val elapsed = (Date().time - launchTime.time) / 1000
             log.v("Push token set after $elapsed seconds.")
@@ -53,7 +53,7 @@ class FirebasePushTokenContextProvider(
     }
 
     private val launchTime = Date()
-    private var eventsPlugin: EventQueueServiceInterface? = null
+    private var eventQueue: EventQueueServiceInterface? = null
     private val keyValueStorage = localStorage.getKeyValueStorageFor(Companion.STORAGE_CONTEXT_IDENTIFIER)
 
     private var token: String?
