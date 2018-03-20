@@ -116,9 +116,9 @@ class NotificationsAssembler(
         // this one will be oft overridden!
         container.register(
             Scope.Singleton,
-            NotificationActionRoutingBehaviourInterface::class.java
+            ActionRoutingBehaviourInterface::class.java
         ) { resolver ->
-            NotificationActionRoutingBehaviour(
+            ActionRoutingBehaviour(
                 applicationContext,
                 resolver.resolveSingletonOrFail(TopLevelNavigation::class.java),
                 deepLinkSchemaSlug
@@ -132,7 +132,7 @@ class NotificationsAssembler(
             NotificationContentPendingIntentSynthesizer(
                 applicationContext,
                 resolver.resolveSingletonOrFail(TopLevelNavigation::class.java),
-                resolver.resolveSingletonOrFail(NotificationActionRoutingBehaviourInterface::class.java)
+                resolver.resolveSingletonOrFail(ActionRoutingBehaviourInterface::class.java)
             )
         }
 
@@ -144,7 +144,7 @@ class NotificationsAssembler(
                 applicationContext,
                 resolver.resolveSingletonOrFail(WireEncoderInterface::class.java),
                 resolver.resolveSingletonOrFail(EventQueueServiceInterface::class.java),
-                resolver.resolveSingletonOrFail(NotificationActionRoutingBehaviourInterface::class.java),
+                resolver.resolveSingletonOrFail(ActionRoutingBehaviourInterface::class.java),
                 resolver.resolveSingletonOrFail(NotificationContentPendingIntentSynthesizerInterface::class.java)
             )
         }

@@ -1,6 +1,7 @@
 package io.rover.rover.experiences
 
 import android.content.Intent
+import java.net.URI
 
 //
 //interface UserExperiencePluginInterface : ViewModelFactoryInterface {
@@ -45,3 +46,10 @@ interface TopLevelNavigation {
     fun openAppIntent(): Intent
 }
 
+
+interface LinkOpenInterface {
+    /**
+     * Map an intent for a deep/universal link to an explicit, mapped intent.
+     */
+    fun localIntentForReceived(receivedUri: URI): Intent
+}

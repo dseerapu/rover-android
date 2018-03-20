@@ -5,7 +5,6 @@ import android.content.Intent
 import android.net.Uri
 import android.support.v4.app.TaskStackBuilder
 import io.rover.rover.core.data.domain.Notification
-import io.rover.rover.core.data.domain.PushNotificationAction
 import io.rover.rover.core.logging.log
 import io.rover.rover.experiences.TopLevelNavigation
 import java.net.URI
@@ -13,7 +12,7 @@ import java.net.URI
 /**
  *
  */
-open class NotificationActionRoutingBehaviour(
+open class ActionRoutingBehaviour(
     private val applicationContext: Context,
     private val topLevelNavigation: TopLevelNavigation,
 
@@ -31,7 +30,7 @@ open class NotificationActionRoutingBehaviour(
      * anywhere else. TODO explain how once the stuff to do so is built
      */
     private val deepLinkSchemaSlug: String
-): NotificationActionRoutingBehaviourInterface {
+): ActionRoutingBehaviourInterface {
 
     init {
         // validate the deep link slug and ensure it's sane.
@@ -46,11 +45,12 @@ open class NotificationActionRoutingBehaviour(
 
     private val fullSchema = "rv-$deepLinkSchemaSlug"
 
-    override fun notificationActionToIntent(action: PushNotificationAction): Intent {
-        return when(action.uri.scheme) {
+    override fun notificationActionToIntent(action: URI): Intent {
+        val uri = action
+        return when(action.scheme) {
             fullSchema -> {
                 // one of our deeplinks
-                when(action.uri.authority) {
+                when(uri.authority) {
                     "" -> {
                         // just open the app.
                         topLevelNavigation.openAppIntent()
@@ -60,10 +60,10 @@ open class NotificationActionRoutingBehaviour(
 
                         // TODO crap gotta parse the query params.
 
-                        val websiteUri = action.uri.query.parseAsQueryParameters()["website"]
+                        val websiteUri = uri.query.parseAsQueryParameters()["website"]
 
                         if(websiteUri.isNullOrBlank()) {
-                            log.w("Website URI missing from present website deep link.  Was ${action.uri}")
+                            log.w("Website URI missing from present website deep link.  Was ${uri}")
                             // just default to opening the app in this case.
                             topLevelNavigation.openAppIntent()
                         } else {
@@ -71,7 +71,7 @@ open class NotificationActionRoutingBehaviour(
                         }
                     }
                     "experience" -> {
-                        val queryParams = action.uri.query.parseAsQueryParameters()
+                        val queryParams = uri.query.parseAsQueryParameters()
 
                         val experienceId = queryParams["id"]
                         val campaignId = queryParams["campaignId"]
@@ -85,7 +85,7 @@ open class NotificationActionRoutingBehaviour(
                         }
                     }
                     else -> {
-                        log.w("Unknown authority given in deep link: ${action.uri}")
+                        log.w("Unknown authority given in deep link: ${uri}")
                         // just default to opening the app in this case.
                         topLevelNavigation.openAppIntent()
                     }
@@ -94,13 +94,13 @@ open class NotificationActionRoutingBehaviour(
             else -> {
                 // an external link, either web or another deep link.  Hand over to Android's
                 // builtin Intent routing system.
-                Intent(Intent.ACTION_VIEW, Uri.parse(action.uri.toString()))
+                Intent(Intent.ACTION_VIEW, Uri.parse(uri.toString()))
             }
         }
     }
 
-    override fun isDirectOpenAppropriate(action: PushNotificationAction): Boolean {
-        return !(action.uri.scheme == fullSchema && action.uri.authority.isBlank())
+    override fun isDirectOpenAppropriate(action: URI): Boolean {
+        return !(action.scheme == fullSchema && action.authority.isBlank())
     }
 
     private fun String.parseAsQueryParameters(): Map<String, String> {
@@ -118,19 +118,20 @@ interface NotificationContentPendingIntentSynthesizerInterface {
 class NotificationContentPendingIntentSynthesizer(
     private val applicationContext: Context,
     private val topLevelNavigation: TopLevelNavigation,
-    private val notificationActionRoutingBehaviour: NotificationActionRoutingBehaviourInterface
+    private val actionRoutingBehaviour: ActionRoutingBehaviourInterface
 ): NotificationContentPendingIntentSynthesizerInterface {
     override fun synthesizeNotificationIntentStack(notification: Notification): List<Intent> {
-        val targetIntent = notificationActionRoutingBehaviour.notificationActionToIntent(notification.action)
+        val targetIntent = actionRoutingBehaviour.notificationActionToIntent(notification.action.uri)
 
         // now to synthesize the backstack.
         return TaskStackBuilder.create(applicationContext).apply {
             if(notification.isNotificationCenterEnabled) {
+
                 // inject the Notification Centre for the user's app. TODO: allow user to *configure*
                 // what their notification centre is, either with a custom URI template method OR
                 // just with a meta-property in their Manifest. but by default we can bundle an Activity that hosts NotificationCentreView, I think.
 
-                // for now, we'll just put some sort of
+                // for now, we'll just put some sort of.
                 addNextIntent(topLevelNavigation.displayNotificationCenterIntent())
             } else {
                 // Instead of displaying the notification centre, display the parent activity the user set
@@ -141,6 +142,7 @@ class NotificationContentPendingIntentSynthesizer(
             // PendingIntents are value objects, but they do not fully encapsulate any extras data,
             // so they may find themselves "merged".  However, perhaps TaskStackBuilder is handling
             // this problem.
+
             addNextIntent(targetIntent)
         }.intents.asList().apply {
             this.first().addFlags(Intent.FLAG_ACTIVITY_NEW_TASK

@@ -20,7 +20,7 @@ open class NotificationOpen(
     private val applicationContext: Context,
     private val wireEncoder: WireEncoderInterface,
     private val eventsService: EventQueueServiceInterface,
-    private val routingBehaviour: NotificationActionRoutingBehaviourInterface,
+    private val routingBehaviour: ActionRoutingBehaviourInterface,
     private val notificationContentPendingIntentSynthesizer: NotificationContentPendingIntentSynthesizerInterface
 ): NotificationOpenInterface {
     override fun pendingIntentForAndroidNotification(notification: Notification): PendingIntent {
@@ -53,14 +53,14 @@ open class NotificationOpen(
     override fun intentForOpeningNotificationDirectly(notification: Notification): Intent? {
         // we only want to open the given notification's action in the case where it would
         // navigate somewhere useful, not just re-open the app.
-        return if (routingBehaviour.isDirectOpenAppropriate(notification.action)) {
+        return if (routingBehaviour.isDirectOpenAppropriate(notification.action.uri)) {
             // side-effect: issue open event.
             issueNotificationOpenedEvent(
                 notification,
                 NotificationSource.NotificationCenter
             )
 
-            routingBehaviour.notificationActionToIntent(notification.action)
+            routingBehaviour.notificationActionToIntent(notification.action.uri)
         } else null
     }
 

@@ -10,10 +10,15 @@
     <application android:allowBackup="true" android:label="@string/app_name"
         android:supportsRtl="true">
 
+        <!-- You should replace this entry for the Experience Activity in your own manifest in order
+        to set your style and an optional parent activity for use when Experiences are launched
+        directly from push notifications.  See the documentation. -->
         <activity
             android:name=".experiences.ui.containers.StandaloneExperienceHostActivity"
             android:theme="@style/EmptyThemeToDisableActionBar"
         />
-    </application>
 
+        <activity android:name="io.rover.rover.experiences.TransientNotificationLaunchActivity" />
+
+    </application>
 </manifest>

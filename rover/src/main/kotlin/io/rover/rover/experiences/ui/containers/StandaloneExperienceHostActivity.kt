@@ -33,12 +33,12 @@ import java.net.HttpURLConnection
  * a Rover [ExperienceView] in your own Activities.
  */
 open class StandaloneExperienceHostActivity : AppCompatActivity() {
-    private val experienceId
+    protected val experienceId: String
         get() = this.intent.getStringExtra("EXPERIENCE_ID") ?: throw RuntimeException(
             "Please pass EXPERIENCE_ID. Consider using StandaloneExperienceHostActivity.makeIntent()"
         )
 
-    private val campaignId
+    protected val campaignId: String?
         get() = this.intent.getStringExtra("CAMPAIGN_ID")
 
     /**

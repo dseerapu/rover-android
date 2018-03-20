@@ -4,7 +4,7 @@ import android.app.PendingIntent
 import android.content.Intent
 import android.os.Bundle
 import io.rover.rover.core.data.domain.Notification
-import io.rover.rover.core.data.domain.PushNotificationAction
+import java.net.URI
 
 interface NotificationHandlerInterface {
     /**
@@ -58,20 +58,20 @@ interface NotificationHandlerInterface {
     fun onTokenRefresh(token: String?)
 }
 
-interface NotificationActionRoutingBehaviourInterface {
+interface ActionRoutingBehaviourInterface {
     /**
      * Map a given action URI to the appropriate Rover behaviour.
      *
      * Should return an Intent for the given push notification action.
      */
-    fun notificationActionToIntent(action: PushNotificationAction): Intent
+    fun notificationActionToIntent(action: URI): Intent
 
     /**
      * Determine if the given action is appropriate for opening directly in a currently open app.
      *
      * For example, "open app" deep links would be pointless if opened within the app.
      */
-    fun isDirectOpenAppropriate(action: PushNotificationAction): Boolean
+    fun isDirectOpenAppropriate(action: URI): Boolean
 }
 
 interface NotificationOpenInterface {
@@ -97,7 +97,7 @@ interface NotificationOpenInterface {
      * Return an intent for directly opening the notification within the app.
      *
      * Note: if you wish to override the intent creation logic, instead considering overriding
-     * [TopLevelNavigation] or [NotificationActionRoutingBehaviour].
+     * [TopLevelNavigation] or [ActionRoutingBehaviour].
      *
      * Returns null if no intent is appropriate.
      */
