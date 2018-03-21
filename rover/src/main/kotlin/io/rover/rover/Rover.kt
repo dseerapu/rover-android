@@ -8,6 +8,8 @@ import io.rover.rover.core.container.ContainerResolver
 import io.rover.rover.core.container.InjectionContainer
 import io.rover.rover.core.data.http.AsyncTaskAndHttpUrlConnectionNetworkClient
 import io.rover.rover.core.events.EventQueueServiceInterface
+import io.rover.rover.experiences.LinkOpen
+import io.rover.rover.experiences.LinkOpenInterface
 import io.rover.rover.notifications.NotificationHandlerInterface
 import io.rover.rover.notifications.NotificationOpenInterface
 import io.rover.rover.experiences.ui.ExperienceViewModelInterface
@@ -33,26 +35,33 @@ class Rover(
     // objects, and access directly by developers' code. TODO re-evaluate that.
 
     val eventQueue: EventQueueServiceInterface
-        get() = this.resolve(EventQueueServiceInterface::class.java) ?: throw missingDependencyError(("EventQueueService"))
+        get() = this.resolve(EventQueueServiceInterface::class.java) ?: throw missingDependencyError("EventQueueService", "Core")
 
     val notificationHandler: NotificationHandlerInterface
-        get() = this.resolve(NotificationHandlerInterface::class.java) ?: throw missingDependencyError(("NotificationHandler"))
+        get() = this.resolve(NotificationHandlerInterface::class.java) ?: throw missingDependencyError("NotificationHandler", "Notifications")
 
     val notificationCenterViewModel: NotificationCenterListViewModelInterface
-        get() = this.resolve(NotificationCenterListViewModelInterface::class.java) ?: throw missingDependencyError("NotificationCenterViewModel")
+        get() = this.resolve(NotificationCenterListViewModelInterface::class.java) ?: throw missingDependencyError("NotificationCenterViewModel", "Notifications")
 
     fun experienceViewModel(experienceId: String, campaignId: String?, icicle: Parcelable?): ExperienceViewModelInterface {
-        return this.resolve(ExperienceViewModelInterface::class.java, null, experienceId, campaignId, icicle) ?: throw missingDependencyError("ExperienceViewModel")
+        return this.resolve(ExperienceViewModelInterface::class.java, null, experienceId, campaignId, icicle) ?: throw missingDependencyError("ExperienceViewModel", "ExperiencesAssembler")
+    }
+
+    fun experienceViewModel(experienceUrl: String, icicle: Parcelable?): ExperienceViewModelInterface {
+        return this.resolve(ExperienceViewModelInterface::class.java, null, experienceUrl, icicle) ?: throw missingDependencyError("ExperienceViewModel", "ExperiencesAssembler")
     }
 
     val notificationOpen: NotificationOpenInterface
-        get() = this.resolve(NotificationOpenInterface::class.java) ?: throw missingDependencyError("NotificationOpen")
+        get() = this.resolve(NotificationOpenInterface::class.java) ?: throw missingDependencyError("NotificationOpen", "Notifications")
+
+    val linkOpen: LinkOpenInterface
+        get() = this.resolve(io.rover.rover.experiences.LinkOpenInterface::class.java) ?: throw missingDependencyError("LinkOpen", "Experiences")
 
     val assetService: AssetService
-        get() = this.resolve(AssetService::class.java) ?: throw missingDependencyError("AssetService")
+        get() = this.resolve(AssetService::class.java) ?: throw missingDependencyError("AssetService", "Core")
 
-    private fun missingDependencyError(name: String): Throwable {
-        throw RuntimeException("Dependency not registered.  Did you include $name() in the assembler list?")
+    private fun missingDependencyError(name: String, neededAssembler: String): Throwable {
+        throw RuntimeException("Dependency not registered: $name.  Did you include ${neededAssembler}Assembler() in the assembler list?")
     }
 
     companion object {

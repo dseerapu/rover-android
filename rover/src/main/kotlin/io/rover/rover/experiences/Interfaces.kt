@@ -29,9 +29,14 @@ import java.net.URI
  */
 interface TopLevelNavigation {
     /**
-     * Generate an Intent for displaying an Experience.
+     * Generate an Intent for displaying an Experience from an explicit experience and campaign id.
      */
     fun displayExperienceIntent(experienceId: String, campaignId: String?): Intent
+
+    /**
+     * Generate an Intent for displaying an Experience from an opaque experience universal link.
+     */
+    fun displayExperienceIntent(universalLink: URI): Intent
 
     /**
      * Generate an Intent for navigating your app to the Notification Center.
@@ -51,5 +56,5 @@ interface LinkOpenInterface {
     /**
      * Map an intent for a deep/universal link to an explicit, mapped intent.
      */
-    fun localIntentForReceived(receivedUri: URI): Intent
+    fun localIntentForReceived(receivedUri: URI): List<Intent>
 }

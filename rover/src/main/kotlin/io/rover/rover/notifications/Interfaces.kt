@@ -64,7 +64,16 @@ interface ActionRoutingBehaviourInterface {
      *
      * Should return an Intent for the given push notification action.
      */
-    fun notificationActionToIntent(action: URI): Intent
+    fun actionUriToIntent(action: URI): IntentAndBackstackRequest
+
+    /**
+     * The mapped intent and whether the action explicitly requested that a backstack not be
+     * synthesized.
+     */
+    data class IntentAndBackstackRequest(
+        val intent: Intent,
+        val noBackstack: Boolean
+    )
 
     /**
      * Determine if the given action is appropriate for opening directly in a currently open app.

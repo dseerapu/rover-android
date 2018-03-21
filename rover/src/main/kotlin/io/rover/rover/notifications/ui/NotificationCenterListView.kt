@@ -137,7 +137,7 @@ open class NotificationCenterListView : CoordinatorLayout, BindableView<Notifica
                             Snackbar.make(this, R.string.generic_problem, Snackbar.LENGTH_LONG).show()
                         }
                         is NotificationCenterListViewModelInterface.Event.Navigate -> {
-                            log.v("Navigating to action: ${event.notification.action}")
+                            log.v("Navigating to action: ${event.notification.uri}")
                             val host = (notificationCenterHost
                                 ?: throw RuntimeException("Please set notificationCenterHost on NotificationCenterListView.  Otherwise, navigation cannot work."))
 

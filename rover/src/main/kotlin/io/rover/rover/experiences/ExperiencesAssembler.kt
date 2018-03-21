@@ -45,6 +45,8 @@ import io.rover.rover.experiences.ui.navigation.ExperienceNavigationViewModelInt
 import io.rover.rover.experiences.ui.toolbar.ExperienceToolbarViewModel
 import io.rover.rover.experiences.ui.toolbar.ExperienceToolbarViewModelInterface
 import io.rover.rover.experiences.ui.toolbar.ToolbarConfiguration
+import io.rover.rover.notifications.ActionRoutingBehaviourInterface
+import io.rover.rover.notifications.NotificationContentPendingIntentSynthesizerInterface
 
 /**
  * This is the Rover User Experience plugin.  It contains the entire Rover Experiences system.
@@ -71,6 +73,17 @@ class ExperiencesAssembler(
             AndroidMeasurementService(
                 resolver.resolveSingletonOrFail(Context::class.java).resources.displayMetrics,
                 resolver.resolveSingletonOrFail(RichTextToSpannedTransformer::class.java)
+            )
+        }
+
+        container.register(
+            Scope.Singleton,
+            LinkOpenInterface::class.java
+        ) { resolver ->
+            LinkOpen(
+                resolver.resolveSingletonOrFail(ActionRoutingBehaviourInterface::class.java),
+                resolver.resolveSingletonOrFail(NotificationContentPendingIntentSynthesizerInterface::class.java),
+                resolver.resolveSingletonOrFail(TopLevelNavigation::class.java)
             )
         }
 

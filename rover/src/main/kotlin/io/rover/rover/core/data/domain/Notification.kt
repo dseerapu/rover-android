@@ -50,18 +50,13 @@ data class Notification(
 
     val deliveredAt: Date,
 
-    val action: PushNotificationAction,
+    val uri: URI,
 
     val attachment: NotificationAttachment?
 ) {
     companion object
 }
 
-data class PushNotificationAction(
-    val uri: URI
-) {
-    companion object
-}
 
 sealed class NotificationAttachment(
     val typeName: String,

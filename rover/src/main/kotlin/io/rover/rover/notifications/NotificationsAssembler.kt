@@ -131,8 +131,7 @@ class NotificationsAssembler(
         ) { resolver ->
             NotificationContentPendingIntentSynthesizer(
                 applicationContext,
-                resolver.resolveSingletonOrFail(TopLevelNavigation::class.java),
-                resolver.resolveSingletonOrFail(ActionRoutingBehaviourInterface::class.java)
+                resolver.resolveSingletonOrFail(TopLevelNavigation::class.java)
             )
         }
 

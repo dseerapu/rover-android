@@ -144,9 +144,7 @@
                     "isNotificationCenterEnabled": true,
                     "expiresAt": "2019-02-21T19:14:38Z",
                     "deliveredAt": "2018-02-21T19:14:38Z",
-                    "action": {
-                        "url": "rv-testapp://experience/645656"
-                    },
+                    "uri": "rv-testapp://open",
                     "attachment": {
                         "type": "IMAGE",
                         "url": "https://www.debian.org/Pics/openlogo-50.png"

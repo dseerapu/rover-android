@@ -7,10 +7,11 @@ import android.support.v4.app.TaskStackBuilder
 import io.rover.rover.core.data.domain.Notification
 import io.rover.rover.core.logging.log
 import io.rover.rover.experiences.TopLevelNavigation
+import io.rover.rover.platform.whenNotNull
 import java.net.URI
 
 /**
- *
+ * TODO move to Core
  */
 open class ActionRoutingBehaviour(
     private val applicationContext: Context,
@@ -29,7 +30,7 @@ open class ActionRoutingBehaviour(
      * any Rover functionality to work, it is required for clickable deep/universal links to work from
      * anywhere else. TODO explain how once the stuff to do so is built
      */
-    private val deepLinkSchemaSlug: String
+    deepLinkSchemaSlug: String
 ): ActionRoutingBehaviourInterface {
 
     init {
@@ -45,62 +46,80 @@ open class ActionRoutingBehaviour(
 
     private val fullSchema = "rv-$deepLinkSchemaSlug"
 
-    override fun notificationActionToIntent(action: URI): Intent {
+
+    override fun actionUriToIntent(action: URI): ActionRoutingBehaviourInterface.IntentAndBackstackRequest {
         val uri = action
         return when(action.scheme) {
             fullSchema -> {
-                // one of our deeplinks
                 when(uri.authority) {
-                    "" -> {
+                    "open" -> {
                         // just open the app.
-                        topLevelNavigation.openAppIntent()
+                        ActionRoutingBehaviourInterface.IntentAndBackstackRequest(topLevelNavigation.openAppIntent(), false)
                     }
                     "website" -> {
                         // open a website, TODO in the hosted chrome thingy.
 
-                        // TODO crap gotta parse the query params.
-
                         val websiteUri = uri.query.parseAsQueryParameters()["website"]
 
                         if(websiteUri.isNullOrBlank()) {
-                            log.w("Website URI missing from present website deep link.  Was ${uri}")
+                            log.w("Website URI missing from present website deep link.  Was: $uri")
+
                             // just default to opening the app in this case.
-                            topLevelNavigation.openAppIntent()
+
+                            ActionRoutingBehaviourInterface.IntentAndBackstackRequest(topLevelNavigation.openAppIntent(), false)
                         } else {
-                            Intent(Intent.ACTION_VIEW, Uri.parse(websiteUri))
+                            ActionRoutingBehaviourInterface.IntentAndBackstackRequest(
+                                Intent(Intent.ACTION_VIEW, Uri.parse(websiteUri)),
+                                false
+                            )
                         }
                     }
                     "experience" -> {
                         val queryParams = uri.query.parseAsQueryParameters()
-
                         val experienceId = queryParams["id"]
                         val campaignId = queryParams["campaignId"]
 
                         if(experienceId == null || experienceId.isBlank()) {
                             log.w("Experience ID missing from present experience deep link.")
                             // just default to opening the app in this case.
-                            topLevelNavigation.openAppIntent()
+                            ActionRoutingBehaviourInterface.IntentAndBackstackRequest(
+                                topLevelNavigation.openAppIntent(),
+                                false
+                            )
                         } else {
-                            topLevelNavigation.displayExperienceIntent(experienceId, campaignId)
+                            ActionRoutingBehaviourInterface.IntentAndBackstackRequest(
+                                topLevelNavigation.displayExperienceIntent(experienceId, campaignId),
+                                queryParams["internal"] == "true"
+                            )
                         }
                     }
                     else -> {
                         log.w("Unknown authority given in deep link: ${uri}")
                         // just default to opening the app in this case.
-                        topLevelNavigation.openAppIntent()
+                        ActionRoutingBehaviourInterface.IntentAndBackstackRequest(
+                            topLevelNavigation.openAppIntent(),
+                            false
+                        )
                     }
                 }
             }
             else -> {
+                // TODO: consider moving to NotificationOpen, because this is specific to URIs
+                // opened from notifications: elsewhere, such as tapped links, we instead by default
+                // assume that http/https links are experience links.
+
                 // an external link, either web or another deep link.  Hand over to Android's
                 // builtin Intent routing system.
-                Intent(Intent.ACTION_VIEW, Uri.parse(uri.toString()))
+                ActionRoutingBehaviourInterface.IntentAndBackstackRequest(
+                    Intent(Intent.ACTION_VIEW, Uri.parse(uri.toString())),
+                    false
+                )
             }
         }
     }
 
     override fun isDirectOpenAppropriate(action: URI): Boolean {
-        return !(action.scheme == fullSchema && action.authority.isBlank())
+        return !(action.scheme == fullSchema && action.authority == "open")
     }
 
     private fun String.parseAsQueryParameters(): Map<String, String> {
@@ -112,20 +131,17 @@ open class ActionRoutingBehaviour(
 }
 
 interface NotificationContentPendingIntentSynthesizerInterface {
-    fun synthesizeNotificationIntentStack(notification: Notification): List<Intent>
+    fun synthesizeNotificationIntentStack(action: Intent, inNotificationCenter: Boolean): List<Intent>
 }
 
 class NotificationContentPendingIntentSynthesizer(
     private val applicationContext: Context,
-    private val topLevelNavigation: TopLevelNavigation,
-    private val actionRoutingBehaviour: ActionRoutingBehaviourInterface
+    private val topLevelNavigation: TopLevelNavigation
 ): NotificationContentPendingIntentSynthesizerInterface {
-    override fun synthesizeNotificationIntentStack(notification: Notification): List<Intent> {
-        val targetIntent = actionRoutingBehaviour.notificationActionToIntent(notification.action.uri)
-
+    override fun synthesizeNotificationIntentStack(action: Intent, inNotificationCenter: Boolean): List<Intent> {
         // now to synthesize the backstack.
         return TaskStackBuilder.create(applicationContext).apply {
-            if(notification.isNotificationCenterEnabled) {
+            if (inNotificationCenter) {
 
                 // inject the Notification Centre for the user's app. TODO: allow user to *configure*
                 // what their notification centre is, either with a custom URI template method OR
@@ -143,13 +159,12 @@ class NotificationContentPendingIntentSynthesizer(
             // so they may find themselves "merged".  However, perhaps TaskStackBuilder is handling
             // this problem.
 
-            addNextIntent(targetIntent)
+            addNextIntent(action)
         }.intents.asList().apply {
             this.first().addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                 or Intent.FLAG_ACTIVITY_CLEAR_TASK
                 or Intent.FLAG_ACTIVITY_TASK_ON_HOME)
             this.last().addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
-        // .intents.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT)!!
     }
 }

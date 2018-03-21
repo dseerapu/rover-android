@@ -37,11 +37,7 @@ class FetchStateRequest : NetworkRequest<DeviceState> {
                         isRead
                         isDeleted
                         isNotificationCenterEnabled
-                        action {
-                            type
-                            experienceId
-                            url
-                        }
+                        uri
                         attachment {
                             type
                             url

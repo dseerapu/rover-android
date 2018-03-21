@@ -5,6 +5,7 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.Parcelable
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.view.Menu
@@ -33,10 +34,9 @@ import java.net.HttpURLConnection
  * a Rover [ExperienceView] in your own Activities.
  */
 open class StandaloneExperienceHostActivity : AppCompatActivity() {
-    protected val experienceId: String
-        get() = this.intent.getStringExtra("EXPERIENCE_ID") ?: throw RuntimeException(
-            "Please pass EXPERIENCE_ID. Consider using StandaloneExperienceHostActivity.makeIntent()"
-        )
+    protected val experienceId: String? = this.intent.getStringExtra("EXPERIENCE_ID")
+
+    protected val experienceUrl: String? = this.intent.getStringExtra("EXPERIENCE_URL")
 
     protected val campaignId: String?
         get() = this.intent.getStringExtra("CAMPAIGN_ID")
@@ -137,13 +137,26 @@ open class StandaloneExperienceHostActivity : AppCompatActivity() {
         // wire up the toolbar host to the ExperienceView.
         experiencesView.toolbarHost = toolbarHost
 
-        experienceViewModel = Rover.sharedInstance.experienceViewModel(
-            experienceId,
-            campaignId,
-            // obtain any possibly saved state for the experience view model.  See
-            // onSaveInstanceState.
-            savedInstanceState?.getParcelable("experienceState")
-        )
+        // obtain any possibly saved state for the experience view model.  See
+        // onSaveInstanceState.
+        val state: Parcelable? = savedInstanceState?.getParcelable("experienceState")
+        when {
+            experienceId != null -> experienceViewModel = Rover.sharedInstance.experienceViewModel(
+                experienceId,
+                campaignId,
+                // obtain any possibly saved state for the experience view model.  See
+                // onSaveInstanceState.
+                state
+            )
+            experienceUrl != null -> experienceViewModel = Rover.sharedInstance.experienceViewModel(
+                experienceUrl,
+                
+                state
+            )
+            else -> throw RuntimeException(
+                "Please pass either EXPERIENCE_ID or EXPERIENCE_URL. Consider using StandaloneExperienceHostActivity.makeIntent()"
+            )
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -168,6 +181,14 @@ open class StandaloneExperienceHostActivity : AppCompatActivity() {
             return Intent(packageContext, activityClass).apply {
                 putExtra("EXPERIENCE_ID", experienceId)
                 putExtra("CAMPAIGN_ID", campaignId)
+            }
+        }
+
+        @JvmStatic
+        @JvmOverloads
+        fun makeIntent(packageContext: Context, experienceUrl: String, activityClass: Class<out Activity> = StandaloneExperienceHostActivity::class.java): Intent {
+            return Intent(packageContext, activityClass).apply {
+                putExtra("EXPERIENCE_URL", experienceUrl)
             }
         }
     }

@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.support.v4.app.NavUtils
 import io.rover.rover.experiences.ui.containers.StandaloneExperienceHostActivity
+import java.net.URI
 
 /**
  * A default version of [TopLevelNavigation] that will use the two Activities bundled with the Rover
@@ -15,6 +16,10 @@ open class DefaultTopLevelNavigation(
 ): TopLevelNavigation {
     override fun displayExperienceIntent(experienceId: String, campaignId: String?): Intent {
         return StandaloneExperienceHostActivity.makeIntent(applicationContext, experienceId, campaignId)
+    }
+
+    override fun displayExperienceIntent(universalLink: URI): Intent {
+        return StandaloneExperienceHostActivity.makeIntent(applicationContext, universalLink.toString())
     }
 
     override fun displayNotificationCenterIntent(): Intent {
@@ -34,7 +39,6 @@ open class DefaultTopLevelNavigation(
      * build a custom Intent.
      */
     override fun openAppIntent(): Intent {
-        // or perhaps just applicationContext.packageManager.getLaunchIntentForPackage(applicationContext.packageName)
-        return NavUtils.getParentActivityIntent(applicationContext, StandaloneExperienceHostActivity::class.java)!!
+        return applicationContext.packageManager.getLaunchIntentForPackage(applicationContext.packageName)
     }
 }

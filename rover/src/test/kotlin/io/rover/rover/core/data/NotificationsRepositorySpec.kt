@@ -1,35 +1,28 @@
 package io.rover.rover.core.data
 
-import io.rover.rover.Rover
-import io.rover.rover.core.container.Assembler
-import io.rover.rover.core.container.Container
-import io.rover.rover.core.container.InjectionContainer
-import io.rover.rover.core.container.Resolver
-import io.rover.rover.core.container.Scope
-import io.rover.rover.core.logging.JvmLogger
-import io.rover.rover.core.logging.LogEmitter
-import io.rover.rover.core.logging.log
-import io.rover.rover.core.streams.Scheduler
-import io.rover.rover.core.streams.subscribe
-import io.rover.rover.platform.DateFormatting
-import io.rover.rover.platform.KeyValueStorage
-import io.rover.rover.platform.LocalStorage
 import io.rover.rover.core.data.domain.DeviceState
 import io.rover.rover.core.data.domain.Notification
 import io.rover.rover.core.data.domain.Profile
-import io.rover.rover.core.data.domain.PushNotificationAction
 import io.rover.rover.core.data.graphql.GraphQlApiServiceInterface
 import io.rover.rover.core.data.http.NetworkTask
 import io.rover.rover.core.events.EventQueueServiceInterface
 import io.rover.rover.core.logging.GlobalStaticLogHolder
+import io.rover.rover.core.logging.JvmLogger
+import io.rover.rover.core.logging.log
+import io.rover.rover.core.streams.Scheduler
+import io.rover.rover.core.streams.subscribe
 import io.rover.rover.notifications.NotificationsRepository
 import io.rover.rover.notifications.ui.NotificationsRepositoryInterface
+import io.rover.rover.platform.DateFormatting
+import io.rover.rover.platform.KeyValueStorage
+import io.rover.rover.platform.LocalStorage
 import org.amshove.kluent.mock
 import org.amshove.kluent.shouldEqual
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
+import java.net.URI
 import java.util.Date
 import java.util.concurrent.Executor
 
@@ -97,7 +90,7 @@ class NotificationsRepositorySpec: Spek({
                             Notification(
                                 "41C7F235-7B47-4DC9-9ED8-E1C937F6C6D1",
                                 null, null, "body", false, false, true, Date(), Date(),
-                                PushNotificationAction(""),
+                                URI("http://google.ca"),
                                 null
                             )
                         )

@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import io.rover.rover.core.data.domain.AttributeValue
 import io.rover.rover.core.data.domain.Notification
-import io.rover.rover.core.data.domain.PushNotificationAction
 import io.rover.rover.core.data.http.WireEncoderInterface
 import io.rover.rover.core.events.EventQueueService
 import io.rover.rover.core.events.EventQueueServiceInterface
@@ -23,12 +22,8 @@ open class NotificationOpen(
     private val routingBehaviour: ActionRoutingBehaviourInterface,
     private val notificationContentPendingIntentSynthesizer: NotificationContentPendingIntentSynthesizerInterface
 ): NotificationOpenInterface {
+
     override fun pendingIntentForAndroidNotification(notification: Notification): PendingIntent {
-
-        notificationContentPendingIntentSynthesizer.synthesizeNotificationIntentStack(
-            notification
-        )
-
         return TransientNotificationLaunchActivity.generateLaunchIntent(
             applicationContext,
             wireEncoder,
@@ -45,22 +40,29 @@ open class NotificationOpen(
             NotificationSource.Push
         )
 
-        return notificationContentPendingIntentSynthesizer.synthesizeNotificationIntentStack(
-            notification
-        )
+        val intentAndBackstackRequest = routingBehaviour.actionUriToIntent(notification.uri)
+
+        return if(intentAndBackstackRequest.noBackstack) {
+            listOf(intentAndBackstackRequest.intent)
+        } else {
+            notificationContentPendingIntentSynthesizer.synthesizeNotificationIntentStack(
+                intentAndBackstackRequest.intent,
+                notification.isNotificationCenterEnabled
+            )
+        }
     }
 
     override fun intentForOpeningNotificationDirectly(notification: Notification): Intent? {
         // we only want to open the given notification's action in the case where it would
         // navigate somewhere useful, not just re-open the app.
-        return if (routingBehaviour.isDirectOpenAppropriate(notification.action.uri)) {
+        return if (routingBehaviour.isDirectOpenAppropriate(notification.uri)) {
             // side-effect: issue open event.
             issueNotificationOpenedEvent(
                 notification,
                 NotificationSource.NotificationCenter
             )
 
-            routingBehaviour.notificationActionToIntent(notification.action.uri)
+            routingBehaviour.actionUriToIntent(notification.uri).intent
         } else null
     }
 

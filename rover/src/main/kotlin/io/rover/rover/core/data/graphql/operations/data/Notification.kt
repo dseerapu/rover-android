@@ -2,7 +2,6 @@ package io.rover.rover.core.data.graphql.operations.data
 
 import io.rover.rover.platform.DateFormattingInterface
 import io.rover.rover.platform.whenNotNull
-import io.rover.rover.core.data.domain.PushNotificationAction
 import io.rover.rover.core.data.domain.Notification
 import io.rover.rover.core.data.domain.NotificationAttachment
 import io.rover.rover.core.data.graphql.getDate
@@ -26,17 +25,9 @@ internal fun Notification.encodeJson(dateFormatting: DateFormattingInterface): J
         putProp(this@encodeJson, Notification::isDeleted, "isDeleted")
         putProp(this@encodeJson, Notification::deliveredAt, "deliveredAt") { dateFormatting.dateAsIso8601(it )}
         putProp(this@encodeJson, Notification::expiresAt, "expiresAt") { it.whenNotNull { dateFormatting.dateAsIso8601(it) } }
-        putProp(this@encodeJson, Notification::action, "action" ) {
-            it.encodeJson()
-        }
         putProp(this@encodeJson, Notification::attachment, "attachment") { it.whenNotNull { it.encodeJson() }}
+        putProp(this@encodeJson, Notification::uri)
     }
-}
-
-internal fun PushNotificationAction.Companion.decodeJson(json: JSONObject): PushNotificationAction {
-    return PushNotificationAction(
-        uri = URI(json.safeGetString("url"))
-    )
 }
 
 internal fun NotificationAttachment.Companion.decodeJson(json: JSONObject): NotificationAttachment {
@@ -48,12 +39,6 @@ internal fun NotificationAttachment.Companion.decodeJson(json: JSONObject): Noti
         "IMAGE" -> NotificationAttachment.Image(url)
         "VIDEO" -> NotificationAttachment.Video(url)
         else -> throw JSONException("Unsupported Rover attachment type: $type")
-    }
-}
-
-internal fun PushNotificationAction.encodeJson(): JSONObject {
-    return JSONObject().apply {
-        putProp(this@encodeJson, PushNotificationAction::uri, "url")
     }
 }
 
@@ -82,7 +67,7 @@ internal fun Notification.Companion.decodeJson(json: JSONObject, dateFormatting:
         expiresAt = json.safeOptDate("expiresAt", dateFormatting),
         deliveredAt = json.getDate("deliveredAt", dateFormatting),
         isNotificationCenterEnabled = json.getBoolean("isNotificationCenterEnabled"),
-        action = PushNotificationAction.decodeJson(json.getJSONObject("action")),
+        uri = URI(json.safeGetString("uri")),
         attachment = if (json.has("attachment") && !json.isNull("attachment")) NotificationAttachment.decodeJson(json.getJSONObject("attachment")) else null
     )
 }
