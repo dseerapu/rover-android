@@ -54,22 +54,22 @@ open class ActionRoutingBehaviour(
                 when(uri.authority) {
                     "open" -> {
                         // just open the app.
-                        ActionRoutingBehaviourInterface.IntentAndBackstackRequest(topLevelNavigation.openAppIntent(), false)
+                        ActionRoutingBehaviourInterface.IntentAndBackstackRequest(null, false)
                     }
                     "website" -> {
                         // open a website, TODO in the hosted chrome thingy.
 
-                        val websiteUri = uri.query.parseAsQueryParameters()["website"]
+                        val websiteUrl = uri.query.parseAsQueryParameters()["url"]
 
-                        if(websiteUri.isNullOrBlank()) {
+                        if(websiteUrl.isNullOrBlank()) {
                             log.w("Website URI missing from present website deep link.  Was: $uri")
 
                             // just default to opening the app in this case.
 
-                            ActionRoutingBehaviourInterface.IntentAndBackstackRequest(topLevelNavigation.openAppIntent(), false)
+                            ActionRoutingBehaviourInterface.IntentAndBackstackRequest(null, false)
                         } else {
                             ActionRoutingBehaviourInterface.IntentAndBackstackRequest(
-                                Intent(Intent.ACTION_VIEW, Uri.parse(websiteUri)),
+                                Intent(Intent.ACTION_VIEW, Uri.parse(websiteUrl)),
                                 false
                             )
                         }
@@ -97,7 +97,7 @@ open class ActionRoutingBehaviour(
                         log.w("Unknown authority given in deep link: ${uri}")
                         // just default to opening the app in this case.
                         ActionRoutingBehaviourInterface.IntentAndBackstackRequest(
-                            topLevelNavigation.openAppIntent(),
+                            null,
                             false
                         )
                     }
@@ -131,14 +131,14 @@ open class ActionRoutingBehaviour(
 }
 
 interface NotificationContentPendingIntentSynthesizerInterface {
-    fun synthesizeNotificationIntentStack(action: Intent, inNotificationCenter: Boolean): List<Intent>
+    fun synthesizeNotificationIntentStack(action: Intent?, inNotificationCenter: Boolean): List<Intent>
 }
 
 class NotificationContentPendingIntentSynthesizer(
     private val applicationContext: Context,
     private val topLevelNavigation: TopLevelNavigation
 ): NotificationContentPendingIntentSynthesizerInterface {
-    override fun synthesizeNotificationIntentStack(action: Intent, inNotificationCenter: Boolean): List<Intent> {
+    override fun synthesizeNotificationIntentStack(action: Intent?, inNotificationCenter: Boolean): List<Intent> {
         // now to synthesize the backstack.
         return TaskStackBuilder.create(applicationContext).apply {
             if (inNotificationCenter) {
@@ -154,12 +154,7 @@ class NotificationContentPendingIntentSynthesizer(
                 addNextIntent(topLevelNavigation.openAppIntent())
             }
 
-            // so, targetIntent, since it uses extra data to pass arguments, might be a problem:
-            // PendingIntents are value objects, but they do not fully encapsulate any extras data,
-            // so they may find themselves "merged".  However, perhaps TaskStackBuilder is handling
-            // this problem.
-
-            addNextIntent(action)
+            if(action != null) addNextIntent(action)
         }.intents.asList().apply {
             this.first().addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                 or Intent.FLAG_ACTIVITY_CLEAR_TASK

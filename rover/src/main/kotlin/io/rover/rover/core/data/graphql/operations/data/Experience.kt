@@ -38,6 +38,7 @@ import io.rover.rover.core.data.domain.WebViewBlock
 import io.rover.rover.core.data.graphql.getObjectIterable
 import io.rover.rover.core.data.graphql.putProp
 import io.rover.rover.core.data.graphql.safeGetString
+import io.rover.rover.core.data.graphql.safeGetUri
 import io.rover.rover.core.data.graphql.safeOptString
 import org.json.JSONArray
 import org.json.JSONObject
@@ -95,7 +96,7 @@ internal fun Image.Companion.optDecodeJSON(json: JSONObject?): Image? = when (js
         json.getInt("height"),
         json.safeGetString("name"),
         json.getInt("size"),
-        URI.create(json.safeGetString("url"))
+        json.safeGetUri("url")
     )
 }
 
@@ -412,7 +413,7 @@ internal fun WebViewBlock.Companion.decodeJson(json: JSONObject): WebViewBlock {
         verticalAlignment = VerticalAlignment.decodeJson(json.safeGetString("verticalAlignment")),
         width = Length.decodeJson(json.getJSONObject("width")),
         isScrollingEnabled = json.getBoolean("isScrollingEnabled"),
-        url = URI.create(json.safeGetString("url")),
+        url = json.safeGetUri("url"),
         customKeys = json.getJSONObject("customKeys").toFlatAttributesHash()
     )
 }
@@ -482,7 +483,7 @@ internal fun BlockAction.Companion.optDecodeJson(json: JSONObject?): BlockAction
 
     return when (typeName) {
         BlockAction.OpenUrlAction.resourceName -> BlockAction.OpenUrlAction(
-            url = URI.create(json.safeGetString("url"))
+            url = json.safeGetUri("url")
         )
         BlockAction.GoToScreenAction.resourceName -> BlockAction.GoToScreenAction(
             experienceId = ID(json.safeGetString("experienceId")),

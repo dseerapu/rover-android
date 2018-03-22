@@ -8,6 +8,8 @@ import io.rover.rover.platform.whenNotNull
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
+import java.net.URI
+import java.net.URISyntaxException
 import java.text.ParseException
 import java.util.Date
 import kotlin.reflect.KProperty1
@@ -61,6 +63,19 @@ internal fun JSONObject.safeGetString(name: String): String {
         throw JSONException("Field '$name' is null instead of string")
     }
     return getString(name)
+}
+
+internal fun JSONObject.safeGetUri(name: String): URI {
+    val field = this.safeGetString(name)
+    return try {
+        URI(field)
+    } catch (e: URISyntaxException) {
+        if (Build.VERSION.SDK_INT >= 27) {
+            throw JSONException("URI syntax problem", e)
+        } else {
+            throw JSONException("URI syntax problem: ${e.message}")
+        }
+    }
 }
 
 /**

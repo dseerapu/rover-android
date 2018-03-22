@@ -42,7 +42,7 @@ open class NotificationOpen(
 
         val intentAndBackstackRequest = routingBehaviour.actionUriToIntent(notification.uri)
 
-        return if(intentAndBackstackRequest.noBackstack) {
+        return if(intentAndBackstackRequest.noBackstack && intentAndBackstackRequest.intent != null) {
             listOf(intentAndBackstackRequest.intent)
         } else {
             notificationContentPendingIntentSynthesizer.synthesizeNotificationIntentStack(

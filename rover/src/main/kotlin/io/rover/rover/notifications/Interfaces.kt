@@ -68,10 +68,13 @@ interface ActionRoutingBehaviourInterface {
 
     /**
      * The mapped intent and whether the action explicitly requested that a backstack not be
-     * synthesized.
+     * synthesized.  Note that a backstack may be synthesized anyway depending on the context.
+     *
+     * The intent may be null, particularly if the synthesized backstack is all that the action
+     * needs.
      */
     data class IntentAndBackstackRequest(
-        val intent: Intent,
+        val intent: Intent?,
         val noBackstack: Boolean
     )
 

@@ -19,9 +19,10 @@ class LinkOpen(
                 false
             )
         } else {
+
             val action = routingBehaviour.actionUriToIntent(receivedUri)
 
-            if(action.noBackstack) {
+            if(action.noBackstack && action.intent != null) {
                 // no backstack
                 listOf(action.intent)
             } else {

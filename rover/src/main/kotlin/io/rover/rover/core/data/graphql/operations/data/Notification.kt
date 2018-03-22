@@ -7,6 +7,7 @@ import io.rover.rover.core.data.domain.NotificationAttachment
 import io.rover.rover.core.data.graphql.getDate
 import io.rover.rover.core.data.graphql.putProp
 import io.rover.rover.core.data.graphql.safeGetString
+import io.rover.rover.core.data.graphql.safeGetUri
 import io.rover.rover.core.data.graphql.safeOptDate
 import io.rover.rover.core.data.graphql.safeOptString
 import org.json.JSONException
@@ -67,7 +68,7 @@ internal fun Notification.Companion.decodeJson(json: JSONObject, dateFormatting:
         expiresAt = json.safeOptDate("expiresAt", dateFormatting),
         deliveredAt = json.getDate("deliveredAt", dateFormatting),
         isNotificationCenterEnabled = json.getBoolean("isNotificationCenterEnabled"),
-        uri = URI(json.safeGetString("uri")),
+        uri = json.safeGetUri("uri"),
         attachment = if (json.has("attachment") && !json.isNull("attachment")) NotificationAttachment.decodeJson(json.getJSONObject("attachment")) else null
     )
 }

@@ -1,6 +1,7 @@
 package io.rover.rover.experiences.ui
 
 import android.os.Bundle
+import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import io.rover.rover.Rover
 import io.rover.rover.core.logging.log
@@ -27,11 +28,14 @@ open class TransientLinkLaunchActivity : AppCompatActivity() {
 
         log.v("Transient link launch activity running for received URI: '${intent.data}'")
 
-        linkOpen.localIntentForReceived(
+        val intentStack = linkOpen.localIntentForReceived(
             uri
         )
 
-        intent.`package`
-
+        ContextCompat.startActivities(
+            this,
+            intentStack.toTypedArray()
+        )
+        finish()
     }
 }

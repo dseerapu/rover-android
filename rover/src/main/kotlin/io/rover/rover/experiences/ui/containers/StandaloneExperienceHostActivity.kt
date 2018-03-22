@@ -34,9 +34,9 @@ import java.net.HttpURLConnection
  * a Rover [ExperienceView] in your own Activities.
  */
 open class StandaloneExperienceHostActivity : AppCompatActivity() {
-    protected val experienceId: String? = this.intent.getStringExtra("EXPERIENCE_ID")
+    protected val experienceId: String? by lazy { this.intent.getStringExtra("EXPERIENCE_ID") }
 
-    protected val experienceUrl: String? = this.intent.getStringExtra("EXPERIENCE_URL")
+    protected val experienceUrl: String? by lazy { this.intent.getStringExtra("EXPERIENCE_URL") }
 
     protected val campaignId: String?
         get() = this.intent.getStringExtra("CAMPAIGN_ID")
@@ -142,14 +142,14 @@ open class StandaloneExperienceHostActivity : AppCompatActivity() {
         val state: Parcelable? = savedInstanceState?.getParcelable("experienceState")
         when {
             experienceId != null -> experienceViewModel = Rover.sharedInstance.experienceViewModel(
-                experienceId,
+                experienceId!!,
                 campaignId,
                 // obtain any possibly saved state for the experience view model.  See
                 // onSaveInstanceState.
                 state
             )
             experienceUrl != null -> experienceViewModel = Rover.sharedInstance.experienceViewModel(
-                experienceUrl,
+                experienceUrl!!,
                 
                 state
             )
