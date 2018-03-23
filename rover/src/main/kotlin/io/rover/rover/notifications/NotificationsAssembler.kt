@@ -12,6 +12,7 @@ import io.rover.rover.core.data.http.WireEncoderInterface
 import io.rover.rover.core.events.ContextProvider
 import io.rover.rover.core.events.EventQueueServiceInterface
 import io.rover.rover.core.events.contextproviders.FirebasePushTokenContextProvider
+import io.rover.rover.core.routing.website.EmbeddedWebBrowserDisplayInterface
 import io.rover.rover.core.streams.Scheduler
 import io.rover.rover.experiences.DefaultTopLevelNavigation
 import io.rover.rover.experiences.TopLevelNavigation
@@ -121,6 +122,7 @@ class NotificationsAssembler(
             ActionRoutingBehaviour(
                 applicationContext,
                 resolver.resolveSingletonOrFail(TopLevelNavigation::class.java),
+                resolver.resolveSingletonOrFail(EmbeddedWebBrowserDisplayInterface::class.java),
                 deepLinkSchemaSlug
             )
         }

@@ -121,6 +121,10 @@ open class StandaloneExperienceHostActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // TODO: perhaps this arrangement is not necessary: confirm for sure that it will not pick
+        // up the default theme set on the App (although we can hopefully check that they have an
+        // actionbar-free theme enabled).
+
         val displayNoCustomThemeWarningMessage = this.theme.obtainStyledAttributes(
             intArrayOf(R.attr.displayNoCustomThemeWarningMessage)
         ).getBoolean(0, false)

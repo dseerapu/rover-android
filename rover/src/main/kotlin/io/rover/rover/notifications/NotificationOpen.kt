@@ -9,6 +9,7 @@ import io.rover.rover.core.data.http.WireEncoderInterface
 import io.rover.rover.core.events.EventQueueService
 import io.rover.rover.core.events.EventQueueServiceInterface
 import io.rover.rover.core.events.domain.Event
+import io.rover.rover.core.logging.log
 import io.rover.rover.experiences.TransientNotificationLaunchActivity
 import org.json.JSONObject
 
@@ -45,10 +46,12 @@ open class NotificationOpen(
         return if(intentAndBackstackRequest.noBackstack && intentAndBackstackRequest.intent != null) {
             listOf(intentAndBackstackRequest.intent)
         } else {
+            log.v("SYNTHESIZING REQUEST FOR NOTIFICATION")
             notificationContentPendingIntentSynthesizer.synthesizeNotificationIntentStack(
                 intentAndBackstackRequest.intent,
                 notification.isNotificationCenterEnabled
-            )
+            ).apply { log.v("... CAME OUT AS $this")}
+
         }
     }
 

@@ -25,7 +25,8 @@ import io.rover.rover.core.events.EventQueueServiceInterface
 import io.rover.rover.core.events.contextproviders.*
 import io.rover.rover.core.logging.AndroidLogger
 import io.rover.rover.core.logging.GlobalStaticLogHolder
-import io.rover.rover.core.logging.LogEmitter
+import io.rover.rover.core.routing.website.EmbeddedWebBrowserDisplay
+import io.rover.rover.core.routing.website.EmbeddedWebBrowserDisplayInterface
 import io.rover.rover.core.streams.Scheduler
 import io.rover.rover.core.streams.forAndroidMainThread
 import io.rover.rover.platform.*
@@ -150,6 +151,13 @@ class CoreAssembler(
                 30.0,
                 100,
                 1000
+            )
+        }
+
+        container.register(Scope.Singleton, EmbeddedWebBrowserDisplayInterface::class.java) { resolver ->
+            EmbeddedWebBrowserDisplay(
+                application
+                // TODO: add in support for the accent colour pass-through
             )
         }
     }

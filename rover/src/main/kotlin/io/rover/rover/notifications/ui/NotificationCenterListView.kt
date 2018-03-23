@@ -189,7 +189,7 @@ open class NotificationCenterListView : CoordinatorLayout, BindableView<Notifica
     private var currentStableIdsMap: Map<String, Int>? = null
 
     private val adapter = object : RecyclerView.Adapter<NotificationViewHolder>() {
-        override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): NotificationViewHolder {
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NotificationViewHolder {
             return NotificationViewHolder(context, this@NotificationCenterListView, makeNotificationRowView(), makeSwipeToDeleteRevealBackgroundView())
         }
 

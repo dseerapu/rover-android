@@ -32,6 +32,8 @@ open class TransientLinkLaunchActivity : AppCompatActivity() {
             uri
         )
 
+        log.v("Launching stack ${intentStack.size} deep: ${intentStack.joinToString("\n") { it.toString() }}")
+
         ContextCompat.startActivities(
             this,
             intentStack.toTypedArray()

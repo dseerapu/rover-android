@@ -4,20 +4,19 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.support.v4.app.TaskStackBuilder
-import io.rover.rover.core.data.domain.Notification
 import io.rover.rover.core.logging.log
+import io.rover.rover.core.routing.website.EmbeddedWebBrowserDisplayInterface
 import io.rover.rover.experiences.TopLevelNavigation
-import io.rover.rover.platform.whenNotNull
 import java.net.URI
 
 /**
- * TODO move to Core
+ * TODO make pluggable and move to Core
  */
 open class ActionRoutingBehaviour(
     private val applicationContext: Context,
     private val topLevelNavigation: TopLevelNavigation,
+    private val embeddedWebBrowserDisplay: EmbeddedWebBrowserDisplayInterface,
 
-    // TODO will need a postfix to be passed in for the `rv-` prefix
     /**
      * Rover deep links are customized for each app in this way:
      *
@@ -46,7 +45,6 @@ open class ActionRoutingBehaviour(
 
     private val fullSchema = "rv-$deepLinkSchemaSlug"
 
-
     override fun actionUriToIntent(action: URI): ActionRoutingBehaviourInterface.IntentAndBackstackRequest {
         val uri = action
         return when(action.scheme) {
@@ -69,7 +67,8 @@ open class ActionRoutingBehaviour(
                             ActionRoutingBehaviourInterface.IntentAndBackstackRequest(null, false)
                         } else {
                             ActionRoutingBehaviourInterface.IntentAndBackstackRequest(
-                                Intent(Intent.ACTION_VIEW, Uri.parse(websiteUrl)),
+                                embeddedWebBrowserDisplay.intentForViewingWebsiteViaEmbeddedBrowser(websiteUrl!!),
+                                // Intent(Intent.ACTION_VIEW, Uri.parse(websiteUrl)),
                                 false
                             )
                         }
@@ -108,8 +107,10 @@ open class ActionRoutingBehaviour(
                 // opened from notifications: elsewhere, such as tapped links, we instead by default
                 // assume that http/https links are experience links.
 
-                // an external link, either web or another deep link.  Hand over to Android's
-                // builtin Intent routing system.
+                // an external link, either web or another deep link handled by some other part of
+                // the app.  Hand over to Android's builtin Intent routing system.  Note: if the
+                // user mismatches their deepLinkSchemaSlug and their server-side configuration,
+                // the deep links they expected to be handled above will land here instead!
                 ActionRoutingBehaviourInterface.IntentAndBackstackRequest(
                     Intent(Intent.ACTION_VIEW, Uri.parse(uri.toString())),
                     false
@@ -131,6 +132,12 @@ open class ActionRoutingBehaviour(
 }
 
 interface NotificationContentPendingIntentSynthesizerInterface {
+    /**
+     * Synthesize a backstack (with either the home screen or the notification center screen,
+     * depending on the [inNotificationCenter] flag) for the given intent.
+     *
+     * If Intent is null, then home screen/notification center will be returned on their own.
+     */
     fun synthesizeNotificationIntentStack(action: Intent?, inNotificationCenter: Boolean): List<Intent>
 }
 
@@ -159,7 +166,6 @@ class NotificationContentPendingIntentSynthesizer(
             this.first().addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                 or Intent.FLAG_ACTIVITY_CLEAR_TASK
                 or Intent.FLAG_ACTIVITY_TASK_ON_HOME)
-            this.last().addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
     }
 }
