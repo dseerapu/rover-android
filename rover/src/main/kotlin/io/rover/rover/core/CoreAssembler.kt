@@ -2,6 +2,8 @@ package io.rover.rover.core
 
 import android.app.Application
 import android.content.Context
+import android.graphics.Color
+import android.support.annotation.ColorInt
 import io.rover.rover.core.assets.AndroidAssetService
 import io.rover.rover.core.assets.AssetService
 import io.rover.rover.core.assets.ImageDownloader
@@ -42,7 +44,9 @@ import java.util.concurrent.Executor
 class CoreAssembler(
     private val accountToken: String,
     private val application: Application,
-    private val endpoint: String = "https://api.rover.io/graphql"
+    private val endpoint: String = "https://api.rover.io/graphql",
+    @param:ColorInt
+    private val chromeTabBackgroundColor: Int = Color.BLACK
 ): Assembler {
     override fun assemble(container: Container) {
         // logger, which we "inject" using static scope
@@ -156,8 +160,7 @@ class CoreAssembler(
 
         container.register(Scope.Singleton, EmbeddedWebBrowserDisplayInterface::class.java) { resolver ->
             EmbeddedWebBrowserDisplay(
-                application
-                // TODO: add in support for the accent colour pass-through
+                chromeTabBackgroundColor
             )
         }
     }

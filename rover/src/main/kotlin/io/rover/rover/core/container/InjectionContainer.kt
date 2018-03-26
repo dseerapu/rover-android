@@ -168,7 +168,3 @@ class InjectionContainer(
         ): ServiceEntry<T>()
     }
 }
-//
-//class Registrator(val container: Container) {
-//    inline fun register <T>
-//}
