@@ -1,1 +1,1 @@
-include ':rover'
+include ':rover', ':location'
