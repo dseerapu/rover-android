@@ -20,7 +20,7 @@ data class Context(
     val localeScript: String?,
 
     // TODO: enum type
-    val notificationAuthorization: String?,
+    val notificationAuthorization: NotificationAuthorization?,
 
     val operatingSystemName: String?,
     val operatingSystemVersion: String?,
@@ -59,5 +59,14 @@ data class Context(
                 null, null, null, null, hashMapOf(), null
             )
         }
+    }
+
+    enum class NotificationAuthorization(
+        val wireFormat: String
+    ) {
+        Authorized("authorized"),
+        Denied("denied");
+
+        companion object
     }
 }

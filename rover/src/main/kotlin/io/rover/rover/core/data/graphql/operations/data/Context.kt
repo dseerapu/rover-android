@@ -6,6 +6,7 @@ import io.rover.rover.core.data.graphql.safeGetString
 import io.rover.rover.core.data.graphql.safeOptBoolean
 import io.rover.rover.core.data.graphql.safeOptInt
 import io.rover.rover.core.data.graphql.safeOptString
+import io.rover.rover.platform.whenNotNull
 import org.json.JSONObject
 
 /**
@@ -28,7 +29,6 @@ internal fun Context.asJson(): JSONObject {
             Context::localeLanguage,
             Context::localeRegion,
             Context::localeScript,
-            Context::notificationAuthorization,
             Context::operatingSystemName,
             Context::operatingSystemVersion,
             Context::pushEnvironment,
@@ -42,6 +42,8 @@ internal fun Context.asJson(): JSONObject {
         props.forEach { putProp(this@asJson, it) }
 
         putProp(this@asJson, Context::frameworks, "frameworks") { JSONObject(this@asJson.frameworks) }
+
+        putProp(this@asJson, Context::notificationAuthorization, "notificationAuthorization") { it?.encodeJson() ?: JSONObject.NULL }
     }
 }
 
@@ -64,7 +66,7 @@ internal fun Context.Companion.decodeJson(json: JSONObject): Context {
         localeLanguage = json.safeOptString("localeLanguage"),
         localeRegion = json.safeOptString("localeRegion"),
         localeScript = json.safeOptString("localeScript"),
-        notificationAuthorization = json.safeOptString("notificationAuthorization"),
+        notificationAuthorization = json.safeOptString("notificationAuthorization").whenNotNull { Context.NotificationAuthorization.decodeJson(it) },
         operatingSystemName = json.safeOptString("operatingSystemName"),
         operatingSystemVersion = json.safeOptString("operatingSystemVersion"),
         pushEnvironment = json.safeOptString("pushEnvironment"),
@@ -77,6 +79,13 @@ internal fun Context.Companion.decodeJson(json: JSONObject): Context {
     )
 }
 
+internal fun Context.NotificationAuthorization.Companion.decodeJson(value: String): Context.NotificationAuthorization {
+    return Context.NotificationAuthorization.values().firstOrNull { it.wireFormat == value } ?: throw Exception("Unknown notification authorization value: ")
+}
+
+internal fun Context.NotificationAuthorization.encodeJson(): String {
+    return this.wireFormat
+}
 
 private fun Map<String, String>.encodeJson(): JSONObject {
     return JSONObject(this)

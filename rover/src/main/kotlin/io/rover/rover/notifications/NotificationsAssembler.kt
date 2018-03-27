@@ -167,6 +167,10 @@ class NotificationsAssembler(
                 defaultChannelId
             )
         }
+
+        container.register(Scope.Singleton, ContextProvider::class.java,"notification") { _ ->
+            NotificationContextProvider(applicationContext)
+        }
     }
 
     override fun afterAssembly(resolver: Resolver) {
@@ -176,6 +180,10 @@ class NotificationsAssembler(
         val pushTokenContextProvider = resolver.resolveSingletonOrFail(ContextProvider::class.java, "pushToken")
         eventQueue.addContextProvider(
             pushTokenContextProvider
+        )
+
+        resolver.resolveSingletonOrFail(EventQueueServiceInterface::class.java).addContextProvider(
+            resolver.resolveSingletonOrFail(ContextProvider::class.java, "notification")
         )
     }
 }
