@@ -21,7 +21,8 @@ import io.rover.rover.core.data.http.NetworkTask
 import io.rover.rover.core.data.http.WireEncoderInterface
 import io.rover.rover.core.data.graphql.operations.FetchExperienceRequest
 import io.rover.rover.core.data.graphql.operations.SendEventsRequest
-import io.rover.rover.core.data.graphql.operations.FetchStateRequest
+import io.rover.rover.core.data.state.FetchStateRequest
+import io.rover.rover.core.streams.Publisher
 import org.json.JSONException
 import java.io.IOException
 import java.net.URL
@@ -134,7 +135,7 @@ class GraphQlApiService(
      * Make a request of the Rover cloud API.  Results are delivered into the provided
      * [completionHandler] callback, on the main thread.
      */
-    private fun <TEntity> uploadTask(request: NetworkRequest<TEntity>, completionHandler: ((NetworkResult<TEntity>) -> Unit)?): NetworkTask {
+    override fun <TEntity> operation(request: NetworkRequest<TEntity>, completionHandler: ((NetworkResult<TEntity>) -> Unit)?): NetworkTask {
         // TODO: once we change urlRequest() to use query parameters and GET for non-mutation
         // requests, replace true `below` with `request.mutation`.
         val urlRequest = urlRequest(true)
@@ -150,7 +151,7 @@ class GraphQlApiService(
 
     override fun fetchExperienceTask(experienceId: ID, campaignId: ID?, completionHandler: ((NetworkResult<Experience>) -> Unit)): NetworkTask {
         val request = FetchExperienceRequest(FetchExperienceRequest.ExperienceQueryIdentifier.ById(experienceId.rawValue, campaignId?.rawValue))
-        return uploadTask(request) { experienceResult ->
+        return operation(request) { experienceResult ->
             mainThreadHandler.post {
                 completionHandler.invoke(experienceResult)
             }
@@ -177,11 +178,13 @@ class GraphQlApiService(
                 }
             }
         }
+
         val request = SendEventsRequest(
             events,
             wireEncoder
         )
-        return uploadTask(request) { uploadResult ->
+
+        return operation(request) { uploadResult ->
             mainThreadHandler.post {
                 completionHandler.invoke(uploadResult)
             }
@@ -190,7 +193,7 @@ class GraphQlApiService(
 
     override fun fetchStateTask(completionHandler: ((NetworkResult<DeviceState>) -> Unit)): NetworkTask {
         val request = FetchStateRequest()
-        return uploadTask(request) { uploadResult ->
+        return operation(request) { uploadResult ->
             mainThreadHandler.post {
                 completionHandler.invoke(uploadResult)
             }

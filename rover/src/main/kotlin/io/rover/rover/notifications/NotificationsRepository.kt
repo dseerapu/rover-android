@@ -12,6 +12,7 @@ import io.rover.rover.core.data.graphql.GraphQlApiServiceInterface
 import io.rover.rover.core.data.graphql.getObjectIterable
 import io.rover.rover.core.data.graphql.operations.data.decodeJson
 import io.rover.rover.core.data.graphql.operations.data.encodeJson
+import io.rover.rover.core.data.state.StateManagerServiceInterface
 import io.rover.rover.core.events.EventQueueService
 import io.rover.rover.notifications.ui.NotificationsRepositoryInterface
 import io.rover.rover.core.events.EventQueueServiceInterface
@@ -19,6 +20,7 @@ import io.rover.rover.core.events.domain.Event
 import io.rover.rover.platform.merge
 import org.json.JSONArray
 import org.json.JSONException
+import org.json.JSONObject
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 
@@ -33,6 +35,7 @@ class NotificationsRepository(
     private val ioExecutor: Executor,
     mainThreadScheduler: Scheduler,
     private val eventsPlugin: EventQueueServiceInterface,
+    private val stateManagerService: StateManagerServiceInterface,
     localStorage: LocalStorage
 ): NotificationsRepositoryInterface {
 
@@ -46,6 +49,8 @@ class NotificationsRepository(
         },
         epic
     ).filterForSubtype<NotificationsRepositoryInterface.Emission.Update, NotificationsRepositoryInterface.Emission>()
+
+
 
     override fun events(): Publisher<NotificationsRepositoryInterface.Emission.Event> = epic.filterForSubtype()
 
@@ -68,25 +73,6 @@ class NotificationsRepository(
     private val keyValueStorage = localStorage.getKeyValueStorageFor(STORAGE_CONTEXT_IDENTIFIER)
 
     private val actions = PublishSubject<Action>()
-
-    sealed class CloudFetchResult {
-        data class CouldNotFetch(val reason: String): CloudFetchResult()
-        data class Succeeded(val notifications: List<Notification>): CloudFetchResult()
-    }
-    private fun latestNotificationsFromCloud(): Publisher<CloudFetchResult> {
-        return { callback: CallbackReceiver<NetworkResult<DeviceState>> ->  graphQlApiService.fetchStateTask(callback) }
-            .asPublisher()
-            .doOnSubscribe { log.v("Refreshing device state to obtain notifications list.") }
-            .map { networkResult ->
-                when(networkResult) {
-                    is NetworkResult.Error -> {
-                        CloudFetchResult.CouldNotFetch(networkResult.throwable.message
-                            ?: "Unknown")
-                    }
-                    is NetworkResult.Success -> CloudFetchResult.Succeeded(networkResult.response.notifications)
-                }
-            }.subscribeOn(ioExecutor)
-    }
 
     private fun currentNotificationsOnDisk(): Publisher<List<Notification>?> {
         return Observable.defer {
@@ -141,24 +127,11 @@ class NotificationsRepository(
         when(action) {
             is Action.Refresh -> {
                 Observable.concat(
-                    Observable.just(NotificationsRepositoryInterface.Emission.Event.Refreshing(true)),
-                    latestNotificationsFromCloud()
-                        .flatMap { fetchResult ->
-                            when(fetchResult) {
-                                is CloudFetchResult.CouldNotFetch -> Observable.just(
-                                    NotificationsRepositoryInterface.Emission.Event.FetchFailure(fetchResult.reason)
-                                )
-                                is CloudFetchResult.Succeeded ->
-                                    mergeWithLocalStorage(fetchResult.notifications)
-                                    .flatMap { notifications ->
-                                        // side-effect: update local storage!
-                                        replaceLocalStorage(notifications).map {
-                                            NotificationsRepositoryInterface.Emission.Update(it)
-                                        }
-                                    }
-                            }
-                        },
-                    Observable.just(NotificationsRepositoryInterface.Emission.Event.Refreshing(false))
+                    Observable.just(NotificationsRepositoryInterface.Emission.Event.Refreshing(true))
+                    .doOnComplete {
+                        log.v("Triggering Device State Manager refresh.")
+                        stateManagerService.triggerRefresh()
+                    }
                 )
             }
             is Action.MarkDeleted -> {
@@ -171,6 +144,22 @@ class NotificationsRepository(
                 mergeWithLocalStorage(listOf(action.notification)).flatMap { merged -> replaceLocalStorage(merged) }.map {
                     NotificationsRepositoryInterface.Emission.Update(it)
                 }
+            }
+            is Action.DeviceStateUpdated -> {
+                Observable.concat(
+                    Observable.just(NotificationsRepositoryInterface.Emission.Event.Refreshing(false)),
+                        mergeWithLocalStorage(action.notifications)
+                        .flatMap { notifications ->
+                            // side-effect: update local storage!
+                            replaceLocalStorage(notifications).map {
+                                NotificationsRepositoryInterface.Emission.Update(it)
+                            }
+                        }
+                    )
+
+            }
+            is Action.DeviceStateUpdateFailed -> {
+                Observable.just( NotificationsRepositoryInterface.Emission.Event.FetchFailure(action.reason))
             }
         }
     }.observeOn(mainThreadScheduler).shareHotAndReplay(0)
@@ -251,6 +240,38 @@ class NotificationsRepository(
             .sortedByDescending { it.deliveredAt }
     }
 
+    override val queryFragment: String
+        get() = """
+            notifications {
+                id
+                campaignId
+                title
+                body
+                deliveredAt
+                expiresAt
+                isRead
+                isDeleted
+                isNotificationCenterEnabled
+                uri
+                attachment {
+                    type
+                    url
+                }
+            }
+        """
+
+    override fun updateState(data: JSONObject) {
+        actions.onNext(NotificationsRepository.Action.DeviceStateUpdated(
+            TODO: ANDREW START HERE AND DETERMINE THE FOLLOWING:
+
+            // -> GET DECODED NOTIFICATIONS LIST FROM DEVICE STATE JSON, DISPATCH IT AS ACTION
+
+            // -> AND IN FACT DETERMINE IF it would be better for all of my StateStores to instead
+            // just *subscribe* to the StateManager. Does that allow for all the cases we need? I think it may.
+
+        ))
+    }
+
     // observe notifications coming in from events and notifications arriving from cloud.  how do we
     // trigger cloud updates? subscriptions! however, same problem all over again: difficult to do
     // singleton side-effects of a chain that involves an on-subscription side-effect.
@@ -282,5 +303,12 @@ class NotificationsRepository(
          * A notification arrived by push.  This will add it to the repository.
          */
         class NotificationArrivedByPush(val notification: Notification): Action()
+
+        /**
+         * The device state has refreshed.
+         */
+        class DeviceStateUpdated(val notifications: List<Notification>): Action()
+
+        class DeviceStateUpdateFailed(val reason: String): Action()
     }
 }

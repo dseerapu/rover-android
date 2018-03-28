@@ -9,6 +9,7 @@ import io.rover.rover.core.container.Resolver
 import io.rover.rover.core.container.Scope
 import io.rover.rover.core.data.graphql.GraphQlApiServiceInterface
 import io.rover.rover.core.data.http.WireEncoderInterface
+import io.rover.rover.core.data.state.StateManagerServiceInterface
 import io.rover.rover.core.events.ContextProvider
 import io.rover.rover.core.events.EventQueueServiceInterface
 import io.rover.rover.core.events.contextproviders.FirebasePushTokenContextProvider
@@ -85,6 +86,7 @@ class NotificationsAssembler(
                 resolver.resolveSingletonOrFail(Executor::class.java, "io"),
                 resolver.resolveSingletonOrFail(Scheduler::class.java, "main"),
                 resolver.resolveSingletonOrFail(EventQueueServiceInterface::class.java),
+                resolver.resolveSingletonOrFail(StateManagerServiceInterface::class.java),
                 resolver.resolveSingletonOrFail(LocalStorage::class.java)
             )
         }
@@ -184,6 +186,10 @@ class NotificationsAssembler(
 
         resolver.resolveSingletonOrFail(EventQueueServiceInterface::class.java).addContextProvider(
             resolver.resolveSingletonOrFail(ContextProvider::class.java, "notification")
+        )
+
+        resolver.resolveSingletonOrFail(StateManagerServiceInterface::class.java).addStore(
+            resolver.resolveSingletonOrFail(NotificationsRepositoryInterface::class.java)
         )
     }
 }

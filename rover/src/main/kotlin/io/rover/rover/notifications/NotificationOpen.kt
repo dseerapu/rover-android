@@ -51,7 +51,6 @@ open class NotificationOpen(
                 intentAndBackstackRequest.intent,
                 notification.isNotificationCenterEnabled
             ).apply { log.v("... CAME OUT AS $this")}
-
         }
     }
 

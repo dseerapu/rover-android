@@ -21,6 +21,8 @@ import io.rover.rover.core.data.graphql.WireEncoder
 import io.rover.rover.core.data.http.AsyncTaskAndHttpUrlConnectionNetworkClient
 import io.rover.rover.core.data.http.NetworkClient
 import io.rover.rover.core.data.http.WireEncoderInterface
+import io.rover.rover.core.data.state.StateManagerService
+import io.rover.rover.core.data.state.StateManagerServiceInterface
 import io.rover.rover.core.events.ContextProvider
 import io.rover.rover.core.events.EventQueueService
 import io.rover.rover.core.events.EventQueueServiceInterface
@@ -163,6 +165,13 @@ class CoreAssembler(
                 chromeTabBackgroundColor
             )
         }
+
+        container.register(Scope.Singleton, StateManagerServiceInterface::class.java) { resolver ->
+            StateManagerService(
+                resolver.resolveSingletonOrFail(GraphQlApiServiceInterface::class.java),
+                application
+            )
+        }
     }
 
     override fun afterAssembly(resolver: Resolver) {
@@ -177,5 +186,12 @@ class CoreAssembler(
             resolver.resolveSingletonOrFail(ContextProvider::class.java, "telephony"),
             resolver.resolveSingletonOrFail(ContextProvider::class.java, "timeZone")
         ).forEach { eventQueue.addContextProvider(it) }
+
+        // TODO: for Profile!
+//        resolver.resolveSingletonOrFail(StateManagerServiceInterface::class.java).addStore(
+//            //
+//        )
+
+        resolver.resolveSingletonOrFail(StateManagerServiceInterface::class.java).enableAutoFetch()
     }
 }

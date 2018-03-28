@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import io.rover.rover.core.streams.Observable
 import io.rover.rover.core.streams.Publisher
 import io.rover.rover.core.data.domain.Notification
+import io.rover.rover.core.data.state.StateStore
 import io.rover.rover.experiences.ui.concerns.BindableViewModel
 
 /**
@@ -20,7 +21,7 @@ import io.rover.rover.experiences.ui.concerns.BindableViewModel
  * any arbitrary amount of time in the future.  This Repository is responsible for maintaining its
  * own state for read and deleted.
  */
-interface NotificationsRepositoryInterface {
+interface NotificationsRepositoryInterface: StateStore {
     /**
      * Obtain the list of push notifications received by this device (and that were marked for
      * storage in the Notification Center).

@@ -1,4 +1,4 @@
-package io.rover.rover.core.data.graphql.operations
+package io.rover.rover.core.data.state
 
 import io.rover.rover.core.data.domain.DeviceState
 import io.rover.rover.core.data.NetworkRequest
@@ -27,22 +27,7 @@ class FetchStateRequest : NetworkRequest<DeviceState> {
                             radius
                         }
                     }
-                    notifications {
-                        id
-                        campaignId
-                        title
-                        body
-                        deliveredAt
-                        expiresAt
-                        isRead
-                        isDeleted
-                        isNotificationCenterEnabled
-                        uri
-                        attachment {
-                            type
-                            url
-                        }
-                    }
+
                 }
             }
             """

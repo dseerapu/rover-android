@@ -1,6 +1,7 @@
 package io.rover.rover.core.data.state
 
 import io.rover.rover.core.data.domain.DeviceState
+import io.rover.rover.core.streams.Publisher
 import org.json.JSONObject
 
 /**
@@ -17,15 +18,17 @@ interface StateManagerServiceInterface {
 
     /**
      * Instruct the state manager to aggressively attempt to update the device state on app launch.
+     *
+     * This should be called after assembly.
      */
     fun enableAutoFetch()
 
-    fun disableAutoFetch()
+    // fun disableAutoFetch()
 
-    // TODO: start here when tomorrow when figuring out when/how we should sync
-    // https://developer.android.com/about/versions/oreo/android-8.0-changes.html
-
-    // Probably JobScheduler, but need to be sure how to repeat.  Worst case, we have to use a SyncAdapter.
+    /**
+     * Begin a refresh now, perhaps because of a refresh action.
+     */
+    fun triggerRefresh()
 }
 
 /**
