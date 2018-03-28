@@ -5,7 +5,6 @@
       <module fileurl="file://$PROJECT_DIR$/location/location.iml" filepath="$PROJECT_DIR$/location/location.iml" />
       <module fileurl="file://$PROJECT_DIR$/rover/rover.iml" filepath="$PROJECT_DIR$/rover/rover.iml" />
       <module fileurl="file://$PROJECT_DIR$/rover-android.iml" filepath="$PROJECT_DIR$/rover-android.iml" />
-      <module fileurl="file://$PROJECT_DIR$/rover-android.iml" filepath="$PROJECT_DIR$/rover-android.iml" />
     </modules>
   </component>
 </project>

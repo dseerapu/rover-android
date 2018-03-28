@@ -6,6 +6,7 @@ import io.rover.rover.core.data.domain.EventSnapshot
 import io.rover.rover.core.data.domain.Experience
 import io.rover.rover.core.data.domain.ID
 import io.rover.rover.core.data.http.NetworkTask
+import org.json.JSONObject
 
 interface GraphQlApiServiceInterface {
     /**
@@ -38,3 +39,4 @@ interface GraphQlApiServiceInterface {
         completionHandler: ((NetworkResult<String>) -> Unit)
     ): NetworkTask
 }
+
