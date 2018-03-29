@@ -1,11 +1,12 @@
-package io.rover.rover.core.data.graphql.operations.data
+package io.rover.location.graphql.data
 
-import io.rover.rover.core.data.domain.Region
+import io.rover.location.domain.Region
 import io.rover.rover.core.data.graphql.optIntOrNull
 import io.rover.rover.core.data.graphql.putProp
 import io.rover.rover.core.data.graphql.safeGetString
 import org.json.JSONObject
 import java.util.UUID
+
 
 val Region.BeaconRegion.Companion.resourceName get() = "BeaconRegion"
 val Region.GeofenceRegion.Companion.resourceName get() = "GeofenceRegion"

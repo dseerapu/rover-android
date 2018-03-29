@@ -1,4 +1,4 @@
-package io.rover.rover.core.data.domain
+package io.rover.location.domain
 
 import java.util.UUID
 
