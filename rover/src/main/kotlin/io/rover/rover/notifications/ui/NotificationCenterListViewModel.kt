@@ -1,7 +1,7 @@
 package io.rover.rover.notifications.ui
 
 import io.rover.rover.core.streams.*
-import io.rover.rover.core.data.domain.Notification
+import io.rover.rover.notifications.domain.Notification
 import java.util.Date
 
 class NotificationCenterListViewModel(

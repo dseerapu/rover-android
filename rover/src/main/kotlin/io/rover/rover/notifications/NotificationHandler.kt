@@ -18,7 +18,7 @@ import io.rover.rover.core.streams.onErrorReturn
 import io.rover.rover.core.streams.subscribe
 import io.rover.rover.core.streams.timeout
 import io.rover.rover.core.data.NetworkResult
-import io.rover.rover.core.data.domain.NotificationAttachment
+import io.rover.rover.notifications.domain.NotificationAttachment
 import io.rover.rover.core.events.EventQueueServiceInterface
 import io.rover.rover.core.data.http.WireEncoderInterface
 import io.rover.rover.core.assets.AssetService

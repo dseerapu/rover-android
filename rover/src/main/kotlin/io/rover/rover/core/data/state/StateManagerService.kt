@@ -4,6 +4,7 @@ import android.app.Application
 import android.os.Handler
 import android.os.Looper
 import io.rover.rover.core.data.NetworkRequest
+import io.rover.rover.core.data.NetworkResult
 import io.rover.rover.core.data.graphql.GraphQlApiServiceInterface
 import io.rover.rover.core.data.http.WireEncoderInterface
 import io.rover.rover.core.logging.log
@@ -11,38 +12,35 @@ import org.json.JSONObject
 
 class StateManagerService(
     private val graphQlApiService: GraphQlApiServiceInterface,
-    private val application: Application
+    private val application: Application,
+    private val autoFetch: Boolean = true
 ): StateManagerServiceInterface, NetworkRequest<StateFetchSuccess> {
-    override fun enableAutoFetch() {
-        triggerRefresh()
-    }
-
     override fun addStore(stateStore: StateStore) {
         stores.add(stateStore)
     }
 
     override fun triggerRefresh() {
-        // TODO schedule or direct?
-
         log.v("Performing refresh.")
-
-        //
         graphQlApiService.operation(this) { networkResult ->
-            when(networkResult) {
-                // TODO: retry behaviour?  however we do not need to process the results here.
+            log.v("Got result: $networkResult")
+
+            // we do not need to process the results here because the StateStores have done so on
+            // their own.
+            if(networkResult is NetworkResult.Error) {
+                // TODO: retry behaviour?
+                stores.forEach { it.informOfError(networkResult.throwable.message ?: "Unknown") }
             }
-        }
+        }.resume()
     }
 
-    override val operationName: String?
-        get() = "State refresh for ${stores.joinToString(", ") { it.javaClass.name } }."
+    override val operationName: String? = "StateRefresh"
 
     override val mutation: Boolean = false
 
     override val query: String
         get() = """
-            query {
-                devices {
+            query StateRefresh {
+                device {
                     ${stores.joinToString("\n") { it.queryFragment }}
                 }
             }
@@ -52,8 +50,8 @@ class StateManagerService(
 
     override fun decodePayload(responseObject: JSONObject, wireEncoder: WireEncoderInterface): StateFetchSuccess {
         // deliver the update to each registered store as a side-effect.
-
-        stores.forEach { it.updateState(responseObject) }
+        val device = responseObject.getJSONObject("data").getJSONObject("device")
+        stores.forEach { it.updateState(device) }
         return StateFetchSuccess()
     }
 
@@ -63,8 +61,10 @@ class StateManagerService(
         // trigger refresh for the next loop of the Android main looper.  This will happen
         // after all of the Rover DI has completed and thus all of the stores have been registered.
 
-        Handler(Looper.getMainLooper()).post {
-            triggerRefresh()
+        if(autoFetch) {
+            Handler(Looper.getMainLooper()).post {
+                triggerRefresh()
+            }
         }
     }
 }

@@ -1,9 +1,9 @@
-package io.rover.rover.core.data.graphql.operations.data
+package io.rover.rover.notifications.graphql
 
 import io.rover.rover.platform.DateFormattingInterface
 import io.rover.rover.platform.whenNotNull
-import io.rover.rover.core.data.domain.Notification
-import io.rover.rover.core.data.domain.NotificationAttachment
+import io.rover.rover.notifications.domain.Notification
+import io.rover.rover.notifications.domain.NotificationAttachment
 import io.rover.rover.core.data.graphql.getDate
 import io.rover.rover.core.data.graphql.putProp
 import io.rover.rover.core.data.graphql.safeGetString
@@ -12,7 +12,6 @@ import io.rover.rover.core.data.graphql.safeOptDate
 import io.rover.rover.core.data.graphql.safeOptString
 import org.json.JSONException
 import org.json.JSONObject
-import java.net.URI
 import java.net.URL
 
 internal fun Notification.encodeJson(dateFormatting: DateFormattingInterface): JSONObject {

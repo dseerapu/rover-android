@@ -21,7 +21,7 @@ interface StateManagerServiceInterface {
      *
      * This should be called after assembly.
      */
-    fun enableAutoFetch()
+    // fun enableAutoFetch()
 
     // fun disableAutoFetch()
 
@@ -41,4 +41,6 @@ interface StateStore {
     val queryFragment: String
 
     fun updateState(data: JSONObject)
+
+    fun informOfError(reason: String)
 }

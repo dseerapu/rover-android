@@ -3,10 +3,12 @@ package io.rover.rover.core.data.graphql.operations.data
 import io.rover.rover.platform.DateFormattingInterface
 import io.rover.rover.core.data.domain.DeviceState
 import io.rover.rover.core.data.domain.Profile
-import io.rover.rover.core.data.domain.Notification
+import io.rover.rover.notifications.domain.Notification
 import io.rover.rover.core.data.domain.Region
 import io.rover.rover.core.data.graphql.getObjectIterable
 import io.rover.rover.core.data.graphql.putProp
+import io.rover.rover.notifications.graphql.decodeJson
+import io.rover.rover.notifications.graphql.encodeJson
 import org.json.JSONArray
 import org.json.JSONObject
 

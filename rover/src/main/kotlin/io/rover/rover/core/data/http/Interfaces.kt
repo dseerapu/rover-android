@@ -4,7 +4,7 @@ import io.rover.rover.core.data.domain.Context
 import io.rover.rover.core.data.domain.DeviceState
 import io.rover.rover.core.data.domain.EventSnapshot
 import io.rover.rover.core.data.domain.Experience
-import io.rover.rover.core.data.domain.Notification
+import io.rover.rover.notifications.domain.Notification
 import org.json.JSONArray
 import org.json.JSONObject
 

@@ -1,4 +1,4 @@
-package io.rover.rover.core.data.domain
+package io.rover.rover.notifications.domain
 
 import java.net.URI
 import java.net.URL

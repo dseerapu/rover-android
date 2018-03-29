@@ -3,7 +3,7 @@ package io.rover.rover.notifications
 import android.app.PendingIntent
 import android.content.Intent
 import android.os.Bundle
-import io.rover.rover.core.data.domain.Notification
+import io.rover.rover.notifications.domain.Notification
 import java.net.URI
 
 interface NotificationHandlerInterface {

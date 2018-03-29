@@ -3,7 +3,7 @@ package io.rover.rover.notifications.ui
 import android.graphics.Bitmap
 import io.rover.rover.core.streams.Observable
 import io.rover.rover.core.streams.Publisher
-import io.rover.rover.core.data.domain.Notification
+import io.rover.rover.notifications.domain.Notification
 import io.rover.rover.core.data.state.StateStore
 import io.rover.rover.experiences.ui.concerns.BindableViewModel
 

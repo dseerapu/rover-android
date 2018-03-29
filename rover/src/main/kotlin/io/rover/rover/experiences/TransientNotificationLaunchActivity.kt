@@ -8,7 +8,7 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import io.rover.rover.Rover
 import io.rover.rover.core.logging.log
-import io.rover.rover.core.data.domain.Notification
+import io.rover.rover.notifications.domain.Notification
 import io.rover.rover.core.data.http.WireEncoderInterface
 import io.rover.rover.notifications.NotificationContentPendingIntentSynthesizer
 

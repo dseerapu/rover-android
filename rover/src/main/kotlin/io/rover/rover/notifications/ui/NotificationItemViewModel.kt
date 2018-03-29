@@ -7,8 +7,8 @@ import io.rover.rover.core.streams.Publisher
 import io.rover.rover.core.streams.doOnSubscribe
 import io.rover.rover.core.streams.flatMap
 import io.rover.rover.core.data.NetworkResult
-import io.rover.rover.core.data.domain.Notification
-import io.rover.rover.core.data.domain.NotificationAttachment
+import io.rover.rover.notifications.domain.Notification
+import io.rover.rover.notifications.domain.NotificationAttachment
 import io.rover.rover.core.assets.AssetService
 
 class NotificationItemViewModel(

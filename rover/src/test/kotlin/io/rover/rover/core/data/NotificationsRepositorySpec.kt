@@ -1,7 +1,7 @@
 package io.rover.rover.core.data
 
 import io.rover.rover.core.data.domain.DeviceState
-import io.rover.rover.core.data.domain.Notification
+import io.rover.rover.notifications.domain.Notification
 import io.rover.rover.core.data.domain.Profile
 import io.rover.rover.core.data.graphql.GraphQlApiServiceInterface
 import io.rover.rover.core.data.http.NetworkTask
@@ -61,6 +61,7 @@ class NotificationsRepositorySpec: Spek({
                     }
                 },
                 eventQueue,
+                mock(),
                 object : LocalStorage {
                     override fun getKeyValueStorageFor(namedContext: String): KeyValueStorage {
                         return object : KeyValueStorage {

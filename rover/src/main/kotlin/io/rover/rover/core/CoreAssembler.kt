@@ -191,7 +191,5 @@ class CoreAssembler(
 //        resolver.resolveSingletonOrFail(StateManagerServiceInterface::class.java).addStore(
 //            //
 //        )
-
-        resolver.resolveSingletonOrFail(StateManagerServiceInterface::class.java).enableAutoFetch()
     }
 }

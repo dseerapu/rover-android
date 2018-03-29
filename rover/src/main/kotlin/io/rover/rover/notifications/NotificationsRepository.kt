@@ -5,13 +5,11 @@ import io.rover.rover.core.streams.*
 import io.rover.rover.platform.DateFormattingInterface
 import io.rover.rover.platform.LocalStorage
 import io.rover.rover.platform.whenNotNull
-import io.rover.rover.core.data.NetworkResult
-import io.rover.rover.core.data.domain.DeviceState
-import io.rover.rover.core.data.domain.Notification
+import io.rover.rover.notifications.domain.Notification
 import io.rover.rover.core.data.graphql.GraphQlApiServiceInterface
 import io.rover.rover.core.data.graphql.getObjectIterable
-import io.rover.rover.core.data.graphql.operations.data.decodeJson
-import io.rover.rover.core.data.graphql.operations.data.encodeJson
+import io.rover.rover.notifications.graphql.decodeJson
+import io.rover.rover.notifications.graphql.encodeJson
 import io.rover.rover.core.data.state.StateManagerServiceInterface
 import io.rover.rover.core.events.EventQueueService
 import io.rover.rover.notifications.ui.NotificationsRepositoryInterface
@@ -22,7 +20,6 @@ import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import java.util.concurrent.Executor
-import java.util.concurrent.Executors
 
 /**
  * Responsible for reactively persisting notifications and informing subscribers of changes.
@@ -147,19 +144,25 @@ class NotificationsRepository(
             }
             is Action.DeviceStateUpdated -> {
                 Observable.concat(
-                    Observable.just(NotificationsRepositoryInterface.Emission.Event.Refreshing(false)),
-                        mergeWithLocalStorage(action.notifications)
+                    Observable.just(
+                        NotificationsRepositoryInterface.Emission.Event.Refreshing(false)
+                    ),
+                    mergeWithLocalStorage(action.notifications)
                         .flatMap { notifications ->
                             // side-effect: update local storage!
                             replaceLocalStorage(notifications).map {
                                 NotificationsRepositoryInterface.Emission.Update(it)
                             }
                         }
-                    )
 
+
+                )
             }
             is Action.DeviceStateUpdateFailed -> {
-                Observable.just( NotificationsRepositoryInterface.Emission.Event.FetchFailure(action.reason))
+                Observable.concat(
+                    Observable.just(NotificationsRepositoryInterface.Emission.Event.Refreshing(false)),
+                    Observable.just( NotificationsRepositoryInterface.Emission.Event.FetchFailure(action.reason))
+                )
             }
         }
     }.observeOn(mainThreadScheduler).shareHotAndReplay(0)
@@ -261,15 +264,14 @@ class NotificationsRepository(
         """
 
     override fun updateState(data: JSONObject) {
+        val notifications = data.getJSONArray("notifications").getObjectIterable().map { notificationJson -> Notification.decodeJson(notificationJson, dateFormatting)}
         actions.onNext(NotificationsRepository.Action.DeviceStateUpdated(
-            TODO: ANDREW START HERE AND DETERMINE THE FOLLOWING:
-
-            // -> GET DECODED NOTIFICATIONS LIST FROM DEVICE STATE JSON, DISPATCH IT AS ACTION
-
-            // -> AND IN FACT DETERMINE IF it would be better for all of my StateStores to instead
-            // just *subscribe* to the StateManager. Does that allow for all the cases we need? I think it may.
-
+            notifications
         ))
+    }
+
+    override fun informOfError(reason: String) {
+        actions.onNext(NotificationsRepository.Action.DeviceStateUpdateFailed(reason))
     }
 
     // observe notifications coming in from events and notifications arriving from cloud.  how do we
@@ -281,6 +283,10 @@ class NotificationsRepository(
         private const val STORE_KEY = "local-notifications-cache"
 
         private const val MAX_NOTIFICATIONS_LIMIT = 100
+    }
+
+    init {
+
     }
 
     sealed class Action {
