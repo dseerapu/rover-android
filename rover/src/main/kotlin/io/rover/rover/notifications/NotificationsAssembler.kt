@@ -81,7 +81,6 @@ class NotificationsAssembler(
             NotificationsRepositoryInterface::class.java
         ) { resolver ->
             NotificationsRepository(
-                resolver.resolveSingletonOrFail(GraphQlApiServiceInterface::class.java),
                 resolver.resolveSingletonOrFail(DateFormattingInterface::class.java),
                 resolver.resolveSingletonOrFail(Executor::class.java, "io"),
                 resolver.resolveSingletonOrFail(Scheduler::class.java, "main"),

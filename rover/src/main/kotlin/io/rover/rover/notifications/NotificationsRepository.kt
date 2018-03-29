@@ -27,7 +27,6 @@ import java.util.concurrent.Executor
  * Must be a singleton, because changes dispatch updates to all subscribers as a side-effect.
  */
 class NotificationsRepository(
-    private val graphQlApiService: GraphQlApiServiceInterface,
     private val dateFormatting: DateFormattingInterface,
     private val ioExecutor: Executor,
     mainThreadScheduler: Scheduler,

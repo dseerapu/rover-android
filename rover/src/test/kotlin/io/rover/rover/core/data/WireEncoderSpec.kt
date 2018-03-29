@@ -18,7 +18,6 @@ import io.rover.rover.core.data.domain.UnitOfMeasure
 import io.rover.rover.core.data.domain.VerticalAlignment
 import io.rover.rover.junit4ReportingWorkaround
 import io.rover.rover.platform.DateFormatting
-import io.rover.rover.platform.decodeDeviceStateFromJsonStringForTests
 import io.rover.rover.platform.decodeEventSnapshotsFromJsonStringForTests
 import io.rover.rover.platform.decodeExperienceFromStringForTests
 import io.rover.rover.platform.encodeEventsToStringJsonForTests
@@ -85,25 +84,27 @@ class WireEncoderSpec : Spek({
             }
         }
 
-        on("decoding a device") {
-            val expectedJson = this.javaClass.classLoader.getResourceAsStream("comprehensive_device.json").bufferedReader(Charsets.UTF_8).readText()
-            val decoded = wireEncoder.decodeDeviceStateFromJsonStringForTests(JSONObject(expectedJson).getJSONObject("data").getJSONObject("device").toString(4))
+        // TODO move to tests for Location module.
 
-            it("produces valid Device objects that can be encoded back into equivalent JSON") {
-                // if we can roundtrip the comprehensive JSON Experience structure to the Rover
-                // SDK model representation and back accurately, then we have a pretty strong
-                // guarantee that the deserialization logic is accurate and complete.
-
-                val reWrapped = JSONObject().apply {
-                    put("data", JSONObject().apply {
-                        put("device", JSONObject(decoded.encodeJsonToStringForTests(dateFormatting)))
-                    })
-                }
-
-                val rejsonned = reWrapped.toString(4)
-                JSONAssert.assertEquals(expectedJson, rejsonned, true)
-            }
-        }
+//        on("decoding a device") {
+//            val expectedJson = this.javaClass.classLoader.getResourceAsStream("comprehensive_device.json").bufferedReader(Charsets.UTF_8).readText()
+//            val decoded = wireEncoder.decodeDeviceStateFromJsonStringForTests(JSONObject(expectedJson).getJSONObject("data").getJSONObject("device").toString(4))
+//
+//            it("produces valid Device objects that can be encoded back into equivalent JSON") {
+//                // if we can roundtrip the comprehensive JSON Experience structure to the Rover
+//                // SDK model representation and back accurately, then we have a pretty strong
+//                // guarantee that the deserialization logic is accurate and complete.
+//
+//                val reWrapped = JSONObject().apply {
+//                    put("data", JSONObject().apply {
+//                        put("device", JSONObject(decoded.encodeJsonToStringForTests(dateFormatting)))
+//                    })
+//                }
+//
+//                val rejsonned = reWrapped.toString(4)
+//                JSONAssert.assertEquals(expectedJson, rejsonned, true)
+//            }
+//        }
 
         on("decoding an experience") {
             val expectedJson = this.javaClass.classLoader.getResourceAsStream("comprehensive_experience.json").bufferedReader(Charsets.UTF_8).readText()
