@@ -2,13 +2,10 @@ package io.rover.rover.core.data.graphql
 
 import io.rover.rover.core.data.NetworkRequest
 import io.rover.rover.core.data.NetworkResult
-import io.rover.rover.core.data.domain.DeviceState
 import io.rover.rover.core.data.domain.EventSnapshot
 import io.rover.rover.core.data.domain.Experience
 import io.rover.rover.core.data.domain.ID
 import io.rover.rover.core.data.http.NetworkTask
-import io.rover.rover.core.streams.Publisher
-import org.json.JSONObject
 
 interface GraphQlApiServiceInterface {
     /**
@@ -20,16 +17,6 @@ interface GraphQlApiServiceInterface {
         experienceId: ID,
         campaignId: ID?,
         completionHandler: ((NetworkResult<Experience>) -> Unit)
-    ): NetworkTask
-
-    /**
-     * Retrieve the device state.
-     *
-     * @param completionHandler callback will be called with a result.
-     */
-    @Deprecated("Use operation() instead.")
-    fun fetchStateTask(
-        completionHandler: ((NetworkResult<DeviceState>) -> Unit)
     ): NetworkTask
 
     /**

@@ -1,7 +1,6 @@
 package io.rover.rover.core.data.http
 
 import io.rover.rover.core.data.domain.Context
-import io.rover.rover.core.data.domain.DeviceState
 import io.rover.rover.core.data.domain.EventSnapshot
 import io.rover.rover.core.data.domain.Experience
 import io.rover.rover.notifications.domain.Notification
@@ -14,8 +13,6 @@ import org.json.JSONObject
  */
 interface WireEncoderInterface {
     fun decodeExperience(data: JSONObject): Experience
-
-    fun decodeDeviceState(data: JSONObject): DeviceState
 
     fun decodeNotification(data: JSONObject): Notification
 

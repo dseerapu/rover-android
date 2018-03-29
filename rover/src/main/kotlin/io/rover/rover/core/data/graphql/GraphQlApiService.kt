@@ -9,7 +9,6 @@ import io.rover.rover.core.data.AuthenticationContext
 import io.rover.rover.core.data.NetworkError
 import io.rover.rover.core.data.NetworkRequest
 import io.rover.rover.core.data.NetworkResult
-import io.rover.rover.core.data.domain.DeviceState
 import io.rover.rover.core.data.domain.EventSnapshot
 import io.rover.rover.core.data.domain.Experience
 import io.rover.rover.core.data.domain.ID
@@ -21,8 +20,6 @@ import io.rover.rover.core.data.http.NetworkTask
 import io.rover.rover.core.data.http.WireEncoderInterface
 import io.rover.rover.core.data.graphql.operations.FetchExperienceRequest
 import io.rover.rover.core.data.graphql.operations.SendEventsRequest
-import io.rover.rover.core.data.state.FetchStateRequest
-import io.rover.rover.core.streams.Publisher
 import org.json.JSONException
 import java.io.IOException
 import java.net.URL
@@ -184,15 +181,6 @@ class GraphQlApiService(
             wireEncoder
         )
 
-        return operation(request) { uploadResult ->
-            mainThreadHandler.post {
-                completionHandler.invoke(uploadResult)
-            }
-        }
-    }
-
-    override fun fetchStateTask(completionHandler: ((NetworkResult<DeviceState>) -> Unit)): NetworkTask {
-        val request = FetchStateRequest()
         return operation(request) { uploadResult ->
             mainThreadHandler.post {
                 completionHandler.invoke(uploadResult)

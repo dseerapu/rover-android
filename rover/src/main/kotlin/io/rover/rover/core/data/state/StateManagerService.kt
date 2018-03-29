@@ -39,7 +39,7 @@ class StateManagerService(
 
     override val query: String
         get() = """
-            query StateRefresh {
+            query $operationName {
                 device {
                     ${stores.joinToString("\n") { it.queryFragment }}
                 }

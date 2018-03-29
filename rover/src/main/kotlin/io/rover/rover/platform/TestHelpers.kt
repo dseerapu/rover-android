@@ -2,7 +2,6 @@
 
 package io.rover.rover.platform
 
-import io.rover.rover.core.data.domain.DeviceState
 import io.rover.rover.core.data.domain.EventSnapshot
 import io.rover.rover.core.data.domain.Experience
 import io.rover.rover.core.data.graphql.WireEncoder
@@ -22,11 +21,6 @@ internal fun WireEncoder.encodeEventsToStringJsonForTests(events: List<EventSnap
 
 internal fun WireEncoder.decodeEventSnapshotsFromJsonStringForTests(json: String): List<EventSnapshot> =
     this.decodeEventsForSending(JSONArray(json))
-
-internal fun WireEncoder.decodeDeviceStateFromJsonStringForTests(json: String): DeviceState =
-    this.decodeDeviceState(JSONObject(json))
-
-internal fun DeviceState.encodeJsonToStringForTests(dateFormatting: DateFormattingInterface): String = this.encodeJson(dateFormatting).toString(4)
 
 internal fun Experience.encodeJsonToStringForTests(): String = this.encodeJson().toString(4)
 

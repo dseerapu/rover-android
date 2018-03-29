@@ -1,7 +1,5 @@
 package io.rover.rover.core.data.state
 
-import io.rover.rover.core.data.domain.DeviceState
-import io.rover.rover.core.streams.Publisher
 import org.json.JSONObject
 
 /**
