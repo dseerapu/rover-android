@@ -35,9 +35,11 @@ class NotificationsRepository(
     localStorage: LocalStorage
 ): NotificationsRepositoryInterface {
 
-    // TODO: receive and persist notifications inbound from actual pushes.
-
     // TODO: gate access to the localStorage via a single-thread executor pool.
+
+    // TODO: break this object up into: Notifications Remote API, possibly make StateStore have a
+    // subscriber model after all, in which consumers would provide their query fragment at
+    // registration time, removing the afterAssembly() callback wire-up.
 
     override fun updates(): Publisher<NotificationsRepositoryInterface.Emission.Update> = Observable.concat(
         currentNotificationsOnDisk().filterNulls().map { existingNotifications ->
@@ -45,8 +47,6 @@ class NotificationsRepository(
         },
         epic
     ).filterForSubtype<NotificationsRepositoryInterface.Emission.Update, NotificationsRepositoryInterface.Emission>()
-
-
 
     override fun events(): Publisher<NotificationsRepositoryInterface.Emission.Event> = epic.filterForSubtype()
 

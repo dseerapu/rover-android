@@ -11,7 +11,8 @@
       "frameworks": {
         "io.rover.rover": "2.0.0"
       },
-      "isCellularEnabled": false
+      "isCellularEnabled": false,
+      "notificationAuthorization": "authorized"
     }
   }
 ]

@@ -57,7 +57,8 @@ class WireEncoderSpec : Spek({
                         "rover",
                         Context.blank().copy(
                             isCellularEnabled = false,
-                            frameworks = hashMapOf(Pair("io.rover.rover", "2.0.0"))
+                            frameworks = hashMapOf(Pair("io.rover.rover", "2.0.0")),
+                            notificationAuthorization = Context.NotificationAuthorization.Authorized
                         )
                     )
             )
@@ -65,9 +66,8 @@ class WireEncoderSpec : Spek({
             it("should match some pre-rendered JSON") {
                 val expectedJson = this.javaClass.classLoader.getResourceAsStream("outbound_events.json").bufferedReader(Charsets.UTF_8).readText()
                 val json = wireEncoder.encodeEventsToStringJsonForTests(eventSnapshots)
-                junit4ReportingWorkaround {
-                    JSONAssert.assertEquals(expectedJson, json, true)
-                }
+
+                JSONAssert.assertEquals(expectedJson, json, true)
             }
         }
 
