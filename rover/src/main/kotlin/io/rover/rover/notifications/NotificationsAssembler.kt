@@ -7,7 +7,6 @@ import io.rover.rover.core.container.Assembler
 import io.rover.rover.core.container.Container
 import io.rover.rover.core.container.Resolver
 import io.rover.rover.core.container.Scope
-import io.rover.rover.core.data.graphql.GraphQlApiServiceInterface
 import io.rover.rover.core.data.http.WireEncoderInterface
 import io.rover.rover.core.data.state.StateManagerServiceInterface
 import io.rover.rover.core.events.ContextProvider
@@ -187,8 +186,6 @@ class NotificationsAssembler(
             resolver.resolveSingletonOrFail(ContextProvider::class.java, "notification")
         )
 
-        resolver.resolveSingletonOrFail(StateManagerServiceInterface::class.java).addStore(
-            resolver.resolveSingletonOrFail(NotificationsRepositoryInterface::class.java)
-        )
+        resolver.resolveSingletonOrFail(NotificationsRepositoryInterface::class.java)
     }
 }

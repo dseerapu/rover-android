@@ -1122,7 +1122,7 @@ typealias CallbackReceiver<T> = (T) -> Unit
  *
  * Example usage:
  *
- * `{ callback: CallbackReceiver<MY_RESULT_TYPE> -> roverNetworkService.someMethodThatReturnsANetworkTask(callback) }.asPublisher()`
+ * `{ callback: CallbackReceiver<MY_RESULT_TYPE> -> graphQlApiService.someMethodThatReturnsANetworkTask(callback) }.asPublisher()`
  */
 internal fun <T> (((r: T) -> Unit) -> NetworkTask).asPublisher(): Publisher<T> {
     return object : Publisher<T> {

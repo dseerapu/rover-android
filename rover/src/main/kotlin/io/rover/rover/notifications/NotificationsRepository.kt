@@ -1,5 +1,6 @@
 package io.rover.rover.notifications
 
+import io.rover.rover.core.data.NetworkResult
 import io.rover.rover.core.logging.log
 import io.rover.rover.core.streams.*
 import io.rover.rover.platform.DateFormattingInterface
@@ -46,7 +47,7 @@ class NotificationsRepository(
             NotificationsRepositoryInterface.Emission.Update(existingNotifications)
         },
         epic
-    ).filterForSubtype<NotificationsRepositoryInterface.Emission.Update, NotificationsRepositoryInterface.Emission>()
+    ).filterForSubtype()
 
     override fun events(): Publisher<NotificationsRepositoryInterface.Emission.Event> = epic.filterForSubtype()
 
@@ -119,52 +120,87 @@ class NotificationsRepository(
         }.subscribeOn(ioExecutor)
     }
 
-    private val epic: Publisher<NotificationsRepositoryInterface.Emission> = actions.flatMap { action ->
-        when(action) {
-            is Action.Refresh -> {
-                Observable.concat(
-                    Observable.just(NotificationsRepositoryInterface.Emission.Event.Refreshing(true))
-                    .doOnComplete {
-                        log.v("Triggering Device State Manager refresh.")
-                        stateManagerService.triggerRefresh()
-                    }
-                )
-            }
-            is Action.MarkDeleted -> {
-                doMarkAsDeleted(action.notification).map { NotificationsRepositoryInterface.Emission.Update(it) }
-            }
-            is Action.MarkRead -> {
-                doMarkAsRead(action.notification).map { NotificationsRepositoryInterface.Emission.Update(it) }
-            }
-            is Action.NotificationArrivedByPush -> {
-                mergeWithLocalStorage(listOf(action.notification)).flatMap { merged -> replaceLocalStorage(merged) }.map {
-                    NotificationsRepositoryInterface.Emission.Update(it)
+    private val queryFragment: String = """
+            notifications {
+                id
+                campaignId
+                title
+                body
+                deliveredAt
+                expiresAt
+                isRead
+                isDeleted
+                isNotificationCenterEnabled
+                uri
+                attachment {
+                    type
+                    url
                 }
             }
-            is Action.DeviceStateUpdated -> {
+        """
+
+    /**
+     * This chain of behaviour maps incoming updates from the [StateManagerServiceInterface] to
+     * notifications updates, along with the side-effect of updating local state.
+     */
+    private val stateStoreObserverChain = stateManagerService.updatesForQueryFragment(
+        queryFragment
+    ).flatMap { networkResult ->
+        when(networkResult) {
+            is NetworkResult.Error -> {
+                Observable.concat(
+                    Observable.just(NotificationsRepositoryInterface.Emission.Event.Refreshing(false)),
+                    Observable.just(NotificationsRepositoryInterface.Emission.Event.FetchFailure(networkResult.throwable.message ?: "Unknown"))
+                )
+            }
+            is NetworkResult.Success -> {
                 Observable.concat(
                     Observable.just(
                         NotificationsRepositoryInterface.Emission.Event.Refreshing(false)
                     ),
-                    mergeWithLocalStorage(action.notifications)
+                    mergeWithLocalStorage(decodeNotificationsPayload(networkResult.response))
                         .flatMap { notifications ->
                             // side-effect: update local storage!
                             replaceLocalStorage(notifications).map {
                                 NotificationsRepositoryInterface.Emission.Update(it)
                             }
                         }
-
-
-                )
-            }
-            is Action.DeviceStateUpdateFailed -> {
-                Observable.concat(
-                    Observable.just(NotificationsRepositoryInterface.Emission.Event.Refreshing(false)),
-                    Observable.just( NotificationsRepositoryInterface.Emission.Event.FetchFailure(action.reason))
                 )
             }
         }
-    }.observeOn(mainThreadScheduler).shareHotAndReplay(0)
+    }
+
+    private val epic: Publisher<NotificationsRepositoryInterface.Emission> =
+        Observable.merge(
+            actions.flatMap { action ->
+                when (action) {
+                    is Action.Refresh -> {
+                        Observable.concat(
+                            Observable.just(NotificationsRepositoryInterface.Emission.Event.Refreshing(true))
+                                .doOnComplete {
+                                    log.v("Triggering Device State Manager refresh.")
+                                    stateManagerService.triggerRefresh()
+
+                                    // this will result in an emission being received by the state
+                                    // manager updates observer.
+                                }
+                        )
+                    }
+                    is Action.MarkDeleted -> {
+                        doMarkAsDeleted(action.notification).map { NotificationsRepositoryInterface.Emission.Update(it) }
+                    }
+                    is Action.MarkRead -> {
+                        doMarkAsRead(action.notification).map { NotificationsRepositoryInterface.Emission.Update(it) }
+                    }
+                    is Action.NotificationArrivedByPush -> {
+                        mergeWithLocalStorage(listOf(action.notification)).flatMap { merged -> replaceLocalStorage(merged) }.map {
+                            NotificationsRepositoryInterface.Emission.Update(it)
+                        }
+                    }
+                }
+            },
+            stateStoreObserverChain
+        ).observeOn(mainThreadScheduler).shareHotAndReplay(0)
 
     /**
      * When subscribed, performs the side-effect of marking the given notification as deleted
@@ -242,40 +278,11 @@ class NotificationsRepository(
             .sortedByDescending { it.deliveredAt }
     }
 
-    override val queryFragment: String
-        get() = """
-            notifications {
-                id
-                campaignId
-                title
-                body
-                deliveredAt
-                expiresAt
-                isRead
-                isDeleted
-                isNotificationCenterEnabled
-                uri
-                attachment {
-                    type
-                    url
-                }
-            }
-        """
-
-    override fun updateState(data: JSONObject) {
+    private fun decodeNotificationsPayload(data: JSONObject): List<Notification> {
         val notifications = data.getJSONArray("notifications").getObjectIterable().map { notificationJson -> Notification.decodeJson(notificationJson, dateFormatting)}
-        actions.onNext(NotificationsRepository.Action.DeviceStateUpdated(
-            notifications
-        ))
-    }
 
-    override fun informOfError(reason: String) {
-        actions.onNext(NotificationsRepository.Action.DeviceStateUpdateFailed(reason))
+        return notifications
     }
-
-    // observe notifications coming in from events and notifications arriving from cloud.  how do we
-    // trigger cloud updates? subscriptions! however, same problem all over again: difficult to do
-    // singleton side-effects of a chain that involves an on-subscription side-effect.
 
     companion object {
         private const val STORAGE_CONTEXT_IDENTIFIER = "io.rover.rover.notification-storage"
@@ -284,9 +291,6 @@ class NotificationsRepository(
         private const val MAX_NOTIFICATIONS_LIMIT = 100
     }
 
-    init {
-
-    }
 
     sealed class Action {
         /**
@@ -308,12 +312,5 @@ class NotificationsRepository(
          * A notification arrived by push.  This will add it to the repository.
          */
         class NotificationArrivedByPush(val notification: Notification): Action()
-
-        /**
-         * The device state has refreshed.
-         */
-        class DeviceStateUpdated(val notifications: List<Notification>): Action()
-
-        class DeviceStateUpdateFailed(val reason: String): Action()
     }
 }

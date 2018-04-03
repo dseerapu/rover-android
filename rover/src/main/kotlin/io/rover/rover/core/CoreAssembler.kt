@@ -168,8 +168,7 @@ class CoreAssembler(
 
         container.register(Scope.Singleton, StateManagerServiceInterface::class.java) { resolver ->
             StateManagerService(
-                resolver.resolveSingletonOrFail(GraphQlApiServiceInterface::class.java),
-                application
+                resolver.resolveSingletonOrFail(GraphQlApiServiceInterface::class.java)
             )
         }
     }
@@ -186,10 +185,5 @@ class CoreAssembler(
             resolver.resolveSingletonOrFail(ContextProvider::class.java, "telephony"),
             resolver.resolveSingletonOrFail(ContextProvider::class.java, "timeZone")
         ).forEach { eventQueue.addContextProvider(it) }
-
-        // TODO: for Profile!
-//        resolver.resolveSingletonOrFail(StateManagerServiceInterface::class.java).addStore(
-//            //
-//        )
     }
 }
