@@ -121,23 +121,23 @@ class NotificationsRepository(
     }
 
     private val queryFragment: String = """
-            notifications {
-                id
-                campaignId
-                title
-                body
-                deliveredAt
-                expiresAt
-                isRead
-                isDeleted
-                isNotificationCenterEnabled
-                uri
-                attachment {
-                    type
-                    url
-                }
+        notifications {
+            id
+            campaignId
+            title
+            body
+            deliveredAt
+            expiresAt
+            isRead
+            isDeleted
+            isNotificationCenterEnabled
+            uri
+            attachment {
+                type
+                url
             }
-        """
+        }
+    """
 
     /**
      * This chain of behaviour maps incoming updates from the [StateManagerServiceInterface] to

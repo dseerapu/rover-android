@@ -5,6 +5,7 @@
 //import io.rover.rover.core.events.EventQueueServiceInterface
 //import io.rover.rover.core.logging.GlobalStaticLogHolder
 //import io.rover.rover.core.logging.JvmLogger
+//import io.rover.rover.core.streams.Publisher
 //import io.rover.rover.core.streams.Scheduler
 //import io.rover.rover.core.streams.subscribe
 //import io.rover.rover.notifications.NotificationsRepository
@@ -38,7 +39,24 @@
 //        fun repo(notificationsToEmit: List<Notification>): NotificationsRepository {
 //            val eventQueue : EventQueueServiceInterface = mock()
 //
-//            val stateManagerService: StateManagerServiceInterface = mock()
+//            val stateManagerService: StateManagerServiceInterface = object : StateManagerServiceInterface by mock() {
+//                override fun updatesForQueryFragment(queryFragment: String): Publisher<NetworkResult<JSONObject>> {
+//                    return Publisher.just(
+//                        NetworkResult.Success(
+//                            // crap they have be encoded. those concerns should be separated.
+//                            // TODO: cannot use JSONObject here.
+//                            JSONObject().apply {
+//                                put(
+//                                    "notifications",
+//                                    JSONArray(
+//                                        notificationsToEmit.map { it.encodeJson(DateFormatting()) }
+//                                    )
+//                                )
+//                            }
+//                        )
+//                    )
+//                }
+//            }
 //
 //            val keyValueStorage : MutableMap<String, String?> = mutableMapOf()
 //            val repo = NotificationsRepository(
@@ -65,22 +83,7 @@
 //                    }
 //                }
 //            )
-//
-//            // crap they have be encoded. those concerns should be separated.
-//
-//            // TODO: cannot use JSONObject here.
-//
-//            repo.updateState(
-//                JSONObject().apply {
-//                    put(
-//                        "notifications",
-//                        JSONArray(
-//                            notificationsToEmit.map { it.encodeJson(DateFormatting()) }
-//                        )
-//                    )
-//                }
-//            )
-//
+//            
 //            return repo
 //        }
 //
