@@ -21,6 +21,8 @@ class StateManagerService(
 ): StateManagerServiceInterface {
     override fun updatesForQueryFragment(queryFragment: String): Publisher<NetworkResult<JSONObject>> {
         queryFragments.add(queryFragment)
+
+        // TODO: consider caching and re-emitting latest device state to all new subscribers.
         return updates
     }
 

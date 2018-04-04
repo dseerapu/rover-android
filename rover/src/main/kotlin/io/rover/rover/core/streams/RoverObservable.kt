@@ -219,7 +219,7 @@ fun <T> Publisher<T>.subscribe(onNext: (item: T) -> Unit) {
     })
 }
 
-internal fun <T, R> Publisher<T>.map(transform: (T) -> R): Publisher<R> {
+fun <T, R> Publisher<T>.map(transform: (T) -> R): Publisher<R> {
     val prior = this
     return object : Publisher<R> {
         override fun subscribe(subscriber: Subscriber<R>) {
@@ -433,7 +433,7 @@ internal fun <T> Publisher<T>.share(): Publisher<T> {
  *
  * NB. This operator is not yet thread safe.
  */
-internal fun <T> Publisher<T>.shareHotAndReplay(count: Int): Publisher<T> {
+fun <T> Publisher<T>.shareHotAndReplay(count: Int): Publisher<T> {
     val buffer = ArrayDeque<T>(count)
 
     val multicastTo: MutableSet<Subscriber<T>> = mutableSetOf()
@@ -493,7 +493,7 @@ internal fun <T> Publisher<T>.shareHotAndReplay(count: Int): Publisher<T> {
  *
  * Not thread safe.
  */
-internal fun <T> Publisher<T>.shareAndReplay(count: Int): Publisher<T> {
+fun <T> Publisher<T>.shareAndReplay(count: Int): Publisher<T> {
     val buffer = ArrayDeque<T>(count)
 
     val multicastTo: MutableSet<Subscriber<T>> = mutableSetOf()
@@ -986,7 +986,7 @@ internal fun <T> Publisher<T>.onErrorReturn(callback: (throwable: Throwable) -> 
 // TODO: At such time as we set Android Min SDK to at least 24, change to use Optional here and at
 // the usage sites instead (on account of the Reactive Streams spec not actually allowing for
 // nulls).
-internal fun <T> Publisher<T?>.filterNulls(): Publisher<T> = filter { it != null }.map { it!! }
+fun <T> Publisher<T?>.filterNulls(): Publisher<T> = filter { it != null }.map { it!! }
 
 /**
  * Republish emissions from the Publisher until such time as the provider [Publisher] [stopper]
@@ -1233,7 +1233,7 @@ internal fun Scheduler.Companion.forAndroidMainThread(): Scheduler {
     }
 }
 
-internal fun <T> Publisher<T>.observeOn(scheduler: Scheduler): Publisher<T> {
+fun <T> Publisher<T>.observeOn(scheduler: Scheduler): Publisher<T> {
     return object : Publisher<T> {
         override fun subscribe(subscriber: Subscriber<T>) {
             this@observeOn.subscribe(object: Subscriber<T> {

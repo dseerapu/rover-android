@@ -278,11 +278,8 @@ class NotificationsRepository(
             .sortedByDescending { it.deliveredAt }
     }
 
-    private fun decodeNotificationsPayload(data: JSONObject): List<Notification> {
-        val notifications = data.getJSONArray("notifications").getObjectIterable().map { notificationJson -> Notification.decodeJson(notificationJson, dateFormatting)}
-
-        return notifications
-    }
+    private fun decodeNotificationsPayload(data: JSONObject): List<Notification> =
+        data.getJSONArray("notifications").getObjectIterable().map { notificationJson -> Notification.decodeJson(notificationJson, dateFormatting)}
 
     companion object {
         private const val STORAGE_CONTEXT_IDENTIFIER = "io.rover.rover.notification-storage"
