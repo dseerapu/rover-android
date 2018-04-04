@@ -30,7 +30,7 @@ internal class GlobalStaticLogHolder {
     }
 }
 
-internal val Any.log: LogReceiver
+val Any.log: LogReceiver
     get() {
         val receiver = GlobalStaticLogHolder.globalLogEmitter ?: throw RuntimeException("Logger has not yet been configured.")
 

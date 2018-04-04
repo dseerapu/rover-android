@@ -1,2 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="io.rover.location" />
+    package="io.rover.location">
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <application>
+        <service android:name=".LocationReceiverIntentService" />
+    </application>
+</manifest>
