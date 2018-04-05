@@ -6,6 +6,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.support.v4.content.ContextCompat
@@ -18,18 +19,32 @@ import io.rover.rover.core.logging.log
 /**
  * Subscribes to Location Updates from FusedLocationManager and emits location reporting events.
  *
+ * This allows you to see up to date location data for your users in the Audience app.
+ * If left out, the other location functionality (Beacons and Geofences) will continue to work.
+ *
  * Google documentation: https://developer.android.com/training/location/receive-location-updates.html
  */
 class GoogleBackgroundLocationService(
     private val fusedLocationProviderClient: FusedLocationProviderClient,
     private val applicationContext: Context,
-    private val googleLocationReportingService: GoogleLocationReportingServiceInterface
+    private val locationReportingService: LocationReportingServiceInterface
 ): GoogleBackgroundLocationServiceInterface {
     override fun newGoogleLocationResult(locationResult: LocationResult) {
         log.v("Received location result: $locationResult")
+
+        val location = LocationReportingServiceInterface.Location(
+            locationResult.lastLocation.latitude,
+            locationResult.lastLocation.longitude,
+            locationResult.lastLocation.altitude,
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && locationResult.lastLocation.hasVerticalAccuracy()) locationResult.lastLocation.verticalAccuracyMeters else null,
+            if(locationResult.lastLocation.hasAccuracy()) locationResult.lastLocation.accuracy else null
+        )
+
+        locationReportingService.updateLocation(location)
     }
 
     init {
+        // TODO: do this only once permission is cleared
         if(ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             fusedLocationProviderClient
                 .requestLocationUpdates(
@@ -47,8 +62,6 @@ class GoogleBackgroundLocationService(
                     )
                 )
         }
-
-        // use the pending intent version of requestLocationUpdates so background works!
     }
 }
 
@@ -57,7 +70,6 @@ class LocationReceiverIntentService: IntentService("LocationReceiverIntentServic
         Handler(Looper.getMainLooper()).post {
             if (LocationResult.hasResult(intent)) {
                 val result = LocationResult.extractResult(intent)
-
                 Rover.sharedInstance.resolveSingletonOrFail(GoogleBackgroundLocationServiceInterface::class.java).newGoogleLocationResult(result)
             } else {
                 log.w("LocationReceiver received an intent, but it lacked a location result. Ignoring.")

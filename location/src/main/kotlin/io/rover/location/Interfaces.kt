@@ -17,6 +17,10 @@ interface GoogleBeaconTrackerServiceInterface {
     fun newGoogleBeaconMessage(intent: Intent)
 }
 
+/**
+ * Implementers can register themselves with [RegionRepositoryInterface] to be informed
+ * of the most recent list of Geofences that should be monitored.
+ */
 interface GoogleGeofenceServiceInterface: RegionObserver {
     fun newGoogleGeofenceEvent(geofencingEvent: GeofencingEvent)
 }
@@ -36,20 +40,26 @@ interface RegionObserver {
 }
 
 /**
- * Dispatch location events to Rover that have been created by the various relevant Google Play
- * services.
- *
- * TODO will likely create a LocationReportingService that might accept abstract non-Google data
- * types instead, and then this class will emit events to that.
+ * Dispatch location events to Rover, pertaining to location updates, geofences, and beacons.
  */
-interface GoogleLocationReportingServiceInterface {
-    fun trackGeofenceEvent(geofencingEvent: GeofencingEvent)
+interface LocationReportingServiceInterface {
+    fun trackEnterGeofence(geofence: Region.GeofenceRegion)
 
-    fun trackEnterBeacon(message: Message)
+    fun trackExitGeofence(geofence: Region.GeofenceRegion)
 
-    fun trackExitBeacon(message: Message)
+    fun trackEnterBeacon(beaconRegion: Region.BeaconRegion)
+
+    fun trackExitBeacon(beaconRegion: Region.BeaconRegion)
 
     fun updateLocation(
-        location: LocationResult
+        location: Location
+    )
+
+    data class Location(
+        val latitude: Double,
+        val longitude: Double,
+        val altitude: Double,
+        val verticalAccuracy: Float?,
+        val horizontalAccurancy: Float?
     )
 }

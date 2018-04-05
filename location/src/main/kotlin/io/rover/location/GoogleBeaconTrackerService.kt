@@ -13,9 +13,14 @@ import android.content.pm.PackageManager
 import android.os.Handler
 import android.os.Looper
 import android.support.v4.content.ContextCompat
+import com.google.android.gms.nearby.messages.EddystoneUid
+import com.google.android.gms.nearby.messages.IBeaconId
 import com.google.android.gms.nearby.messages.Message
 import com.google.android.gms.nearby.messages.MessageListener
+import io.rover.location.domain.Region
 import io.rover.rover.Rover
+import io.rover.rover.core.logging.log
+import io.rover.rover.platform.whenNotNull
 
 
 /**
@@ -27,21 +32,43 @@ import io.rover.rover.Rover
 class GoogleBeaconTrackerService(
     private val applicationContext: Context,
     private val nearbyMessagesClient: MessagesClient,
-    private val googleLocationReportingService: GoogleLocationReportingServiceInterface
+    private val locationReportingService: LocationReportingServiceInterface
 ): GoogleBeaconTrackerServiceInterface {
     override fun newGoogleBeaconMessage(intent: Intent) {
         nearbyMessagesClient.handleIntent(intent, object : MessageListener() {
-            override fun onLost(message: Message) {
-                googleLocationReportingService.trackExitBeacon(message)
+            override fun onFound(message: Message) {
+                messageToBeacon(message).whenNotNull { locationReportingService.trackEnterBeacon(
+                    it
+                )}
             }
 
-            override fun onFound(message: Message) {
-                googleLocationReportingService.trackEnterBeacon(message)
+            override fun onLost(message: Message) {
+                messageToBeacon(message).whenNotNull { locationReportingService.trackExitBeacon(
+                    it
+                )}
             }
         })
     }
 
+    private fun messageToBeacon(message: Message): Region.BeaconRegion? {
+        return when(message.type) {
+            Message.MESSAGE_TYPE_I_BEACON_ID -> {
+                IBeaconId.from(message).toRoverBeaconRegion()
+            }
+            Message.MESSAGE_TYPE_EDDYSTONE_UID -> {
+                val eddystoneUid = EddystoneUid.from(message)
+                log.w("Eddystone beacons not currently supported by Rover (uid was $eddystoneUid). Ignoring")
+                null
+            }
+            else -> {
+                log.w("Unknown beacon type: '${message.type}', ignoring.")
+                null
+            }
+        }
+    }
+
     init {
+        // TODO: only do once the permission is cleared
         if (ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             val messagesClient = Nearby.getMessagesClient(applicationContext, MessagesOptions.Builder()
                 .setPermissions(NearbyPermissions.BLE)
@@ -67,4 +94,12 @@ class BeaconReceiverIntentService: IntentService("BeaconReceiverIntentService") 
             )
         }
     }
+}
+
+fun IBeaconId.toRoverBeaconRegion(): Region.BeaconRegion {
+    return Region.BeaconRegion(
+        this.proximityUuid,
+        this.major.toInt(),
+        this.minor.toInt()
+    )
 }

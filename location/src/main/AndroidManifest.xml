@@ -4,5 +4,6 @@
     <application>
         <service android:name=".LocationReceiverIntentService" />
         <service android:name=".BeaconReceiverIntentService" />
+        <service android:name=".GeofenceReceiverIntentService" />
     </application>
 </manifest>
