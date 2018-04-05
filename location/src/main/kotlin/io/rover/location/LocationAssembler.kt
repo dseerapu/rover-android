@@ -12,6 +12,7 @@ import io.rover.rover.core.container.Resolver
 import io.rover.rover.core.container.Scope
 import io.rover.rover.core.data.state.StateManagerServiceInterface
 import io.rover.rover.core.events.EventQueueServiceInterface
+import io.rover.rover.core.permissions.PermissionsNotifierInterface
 import io.rover.rover.core.streams.Scheduler
 
 /**
@@ -100,7 +101,9 @@ class LocationAssembler(
                     resolver.resolveSingletonOrFail(
                         FusedLocationProviderClient::class.java
                     ),
-                    resolver.resolveSingletonOrFail(Context::class.java)
+                    resolver.resolveSingletonOrFail(Context::class.java),
+                    resolver.resolveSingletonOrFail(PermissionsNotifierInterface::class.java),
+                    resolver.resolveSingletonOrFail(LocationReportingServiceInterface::class.java)
                 )
             }
         }
@@ -166,6 +169,12 @@ class LocationAssembler(
             // greedily poke for GoogleBackgroundLocationService to force the DI to evaluate
             // it and therefore have it start monitoring.
             resolver.resolveSingletonOrFail(GoogleBackgroundLocationServiceInterface::class.java)
+        }
+
+        if(automaticBeaconMonitoring) {
+            // greedily poke for the GoogleBeaconTrackerServiceInterface to force the DI
+            // evaluate it and thus start monitoring.
+            resolver.resolveSingletonOrFail(GoogleBeaconTrackerServiceInterface::class.java)
         }
     }
 }

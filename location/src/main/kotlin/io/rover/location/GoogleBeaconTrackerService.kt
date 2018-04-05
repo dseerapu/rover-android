@@ -1,6 +1,7 @@
 package io.rover.location
 
 import android.Manifest
+import android.annotation.SuppressLint
 import com.google.android.gms.nearby.messages.MessagesClient
 import com.google.android.gms.nearby.messages.NearbyPermissions
 import com.google.android.gms.nearby.messages.MessagesOptions
@@ -9,10 +10,8 @@ import android.app.IntentService
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Handler
 import android.os.Looper
-import android.support.v4.content.ContextCompat
 import com.google.android.gms.nearby.messages.EddystoneUid
 import com.google.android.gms.nearby.messages.IBeaconId
 import com.google.android.gms.nearby.messages.Message
@@ -20,6 +19,8 @@ import com.google.android.gms.nearby.messages.MessageListener
 import io.rover.location.domain.Region
 import io.rover.rover.Rover
 import io.rover.rover.core.logging.log
+import io.rover.rover.core.permissions.PermissionsNotifierInterface
+import io.rover.rover.core.streams.subscribe
 import io.rover.rover.platform.whenNotNull
 
 
@@ -32,8 +33,9 @@ import io.rover.rover.platform.whenNotNull
 class GoogleBeaconTrackerService(
     private val applicationContext: Context,
     private val nearbyMessagesClient: MessagesClient,
-    private val locationReportingService: LocationReportingServiceInterface
-): GoogleBeaconTrackerServiceInterface {
+    private val locationReportingService: LocationReportingServiceInterface,
+    private val permissionsNotifier: PermissionsNotifierInterface
+    ): GoogleBeaconTrackerServiceInterface {
     override fun newGoogleBeaconMessage(intent: Intent) {
         nearbyMessagesClient.handleIntent(intent, object : MessageListener() {
             override fun onFound(message: Message) {
@@ -68,8 +70,12 @@ class GoogleBeaconTrackerService(
     }
 
     init {
-        // TODO: only do once the permission is cleared
-        if (ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        startMonitoring()
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun startMonitoring() {
+        permissionsNotifier.notifyForPermission(Manifest.permission.ACCESS_FINE_LOCATION).subscribe {
             val messagesClient = Nearby.getMessagesClient(applicationContext, MessagesOptions.Builder()
                 .setPermissions(NearbyPermissions.BLE)
                 .build())
@@ -96,6 +102,9 @@ class BeaconReceiverIntentService: IntentService("BeaconReceiverIntentService") 
     }
 }
 
+/**
+ * Map a received iBeacon back to a Rover.BeaconRegion value object.
+ */
 fun IBeaconId.toRoverBeaconRegion(): Region.BeaconRegion {
     return Region.BeaconRegion(
         this.proximityUuid,

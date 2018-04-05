@@ -71,7 +71,9 @@ class GoogleGeofenceService(
     override fun regionsUpdated(regions: List<Region>) {
         currentFences = regions.filterIsInstance(Region.GeofenceRegion::class.java)
 
-
+        // TODO: andrew start here and figure out how to get something to happen when both regions
+        // and perms are ready at least once.  Create combineLatest operator.
+        
         // This will remove any existing Rover geofences, because will all be registered with the
         // same pending intent pointing to the receiver intent service.
         geofencingClient.removeGeofences(

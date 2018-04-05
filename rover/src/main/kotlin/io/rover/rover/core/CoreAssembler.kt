@@ -29,6 +29,8 @@ import io.rover.rover.core.events.EventQueueServiceInterface
 import io.rover.rover.core.events.contextproviders.*
 import io.rover.rover.core.logging.AndroidLogger
 import io.rover.rover.core.logging.GlobalStaticLogHolder
+import io.rover.rover.core.permissions.PermissionsNotifier
+import io.rover.rover.core.permissions.PermissionsNotifierInterface
 import io.rover.rover.core.routing.website.EmbeddedWebBrowserDisplay
 import io.rover.rover.core.routing.website.EmbeddedWebBrowserDisplayInterface
 import io.rover.rover.core.streams.Scheduler
@@ -97,6 +99,12 @@ class CoreAssembler(
                 resolver.resolveSingletonOrFail(DeviceIdentificationInterface::class.java),
                 resolver.resolveSingletonOrFail(WireEncoderInterface::class.java),
                 resolver.resolveSingletonOrFail(NetworkClient::class.java)
+            )
+        }
+
+        container.register(Scope.Singleton, PermissionsNotifierInterface::class.java) { resolver ->
+            PermissionsNotifier(
+                application
             )
         }
 

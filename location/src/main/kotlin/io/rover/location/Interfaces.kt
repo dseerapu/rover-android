@@ -3,7 +3,6 @@ package io.rover.location
 import android.content.Intent
 import com.google.android.gms.location.GeofencingEvent
 import com.google.android.gms.location.LocationResult
-import com.google.android.gms.nearby.messages.Message
 import io.rover.location.domain.Region
 
 interface GoogleBackgroundLocationServiceInterface {

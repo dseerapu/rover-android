@@ -1,20 +1,21 @@
 package io.rover.location
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.IntentService
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
-import android.support.v4.content.ContextCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import io.rover.rover.Rover
 import io.rover.rover.core.logging.log
+import io.rover.rover.core.permissions.PermissionsNotifierInterface
+import io.rover.rover.core.streams.subscribe
 
 /**
  * Subscribes to Location Updates from FusedLocationManager and emits location reporting events.
@@ -27,6 +28,7 @@ import io.rover.rover.core.logging.log
 class GoogleBackgroundLocationService(
     private val fusedLocationProviderClient: FusedLocationProviderClient,
     private val applicationContext: Context,
+    private val permissionsNotifier: PermissionsNotifierInterface,
     private val locationReportingService: LocationReportingServiceInterface
 ): GoogleBackgroundLocationServiceInterface {
     override fun newGoogleLocationResult(locationResult: LocationResult) {
@@ -43,9 +45,14 @@ class GoogleBackgroundLocationService(
         locationReportingService.updateLocation(location)
     }
 
+
     init {
-        // TODO: do this only once permission is cleared
-        if(ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        startMonitoring()
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun startMonitoring() {
+        permissionsNotifier.notifyForPermission(Manifest.permission.ACCESS_FINE_LOCATION).subscribe {
             fusedLocationProviderClient
                 .requestLocationUpdates(
                     LocationRequest
