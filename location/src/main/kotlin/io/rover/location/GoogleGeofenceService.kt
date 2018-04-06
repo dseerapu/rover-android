@@ -1,5 +1,7 @@
 package io.rover.location
 
+import android.Manifest
+import android.annotation.SuppressLint
 import android.app.IntentService
 import android.app.PendingIntent
 import android.content.Context
@@ -14,6 +16,8 @@ import com.google.android.gms.location.GeofencingRequest
 import io.rover.location.domain.Region
 import io.rover.rover.Rover
 import io.rover.rover.core.logging.log
+import io.rover.rover.core.permissions.PermissionsNotifierInterface
+import io.rover.rover.core.streams.subscribe
 
 /**
  * Monitors for Geofence events using the Google Location Geofence API.
@@ -26,7 +30,9 @@ import io.rover.rover.core.logging.log
 class GoogleGeofenceService(
     private val applicationContext: Context,
     private val geofencingClient: GeofencingClient,
-    private val locationReportingService: LocationReportingServiceInterface
+    private val locationReportingService: LocationReportingServiceInterface,
+    private val permissionsNotifier: PermissionsNotifierInterface
+    // TODO: customizable geofence limit
 ): GoogleGeofenceServiceInterface {
     override fun newGoogleGeofenceEvent(geofencingEvent: GeofencingEvent) {
 
@@ -71,38 +77,47 @@ class GoogleGeofenceService(
     override fun regionsUpdated(regions: List<Region>) {
         currentFences = regions.filterIsInstance(Region.GeofenceRegion::class.java)
 
-        // TODO: andrew start here and figure out how to get something to happen when both regions
-        // and perms are ready at least once.  Create combineLatest operator.
-        
-        // This will remove any existing Rover geofences, because will all be registered with the
-        // same pending intent pointing to the receiver intent service.
-        geofencingClient.removeGeofences(
-            pendingIntentForReceiverService()
-        )
+        updateGeofencesIfPossible()
+    }
 
-        val geofenceRegions = regions.filterIsInstance(Region.GeofenceRegion::class.java)
+    @SuppressLint("MissingPermission")
+    private fun updateGeofencesIfPossible() {
+        if(permissionObtained && currentFences.isNotEmpty()) {
+            log.v("Updating geofences.")
+            // TODO: andrew start here and figure out how to get something to happen when both regions
+            // and perms are ready at least once.  Create combineLatest operator.
 
-        val geofences = geofenceRegions.map { region ->
-            Geofence.Builder()
-                .setRequestId(region.identifier)
-                .setCircularRegion(
-                    region.latitude,
-                    region.longitude,
-                    region.radius.toFloat()
-                )
-                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER or Geofence.GEOFENCE_TRANSITION_EXIT)
-                .setExpirationDuration(Geofence.NEVER_EXPIRE)
+            // However, I need this to be readily reimplementable by developers.  I would
+
+            // This will remove any existing Rover geofences, because will all be registered with the
+            // same pending intent pointing to the receiver intent service.
+            geofencingClient.removeGeofences(
+                pendingIntentForReceiverService()
+            )
+
+            val geofences = currentFences.map { region ->
+                Geofence.Builder()
+                    .setRequestId(region.identifier)
+                    .setCircularRegion(
+                        region.latitude,
+                        region.longitude,
+                        region.radius.toFloat()
+                    )
+                    .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER or Geofence.GEOFENCE_TRANSITION_EXIT)
+                    .setExpirationDuration(Geofence.NEVER_EXPIRE)
+                    .build()
+            }
+
+            val request = GeofencingRequest.Builder()
+                .addGeofences(geofences)
+                .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
                 .build()
+
+            // TODO: shoot this cannot be done until the permissions are asked for.
+            // now register all of them ourselves:
+            geofencingClient.addGeofences(request, pendingIntentForReceiverService())
+            log.v("Now monitoring ${geofences.count()} Rover geofences.")
         }
-
-        val request = GeofencingRequest.Builder()
-            .addGeofences(geofences)
-            .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
-            .build()
-
-        // TODO: shoot this cannot be done until the permissions are asked for.
-        // now register all of them ourselves:
-        geofencingClient.addGeofences(request, pendingIntentForReceiverService())
     }
 
     /**
@@ -120,6 +135,15 @@ class GoogleGeofenceService(
     }
 
     private var currentFences: List<Region.GeofenceRegion> = listOf()
+
+    private var permissionObtained = false
+
+    init {
+        permissionsNotifier.notifyForPermission(Manifest.permission.ACCESS_FINE_LOCATION).subscribe {
+            permissionObtained = true
+            updateGeofencesIfPossible()
+        }
+    }
 }
 
 class GeofenceReceiverIntentService: IntentService("GeofenceReceiverIntentService") {

@@ -138,7 +138,7 @@ class GraphQlApiService(
         val urlRequest = urlRequest(true)
         val bodyData = request.encode()
 
-        log.v("REQUEST BODY: $bodyData")
+        // log.v("REQUEST BODY: $bodyData")
 
         return networkClient.networkTask(urlRequest, bodyData) { httpClientResponse ->
             val result = httpResult(request, httpClientResponse)

@@ -44,6 +44,11 @@ interface NotificationHandlerInterface {
     fun onMessageReceivedDataAsBundle(parameters: Bundle)
 
     /**
+     * Handle an already decoded Rover [Notification].
+     */
+    fun onMessageReceivedNotification(notification: Notification)
+
+    /**
      * You need to implement a
      * [FirebaseInstanceIdService](https://firebase.google.com/docs/reference/android/com/google/firebase/iid/FirebaseInstanceIdService)
      * in your application, and then override its `onTokenRefresh` method.

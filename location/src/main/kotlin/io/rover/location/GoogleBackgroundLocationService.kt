@@ -53,6 +53,7 @@ class GoogleBackgroundLocationService(
     @SuppressLint("MissingPermission")
     private fun startMonitoring() {
         permissionsNotifier.notifyForPermission(Manifest.permission.ACCESS_FINE_LOCATION).subscribe {
+            log.v("Starting up location tracking.")
             fusedLocationProviderClient
                 .requestLocationUpdates(
                     LocationRequest
@@ -79,7 +80,7 @@ class LocationReceiverIntentService: IntentService("LocationReceiverIntentServic
                 val result = LocationResult.extractResult(intent)
                 Rover.sharedInstance.resolveSingletonOrFail(GoogleBackgroundLocationServiceInterface::class.java).newGoogleLocationResult(result)
             } else {
-                log.w("LocationReceiver received an intent, but it lacked a location result. Ignoring.")
+                log.w("LocationReceiver received an intent, but it lacked a location result. Ignoring. Intent extras were ${intent.extras}")
             }
         }
     }

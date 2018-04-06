@@ -14,6 +14,7 @@ import io.rover.rover.core.data.state.StateManagerServiceInterface
 import io.rover.rover.core.events.EventQueueServiceInterface
 import io.rover.rover.core.permissions.PermissionsNotifierInterface
 import io.rover.rover.core.streams.Scheduler
+import io.rover.rover.notifications.NotificationHandlerInterface
 
 /**
  * Location Assembler contains the Rover SDK subsystems for Geofence, Beacon, and location tracking.
@@ -127,7 +128,8 @@ class LocationAssembler(
                     resolver.resolveSingletonOrFail(GeofencingClient::class.java),
                     resolver.resolveSingletonOrFail(
                         LocationReportingServiceInterface::class.java
-                    )
+                    ),
+                    resolver.resolveSingletonOrFail(PermissionsNotifierInterface::class.java)
                 )
             }
         }
@@ -150,7 +152,9 @@ class LocationAssembler(
                     resolver.resolveSingletonOrFail(MessagesClient::class.java),
                     resolver.resolveSingletonOrFail(
                         LocationReportingServiceInterface::class.java
-                    )
+                    ),
+                    resolver.resolveSingletonOrFail(PermissionsNotifierInterface::class.java),
+                    resolver.resolveSingletonOrFail(NotificationHandlerInterface::class.java)
                 )
             }
         }

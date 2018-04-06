@@ -105,47 +105,34 @@ open class NotificationHandler(
         handleRoverNotificationObject(rover)
     }
 
-    private val notificationManager: NotificationManagerCompat = NotificationManagerCompat.from(applicationContext)
-
-    private fun handleRoverNotificationObject(roverJson: String) {
+    override fun onMessageReceivedNotification(notification: io.rover.rover.notifications.domain.Notification) {
         verifyChannelSetUp()
-        val pushNotification = try {
-            val roverJsonObject = JSONObject(roverJson)
-            val notificationJson = roverJsonObject.getJSONObject("notification")
-            wireEncoder.decodeNotification(notificationJson)
-        } catch (e: JSONException) {
-            log.w("Invalid push notification received: `$roverJson`, resulting in '${e.message}'. Ignoring.")
-            return
-        } catch (e: MalformedURLException) {
-            log.w("Invalid push notification received: `$roverJson`, resulting in '${e.message}'. Ignoring.")
-            return
-        }
 
         val builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationCompat.Builder(applicationContext, pushNotification.channelId ?: defaultChannelId ?: NotificationChannel.DEFAULT_CHANNEL_ID)
+            NotificationCompat.Builder(applicationContext, notification.channelId ?: defaultChannelId ?: NotificationChannel.DEFAULT_CHANNEL_ID)
         } else {
             NotificationCompat.Builder(applicationContext)
         }
 
-        builder.setContentTitle(pushNotification.title)
-        builder.setContentText(pushNotification.body)
+        builder.setContentTitle(notification.title)
+        builder.setContentText(notification.body)
         builder.setSmallIcon(smallIconResId, smallIconDrawableLevel)
 
         // Add this back after solving injection issues.
-        notificationsRepository.notificationArrivedByPush(pushNotification)
+        notificationsRepository.notificationArrivedByPush(notification)
 
         builder.setContentIntent(
             notificationOpen.pendingIntentForAndroidNotification(
-                pushNotification
+                notification
             )
         )
 
         // Set large icon and Big Picture as needed by Rich Media values.  Enforce a timeout
         // so we don't fail to create the notification in the allotted 10s if network doesn't
         // cooperate.
-        val attachmentBitmapPublisher = when(pushNotification.attachment) {
+        val attachmentBitmapPublisher = when(notification.attachment) {
             is NotificationAttachment.Image -> {
-                assetService.getImageByUrl(pushNotification.attachment.url)
+                assetService.getImageByUrl(notification.attachment.url)
                     .timeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
                     .onErrorReturn { error ->
                         // log.w("Timed out fetching notification image.  Will create image without the rich media.")
@@ -154,7 +141,7 @@ open class NotificationHandler(
             }
             null -> Observable.just(null)
             else -> {
-                log.w("Notification attachments of type ${pushNotification.attachment.typeName} not supported on Android.")
+                log.w("Notification attachments of type ${notification.attachment.typeName} not supported on Android.")
                 Observable.just(null)
             }
         }
@@ -170,12 +157,30 @@ open class NotificationHandler(
                         )
                     }
                     is NetworkResult.Error -> {
-                        log.w("Unable to retrieve notification image: ${pushNotification.attachment?.url}, because: ${attachmentBitmapResult.throwable.message}")
+                        log.w("Unable to retrieve notification image: ${notification.attachment?.url}, because: ${attachmentBitmapResult.throwable.message}")
                         log.w("Will create image without the rich media.")
                     }
                 }
-                notificationManager.notify(pushNotification.id, 123, builder.build().apply { this.flags = this.flags or Notification.FLAG_AUTO_CANCEL })
+                notificationManager.notify(notification.id, 123, builder.build().apply { this.flags = this.flags or Notification.FLAG_AUTO_CANCEL })
             }
+    }
+
+    private val notificationManager: NotificationManagerCompat = NotificationManagerCompat.from(applicationContext)
+
+    private fun handleRoverNotificationObject(roverJson: String) {
+        val pushNotification = try {
+            val roverJsonObject = JSONObject(roverJson)
+            val notificationJson = roverJsonObject.getJSONObject("notification")
+            wireEncoder.decodeNotification(notificationJson)
+        } catch (e: JSONException) {
+            log.w("Invalid push notification received: `$roverJson`, resulting in '${e.message}'. Ignoring.")
+            return
+        } catch (e: MalformedURLException) {
+            log.w("Invalid push notification received: `$roverJson`, resulting in '${e.message}'. Ignoring.")
+            return
+        }
+
+        onMessageReceivedNotification(pushNotification)
     }
 
     /**

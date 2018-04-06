@@ -8,6 +8,7 @@ import io.rover.rover.core.container.ContainerResolver
 import io.rover.rover.core.container.InjectionContainer
 import io.rover.rover.core.data.http.AsyncTaskAndHttpUrlConnectionNetworkClient
 import io.rover.rover.core.events.EventQueueServiceInterface
+import io.rover.rover.core.permissions.PermissionsNotifierInterface
 import io.rover.rover.experiences.LinkOpen
 import io.rover.rover.experiences.LinkOpenInterface
 import io.rover.rover.notifications.NotificationHandlerInterface
@@ -36,6 +37,9 @@ class Rover(
 
     val eventQueue: EventQueueServiceInterface
         get() = this.resolve(EventQueueServiceInterface::class.java) ?: throw missingDependencyError("EventQueueService", "Core")
+
+    val permissionsNotifier: PermissionsNotifierInterface
+        get() = this.resolve(PermissionsNotifierInterface::class.java) ?: throw missingDependencyError("PermissionsNotifier", neededAssembler = "Core")
 
     val notificationHandler: NotificationHandlerInterface
         get() = this.resolve(NotificationHandlerInterface::class.java) ?: throw missingDependencyError("NotificationHandler", "Notifications")
