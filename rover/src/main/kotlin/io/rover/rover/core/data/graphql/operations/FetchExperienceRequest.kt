@@ -20,7 +20,6 @@ class FetchExperienceRequest(
                 campaignId
                 screens {
                     ...backgroundFields
-                    experienceId
                     id
                     isStretchyHeaderEnabled
                     customKeys
@@ -34,14 +33,12 @@ class FetchExperienceRequest(
                                 __typename
                                 ... on GoToScreenAction {
                                     experienceId
-                                    screenId
                                 }
                                 ... on OpenUrlAction {
                                     url
                                 }
                             }
                             autoHeight
-                            experienceId
                             height {
                                 value
                                 unit
@@ -82,8 +79,6 @@ class FetchExperienceRequest(
                             }
                             opacity
                             position
-                            rowId
-                            screenId
                             verticalAlignment
                             customKeys
                             width {
@@ -133,13 +128,11 @@ class FetchExperienceRequest(
                                 url
                             }
                         }
-                        experienceId
                         height {
                             value
                             unit
                         }
                         id
-                        screenId
                     }
                     statusBarStyle
                     statusBarColor {
